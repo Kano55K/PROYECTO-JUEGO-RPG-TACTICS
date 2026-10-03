@@ -1,5 +1,6 @@
 {
   "$schema": "../_esquemas/especie.schema.json",
+  "_nota": "Sistema.md 4.3 (rol, rango, sellable), 11.2 (vida, danio, movimiento, alcance, velocidad), 11.7 (huida_pct)",
   "id": "rodauva",
   "rol": "trabajo",
   "rango": 1,
@@ -14,6 +15,7 @@
     }
   ],
   "rasgo": {
+    "_nota": "Sistema.md 11.2: Erizarse (accion), hasta su proximo turno recibe -50% de danio y no se mueve. El -50% entra en los porcentajes de 11.4 paso 1",
     "id": "erizarse",
     "efecto": "accion_defensa",
     "danio_recibido_pct": -50,
