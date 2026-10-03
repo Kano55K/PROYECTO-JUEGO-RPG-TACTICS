@@ -1,7 +1,6 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Lealtad",
-  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1.",
+  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1. Los eventos de lealtad del combate y del destino de la atacante (5.2, 9.3) van en eventos; el +1 de victoria está en tablas/combate.json.",
   "type": "object",
   "required": [
     "minimo",
@@ -10,7 +9,8 @@
     "dudosa_hasta",
     "neutral_desde",
     "inicial_por_camino",
-    "resellar"
+    "resellar",
+    "eventos"
   ],
   "additionalProperties": false,
   "properties": {
@@ -18,7 +18,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "minimo": {
       "type": "integer"
@@ -50,13 +50,50 @@
           "type": "integer"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
     "resellar": {
       "type": "integer",
       "description": "Lealtad con la que vuelve una atacante resellada (con el ajuste de la balanza, nunca menos del mínimo)"
+    },
+    "eventos": {
+      "description": "Sistema.md 5.2 y 9.3. Solo cambian la lealtad de las sueltas",
+      "type": "object",
+      "required": [
+        "muerte_en_el_grupo",
+        "muerte_en_el_grupo_afines",
+        "rescate",
+        "perdon_a_leales",
+        "comer_atacante"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "muerte_en_el_grupo": {
+          "description": "A todas las sueltas cuando muere o es comida otra del grupo (5.2)",
+          "type": "integer"
+        },
+        "muerte_en_el_grupo_afines": {
+          "description": "Reemplaza al anterior si eran afines (5.2; ver P-001)",
+          "type": "integer"
+        },
+        "rescate": {
+          "description": "A la rescatista (5.2, 6)",
+          "type": "integer"
+        },
+        "perdon_a_leales": {
+          "description": "A las leales cuando el Maestro perdona a la atacante (5.2, 9.3)",
+          "type": "integer"
+        },
+        "comer_atacante": {
+          "description": "A todas las sueltas cuando el Maestro se come a la atacante, sin el -3 extra (5.2, 9.3)",
+          "type": "integer"
+        },
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        }
+      }
     }
   }
 }

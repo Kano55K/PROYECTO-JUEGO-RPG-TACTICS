@@ -1,10 +1,20 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Definiciones comunes",
-  "description": "Tipos que reusan los demás esquemas. El validador del juego solo entiende el subconjunto de palabras de Arquitectura.md A.2.",
+  "description": "Tipos que reusan los demás esquemas. El validador del juego solo entiende el subconjunto de palabras de Arquitectura.md A.2. El cargador copia cada definición dentro del esquema que la usa: acá no se usan referencias locales (#/$defs/...).",
   "$defs": {
+    "nota": {
+      "description": "Nota de diseño; el código la ignora (A.2)",
+      "type": "string"
+    },
     "id": {
       "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "id_o_null": {
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^[a-z0-9_]+$"
     },
     "pct": {
@@ -19,6 +29,19 @@
     },
     "casilla": {
       "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "posicion": {
+      "description": "[x, y] con y = 0 arriba, o null: la ubica el jugador en el despliegue (A.2)",
+      "type": [
+        "array",
+        "null"
+      ],
       "items": {
         "type": "integer",
         "minimum": 0

@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Ficha de especie",
   "description": "Sistema.md 11.2, 4.3 y 11.7. Una ficha por archivo en datos/especies/. Lo de 0b (apetito, preferencias, habilidades) entra como campos nuevos.",
   "type": "object",
@@ -22,7 +21,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "id": {
       "$ref": "comunes.schema.json#/$defs/id"
@@ -77,11 +76,11 @@
             "minimum": 0
           },
           "marca": {
-            "type": "string",
-            "description": "Clave de texto de la marca en la cola (ej.: caza, cuenta)"
+            "description": "Clave de texto de la marca en la cola (ej.: caza, cuenta)",
+            "$ref": "comunes.schema.json#/$defs/id"
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }
@@ -131,7 +130,7 @@
           "minimum": 0
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     }

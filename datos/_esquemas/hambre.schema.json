@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Hambre",
   "description": "Sistema.md 7.1, 7.2, 2.2 y 5.4. Saciado es un estado derivado del valor de hambre, no un dato aparte. Lo de 0b (recuperación al dormir, apetito) entra como campos nuevos.",
   "type": "object",
@@ -15,7 +14,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "minimo": {
       "type": "integer"
@@ -64,7 +63,7 @@
             ]
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }
@@ -86,7 +85,7 @@
           "minimum": 0
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     }

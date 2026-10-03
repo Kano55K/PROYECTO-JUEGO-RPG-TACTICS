@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Arrimo",
   "description": "Sistema.md 1.3. Efecto de cada paso de Arrimo (la cantidad de pasos sale de la balanza).",
   "type": "object",
@@ -12,7 +11,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "por_paso": {
       "type": "object",
@@ -37,7 +36,7 @@
           "$ref": "comunes.schema.json#/$defs/puntos"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     }

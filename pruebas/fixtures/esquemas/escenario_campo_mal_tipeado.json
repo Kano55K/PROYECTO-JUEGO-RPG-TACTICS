@@ -1,0 +1,23 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "a_dia_1",
+  "_nota": "¿Sello al 50% o arriesgo una ronda más?",
+  "tipo": "test",
+  "semilla": 12345,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0, "danoi": 4,
+      "vida": null, "posicion": [4, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje",
+      "vida": null, "posicion": [4, 0] }
+  ],
+  "pergaminos_en_blanco": 2,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -166,7 +166,7 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 ## Estado actual
 
 - **Terminadas:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador).
-- **Siguiente:** T04 (datos de 0a), en varias sesiones.
+- **En curso:** T04 (datos de 0a), rama `tarea/T04-datos`. Sesión 1 hecha: los 13 esquemas de entrada corregidos y testeados (`pruebas/datos/test_esquemas.gd`). Falta: actualizar los datos de `datos/` a los esquemas nuevos (`golpe_inicial` en cada escenario, `eventos` en `tablas/lealtad.json`), `d_rivales_balanza4.json`, y que `datos/` cargue entero sin errores.
 - Orden de 0a.1: T04 → T05 → T06 → T07 → T08 → T09 → T10 → T12 → **T34** → T13.
 - **T11 no se empieza** hasta que Sistemas responda las dudas S-7 a S-9 (`docs/Arquitectura.md` 10.5).
 - T04 necesita `datos/textos/es.json` del Worldbuilder; si todavía no está, el resto de T04 se hace igual y se avisa.

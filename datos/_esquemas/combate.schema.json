@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Reglas numéricas del combate",
   "description": "Sistema.md 10.1 a 10.7, 11.3 a 11.7 y 8.2. Todo número del combate que no está en las fichas, la balanza, el sellado o los costos.",
   "type": "object",
@@ -27,7 +26,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "despliegue_filas": {
       "type": "integer",
@@ -61,7 +60,7 @@
           "description": "Cada eslabón vale el anterior dividido esto, redondeado hacia abajo"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -80,7 +79,7 @@
           "type": "integer"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -108,7 +107,7 @@
           "type": "integer"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -131,7 +130,7 @@
           "$ref": "comunes.schema.json#/$defs/puntos"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -155,7 +154,7 @@
           "$ref": "comunes.schema.json#/$defs/pct"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -183,7 +182,7 @@
               "type": "integer"
             },
             "_nota": {
-              "type": "string"
+              "$ref": "comunes.schema.json#/$defs/nota"
             }
           }
         },
@@ -206,12 +205,12 @@
               "type": "integer"
             },
             "_nota": {
-              "type": "string"
+              "$ref": "comunes.schema.json#/$defs/nota"
             }
           }
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -227,7 +226,7 @@
           "type": "integer"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -249,7 +248,7 @@
           "$ref": "comunes.schema.json#/$defs/puntos"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
