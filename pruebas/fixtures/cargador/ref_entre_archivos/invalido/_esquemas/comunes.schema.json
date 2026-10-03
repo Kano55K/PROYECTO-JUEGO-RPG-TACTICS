@@ -1,0 +1,5 @@
+{
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "required": ["pares"],
+  "additionalProperties": false,
+  "properties": {
+    "pares": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["a", "b", "relacion"],
+        "additionalProperties": false,
+        "properties": {
+          "a": { "type": "string" },
+          "b": { "type": "string" },
+          "relacion": { "enum": ["bien", "mal"] }
+        }
+      }
+    }
+  }
+}

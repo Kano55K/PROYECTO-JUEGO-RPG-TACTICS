@@ -1,0 +1,6 @@
+{
+  "estados": [
+    { "id": "sano", "desde": 0, "hasta": 4 },
+    { "id": "hambriento", "desde": 6, "hasta": 10 }
+  ]
+}

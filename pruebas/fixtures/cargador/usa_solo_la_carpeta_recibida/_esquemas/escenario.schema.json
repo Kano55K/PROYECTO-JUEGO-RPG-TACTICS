@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "required": ["id", "tablero", "tribu", "enemigas"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "tablero": {
+      "type": "object",
+      "required": ["ancho", "alto"],
+      "additionalProperties": false,
+      "properties": {
+        "ancho": { "type": "integer" },
+        "alto": { "type": "integer" }
+      }
+    },
+    "tribu": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "especie"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "especie": { "type": "string" }
+        }
+      }
+    },
+    "enemigas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "especie"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "especie": { "type": "string" }
+        }
+      }
+    }
+  }
+}

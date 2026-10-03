@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "_nota": { "type": "string" }
+  },
+  "additionalProperties": {
+    "type": ["string", "array"],
+    "items": { "type": "string" },
+    "minItems": 1
+  }
+}

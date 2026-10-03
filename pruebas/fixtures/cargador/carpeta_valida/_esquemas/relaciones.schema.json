@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "required": ["pares"],
+  "additionalProperties": false,
+  "properties": {
+    "pares": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["a", "b", "relacion"],
+        "additionalProperties": false,
+        "properties": {
+          "a": { "$ref": "comunes.schema.json#/$defs/id" },
+          "b": { "$ref": "comunes.schema.json#/$defs/id" },
+          "relacion": { "enum": ["bien", "mal"] }
+        }
+      }
+    }
+  }
+}
