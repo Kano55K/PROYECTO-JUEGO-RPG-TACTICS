@@ -1,11 +1,16 @@
 extends GdUnitTestSuite
 
-# Arquitectura.md B.2 (T04, sesion 2): el contenido fijo de datos/ (especies,
-# maestro, hechizos y relaciones) carga sin errores con el Cargador de T03.
-# Cada caso copia los esquemas reales y solo los archivos que prueba a una
-# carpeta temporal: asi pasan tambien los chequeos cruzados aunque el resto
-# de datos/ (tablas y escenarios de la sesion 3) todavia no cargue.
+# Arquitectura.md B.2 (T04, sesiones 2 y 3a): el contenido fijo de datos/
+# (especies, maestro, hechizos, relaciones y seis tablas) carga sin errores
+# con el Cargador de T03. Cada caso copia los esquemas reales y solo los
+# archivos que prueba a una carpeta temporal: asi pasan tambien los chequeos
+# cruzados aunque el resto de datos/ (combate.json y escenarios) todavia no cargue.
 const _CARPETA_DATOS: String = "res://datos"
+
+const _TABLAS: Array[String] = [
+	"tablas/balanza.json", "tablas/arrimo.json", "tablas/sellado.json",
+	"tablas/costos_mana.json", "tablas/hambre.json", "tablas/lealtad.json",
+]
 
 const _ESPECIES: Array[String] = [
 	"especies/ocarra.json", "especies/rodauva.json", "especies/surcon.json",
@@ -82,3 +87,34 @@ func test_hechizos_del_maestro_existen() -> void:
 	assert_array(del_maestro).is_not_empty()
 	for id in del_maestro:
 		assert_array(ids_hechizos).override_failure_message("falta el hechizo %s" % [id]).contains([id])
+
+
+func test_balanza_carga_sin_errores() -> void:
+	_cargar_sin_errores("balanza", ["tablas/balanza.json"])
+
+
+func test_arrimo_carga_sin_errores() -> void:
+	_cargar_sin_errores("arrimo", ["tablas/arrimo.json"])
+
+
+func test_sellado_carga_sin_errores() -> void:
+	_cargar_sin_errores("sellado", ["tablas/sellado.json"])
+
+
+func test_costos_mana_carga_sin_errores() -> void:
+	_cargar_sin_errores("costos_mana", ["tablas/costos_mana.json"])
+
+
+func test_hambre_carga_sin_errores() -> void:
+	_cargar_sin_errores("hambre", ["tablas/hambre.json"])
+
+
+func test_lealtad_carga_sin_errores() -> void:
+	_cargar_sin_errores("lealtad", ["tablas/lealtad.json"])
+
+
+func test_seis_tablas_juntas_sin_errores_ni_avisos() -> void:
+	var resultado: Dictionary = _cargar_sin_errores("tablas_juntas", _TABLAS)
+	var avisos: Array[Dictionary] = resultado["avisos"]
+	assert_array(avisos).override_failure_message(str(avisos)).is_empty()
+	assert_int((resultado["datos"] as Dictionary).size()).is_equal(_TABLAS.size())
