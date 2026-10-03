@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites id="2026-10-03" name="report_3" tests="5" failures="0" skipped="0" flaky="0" time="0.000">
+	<testsuite id="0" name="test_generador_azar" package="pruebas/azar" timestamp="2026-10-03T17:19:02" hostname="localhost" tests="4" failures="0" errors="0" skipped="0" flaky="0" time="2.143">
+		<testcase name="test_misma_semilla_da_la_misma_secuencia_de_mil_tiradas" classname="test_generador_azar" time="0.233">
+		</testcase>
+		<testcase name="test_otra_semilla_da_otra_secuencia" classname="test_generador_azar" time="0.154">
+		</testcase>
+		<testcase name="test_dos_generadores_con_la_misma_semilla_no_se_interfieren" classname="test_generador_azar" time="0.162">
+		</testcase>
+		<testcase name="test_historial_registra_cada_tirada" classname="test_generador_azar" time="0.249">
+		</testcase>
+	</testsuite>
+	<testsuite id="1" name="test_humo" package="pruebas" timestamp="2026-10-03T17:19:04" hostname="localhost" tests="1" failures="0" errors="0" skipped="0" flaky="0" time="0.658">
+		<testcase name="test_humo" classname="test_humo" time="0.167">
+		</testcase>
+	</testsuite>
+</testsuites>
