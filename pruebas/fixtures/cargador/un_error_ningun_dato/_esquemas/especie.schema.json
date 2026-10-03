@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["id", "vida"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "vida": { "type": "integer" }
+  }
+}

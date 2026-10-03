@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "turnos": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "maxItems": 3
+    }
+  },
+  "required": ["turnos"],
+  "additionalProperties": false
+}

@@ -1,0 +1,7 @@
+{
+  "id": "a_dia_1",
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "posicion": [3, 7] },
+  "tribu": [ { "id": "rodauva_1", "especie": "rodauva", "posicion": [4, 7] } ],
+  "enemigas": [ { "id": "ocarra_1", "especie": "ocarra", "posicion": [4, 0] } ]
+}

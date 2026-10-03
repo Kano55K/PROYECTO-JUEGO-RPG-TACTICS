@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "alcance": {
+      "type": ["integer", "array"],
+      "items": { "type": "integer" }
+    }
+  },
+  "required": ["alcance"],
+  "additionalProperties": false
+}

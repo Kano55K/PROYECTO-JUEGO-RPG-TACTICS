@@ -1,0 +1,66 @@
+{
+  "type": "object",
+  "required": ["id", "tablero", "maestro", "tribu", "enemigas"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "tablero": {
+      "type": "object",
+      "required": ["ancho", "alto"],
+      "additionalProperties": false,
+      "properties": {
+        "ancho": { "type": "integer" },
+        "alto": { "type": "integer" }
+      }
+    },
+    "maestro": {
+      "type": "object",
+      "required": ["posicion"],
+      "additionalProperties": false,
+      "properties": {
+        "posicion": {
+          "type": ["array", "null"],
+          "items": { "type": "integer" },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "tribu": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "especie", "posicion"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "especie": { "type": "string" },
+          "posicion": {
+            "type": ["array", "null"],
+            "items": { "type": "integer" },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    },
+    "enemigas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "especie", "posicion"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "especie": { "type": "string" },
+          "posicion": {
+            "type": ["array", "null"],
+            "items": { "type": "integer" },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    }
+  }
+}
