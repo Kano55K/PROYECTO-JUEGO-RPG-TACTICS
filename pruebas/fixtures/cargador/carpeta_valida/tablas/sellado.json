@@ -1,0 +1,6 @@
+{
+  "tramos": [
+    { "hasta_vida_pct": 50 },
+    { "hasta_vida_pct": 100 }
+  ]
+}

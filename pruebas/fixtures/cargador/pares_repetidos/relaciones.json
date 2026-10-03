@@ -1,0 +1,6 @@
+{
+  "pares": [
+    { "a": "rodauva", "b": "ocarra", "relacion": "mal" },
+    { "a": "ocarra", "b": "rodauva", "relacion": "bien" }
+  ]
+}

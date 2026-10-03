@@ -17,7 +17,11 @@
       "Bash(git merge *)",
       "Bash(git rebase *)",
       "Bash(git reset --hard *)",
-      "Edit(docs/**)",
+      "Edit(docs/00_Vision.md)",
+      "Edit(docs/Sistema.md)",
+      "Edit(docs/Mundo.md)",
+      "Edit(docs/Arquitectura.md)",
+      "Edit(docs/Brief*)",
       "Edit(datos/textos/**)"
     ]
   }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites id="2026-10-03" name="report_5" tests="30" failures="0" skipped="0" flaky="0" time="0.000">
+	<testsuite id="0" name="test_cargador" package="pruebas/datos" timestamp="2026-10-03T22:03:13" hostname="localhost" tests="15" failures="0" errors="0" skipped="0" flaky="0" time="2.295">
+		<testcase name="test_id_debe_coincidir_con_archivo" classname="test_cargador" time="0.038">
+		</testcase>
+		<testcase name="test_especie_referenciada_debe_existir" classname="test_cargador" time="0.102">
+		</testcase>
+		<testcase name="test_pares_sin_repetir" classname="test_cargador" time="0.024">
+		</testcase>
+		<testcase name="test_balanza_posiciones_1_a_5" classname="test_cargador" time="0.019">
+		</testcase>
+		<testcase name="test_sellado_tramos_crecientes" classname="test_cargador" time="0.097">
+		</testcase>
+		<testcase name="test_hambre_cubre_0_10_sin_huecos" classname="test_cargador" time="0.080">
+		</testcase>
+		<testcase name="test_escenario_ids_sin_repetir" classname="test_cargador" time="0.036">
+		</testcase>
+		<testcase name="test_escenario_posiciones_dentro_del_tablero" classname="test_cargador" time="0.037">
+		</testcase>
+		<testcase name="test_textos_formato_de_clave" classname="test_cargador" time="0.095">
+		</testcase>
+		<testcase name="test_textos_claves_faltantes_y_sobrantes" classname="test_cargador" time="0.097">
+		</testcase>
+		<testcase name="test_json_con_error_de_sintaxis" classname="test_cargador" time="0.093">
+		</testcase>
+		<testcase name="test_un_error_ningun_dato" classname="test_cargador" time="0.084">
+		</testcase>
+		<testcase name="test_cargador_usa_solo_la_carpeta_recibida" classname="test_cargador" time="0.022">
+		</testcase>
+		<testcase name="test_resuelve_ref_entre_archivos_de_esquema" classname="test_cargador" time="0.101">
+		</testcase>
+		<testcase name="test_carpeta_valida_no_tiene_errores_ni_avisos" classname="test_cargador" time="0.097">
+		</testcase>
+	</testsuite>
+	<testsuite id="1" name="test_validador" package="pruebas/datos" timestamp="2026-10-03T22:03:16" hostname="localhost" tests="14" failures="0" errors="0" skipped="0" flaky="0" time="1.025">
+		<testcase name="test_campo_mal_tipeado_es_rechazado" classname="test_validador" time="0.046">
+		</testcase>
+		<testcase name="test_decimal_donde_va_entero_es_rechazado" classname="test_validador" time="0.032">
+		</testcase>
+		<testcase name="test_entero_de_godot_12_0_se_acepta_y_convierte" classname="test_validador" time="0.037">
+		</testcase>
+		<testcase name="test_valor_fuera_de_rango_es_rechazado" classname="test_validador" time="0.029">
+		</testcase>
+		<testcase name="test_obligatorio_faltante_es_rechazado" classname="test_validador" time="0.057">
+		</testcase>
+		<testcase name="test_enum_invalido_es_rechazado" classname="test_validador" time="0.043">
+		</testcase>
+		<testcase name="test_type_con_lista_acepta_entero_y_array" classname="test_validador" time="0.017">
+		</testcase>
+		<testcase name="test_type_con_lista_rechaza_otro_tipo" classname="test_validador" time="0.017">
+		</testcase>
+		<testcase name="test_diccionario_claves_libres_acepta_valor_valido" classname="test_validador" time="0.037">
+		</testcase>
+		<testcase name="test_diccionario_claves_libres_rechaza_valor_invalido" classname="test_validador" time="0.045">
+		</testcase>
+		<testcase name="test_minitems_rechaza_array_vacio" classname="test_validador" time="0.078">
+		</testcase>
+		<testcase name="test_maxitems_rechaza_array_con_exceso" classname="test_validador" time="0.049">
+		</testcase>
+		<testcase name="test_ref_defs_resuelve_referencia_y_valida_adentro" classname="test_validador" time="0.056">
+		</testcase>
+		<testcase name="test_esquema_con_palabra_clave_desconocida_es_error" classname="test_validador" time="0.047">
+		</testcase>
+	</testsuite>
+	<testsuite id="2" name="test_humo" package="pruebas" timestamp="2026-10-03T22:03:17" hostname="localhost" tests="1" failures="0" errors="0" skipped="0" flaky="0" time="0.237">
+		<testcase name="test_humo" classname="test_humo" time="0.079">
+		</testcase>
+	</testsuite>
+</testsuites>

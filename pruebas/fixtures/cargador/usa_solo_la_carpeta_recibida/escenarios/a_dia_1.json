@@ -1,0 +1,6 @@
+{
+  "id": "a_dia_1",
+  "tablero": { "ancho": 8, "alto": 8 },
+  "tribu": [ { "id": "t1", "especie": "ocarra" } ],
+  "enemigas": []
+}

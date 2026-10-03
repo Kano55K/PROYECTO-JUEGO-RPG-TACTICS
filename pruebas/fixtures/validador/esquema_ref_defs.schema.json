@@ -1,0 +1,19 @@
+{
+  "$defs": {
+    "posicion": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "integer" },
+        "y": { "type": "integer" }
+      },
+      "required": ["x", "y"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "posicion": { "$ref": "#/$defs/posicion" }
+  },
+  "required": ["posicion"],
+  "additionalProperties": false
+}

@@ -1,0 +1,5 @@
+{
+  "$schema": "../_esquemas/textos.schema.json",
+  "saludo.hola": "Hola",
+  "despedida.chau": "Chau"
+}
