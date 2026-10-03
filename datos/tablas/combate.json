@@ -1,0 +1,55 @@
+{
+  "$schema": "../_esquemas/combate.schema.json",
+  "despliegue_filas": 2,
+  "danio_minimo": 1,
+  "afinidad_danio_plano": 1,
+  "combo": {
+    "sin_relacion_pct": 20,
+    "afines_pct": 40,
+    "divisor_por_eslabon": 2
+  },
+  "incidente": {
+    "base_pct": 20,
+    "ataca_si_obediencia_hasta": 3
+  },
+  "encono": {
+    "base_pct": 25,
+    "por_punto_pct": 25,
+    "max_puntos": 3,
+    "danio_plano_por_punto": 1
+  },
+  "cobardia": {
+    "base_pct": 60,
+    "maestro_adyacente_pts": -10,
+    "danio_pct": -50
+  },
+  "afines_contra_cobardia": {
+    "_nota": "PROPUESTA 10.6, solo con el toggle",
+    "por_afin_pts": -10,
+    "tope_pts": -20,
+    "minimo_pct": 5
+  },
+  "obediencia": {
+    "leal": {
+      "encono_pts": -10,
+      "cobardia_pts": -20
+    },
+    "baja": {
+      "hasta": 3,
+      "encono_pts": 10,
+      "cobardia_pts": 20
+    }
+  },
+  "salvajes": {
+    "obediencia_equivalente": 3
+  },
+  "enfermedad_danio_pct": -25,
+  "huida_salvaje": {
+    "umbral_vida_pct": 25,
+    "acobardada_pts": 25
+  },
+  "alcance_sellar": 2,
+  "alcance_guardar_caida": 2,
+  "vida_tras_caida": 1,
+  "lealtad_por_victoria": 1
+}

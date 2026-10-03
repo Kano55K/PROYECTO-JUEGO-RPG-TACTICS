@@ -1,0 +1,24 @@
+{
+  "$schema": "../_esquemas/costos_mana.schema.json",
+  "sellar": [
+    3,
+    5,
+    7
+  ],
+  "invocar": [
+    2,
+    3,
+    4
+  ],
+  "resellar": [
+    2,
+    3,
+    4
+  ],
+  "guardar_caida": [
+    2,
+    3,
+    4
+  ],
+  "costo_minimo": 1
+}

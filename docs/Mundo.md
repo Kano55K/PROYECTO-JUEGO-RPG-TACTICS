@@ -1,8 +1,8 @@
-# MUNDO — Mundo, regiones y criaturas (v0.5)
+# MUNDO — Mundo, regiones y criaturas (v1.0)
 
-01/10/2026 · @Joaquín
+03/10/2026 · @Joaquín
 
-**Estado:** Borrador v0.5 · **Dueño:** Worldbuilder y Diseñador Narrativo
+**Estado:** v1.0 · **Textos del MVP completos, aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0) · Sincronizado con `00_Vision.md` v1.0 · **Dueño:** Worldbuilder y Diseñador Narrativo
 
 Este documento define la identidad del mundo. Si algo acá contradice `00_Vision.md`, manda la Visión: se propone el cambio y se registra en `Decisiones.md`. Los números (rangos, apetito, efectos, costos) viven en `Sistema.md`.
 
@@ -36,15 +36,76 @@ Todo se nombra en **castellano evocador**: palabras reales o compuestas que suen
 | **La prenda** | Lo que un cuerpo da sin daño para el ritual | En castellano viejo, una garantía que se deja en manos de otro. Reemplaza a "algo que el cuerpo suelta sin daño" |
 | **La péñola** | Material del ritual que sale de los Huertos | Palabra antigua para la pluma de escribir. Reemplaza a "pluma" y evita confundirla con la pluma de muda |
 | **Lo que diste** | Tramo de vida máxima que falta tras el ritual | No es un estado: es una marca en la barra de vida |
+| **Menestral** | La clase del Maestro en el MVP | Artesano de oficios manuales, en castellano viejo. Une los tres oficios de sus hechizos (ver 2.9) |
+| **Quebranto** | La secuela tras el rescate (antes "malherido") | "Quebranto de salud": un daño que no se repone. No se lee como estado negativo (ver 4.9) |
+| **Las rayas** | El contador del plazo de la partida | Rayas de carbón del fuego del Molino, una por día (ver 4.10) |
+| **Las golondrinas del Molino** | La señal del fin del plazo en el mundo | Se juntan en el techo a medida que pasan los días y se van el último (ver 4.10) |
 
 ### 1.3 Tono
 
 **Calidez con dientes** (Pilar 4). El mundo es luminoso por defecto. Lo oscuro aparece como **rastro de decisiones pasadas** o como **consecuencia de las del jugador**, nunca como decorado.
 
+> **Comer a una criatura se elide: la tribu es la cámara** — `DECIDIDO`. El texto nunca muestra el acto: muestra a la tribu (quién mira, quién se va, quién se acerca) y la mañana siguiente. Es la forma en que se cumple "sacrificio, nunca gore" (Visión 7). Aplica al escenario G (4.6), a 4.12 y a todo texto futuro de comer criaturas. El mismo principio rige el abandono (4.13): nadie ve irse a la criatura; queda su rastro.
+
 ### 1.4 Legibilidad para arte
 
 - Sprites en 4 direcciones (2 dibujadas + 2 espejadas): **evitar asimetrías fuertes** (marcas, cicatrices o vendas de un solo lado).
 - Cada criatura del MVP tiene una **silueta distinta**: redonda, baja y ancha, cuello largo, vertical y horizontal.
+
+### 1.5 Textos como datos — `DECIDIDO` (contenido) · `PROPUESTA` (huecos, al Arquitecto)
+
+Los textos de este documento viven como datos en **`juego/datos/textos/es.json`** (`Arquitectura.md` A.2.1 y A.4). El Worldbuilder es dueño del contenido; el Arquitecto, del esquema. Este documento sigue siendo la fuente: si un texto cambia acá, cambia en el JSON.
+
+#### Notación
+
+| En este documento | En el JSON | Qué es |
+| --- | --- | --- |
+| `[Criatura]`, `[Rival]`, `[Guardiana]`… | `{criatura}`, `{rival}`, `{guardiana}`… | Una criatura en un rol |
+| `[X]%` | `{porcentaje}%` | Probabilidad que se muestra antes |
+| `Día [N]` | `{dia}` | Número de día |
+| `[N] rayas` | `{rayas}` | Días contados |
+| `[comida]` (tipo de comida) | `{comida}` | `fruta`, `raíces`, `grano`… |
+| `[comida]` (la criatura comida, 4.12) | `{ausente}` | La que ya no está |
+| "1 día", "2 días" | `{duracion}` | Se arma con `tiempo.dia` / `tiempo.dias` |
+
+#### Huecos gramaticales — `PROPUESTA` (PARA ARQUITECTO)
+
+Los textos piensan en "la criatura", pero las especies no comparten género (*la* Rodauva, *el* Surcón). Cada hueco de criatura tiene seis formas, que el código arma una sola vez a partir de `especie.<id>.articulo`:
+
+| Hueco | Rodauva | Surcón |
+| --- | --- | --- |
+| `{criatura}` | la Rodauva | el Surcón |
+| `{a_criatura}` | a la Rodauva | al Surcón |
+| `{de_criatura}` | de la Rodauva | del Surcón |
+| `{criatura_o}` | a | o |
+| `{criatura_la}` | la | lo |
+| `{criatura_ella}` | ella | él |
+
+Valen para cualquier rol (`{a_rival}`, `{de_guardiana}`, `{testigo_o}`). Ejemplo: *"amaneció más flac{criatura_o}"*.
+
+#### Reglas de armado
+
+- **Mayúscula automática** al principio del texto y después de `. ? ! ¿ ¡`: *"¿{criatura}?"* da *"¿La Rodauva?"*.
+- **Variantes por condición:** las claves terminadas en `.<especie>` o `.maestro` **reemplazan** a la clave base. Excepción: `caida.*`, `nocturno.base.*` y `nocturno.raso.*` son **complementos** que se muestran después de la línea base.
+- **Variantes al azar** (lista): solo `noche.molino`, con 3 variantes. Los textos de varios párrafos (ritual, apertura, epílogo) son un solo texto separado con `\n\n`, nunca una lista.
+- **Estados de hambre:** en femenino para las criaturas (*Famélica*) y en masculino para el Maestro (*Famélico*), con la clave `.maestro`.
+
+#### Textos nuevos de la entrega — `DECIDIDO`
+
+Escritos para que ninguna pantalla muestre `[FALTA]`. Están en el JSON. Aprobados con los textos del MVP (Visión v1.0):
+
+| Qué | Claves | Texto o criterio |
+| --- | --- | --- |
+| Etiquetas de acciones | `accion.*` | Mover · Atacar · Sellar · Invocar · Guardar · Guardar a la caída · Secundar · Huir · Esperar |
+| Botones de la atacante caída | `nocturno.boton.*` | Perdonar · Sellar de nuevo · Comer (sin género) |
+| Opciones de nodos sin etiqueta | `evento.*.opcion.*`, `rio.opcion.*` | Juntar una péñola · Juntar agua del charco · Juntar una ramita caída · Bañarte en la Poza · Leer el río · Cruzar · Esperar un día · Llevarte el grano que sirve · Revisar a fondo · Dejarle fruta · Espantarla |
+| Espantar a la Rodauva | `evento.manzano.espantar` | *"Das un paso fuerte. La Rodauva se hace bola y rueda hasta las zarzas. Las manzanas quedan."* |
+| Emboscada con el Maestro de guardia | `emboscada.<destino>.alarma.maestro` | Huertos: *"En tu guardia, algo cruza la hierba a los graznidos. Despertás a los tuyos a tiempo."* · Vado: *"Ves moverse el juncal donde no hay viento. Despertás a los tuyos antes de que el primer junco dé un paso."* · Robledal: *"Te quedás mirando las ramas de arriba. Algo los estaba contando mientras los tuyos dormían."* |
+| Noche y alba con el Maestro de guardia | `noche.raso.tranquila.maestro`, `noche.alba.maestro` | *"La noche pasa. Hacés tu guardia mirando las brasas, y nada más."* · *"Amanece sin novedad. Lo viste clarear desde tu guardia."* |
+| Combos con el Maestro | `combo.eslabon.sigue_al_maestro`, `combo.eslabon.maestro_sigue` (y `.afin`) | *"[Criatura] sigue tu golpe."* · *"Seguís el golpe de [aliado]."* · *"[Criatura] y vos ya se conocen el golpe."* · *"Vos y [aliado] ya se conocen el golpe."* |
+| Lanzadera contra el Maestro | `lanzadera.choque.contra_maestro` | *"[Unidad] sale despedida y se te viene encima."* |
+| Reacciones de Encono | `encono.<especie>.<rival>` | Las reacciones de la sección 5 pasan a línea de registro, con los mismos gestos |
+| Centinela | `nocturno.centinela` | *"La otra Ocarra grazna una vez, fuerte. Te alcanza para rodar a un costado."* (las criaturas no tienen nombre propio; ver 4.6) |
 
 ## 2. La magia y los Nueve
 
@@ -169,9 +230,9 @@ Cada nodo de material del ritual lleva un rastro. Juntar materiales es también 
 
 > **La mancha del cuenco es ambigua para siempre.** Sugiere que alguien en Almiar hizo el ritual antes del Invierno Flaco, pero ningún texto, en ninguna capa, lo confirma ni lo niega. Es un rastro, no una pista.
 
-### 2.8 Los hechizos del Maestro — `DECIDIDO` (nombres)
+### 2.8 Los hechizos del Maestro — `DECIDIDO`
 
-Los nombres son finales. Los hechizos en sí siguen siendo `PROPUESTA` de Sistemas (`Sistema.md` 1.6) hasta que los apruebe el Director Creativo. Cada uno evoca un **oficio de dar forma** distinto: insinúa que los Nueve eran varios sin nombrar a ninguno (2.4).
+Nombres y hechizos aprobados (Visión 6.7; reglas en `Sistema.md` 1.6). Cada uno evoca un **oficio de dar forma** distinto: insinúa que los Nueve eran varios sin nombrar a ninguno (2.4).
 
 | Funcional | Nombre final | Oficio | Tooltip |
 | --- | --- | --- | --- |
@@ -180,6 +241,22 @@ Los nombres son finales. Los hechizos en sí siguen siendo `PROPUESTA` de Sistem
 | Sanar | **Remiendo** | Costura | *"Un remiendo cierra lo abierto. No levanta lo caído."* |
 
 > El tooltip del Remiendo explica en el lore por qué no afecta a las caídas (`Sistema.md` 11.5).
+
+### 2.9 La clase del MVP: el Menestral — `DECIDIDO`
+
+El Maestro del MVP es un **Menestral**: alguien que hace magia como quien trabaja un oficio, con las manos. Sus tres hechizos salen de tres oficios distintos (herrería, telar, costura), y eso insinúa que los Nueve eran varios sin nombrar a ninguno (2.4). La balanza arranca inclinada al **Barro** (Visión 6.1).
+
+- El nombre dice **qué hace** el Maestro, no **de dónde viene**: el pasado sigue sin explicarse en el MVP (4.8).
+- Deja lugar a clases futuras nombradas por otros oficios (Capa 3).
+
+#### Subida de nivel
+
+| Momento | Texto |
+| --- | --- |
+| Subida | *"Algo se te acomoda por dentro. Esta noche sabés un poco más del oficio."* |
+| Paso hacia el Barro | *"Te pesan las manos, como a quien trabajó la tierra todo el día. Las tuyas se te arriman."* |
+| Paso hacia el Soplo | *"Por un momento, el fuego te calienta menos que antes."* |
+| Aviso de rescatista perdida (antes de confirmar) | *"Si das este paso, [Criatura] ya no te va a poder llevar a casa."* |
 
 ## 3. La comida — `DECIDIDO`
 
@@ -236,6 +313,94 @@ Con un Surcón suelto: *"El Surcón hunde el hocico donde vos no ves nada y saca
 | Grano podrido (granero) | *"Grano con manchas verdes. Pesa lo mismo que el bueno."* |
 | Hongos dudosos | *"No todos tienen el sombrero limpio, y ya no sabés cuáles."* |
 
+### 3.5 Hambre — `DECIDIDO`
+
+Cada especie pasa hambre a su manera, y las líneas anticipan su momento oscuro (sección 5) sin ejecutarlo. Aparecen a la mañana, **solo al cambiar de estado**. Saciado y Normal no tienen línea: el hambre se nota cuando falta. Reglas en `Sistema.md` 7.
+
+#### Pasa a Hambrienta
+
+| Ser | Texto |
+| --- | --- |
+| General | *"[Criatura] camina más cerca de la bolsa de comida que de vos."* |
+| Rodauva | *"La Rodauva se come la fruta que llevaba en las púas."* |
+| Surcón | *"El Surcón bosteza más que de costumbre y se echa antes de llegar."* |
+| Ocarra | *"La Ocarra grazna cada vez que abrís la bolsa."* |
+| Zancajunco | *"El Zancajunco mira el agua aunque no haya agua cerca."* |
+| Maestro | *"Te cuesta juntar la magia. El estómago tira para otro lado."* |
+
+#### Pasa a Famélica
+
+| Ser | Texto |
+| --- | --- |
+| General | *"[Criatura] ya no te sigue a vos: sigue a la comida."* |
+| Rodauva | *"La Rodauva ya no tiene nada en las púas. Te olfatea las manos."* |
+| Surcón | *"El Surcón se entierra a medias y no quiere salir."* |
+| Ocarra | *"La Ocarra no grazna. Se queda mirando a las más chicas."* |
+| Zancajunco | *"De noche, el Zancajunco se queda mirando hacia el río."* |
+| Maestro | *"La magia se te escurre entre los dedos. Primero hay que comer."* |
+| Tooltip | *"Famélica: come lo que rechaza y pierde vida cada noche. Si no te es leal, puede irse."* |
+
+#### Consecuencias
+
+| Momento | Texto |
+| --- | --- |
+| Comer algo rechazado | *"[Criatura] come [comida] con la cabeza gacha. No te lo va a agradecer."* |
+| Pierde vida al dormir famélica | *"[Criatura] amaneció más flaca."* |
+| El Maestro pierde vida | *"Te cuesta levantarte. El cinturón te sobra un agujero."* |
+| Aviso: la próxima noche la mata | *"Si [Criatura] pasa otra noche así, no va a despertar."* (se ve **antes** del reparto) |
+| Muere de hambre (general) | *"[Criatura] no se levantó esta mañana. Su pergamino ya era ceniza cuando abriste los ojos."* |
+| Muere de hambre: Surcón | *"El Surcón se enterró a dormir el hambre. Esta mañana, la tierra no sube ni baja."* |
+| La tribu ante la muerte | *"Los demás duermen un poco más lejos del lugar vacío."* |
+| Reparto: no alcanza | *"No alcanza para todos. Alguien se va a dormir con hambre."* |
+
+> El aviso de muerte es el reloj contable de la Visión 6.5 dicho en el mundo: el momento en que comerse a una criatura deja de ser impensable.
+
+### 3.6 Enfermo: textos — `DECIDIDO`
+
+El efecto es uno solo (pega y junta menos), pero cada causa se ve distinta: el jugador tiene que leer qué le pasó a quién, porque la causa define cuánto dura. Malestar de campo, no de hospital. Reglas en `Sistema.md` 8 y 1.5.
+
+> Solo el Surcón come hongos entre las criaturas: la Fiebre del hongo se escribe para él y para el Maestro. El Maestro, omnívoro, solo se empacha por dieta monótona.
+
+#### Antes de comer (en el reparto)
+
+| Momento | Texto |
+| --- | --- |
+| Ración rechazada a una famélica | *"[X]% de que le caiga mal: Empacho, 1 día."* |
+| Ración podrida | *"[X]% de Tripa negra, 2 días."* |
+| Ración dudosa de hongos | *"[X]% de Fiebre del hongo, 3 días."* |
+| El Maestro come carne o pescado sin fuego | *"Crudo. [X]% de Tripa negra."* |
+| Dieta monótona: aviso (2.º día) | *"Otra vez [tipo]. La boca ya no le encuentra el gusto."* |
+| Dieta monótona: Empacho (3.er día) | *"Tres días de [tipo]. El cuerpo dice basta."* |
+
+#### Cae Enfermo
+
+| Causa | Quién | Texto |
+| --- | --- | --- |
+| Empacho | Criatura | *"[Criatura] se echa con la panza hinchada y no quiere moverse."* |
+| Empacho | Maestro | *"Te pesa el estómago como si hubieras comido piedras."* |
+| Tripa negra | Criatura | *"[Criatura] pasó la noche con retortijones. A la mañana tiene los ojos opacos."* |
+| Tripa negra | Maestro | *"Algo de lo que comiste anoche no estaba bien. Te lo dice todo el cuerpo."* |
+| Fiebre del hongo | Surcón | *"El Surcón tiembla en su hondonada y ronca con los ojos abiertos."* |
+| Fiebre del hongo | Maestro | *"Te arde la frente. Los árboles se mueven un poco más de lo que deberían."* |
+
+#### Acumulación y cura
+
+| Momento | Texto |
+| --- | --- |
+| Segunda enfermedad | *"Una cosa encima de la otra. [Criatura] apenas levanta la cabeza."* |
+| Tercera enfermedad | *"[Criatura] ya no sabe qué le duele."* |
+| Maestro con tres | *"Ya no sabés qué te duele. Solo que todo."* |
+| Tooltip del estado | *"Enferma: pega menos y junta menos. Cada enfermedad suma."* |
+| Empezar a descansar (Molino) | *"Te quedás en el Molino con agua del río y nada más. El cuerpo se arregla; el estómago se queja."* |
+| Cortar el descanso | *"Salís antes de estar del todo bien. Lo que se curó, quedó curado."* |
+| Curarse viajando | *"Caminar también cura, aunque despacio."* |
+| Se cura el Empacho | *"A [Criatura] se le deshinchó la panza."* |
+| Se cura la Tripa negra | *"A [Criatura] se le aclararon los ojos."* |
+| Se cura la Fiebre del hongo | *"A [Criatura] le bajó la fiebre. Vuelve a mirar lo que sí está."* |
+| Se cura el Maestro | *"Te levantás y el cuerpo responde. Ya era hora."* |
+
+> El agua es del río, no de la acequia: la acequia está tapada (4.3).
+
 ## 4. Región inicial: Valdelumbre — `DECIDIDO`
 
 Valdelumbre enseña la supervivencia de menor a mayor riesgo: **fruta** (fácil) → **pescado** (media) → **carne** (peligrosa).
@@ -271,7 +436,7 @@ Molino Callado ── Huertos de Almiar ── Vado de los Juncos ══ Robleda
 
 **Función:** el Vado es el **umbral** del destino peligroso, y "La crecida" es el portero del Robledal.
 
-> PARA SISTEMAS: ¿la crecida puede cerrar el paso al Robledal ese día?
+> La crecida **no cierra el paso**: el río crecido se cruza pagando vida (`Sistema.md` 12.11; textos en 4.5).
 
 **El Molino es de agua** — aprobado en espíritu (gancho para la Capa 1). Está callado porque **la acequia se tapó** y la rueda dejó de girar. Repararlo sería destaparla y hacer girar la rueda otra vez. Nunca se explica por qué se tapó.
 
@@ -279,7 +444,7 @@ Molino Callado ── Huertos de Almiar ── Vado de los Juncos ══ Robleda
 
 | Lugar | Tipo | Comida | Material del ritual | Criaturas | Peligro | Qué le enseña al jugador |
 | --- | --- | --- | --- | --- | --- | --- |
-| **El Molino Callado** | Campamento | Agua | Carbón (el fuego) | — | Ninguno | Descanso, convivencia, rescate, ritual de sangre. Escenario del ataque nocturno. Molino de agua con la acequia tapada; reparable a futuro (Capa 1) |
+| **El Molino Callado** | Campamento | Agua | Carbón (el fuego) | — | Ninguno | Descanso, convivencia, rescate, ritual de sangre. Escenario del ataque nocturno. Molino de agua con la acequia tapada; reparable a futuro (Capa 1). Las rayas y las golondrinas marcan el plazo (4.10) |
 | **Los Huertos de Almiar** | Destino 1 (cerca) | Fruta, raíces, grano, bichos | Péñola · Cuenco (una vez) | Rodauva, Ocarra | Bajo | Recolección y camino de confianza |
 | **El Vado de los Juncos** | Destino 2 (media) | Pescado, raíces, bichos | Agua de charco | Zancajunco, Ocarra, Surcón | Medio | Combate, sellado probabilístico, relaciones en conflicto. La Poza Tibia (sanador) |
 | **El Robledal Hondo** | Destino 3 (lejos) | Carne, hongos, bichos | Ramita de roble | Tasajero | Alto | Riesgo contra recompensa, apaciguar, decisiones morales |
@@ -301,11 +466,36 @@ Molino Callado ── Huertos de Almiar ── Vado de los Juncos ══ Robleda
 | *Requisito: Ocarra suelta* | *"Las dos Ocarras se miran por encima de la cerca. Ninguna baja la cresta."* | No se puede usar ese día (Ocarra–Ocarra se llevan mal; misma regla que el juncal) |
 
 - **El palomar** *(péñola)*. *"Las palomas se fueron con la gente, pero algunas volvieron. En el piso hay plumas largas y duras, de las que sirven para escribir."*
+- **La ciruela en disputa** *(encuentro de solo trabajo: 2 Rodauvas, `Sistema.md` 11.6)*. *"Dos Rodauvas se disputan una ciruela caída. Cuando te ven, se enrollan juntas, púa contra púa."*
+
+| Opción | Texto | Consecuencia |
+| --- | --- | --- |
+| Atacar | *"No te buscan pelea. Si querés sellarlas por la fuerza, la vas a tener que empezar vos."* Tooltip: *"Erizadas, cuesta debilitarlas sin pasarse."* | Combate |
+| Seguir de largo | *"Las dejás con su ciruela. Cuando te alejás, oís que se desenrollan."* | Sin cambio |
+| *Variante: Rodauva suelta* (solo texto) | *"Tu Rodauva se acerca a olerlas. Las tres se quedan quietas, como si se conocieran."* | Sin cambio |
+
+Línea general para cualquier encuentro de solo trabajo: *"[Criaturas] no te buscan pelea. Si querés una, la vas a tener que empezar vos."*
 
 #### El Vado de los Juncos
 
-- **La crecida.** *"El agua sube de a poco. Mañana va a estar peor, o mejor."* Opciones: cruzar ahora con riesgo · esperar un día (cuesta comida).
-- **Algo se movió en el juncal.** *"Uno de los juncos parpadeó."* Si hay una **Ocarra suelta**, grazna y el Zancajunco huye.
+- **La crecida: leer el río** *(`Sistema.md` 12.11)*. El nodo muestra el estado del río del día siguiente. Mientras el Maestro tiene quebranto, este nodo es la Poza Tibia.
+
+| Momento | Texto |
+| --- | --- |
+| Leer el río: mañana normal | *"Tirás una rama al agua y la seguís con la vista. Baja tranquila. Mañana se va a poder cruzar."* |
+| Leer el río: mañana crecido | *"La rama se hunde y sale lejos, girando. Mañana el río va a bajar crecido."* |
+| Cruce normal | *"El agua te llega a las rodillas. Cruzás sin mojar la comida."* |
+| Río crecido, antes de cruzar | *"El vado está tapado de agua marrón. Se puede cruzar. No se puede cruzar entero."* Tooltip: *"Cada uno de los sueltos pierde [X] de vida. Las guardadas cruzan a salvo."* |
+| Cruce con daño | *"El río te empuja de costado y te arrastra un trecho contra las piedras. Llegás a la otra orilla tosiendo agua. Los tuyos también."* |
+| Esperar un día | *"Acampás en la orilla a esperar que baje. Mañana va a estar mejor, o peor."* |
+| Cruce a ciegas con quebranto | *"No pudiste leer el río: estabas en la Poza. Vas a saber cómo baja cuando tengas el agua en la cintura."* |
+- **Algo se movió en el juncal** *(avistamiento del Zancajunco)*. *"Uno de los juncos parpadeó."*
+
+| Opción | Texto | Consecuencia |
+| --- | --- | --- |
+| Dejar comida en la orilla | *"Dejás la ración en una piedra de la orilla y te vas sin mirar atrás. Cuando volvés la cabeza, la piedra está vacía y el juncal, quieto."* | +confianza (`Sistema.md` 4.5) |
+| Seguir de largo | *"Seguís de largo. Sentís que el juncal te mira la nuca."* | Sin cambio |
+| *Requisito: Ocarra suelta* | *"La Ocarra le grazna al juncal. Algo se va entre los juncos, y hoy no vuelve."* | No se puede usar ese día |
 - **El surco que ronca** *(avistamiento del Surcón; en la orilla)*. *"Alguien aró anoche la tierra blanda de la orilla. El surco es torcido y hondo, y termina en un montículo que sube y baja despacio. Ronca."*
 
 | Opción | Texto | Consecuencia |
@@ -315,7 +505,7 @@ Molino Callado ── Huertos de Almiar ── Vado de los Juncos ══ Robleda
 | *Variante: Ocarra suelta* (solo texto) | *"La Ocarra se mete en el surco detrás de él, a picotear lombrices. El montículo no se queja."* | Sin cambio |
 
 - **La Poza Tibia** *(el sanador del MVP)*. *"Entre las piedras de la orilla brota un agua que no se enfría ni de noche. Los animales del vado vienen a bañarse cuando están lastimados, y ninguno molesta a otro."* Es el lugar al que el Maestro debe viajar después de recuperarse de un rescate para evitar las secuelas (Visión 6.6). No es un NPC: es un lugar que los animales conocían antes que el Maestro.
-  - PARA SISTEMAS: cuánto dura la visita, si ocupa un nodo del día y qué pasa si el Maestro llega debilitado a un Vado con emboscadas.
+  - Ocupa el nodo de La crecida mientras el Maestro tiene quebranto, sin encuentro; la noche en el Vado sigue con emboscada normal (`Sistema.md` 6.2). Textos del baño en 4.9.
   - La Poza **no es un rastro de los Nueve** y ningún texto la relaciona con ellos: es ecología, no misterio.
 
 - **El charco quieto** *(agua de charco)*. *"La última crecida dejó un charco en la orilla, separado del río por una lengua de barro. El agua no se mueve. En el fondo, unas piedras lisas forman una ronda que ninguna corriente pudo ordenar."*
@@ -337,7 +527,24 @@ Molino Callado ── Huertos de Almiar ── Vado de los Juncos ══ Robleda
 
 > **Llegar al Roble Viejo** — `DECIDIDO`: hay dos caminos. Por el colgadero (más corto, expuesto al Tasajero) o por el rodeo de las zarzas (más largo, sin pasar por el colgadero). El jugador elige entre tiempo y riesgo.
 >
-> PARA SISTEMAS: cuánto más largo es el rodeo (nodos extra o costo en hambre) y si tiene algún peligro propio.
+> El rodeo **ocupa una columna extra** del mapa del día y no tiene peligro propio en el MVP: su costo es un nodo menos de comida (`Sistema.md` 12.8).
+
+#### El Tasajero por estado — `DECIDIDO`
+
+La hostilidad y sus efectos viven en `Sistema.md` 12.10. La ofrenda: −1 de hostilidad cada 2 raciones, la carne cuenta doble, máximo −2 por ofrenda, sin raciones podridas.
+
+| Estado | Al llegar al Robledal | Tooltip |
+| --- | --- | --- |
+| Apaciguado | *"Las ramas del colgadero se mueven con el viento, nada más. Hoy nadie te cuenta."* | *"Te deja pasar."* |
+| Atento | *"Entre los robles, algo te sigue siempre a la misma distancia. No se acerca. No se va."* | *"Te observa."* |
+| Cazando | *"Las presas del colgadero están ordenadas de nuevo. Hay un hueco que ayer no estaba."* | *"Te busca."* |
+
+| Momento | Texto |
+| --- | --- |
+| Nodo de encuentro apaciguado | *"En el claro hay huellas largas y frescas que se alejan de vos. El Tasajero pasó por acá y decidió que no valías la pena. Podés rebuscar en paz."* |
+| Robar estando Cazando (combate inmediato) | *"Descolgás la primera presa y la rama de arriba no se mueve: baja. El Tasajero ya no está contando."* |
+| Sube a Cazando | *"Esta noche, en el Robledal, alguien hizo lugar en una rama."* |
+| Baja de estado | *"La ofrenda ya no está, y la rama quedó quieta."* |
 
 ### 4.6 Ataque nocturno — `DECIDIDO`
 
@@ -358,7 +565,28 @@ Sin fuego: *"No encendiste fuego. Por eso no ves a [criatura] hasta que la tené
 | Surcón | *"La tierra se abre debajo de las bolsas de comida. Después, debajo tuyo."* |
 | Zancajunco | *"Está de pie al borde del campamento, inmóvil, como en el vado. Te mira como mira el agua."* |
 
-**Centinela** (otra Ocarra, que no es la atacante, anula el golpe gratis): *"[Ocarra] grazna una vez, fuerte. Te alcanza para rodar a un costado."*
+**Centinela** (otra Ocarra, que no es la atacante, anula el golpe gratis): *"La otra Ocarra grazna una vez, fuerte. Te alcanza para rodar a un costado."*
+
+> Texto fijo, sin hueco: con `{criatura}` saldría "la Ocarra" y no se distinguiría de la atacante cuando las dos son Ocarras.
+
+#### La atacante caída — `DECIDIDO` (escenario G, T30)
+
+Las tres salidas de la Visión 6.4. Sirven en el Molino y al raso. Las líneas del epílogo de cada salida ya existen (4.11).
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Al caer la atacante | `nocturno.atacante.caida` | *"[Criatura] cae y no se levanta. Respira. Nadie de la tribu se mueve: esperan a ver qué hacés."* |
+| **Perdonar** | `nocturno.perdonar` | *"Te hacés a un lado. [Criatura] tarda en entender que puede irse. Cuando se va, su pergamino se enciende con una llama pálida."* |
+| Perdonar: la tribu | `nocturno.perdonar.tribu` | *"Nadie dice nada. Esta noche, los tuyos duermen un poco más cerca."* |
+| Perdonar: tooltip | `nocturno.perdonar.tooltip` | *"Se va libre y su pergamino arde. La tribu valora la clemencia."* |
+| **Sellar de nuevo** | `nocturno.sellar` | *"Su pergamino ya es ceniza. Desenrollás uno en blanco y el hilo la recoge, más corto que antes."* |
+| Sellar: tooltip | `nocturno.sellar.tooltip` | *"Vuelve a la tribu sin ninguna confianza. Gasta un pergamino en blanco."* |
+| Sin pergamino en blanco | `pergamino.sin_blanco` | *"No te queda ningún pergamino en blanco."* (compartido con el sellado en combate) |
+| **Comerla** | `nocturno.comer` | *"No esperás a la mañana. Cuando terminás, el fuego está más bajo y nadie te mira. Vieron lo que hizo ella. También vieron lo que hiciste vos."* |
+| Comer: tooltip | `nocturno.comer.tooltip` | *"Te da de comer. Su pergamino arde. La tribu pierde confianza, aunque menos que si no te hubiera atacado."* |
+| Comer: con Zancajunco suelto (solo texto) | `nocturno.comer.zancajunco_suelto` | *"El Zancajunco se acerca a comer con vos. Es el único."* |
+
+> La clemencia, el nuevo sello y la comida se leen distinto por cómo reacciona la tribu, no por cómo se describe a la atacante. Comerla se elide (1.3).
 
 ### 4.7 Noches al raso — `DECIDIDO`
 
@@ -412,6 +640,275 @@ Nombres finales (reemplazan a los provisorios de `Sistema.md` 9.4) y texto de la
 **Línea de la interfaz** (la primera vez que se muestra el umbral de rescate): *"Si la cuidás, te va a salvar. Todavía no."*
 
 **El pasado del Maestro no se explica en el MVP** — `DECIDIDO`. La apertura no dice de dónde viene ni por qué tiene tres pergaminos. Ese hueco es deliberado: depende de la clase (Capa 3) y de la historia principal (Capa 4).
+
+### 4.9 El quebranto y la Poza Tibia — `DECIDIDO`
+
+**Quebranto** reemplaza a "malherido". Es la última etapa del rescate: una marca en la barra de vida con su contador, como "lo que diste". **No es un estado negativo** (el único del MVP sigue siendo Enfermo). Reglas en `Sistema.md` 6.1 y 6.2.
+
+| Momento | Texto |
+| --- | --- |
+| Fin de la recuperación | *"Te podés parar. No mucho más. Algo adentro tuyo no está cerrando."* |
+| Mañana con quebranto | *"Hoy amaneciste con menos de lo que tenías ayer."* |
+| Vida máxima en 1 (nunca fue a la Poza) | *"Ya no queda nada que perder. Eso tampoco es un alivio."* |
+| Baño en la Poza | *"Te metés en la Poza hasta el pecho. El agua no está caliente: está tibia como un cuerpo. Del otro lado, un animal que no conocés tiene una pata recogida y no te mira. Cuando salís, el cansancio sigue ahí, pero ya no se te sigue cayendo encima."* |
+| Tooltip del baño | *"Lo que perdiste no vuelve. Lo que te queda, ahora sí se cura."* |
+| Variante (criatura suelta y leal; solo texto) | *"[Criatura] se queda en la orilla, de guardia, hasta que salís."* |
+
+### 4.10 El plazo: las rayas y las golondrinas — `DECIDIDO`
+
+La partida dura un número fijo de días (`Sistema.md` 13). Dos marcas, cada una con su papel, sin simular clima ni explicar el pasado del Maestro:
+
+| Marca | Papel | Qué se ve |
+| --- | --- | --- |
+| **Las rayas** | El contador exacto | El plazo se muestra en la interfaz como rayas de carbón del fuego del Molino, una por día. Las mismas rayas aparecen en una viga del Molino. Es el carbón de la Urdimbre: sin objetos nuevos |
+| **Las golondrinas del Molino** | La señal del mundo | Se juntan en el techo del Molino a medida que pasan los días (3 o 4 etapas). Antes del alba del último día se van todas juntas. No cuentan nada con precisión ni tienen mecánica |
+
+> **Eco con Almiar:** en la viga del granero alguien talló cuarenta y una rayas (4.5). Las tuyas son de carbón y están en el Molino. El eco es un **rastro, no una pista**: dice que ellos también contaban días, nunca qué les pasó.
+
+### 4.11 El epílogo — `DECIDIDO`
+
+Solo texto que lee la tribu, sin puntaje (Visión 5; `Sistema.md` 13). Cada criatura comida tiene su propia línea y **pesa igual el último día que el primero**.
+
+**Orden de lectura** — `DECIDIDO` (`Sistema.md` 13): la apertura; las sueltas (la **compañera inicial** primero, después de mayor a menor lealtad); las guardadas (de la guardada hace más tiempo a la más reciente); las perdidas por día, en el orden en que ocurrieron; y el cierre. Lo que queda se cuenta primero; lo perdido se lee día por día. La compañera inicial tiene líneas propias porque fue el primer pergamino.
+
+**Apertura:**
+
+> *Esta mañana no hay golondrinas en el techo del Molino. Se fueron todas juntas, antes del alba, y el valle quedó tan callado como el Molino. El verano se terminó. Vos seguís acá.*
+> *Contás a los tuyos.*
+
+#### Sueltas al final
+
+| Estado | Línea |
+| --- | --- |
+| Leal (general) | *"[Criatura] sigue a tu lado. Si mañana caés, sabés quién te va a llevar a casa."* |
+| Leal, Rodauva | *"La Rodauva duerme pegada a tus botas. Ya no se enrolla cuando hablás fuerte."* |
+| Leal, compañera inicial | *"La Rodauva del Molino sigue durmiendo junto a la piedra del fuego. Ahora te deja el lado de adentro."* |
+| Leal, Surcón | *"El Surcón ronca en la hondonada que cavó junto al fuego. Cuando te movés, abre un ojo."* |
+| Leal, Ocarra | *"La Ocarra te grazna a la mañana, como todos los días. Ahora sabés que es un saludo."* |
+| Leal, Zancajunco | *"El Zancajunco se queda quieto a tu lado. No mira el agua: te mira a vos."* |
+| Neutral | *"[Criatura] sigue con vos. No te debe nada, y vos a ella tampoco. Todavía."* |
+| Dudosa | *"[Criatura] come de tu mano, pero no se acerca a dormir."* |
+| Desleal | *"[Criatura] sigue acá porque el hilo la ata. Si se cortara, no sabés para qué lado iría."* |
+
+#### Guardadas al final
+
+> *"[Criatura] duerme en su pergamino. Para ella, todavía es el día [N]: el día en que la guardaste."*
+
+Sale del lore del pergamino (2.5): adentro no pasa el tiempo. Necesita el día en que se guardó por última vez.
+
+#### Perdidas
+
+| Causa | Línea |
+| --- | --- |
+| Comida | *"Día [N]. [Criatura] te dio de comer. No fue su decisión."* |
+| Comida, compañera inicial | *"Día [N]. La Rodauva del Molino, la que estaba antes que vos. Te dio de comer. No fue su decisión."* |
+| Comida, tras atacarte (variante opcional) | *"Día [N]. [Criatura] te atacó una noche, y te la comiste. Nadie dijo nada."* |
+| Abandono | *"Día [N]. [Criatura] se fue de noche. Su pergamino ardió solo. Ahora vive en algún lugar del valle, y no te conoce."* |
+| Muerte en combate | *"Día [N]. [Criatura] cayó peleando y quedó atrás. Contaste su ceniza."* |
+| Hambre | *"Día [N]. [Criatura] se murió de hambre. El valle tenía comida; no alcanzó para todos."* |
+| Hambre, Surcón | *"Día [N]. El Surcón se enterró a dormir el hambre y no despertó."* |
+| Perdonada | *"Día [N]. [Criatura] te atacó una noche, y la dejaste ir. Su pergamino ardió; ella no."* |
+
+#### Cierre
+
+> *"[N] rayas en la viga. Las del granero de Almiar llegaron a cuarenta y una."*
+> *"Sobreviviste al verano. Lo que venga, lo vas a enfrentar con los que quedaron."*
+
+| Variante | Segunda línea |
+| --- | --- |
+| No queda ninguna criatura de la tribu, ni suelta ni guardada | *"Sobreviviste al verano. Solo."* |
+| Solo quedan guardadas (ninguna suelta, al menos una guardada) — `DECIDIDO` | *"Sobreviviste al verano. Los tuyos duermen en sus pergaminos: para ellos, el verano todavía no terminó."* |
+
+Ambas variantes son **hechos, no umbrales** (`Sistema.md` 13). La de "solo guardadas" responde al riesgo ⚠️ de guardar a toda la tribu los últimos días (`Sistema.md` 14): no culpa, pero muestra que nadie llegó despierto al final.
+
+[N] sale del dato de duración (los primeros playtests pueden usar 20 días), nunca de un valor fijo.
+
+#### Permadeath
+
+Pantalla final cuando nadie rescata al Maestro: *"Nadie te llevó a casa."*
+
+Si el Maestro muere de hambre (`DECIDIDO`; es permadeath directo, sin rescate, `Sistema.md` 7.6): *"Te acostaste con hambre y no te levantaste."* La línea del rescate culparía a la tribu de algo que no pudo evitar.
+
+### 4.12 Comerse una criatura — `DECIDIDO`
+
+**Cuándo:** solo en el **reparto de la noche, junto al fuego**, con la tribu mirando (Visión 6.5). La decisión se toma junto al fuego; el acto se elide ("lo hacés lejos del fuego"). La única otra salida es comer a la atacante nocturna (4.6). Una caída de un combate ganado se levanta y nunca se ofrece como carne.
+
+**Criterio:** la tribu es la cámara (1.3). El acto nunca se describe y la criatura comida casi no aparece. Las guardadas no lo ven: el pergamino las deja fuera del tiempo (2.5), y ese es el contraste más duro. Reglas en `Sistema.md` 5.2 y 7.7.
+
+#### Antes: la decisión
+
+| Momento | Texto |
+| --- | --- |
+| Al abrir la opción | *"Mirás a los tuyos. Alguno de ellos también te está mirando."* |
+| Elegir a la criatura | *"¿[Criatura]?"* |
+| Tooltip | *"Da [N] raciones de carne. Su pergamino arde. Las sueltas pierden confianza, y más las que se llevaban bien con ella. Nunca te hace crecer."* |
+| Aviso de rescatista perdida | *"Si lo hacés, [Criatura] ya no te va a poder llevar a casa."* (mismo patrón que la subida de nivel, 2.9) |
+| Botones | **Hacerlo** · **Todavía no** |
+| Cancelar | *"Esta noche no. El hambre sigue ahí."* |
+| Sacar a una guardada (si Sistemas lo permite) | *"Desenrollás su pergamino. [Criatura] sale parpadeando: para ella, no pasó el tiempo."* |
+
+#### El momento
+
+Se arma con una base, de 1 a 3 líneas de testigos y, si corresponde, un cierre.
+
+| Pieza | Texto |
+| --- | --- |
+| Base | *"Lo hacés lejos del fuego. Su pergamino arde solo, con una llama pálida, y todos lo miran arder."* |
+| Base, a partir de la segunda vez | *"Esta vez nadie se sorprende. Eso es peor."* |
+| Testigo: Rodauva | *"La Rodauva se enrolla del otro lado del fuego y no se desenrolla en toda la noche."* |
+| Testigo: Surcón | *"El Surcón se entierra hasta las orejas. Esta noche no ronca."* |
+| Testigo: Ocarra | *"La Ocarra no grazna. Te sigue con un ojo, de costado, como a algo que se metió en el corral."* |
+| Testigo: Zancajunco (come con el Maestro) | *"El Zancajunco se acerca al fuego y come con vos. No te mira: mira la carne. Los demás lo miran a él."* |
+| Testigo afín de la comida | *"[Criatura] se queda mirando el lugar donde dormía [comida]."* |
+| Testigo leal | *"[Criatura] no se aparta. Tampoco se acerca."* |
+| Famélica que come esa carne | *"[Criatura] come porque no puede no comer. Después se aleja del fuego."* |
+| Sin sueltas que lo vean | *"Nadie lo ve. Los pergaminos duermen en la bolsa, y para ellos todavía es otro día."* |
+| Era la última de la tribu | *"Ya no queda nadie que te mire."* |
+| Cierre: compañera inicial (Molino) | *"Esta noche, la hojarasca junto a la piedra del fuego queda vacía."* |
+| Cierre: compañera inicial (al raso) | *"Esta noche nadie duerme del lado de adentro del fuego."* |
+
+**Regla de testigos** (`PROPUESTA` para el Arquitecto): como máximo 3 líneas. Primero las afines de la comida, después el Zancajunco si comió, después el resto por lealtad, de mayor a menor. Una línea por especie. Sin sueltas, "sin testigos".
+
+#### La mañana siguiente
+
+| Momento | Texto |
+| --- | --- |
+| General | *"Amanece igual que siempre. Los tuyos tardan en acercarse."* |
+| El Maestro saciado | *"El hambre se calló. Lo demás, no."* |
+| Se perdió una rescatista | *"Anoche, [Criatura] todavía te habría llevado a casa."* |
+| Una criatura bajó de estado | *"[Criatura] duerme lejos de vos."* |
+| Invocar después a una guardada que no lo vio (opcional) | *"[Criatura] sale del pergamino y busca a [comida] con la vista. Todavía no sabe."* |
+| Ofrendar esa carne en el colgadero | *"Dejás en la rama lo que sobró. El colgadero lo recibe igual. Las cuentas del Tasajero no preguntan de dónde viene la carne."* |
+
+La pudrición usa la línea general de carne (3.4). El ataque nocturno (4.6) y el epílogo (4.11) tienen sus propias líneas.
+
+### 4.13 Abandono — `DECIDIDO`
+
+**Criterio:** nadie ve irse a la criatura; queda su rastro, distinto por especie. El Zancajunco es la cara narrativa del abandono, y su huella es la más clara. Reglas en `Sistema.md` 9.1 y 6.2.
+
+| Momento | Texto |
+| --- | --- |
+| Tooltip del ícono de riesgo (antes de dormir) | *"Famélica y sin vínculo: esta noche puede irse. Guardada no se va, pero tampoco se acerca."* |
+| A la mañana, si se fue (general) | *"El lugar donde dormía [Criatura] está frío. En la bolsa, su pergamino es ceniza."* |
+| Rastro: Rodauva | *"Hay un camino de hojas revueltas que baja hacia los huertos."* |
+| Rastro: Surcón | *"Un surco nuevo sale del campamento y se pierde en la tierra blanda."* |
+| Rastro: Ocarra | *"Por primera vez, nadie te grazna al despertar."* |
+| Rastro: Zancajunco | *"Hay huellas largas que bajan hacia el río. No vuelven."* |
+| Testigo afín (solo texto) | *"[Testigo] se quedó despierta mirando hacia donde se fue."* |
+| Sobrevivió al chequeo | *"[Criatura] pasó la noche despierta. Sigue acá."* |
+| Recuperación: alguien se fue | *"Entre fiebre y sueño, oís crepitar algo junto al fuego. Cuando podés mirar, el pergamino de [Criatura] es ceniza."* |
+| Recuperación: varias se fueron | *"Te despertás y contás la ceniza."* |
+| Recuperación: una leal no se movió (solo texto) | *"[Criatura] no se movió de tu lado."* |
+| Recuperación: nadie se fue | *"Cuando podés incorporarte, están todos. Te estaban esperando."* |
+
+### 4.14 Camino de confianza y Leal por primera vez — `DECIDIDO`
+
+**Criterio:** cada especie confía a su manera, y el jugador lo ve en la distancia, no en una barra: primero come cuando te vas, después come con vos ahí, al final te espera. Reglas en `Sistema.md` 4.5.
+
+**Etapas:** primera ofrenda · a mitad de camino (la confianza llega a la mitad de lo necesario) · falta poco (una ración favorita la completa) · olvido (bajó por un día sin alimentarla) · acepta el pergamino. Las primeras ofrendas de la Ocarra, el Surcón y el Zancajunco están en sus eventos (4.5).
+
+| Etapa | Rodauva (bajo el manzano) | Ocarra (el corral caído) |
+| --- | --- | --- |
+| Primera ofrenda | *"Dejás la fruta en el pasto y te alejás. La Rodauva espera a que estés lejos para desenrollarse."* | En el evento (4.5) |
+| A mitad de camino | *"Hoy no se enrolla del todo cuando llegás. Un poco, nada más."* | *"Hoy te grazna menos. Todavía te grazna."* |
+| Falta poco | *"Hoy viene rodando antes de que dejes la fruta."* | *"Baja del muro antes de que dejes la ración y la come mirándote a vos."* |
+| Olvido | *"La Rodauva se enrolla apenas te ve. Se acuerda de que ayer no viniste."* | *"Te grazna desde el muro como el primer día. Ayer no viniste, y la Ocarra lleva la cuenta."* |
+| Acepta el pergamino | *"Hoy no espera a que te alejes. Come con el hocico pegado a tu bota. Cuando sacás el pergamino, no se enrolla."* | *"Hoy baja del muro, te pica la bota una vez, para que quede claro, y se queda. Cuando sacás el pergamino, te mira como si hubiera sido idea suya."* |
+
+| Etapa | Surcón (el surco que ronca) | Zancajunco (el juncal) |
+| --- | --- | --- |
+| Primera ofrenda | En el evento (4.5) | En el evento (4.5) |
+| A mitad de camino | *"Hoy el surco llega hasta donde dejás la ración."* | *"Hoy, el junco que parpadea está más cerca de la orilla."* |
+| Falta poco | *"Cuando llegás, el montículo deja de roncar y asoma un ojo."* | *"Hoy no finge ser junco: te mira desde el agua, con el cuello en S."* |
+| Olvido | *"Durante la noche, el surco se desvió lejos de donde dejabas la comida."* | *"Hoy todos los juncos son juncos. No encontrás cuál te miraba."* |
+| Acepta el pergamino | *"Hoy el Surcón te espera despierto, con medio cuerpo afuera. Cuando sacás el pergamino, bosteza. Lo tomás como un sí."* | *"Está parado en la orilla, al lado de la piedra. No se acerca: deja que vos te acerques. El pergamino lo recoge sin que mueva una pata."* |
+
+| Caso | Texto |
+| --- | --- |
+| Sin pergamino en blanco al completarse | *"Te está esperando. No tenés un pergamino en blanco para ofrecerle."* |
+| Rango fuera de la balanza | Reutiliza el sellado: *"El hilo no alcanza a sujetar algo así. Te falta Soplo."* |
+| Con una Rodauva de la tribu suelta (solo texto) | *"Tu Rodauva deja una manzana al lado de la tuya. La otra la mira, y esta vez no se enrolla."* |
+
+#### Leal por primera vez
+
+Hito de experiencia (`Sistema.md` 1.4). Varias líneas son la versión temprana de las del epílogo (4.11).
+
+| Criatura | Texto |
+| --- | --- |
+| General | *"[Criatura] se echa a dormir pegada a vos, como si siempre hubiera sido así."* |
+| Rodauva | *"Hoy hablaste fuerte y la Rodauva no se enrolló. Te miró, nada más."* |
+| Surcón | *"Esta noche, el Surcón durmió con la cabeza sobre tus botas. Pesa como un costal."* |
+| Ocarra | *"La Ocarra te grazna a la mañana. Por primera vez, suena a saludo."* |
+| Zancajunco | *"El Zancajunco se quedó quieto a tu lado toda la noche. Esta vez no miraba el agua."* |
+
+**El payoff de la compañera inicial:** la primera vez que alcanza el **umbral de rescate**, la línea del día 1 (4.8) se cierra: *"Si la cuidás, te va a salvar. Ahora sí."* Se dispara con el umbral y no con el estado Leal, porque la promesa del día 1 hablaba del rescate. Si las dos cosas pasan la misma mañana, se muestra solo esta.
+
+### 4.15 Ritmo del día — `DECIDIDO`
+
+**Criterio:** el ritmo se repite 30 veces por partida. Frases cortas, que rotan y nunca se repiten dos días seguidos; lo largo se guarda para la primera vez y para el plazo. Acá vive la calidez del Pilar 4: es la parte del juego donde no pasa nada malo. Reglas en `Sistema.md` 12.1, 12.2, 12.5 y 9.4.
+
+#### Viaje
+
+El cruce entre el Vado y el Robledal tiene sus textos en 4.5 ("leer el río").
+
+| Tramo | Ida (hacia el norte) | Vuelta (hacia el sur) |
+| --- | --- | --- |
+| Molino ↔ Huertos | *"Subís por el camino viejo de Almiar. Todavía se ven las rodadas de los carros."* | *"Bajás hacia la boca del valle. Desde lejos, la rueda del Molino sigue quieta."* |
+| Huertos ↔ Vado | *"Dejás los frutales atrás y seguís el río aguas arriba. El pasto se vuelve junco."* | *"Seguís el río aguas abajo hasta que los juncos vuelven a ser pasto y aparecen los frutales."* |
+
+#### Llegada, quedarse y agotamiento
+
+| Destino | Primera vez | Las demás veces |
+| --- | --- | --- |
+| Huertos | *"Los frutales de Almiar se cerraron sobre los caminos. Hay más fruta en el suelo de la que nadie podría juntar."* | *"Los Huertos de Almiar. Huele a fruta caída."* |
+| Vado | *"El río se abre y se vuelve bajo, lleno de piedras y de juncos. Algo chapotea donde no mirás."* | *"El Vado de los Juncos. El agua sigue en lo suyo."* |
+| Robledal | *"Del otro lado del vado, los robles se cierran sobre el camino. Acá la luz llega tarde."* (después, la línea del Tasajero según su estado) | La línea del Tasajero según su estado (4.5) |
+| Molino | — | *"Hoy no se junta nada. Esta noche, nadie vigila."* |
+
+| Momento | Texto |
+| --- | --- |
+| Quedarse | *"Te quedás un día más."* |
+| Huertos agotados (2 días o más) | *"Los frutales ya dieron lo que tenían a mano."* |
+| Vado agotado | *"Los peces aprendieron dónde te parás."* |
+| Robledal agotado | *"El robledal está más callado: las presas se corrieron."* |
+| Tooltip del agotamiento | *"Rinde menos cada día seguido. Se recupera si lo dejás descansar."* |
+
+#### Noches
+
+| Momento | Texto |
+| --- | --- |
+| Molino sin eventos (variante 1) | *"El fuego cruje. Por una noche, nadie cuenta nada."* |
+| Molino sin eventos (variante 2) | *"Los tuyos se acomodan alrededor del fuego, cada uno en su lugar."* |
+| Molino sin eventos (variante 3) | *"Dormís con la espalda contra la piedra del fuego. Afuera, el río pasa de largo."* |
+| Molino, con la compañera suelta | *"La Rodauva del Molino ya está en su hojarasca cuando llegás."* |
+| Armar campamento: Huertos | *"Acampás entre los frutales, de espaldas a una pared de Almiar."* |
+| Armar campamento: Vado | *"Acampás en la orilla alta, donde la crecida no llega."* |
+| Armar campamento: Robledal | *"Acampás entre raíces de roble. Mirás para arriba antes de acostarte."* |
+| Encender el fuego | *"Juntás leña caída. Nada se arranca."* (la misma ley del ritual, 2.6) |
+| Tooltip del fuego en el Robledal | *"Acá el fuego se ve desde las ramas."* |
+| Sin fuego | *"Dormís a oscuras. Cualquier ruido suena más cerca."* |
+| Nombres de las guardias | **Primera guardia** · **Guardia media** · **Guardia del alba** |
+| Tooltip: vigila el Maestro | *"Vigilás vos: mañana vas a tener menos maná."* |
+| Tooltip: vigila una criatura | *"Esta noche no se cura."* |
+| Tooltip: puede dormirse | *"[Guardiana] puede dormirse: todavía no te obedece del todo."* |
+| Guardia sin cubrir | *"Nadie cubre la [guardia]."* |
+| Noche al raso tranquila | *"La noche pasa. [Guardiana] te despierta para el cambio de guardia, y nada más."* |
+| Alba tranquila | *"Amanece sin novedad. [Guardiana del alba] sigue despierta."* |
+
+#### El plazo: rayas y golondrinas
+
+| Momento | Texto |
+| --- | --- |
+| Primera raya (día 1) | *"Hacés la primera raya en la viga, con carbón del fuego."* |
+| Mitad de la partida | *"[N] rayas. La mitad del verano."* |
+| Quedan tres días | *"Quedan tres rayas por hacer."* |
+| Último día | *"Hoy hacés la última raya."* |
+| Golondrinas, etapa 1 | *"Un par de golondrinas entra y sale del techo del Molino."* |
+| Golondrinas, etapa 2 | *"Ya son varias en las vigas. Gritan todas las mañanas."* |
+| Golondrinas, etapa 3 | *"El techo está lleno de golondrinas. Se posan juntas, mirando al sur."* |
+| Golondrinas, etapa 4 | *"Las golondrinas casi no salen. Parece que esperan algo."* |
+
+Las golondrinas solo se ven al llegar o despertar en el Molino. Su partida es la apertura del epílogo (4.11).
 
 ## 5. Criaturas del MVP — `DECIDIDO`
 
@@ -518,9 +1015,20 @@ Las criaturas de **combate** y **mixtas** se enconan ante una rival enemiga; las
 
 > Reemplaza al "encono de presa" de la v0.2.
 
-### Rasgos de combate: nombres — `DECIDIDO` (nombres)
+### Incidentes entre rivales aliadas — `DECIDIDO`
 
-Los nombres son finales. Los rasgos en sí siguen siendo `PROPUESTA` de Sistemas (`Sistema.md` 11.2) hasta que los apruebe el Director Creativo.
+Regla en `Sistema.md` 10.4: con obediencia alta se distrae; con obediencia baja ataca a su rival. Las únicas rivales que pueden estar en la misma tribu son Ocarra–Zancajunco y Ocarra–Ocarra.
+
+| Caso | Distraída | Ataca a su rival |
+| --- | --- | --- |
+| General | *"[Criatura] no le saca el ojo a [rival]. Se le va el turno mirándola."* | *"[Criatura] se olvida del enemigo y se le tira encima a [rival]."* |
+| Ocarra → Zancajunco | *"La Ocarra le grazna al Zancajunco por encima del hombro y se olvida de la pelea."* | *"La Ocarra le tira un picotazo al Zancajunco. Hace rato que tenía ganas."* |
+| Zancajunco → Ocarra | *"El Zancajunco se queda tieso, esperando que la Ocarra se calle. No se calla."* | *"El Zancajunco rompe la quietud, pero no contra el enemigo."* |
+| Ocarra → Ocarra | *"Las dos Ocarras se miran cresta contra cresta. Ninguna baja la vista."* | *"Una Ocarra le pica la cresta a la otra. Se pelean el corral, aunque acá no haya corral."* |
+
+### Rasgos de combate: nombres — `DECIDIDO`
+
+Nombres y rasgos aprobados (Visión 6.2; reglas en `Sistema.md` 11.2).
 
 | Criatura | Nombre provisorio | Nombre final | Por qué |
 | --- | --- | --- | --- |
@@ -548,7 +1056,7 @@ Tooltip general: *"Se fue. Ya no se puede sellar."*
 | Zancajunco | *"Dos zancadas, y el juncal se lo traga. Después no se mueve ni una hoja."* |
 | Tasajero | *"Retrocede sin dejar de mirarte. No huye: se va a pensar."* |
 
-> PARA SISTEMAS: ¿derrotar al Tasajero cambia su hostilidad? ¿Puede volver en la misma visita? El texto deja ambas puertas abiertas.
+> Derrotar al Tasajero baja su hostilidad en 1 y no vuelve en lo que queda de la visita (`Sistema.md` 12.10).
 
 #### Criatura de la tribu caída
 
@@ -598,6 +1106,76 @@ Tooltip: *"Guardada con 1 de vida. No se cura hasta que salga."*
 | Varias caídas | *"Despertás y contás la ceniza."* |
 
 La imagen del Pilar 4 ("la tribu lo ve arder") se cumple sin mostrar la muerte.
+
+### Textos de combate de la 0a — `DECIDIDO`
+
+Momentos que muestran los hitos 0a.1 a 0a.3 (`Arquitectura.md` B.2 a B.4) y que no tenían texto. Las claves son las de `juego/datos/textos/es.json` (1.5). Los tooltips describen sin números: los valores viven en `Sistema.md`.
+
+#### Sellado (T24)
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Tooltip previo | `sellar.tooltip` | *"[X]% de que el hilo la sujete. Si se suelta, el maná se pierde igual."* |
+| Éxito | `sellar.exito` | *"El hilo la encuentra y se tensa. [Criatura] se achica hasta caber en el pergamino, y la hoja deja de estar en blanco."* |
+| Fallo (general) | `sellar.fallo` | *"El hilo la roza y se suelta. El maná ya se fue."* |
+| Fallo: Rodauva erizada | `sellar.fallo.erizada` | *"El hilo resbala entre las púas."* |
+| Fallo: Surcón | `sellar.fallo.surcon` | *"El hilo se le enreda en los terrones y se cae con ellos."* |
+| Fallo: Ocarra | `sellar.fallo.ocarra` | *"La Ocarra se sacude el hilo como si fuera agua y te grazna."* |
+| Fallo: Zancajunco | `sellar.fallo.zancajunco` | *"El hilo agarra un puñado de juncos. El Zancajunco no estaba adentro."* |
+| Rango fuera de la balanza | `sellar.rango_alto` | *"El hilo no alcanza a sujetar algo así. Te falta Soplo."* |
+| Sin pergamino en blanco | `pergamino.sin_blanco` | Compartido con 4.6 |
+
+La salvaje que **huye en su turno** reutiliza las líneas de "Salvaje que huye a 0 de vida".
+
+#### Encono y cobardía en el registro (T19)
+
+Las reacciones por par de rivales (tabla de Encono y cobardía) sirven como línea de registro. Estas son las generales y las de resistir.
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Encono (general) | `encono.inicio` | *"[Criatura] se encona con [rival]. Ya no ve otra cosa."* |
+| Sube el contador | `encono.sube` | *"El encono de [Criatura] crece."* |
+| Cobardía (general) | `cobardia.inicio` | *"[Criatura] ve a [rival] y se le va el coraje."* |
+| Cobardía: Rodauva | `cobardia.rodauva` | *"La Rodauva se hace bola. Tiembla."* |
+| Resiste (general) | `cobardia.resiste` | *"[Criatura] tiembla, pero se queda."* |
+| Resiste: Rodauva | `cobardia.resiste.rodauva` | *"La Rodauva se desenrolla. Le tiemblan las púas, pero se queda."* |
+| Resiste por una afín adyacente (toggle del escenario E) | `cobardia.resiste.afin` | *"Se queda porque [afín] está al lado."* |
+| Resiste con el Maestro adyacente | `cobardia.resiste.maestro` | *"Se queda porque estás al lado."* |
+
+#### Tooltips de los rasgos (T08, T09, T13)
+
+| Rasgo | Clave | Tooltip |
+| --- | --- | --- |
+| Erizarse | `rasgo.erizarse.tooltip` | *"Hecha bola, los golpes le entran a medias. Hasta su próximo turno, no se mueve."* |
+| Lomo de tierra | `rasgo.lomo_de_tierra.tooltip` | *"La tierra apelmazada le come un poco a cada golpe."* |
+| Alabarda | `rasgo.alabarda.tooltip` | *"El gancho del pico llega a dos casillas."* |
+| Hacerse junco | `rasgo.hacerse_junco.tooltip` | *"Su primer golpe sale de la quietud."* (ya existía) |
+| Caza y cuenta | `rasgo.caza_y_cuenta.tooltip` | *"Actúa dos veces por ronda: primero caza, rápido. Después cuenta, despacio."* |
+
+#### Secundar, combos, invocar y guardar (T16, T17, T26)
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Secundar: tooltip | `secundar.tooltip` | *"Actúa justo después de [aliado]. Los enemigos que estaban en el medio actúan antes."* |
+| Secundar bloqueado: enconada | `secundar.bloqueo.encono` | *"Enconada, no espera a nadie."* |
+| Secundar bloqueado: acobardada | `secundar.bloqueo.cobardia` | *"Asustada, no sigue a nadie."* |
+| Eslabón de combo | `combo.eslabon` | *"[Criatura] sigue el golpe de [aliado]."* |
+| Eslabón entre afines | `combo.eslabon.afin` | *"[Criatura] y [aliado] ya se conocen el golpe."* |
+| Invocar | `invocar` | *"Desenrollás el pergamino. [Criatura] sale parpadeando: para ella, no pasó el tiempo."* |
+| Invocar: tooltip | `invocar.tooltip` | *"Llega en la ronda que viene."* |
+| Guardar en combate | `guardar` | *"[Criatura] toca el pergamino y el hilo la recoge."* |
+| Guardar: tooltip | `guardar.tooltip` | *"A salvo hasta que la saques. Mientras tanto, no gana ni pierde nada."* |
+
+> El texto de invocar sale del lore del pergamino (2.5): enseña, sin tooltip, por qué una guardada no gana lealtad.
+
+#### Hechizos, hambre y cierre del combate (T10, T14, T22)
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Lanzadera: choque | `lanzadera.choque` | *"[Unidad] sale despedida y se lleva por delante a [otra]."* |
+| Hambre de combate (al cerrar las rondas 5, 10…) | `combate.hambre` | *"La pelea se alarga. A los tuyos les empieza a pesar el estómago vacío."* |
+| El Maestro cae (antes del rescate) | `maestro.caida` | *"Te fallan las piernas. El suelo está más cerca de lo que pensabas."* |
+| Victoria | `combate.victoria` | *"El claro queda en silencio. Se terminó."* |
 
 ## 6. Relaciones y ecología — `DECIDIDO`
 
@@ -653,34 +1231,58 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 
 ## 9. Pendientes
 
+**Los textos del MVP (0a y 0b) están completos, aprobados y entregados** en `juego/datos/textos/es.json` (03/10/2026). **El Worldbuilder no tiene pendientes que bloqueen la 0a ni la 0b.** Lo que queda abajo son respuestas de otras áreas y capas futuras.
+
+### 9.1 Preguntas abiertas de reglas
+
+- [ ] **PARA SISTEMAS:** ¿se puede comer a una guardada? A — sí, sacándola del pergamino (texto listo: `comer.sacar_guardada`) · B — no (se borra esa clave).
+- [ ] **PARA SISTEMAS / UI:** aviso de rescatistas perdidas antes de confirmar que se come a una criatura. Recomendado: sí, por la Visión 8 (las apuestas se muestran antes). Texto listo: `comer.aviso_rescatista`.
+- [ ] **PARA SISTEMAS:** si la confianza se completa y no hay pergamino en blanco, ¿corre el olvido? Recomendado: sí, porque empuja a hacer el ritual.
+- [ ] **PARA SISTEMAS:** cortes de las etapas de confianza (4.14). `PROPUESTA`: "a mitad de camino" con la confianza en la mitad o más de la necesaria (redondeando hacia arriba); "falta poco" cuando una ración favorita la completa. Se muestra la etapa más alta alcanzada, aunque se salte una.
+- [ ] **PARA SISTEMAS:** cortes de las golondrinas. `PROPUESTA`: cuartos de la duración de la partida.
+- [x] ~~¿Cuándo se puede comer a una criatura?~~ → Solo en el reparto de la noche, junto al fuego (Visión v1.0, 6.5; 4.12).
+- [x] ~~¿Qué pasa si el Maestro muere de hambre?~~ → Permadeath directo (`Sistema.md` 7.6). Pantalla propia `DECIDIDO` (4.11).
+- [x] ~~¿Las guardadas pierden lealtad cuando se come a una compañera?~~ → No (Visión 6.4). **PARA SISTEMAS:** cambiar "a todas" por "a todas las sueltas" en 5.2.
+
+### 9.2 Derivaciones
+
 **PARA DIRECTOR CREATIVO:**
 
-- [ ] Aprobar los rasgos de combate (Erizarse, Lomo de tierra, Alabarda, Hacerse junco, Caza y cuenta) y los hechizos (Martillazo, Lanzadera, Remiendo).
-- [ ] Integrar en la Visión (6.2): la Rodauva es la dueña del Molino; la apertura no explica el pasado del Maestro.
-- [ ] Integrar en la Visión (6.6 y 9): el sanador del MVP es la Poza Tibia, un lugar en el Vado.
-- [ ] Integrar en la Visión (10): el Molino de agua con la acequia tapada como gancho de la Capa 1.
+- [x] ~~Aprobar el ritmo del día (4.15) y los textos nuevos de la entrega JSON (1.5)~~ → Aprobados con los textos del MVP (Visión v1.0).
 
 **PARA SISTEMAS:**
 
-- [ ] Usar los nombres finales en `Sistema.md`: Martillazo, Lanzadera y Remiendo (1.6); Madriguera en lugar de Hoyo (9.4).
-- [ ] Mover el Surcón al Vado: su avistamiento (el surco que ronca) va en la orilla (4.5 y 12.7). Agregar el corral caído (Ocarra) a los Huertos. Los Huertos ya tienen 8 nodos de referencia.
-- [ ] Bloqueo del corral caído con una Ocarra suelta, igual que el juncal con una Ocarra suelta.
-- [ ] Poza Tibia: cuánto dura la visita, si ocupa un nodo del día y qué pasa si el Maestro llega debilitado a un Vado con emboscadas.
-- [ ] ¿La crecida puede cerrar el paso al Robledal ese día?
-- [ ] ¿Derrotar al Tasajero cambia su hostilidad? ¿Puede volver en la misma visita?
-- [ ] Ofrenda del colgadero: qué comida vale, cuánta y cuánto baja la hostilidad.
+- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder ya entregados en la v0.8: quebranto, orden del epílogo, variante "Solo", golondrinas sin mecánica, línea de "solo guardadas", incidentes y baño en la Poza.
+- [ ] Poner al día `Sistema.md` 15: la pregunta de las guardadas al comer ya está cerrada en este documento desde la v0.9 (9.1), y "qué pasa si el Maestro muere de hambre" ya está resuelto en `Sistema.md` 7.6.
+- [ ] Responder las preguntas de 0b de 9.1: comer a una guardada, aviso de rescatistas, olvido sin pergamino en blanco y cortes de confianza y golondrinas.
 
-**PARA ARTE / UI:**
+**PARA ARQUITECTO:**
 
+- [ ] Aprobar los huecos gramaticales y la regla de mayúsculas (1.5). **Prioridad durante la 0a:** los textos de combate usan `{criatura}`, y sin los huecos se arma "la Surcón".
+- [ ] Esquema `textos`: el mapa de claves libres necesita `additionalProperties` como esquema (texto o lista de textos), no `false`. Confirmar que el validador de T03 acepta `type` con varios tipos.
+- [ ] Claves de condición adoptadas: `sellar.fallo.erizada` (T24) y `nocturno.comer.zancajunco_suelto` en lugar de `g.salida.*` (T30), porque la 0b también la usa.
+- [ ] G-03: sumar la variante "solo guardadas" (`epilogo.cierre.solo_guardadas`) junto a la variante "Solo".
+- [x] ~~Quién edita `textos/es.json`~~ → A.2.1. ~~Contagio en C-07~~ → quitado. ~~Malherido~~ → quebranto en la v0.6. ~~Pedidos de texto como datos (rotativos, testigos, hambre, Enfermo, confianza, plazo, escenario G, registro del epílogo)~~ → registrados en G-03 y en el Anexo 11.
+
+**PARA ARTE / UI:** (sin cambios desde la v0.8)
+
+- [ ] Pantalla de comer a una criatura: aviso de rescatistas perdidas, botones "Hacerlo" / "Todavía no", la tribu alrededor del fuego sin mostrar a la comida y su pergamino ardiendo.
+- [ ] Rastro del abandono donde dormía la criatura: hojas, surco o huellas, según la especie.
+- [ ] Un solo ícono de Enfermo, con la causa y los días restantes en el tooltip; una sola postura de enferma, simétrica.
+- [ ] Sin barra de confianza: el progreso se lee en el texto y en la postura del sprite en el nodo (enrollada, atenta, esperando).
+- [ ] Líneas de Encono, cobardía y resistencia en el registro, cerca de la criatura.
+- [ ] Al invocar, la criatura sale parpadeando: un gesto chico, igual en las cuatro especies.
 - [ ] Siluetas distintas para la Rodauva erizada y la acobardada.
 - [ ] Barra de iniciativa con las marcas "Caza" y "Cuenta" del Tasajero.
 - [ ] Ceniza sobre la piedra del fuego al despertar tras un rescate con bajas.
-- [ ] La línea *"Si la cuidás, te va a salvar. Todavía no."* junto al umbral de rescate del día 1.
+- [ ] La línea *"Si la cuidás, te va a salvar. Todavía no."* junto al umbral de rescate del día 1, y su cierre *"Ahora sí."*
 - [ ] Hojarasca junto a la piedra del fuego del Molino: la cama de la compañera.
 - [ ] El Molino de agua con la rueda quieta y la acequia seca (para que la Capa 1 tenga qué reparar).
 - [ ] La Urdimbre: hilos paralelos de carbón alrededor del cuenco, con un hilo suelto; simétrica por el espejado.
 - [ ] La hoja que se enrolla sola sobre la ramita (momento visual del ritual).
-- [ ] Tramo "lo que diste" en la barra de vida, con contador de días. Sin vendas ni marcas de un solo lado en el sprite.
+- [ ] Tramo "lo que diste" y marca de **quebranto** en la barra de vida, cada uno con su contador. Sin vendas ni marcas de un solo lado.
+- [ ] Contador del plazo como **rayas de carbón**; las mismas rayas en una viga del Molino.
+- [ ] Techo del Molino con **golondrinas** en 4 etapas, y vacío al final.
 - [ ] La talla del Roble Viejo: gastada, sin rasgos identificables.
 - [ ] El pergamino ardiendo con llama pálida y ceniza.
 - [ ] Animaciones de Encono (cresta erizada, cuello en ristre, ruptura de la quietud) y de cobardía (Rodauva enrollada).
@@ -690,21 +1292,7 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 - [ ] Frutas intercambiables en el sprite de Rodauva.
 - [ ] El Maestro de polo Soplo, levemente desvaído en la ficha o el retrato.
 
-**PARA ARQUITECTO:**
-
-- [ ] Texto de apertura, línea del umbral de rescate y texto de las dos frutas iniciales como datos.
-- [ ] Textos de huida, caída, levantarse, rescate, guardar a una caída y huida del Maestro como datos, con variantes (afines, varias caídas).
-- [ ] Relaciones dentro de una misma especie en la tabla par a par.
-- [ ] Línea de prenda por emisor como dato.
-- [ ] Evento de la hornacina con variante de "ya visitado".
-- [ ] Dos caminos al Roble Viejo (colgadero o rodeo) como estructura del mapa de nodos.
-- [ ] Textos matutinos de "lo que diste", con variante por acumulación y por criatura leal suelta.
-- [ ] Variantes con requisito de criatura suelta: colgadero (Rodauva), juncal y corral caído (Ocarra), surco que ronca (Ocarra, solo texto).
-- [ ] Emboscadas por destino con variantes (alarma o sorpresa, fuego en el Robledal, guardiana dormida) y ataque nocturno al raso con y sin fuego.
-- [ ] Textos de despertar de las habilidades de campamento, de rebuscar y de pudrición por tipo de comida.
-- [ ] Textos del ataque nocturno por criatura, relaciones, eventos de nodo y preferencias de comida como datos.
-
-**PARA WORLDBUILDER (capas futuras, sin detallar):**
+### 9.3 Para el Worldbuilder (capas futuras, sin detallar)
 
 - [ ] Qué criaturas son orgullosas (dato para el Grito).
 - [ ] Nombres finales de la involución (candidatos: malmuda, torcedura), las órdenes, el Grito, la subyugación y el esbirro.
@@ -714,11 +1302,19 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 - [ ] Número final de los Nueve.
 - [ ] Nombre final de la Mudanza y del pergamino de muda.
 - [ ] Esbozo de los escribas (Capa 5).
+- [ ] Propuestas para el título del juego y el nombre del mundo (con el Director Creativo).
+- [ ] **PREGUNTA ABIERTA:** ¿las criaturas tienen nombre propio? Con varias de la misma especie, el epílogo repite "la Rodauva". Se decide después del primer playtest de la 0b.
+- [x] ~~Entregar los textos en JSON~~ → entregado el 03/10/2026 (1.5).
 
 ## 10. Registro de cambios
 
 | Versión | Fecha | Cambio |
 | --- | --- | --- |
+| v1.0 | 03/10/2026 | **Sincronización con la Visión v1.0. El Worldbuilder no tiene pendientes que bloqueen el MVP.** Pasan a `DECIDIDO` el ritmo del día (4.15) y los textos nuevos de la entrega (1.5). 4.12: cuándo se come a una criatura (solo en el reparto de la noche, junto al fuego). Centinela unificado entre 1.5 y 4.6, sin hueco (actualizar `nocturno.centinela` en `es.json`). Sección 9: se cierra la pregunta de cuándo comer; pedidos a Sistemas para poner al día `Sistema.md` 15; prioridad de los huecos gramaticales para el Arquitecto |
+| v0.9 | 03/10/2026 | **Textos entregados en JSON** (`juego/datos/textos/es.json`, 493 claves). Nueva 1.5: notación, huecos gramaticales (`PROPUESTA` al Arquitecto), reglas de armado y textos nuevos de la entrega (`PROPUESTA` al Director). Claves de la sección 5 y 4.6 alineadas con el JSON (`sellar.fallo.erizada`, `nocturno.comer.zancajunco_suelto`, `rasgo.<id>.tooltip`). 4.11: muerte de hambre del Maestro `DECIDIDO` (`Sistema.md` 7.6). Sección 9 reescrita: se cierran los pedidos ya registrados en `Arquitectura.md` v0.6; las guardadas no pierden lealtad al comer a una compañera (Visión 6.4); nuevos pedidos sobre el esquema de textos y la variante "solo guardadas" |
+| v0.8 | 02/10/2026 | **Textos del MVP completos.** Pasan a `DECIDIDO`: textos de combate de la 0a, atacante caída (4.6), variante "solo guardadas" (4.11) y el criterio de 1.3, que pasa a "la tribu es la cámara". Nuevas 3.5 (hambre) y 3.6 (Enfermo). Evento completo del juncal (4.5). Nuevas 4.12 (comerse una criatura), 4.13 (abandono), 4.14 (camino de confianza y Leal por primera vez, con el payoff de la compañera) y 4.15 (ritmo del día, `PROPUESTA`). Pantalla de muerte por hambre del Maestro (4.11, `PROPUESTA`). Sección 9 reescrita: preguntas de reglas para Sistemas y Director, y pedidos acumulados |
+| v0.7 | 02/10/2026 | **Textos de la 0a completos en `PROPUESTA`.** 1.3: criterio "comer a una criatura se elide". 4.6: la atacante caída (escenario G) con sus tres salidas. 4.11: orden de lectura del epílogo `DECIDIDO` según `Sistema.md` 13; variante de cierre "solo quedan guardadas". Sección 5: textos de combate de la 0a (sellado, Encono y cobardía, tooltips de rasgos, Secundar, combos, invocar, guardar, choque de la Lanzadera, hambre de combate, caída del Maestro y victoria). Sección 9 reescrita: se cierran los pendientes ya resueltos en la Visión v0.9 y en `Sistema.md` v0.8 (Menestral, quebranto, rayas y golondrinas, orden del epílogo, variante "Solo", golondrinas sin mecánica, incidentes y baño en la Poza); nueva 9.1 con los seis bloques de texto de la 0b por prioridad y 9.2 con las preguntas abiertas |
+| v0.6 | 02/10/2026 | **MVP cerrado para el Worldbuilder.** Glosario (1.2): Menestral, quebranto, las rayas y las golondrinas. Hechizos (2.8) y rasgos (sección 5) pasan a `DECIDIDO`. Nueva 2.9: la clase del MVP y textos de subida de nivel. 4.3: la crecida no cierra el paso. 4.5: la ciruela en disputa (encuentro de solo trabajo); "La crecida" se reescribe como "leer el río" con textos de cruce; Poza, rodeo y Tasajero derrotado resueltos; textos del Tasajero por estado. Nuevas 4.9 (quebranto y Poza Tibia), 4.10 (el plazo: rayas y golondrinas) y 4.11 (el epílogo). Incidentes entre rivales aliadas (sección 5). Pendientes reescritos (9) |
 | v0.5 | 01/10/2026 | Nueva 2.8: nombres de los hechizos (Martillazo, Lanzadera, Remiendo). Nueva 3.4: textos de rebuscar y de pudrición. Nueva 4.3: geografía del valle; el Robledal está del otro lado del vado; el Molino es de agua y está callado por la acequia tapada (gancho Capa 1). Lugares (4.4): el Surcón pasa al Vado. Eventos (4.5): el corral caído (Ocarra), el surco que ronca (Surcón) y la Poza Tibia (sanador del MVP). Ataque nocturno al raso y Centinela (4.6). Nueva 4.7: habilidades de campamento con nombres finales (Madriguera reemplaza a Hoyo) y emboscadas. Las dos frutas iniciales (4.8). Avistamiento en cada ficha. Temperamento de huida confirmado; textos de guardar a una caída y de huida del Maestro. Tregua de la Poza en la cadena alimentaria. Secciones 4.3 a 4.6 renumeradas a 4.4, 4.5, 4.6 y 4.8. Pendientes actualizados |
 | v0.4 | 01/10/2026 | Nueva 4.6: la apertura; la Rodauva es la dueña del Molino; el pasado del Maestro no se explica en el MVP. Fichas con rasgo de combate. Nombres finales de los rasgos: Erizarse, Lomo de tierra, Alabarda, Hacerse junco, Caza y cuenta. Rodauva erizada y acobardada con siluetas distintas. Textos de huida, caída, rescate y caídas que quedan atrás. Relaciones dentro de una misma especie (6.1): Rodauva bien, Ocarra mal, Surcón y Zancajunco sin relación. Se quita la nota sobre el Encono de las mixtas (confirmado). Pendientes actualizados |
 | v0.3 | 01/10/2026 | Glosario de términos (1.2): Arrimo, Encono y Secundar finales; Urdimbre, prenda, péñola y "lo que diste". Pergaminos: no son piel; origen fijo + ritual (2.5). Nueva 2.6: el ritual de sangre (lore, materiales, Urdimbre, textos, prendas y "lo que diste"). Nueva 2.7: rastros de los Nueve; la mancha del cuenco es ambigua para siempre. Lugares con materiales (4.3). Nodos nuevos: la hornacina, el palomar, el charco quieto, el Roble Viejo y el rodeo de las zarzas (4.4). Ofrenda del colgadero: la comida se pierde. Ataque nocturno aprobado (4.5). Fichas con prenda y defecto de naturaleza. Tasajero sin momento oscuro propio en el MVP. Cobardía reemplaza al encono de presa. Mudanza y escribas en Ideas en espera |

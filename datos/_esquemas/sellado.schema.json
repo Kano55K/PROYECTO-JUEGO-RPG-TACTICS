@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Probabilidad de sellado",
+  "description": "Sistema.md 4.1. Tramos ordenados de menor a mayor vida. Se usa el primer tramo con vida_actual × 100 ≤ vida_max × hasta_vida_pct (comparación exacta, sin redondeo).",
+  "type": "object",
+  "required": [
+    "tramos",
+    "confianza_pct"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "tramos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "hasta_vida_pct",
+          "pct_por_rango"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "hasta_vida_pct": {
+            "$ref": "comunes.schema.json#/$defs/pct"
+          },
+          "pct_por_rango": {
+            "type": "array",
+            "items": {
+              "$ref": "comunes.schema.json#/$defs/pct"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "_nota": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "confianza_pct": {
+      "$ref": "comunes.schema.json#/$defs/pct"
+    }
+  }
+}

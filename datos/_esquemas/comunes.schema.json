@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Definiciones comunes",
+  "description": "Tipos que reusan los demás esquemas. El validador del juego solo entiende el subconjunto de palabras de Arquitectura.md A.2.",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "puntos": {
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100
+    },
+    "casilla": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "por_rango": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}

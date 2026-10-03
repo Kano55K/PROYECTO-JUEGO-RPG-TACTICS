@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Resultado de combate",
+  "description": "Arquitectura.md A.7. Salida del combate. La pantalla de resultado solo lo muestra; en 0b el loop lo aplica a la partida. No es un archivo que se edite: lo escribe el núcleo.",
+  "type": "object",
+  "required": [
+    "contexto_id",
+    "semilla",
+    "desenlace",
+    "rondas",
+    "rescatista",
+    "permadeath",
+    "maestro",
+    "unidades",
+    "capturas",
+    "lealtad_cambios",
+    "pergaminos",
+    "atacante_pendiente",
+    "metricas"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contexto_id": {
+      "$ref": "comunes.schema.json#/$defs/id"
+    },
+    "semilla": {
+      "type": "integer"
+    },
+    "desenlace": {
+      "enum": [
+        "victoria",
+        "derrota",
+        "huida"
+      ]
+    },
+    "rondas": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rescatista": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "id de la rescatista; null si no cayó el Maestro o si no hubo"
+    },
+    "permadeath": {
+      "type": "boolean"
+    },
+    "maestro": {
+      "type": "object",
+      "required": [
+        "vida",
+        "mana",
+        "hambre"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "vida": {
+          "type": "integer"
+        },
+        "mana": {
+          "type": "integer"
+        },
+        "hambre": {
+          "type": "integer"
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    },
+    "unidades": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "especie",
+          "bando",
+          "final",
+          "vida"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "especie": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "bando": {
+            "enum": [
+              "tribu",
+              "enemiga"
+            ]
+          },
+          "final": {
+            "enum": [
+              "de_pie",
+              "levantada",
+              "guardada",
+              "guardada_caida",
+              "muerta",
+              "huyo",
+              "sellada",
+              "caida_pendiente"
+            ]
+          },
+          "vida": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hambre": {
+            "type": "integer"
+          },
+          "lealtad": {
+            "type": "integer"
+          },
+          "_nota": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "capturas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "especie",
+          "camino",
+          "lealtad"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "especie": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "camino": {
+            "enum": [
+              "combate",
+              "resellado"
+            ]
+          },
+          "lealtad": {
+            "type": "integer"
+          },
+          "_nota": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "lealtad_cambios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "delta",
+          "motivo"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "delta": {
+            "type": "integer"
+          },
+          "motivo": {
+            "enum": [
+              "victoria",
+              "muerte_en_el_grupo",
+              "rescate",
+              "perdon",
+              "comida"
+            ]
+          },
+          "_nota": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pergaminos": {
+      "type": "object",
+      "required": [
+        "en_blanco",
+        "ardidos"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "en_blanco": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ardidos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ids de las instancias cuyo pergamino ardió"
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    },
+    "atacante_pendiente": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Atacante nocturna caída que espera la decisión del Maestro (perdonar, sellar, comer)"
+    },
+    "metricas": {
+      "type": "object",
+      "required": [
+        "secundar_usos",
+        "eslabones_promedio",
+        "incidentes",
+        "enconos",
+        "cobardias",
+        "sellados_intentados",
+        "sellados_logrados",
+        "huidas_antes_de_sellar",
+        "caidas",
+        "caidas_guardadas",
+        "muertes",
+        "rescates",
+        "distancia_media_maestro"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "secundar_usos": {
+          "type": "integer"
+        },
+        "eslabones_promedio": {
+          "type": "number"
+        },
+        "incidentes": {
+          "type": "integer"
+        },
+        "enconos": {
+          "type": "integer"
+        },
+        "cobardias": {
+          "type": "integer"
+        },
+        "sellados_intentados": {
+          "type": "integer"
+        },
+        "sellados_logrados": {
+          "type": "integer"
+        },
+        "huidas_antes_de_sellar": {
+          "type": "integer"
+        },
+        "caidas": {
+          "type": "integer"
+        },
+        "caidas_guardadas": {
+          "type": "integer"
+        },
+        "muertes": {
+          "type": "integer"
+        },
+        "rescates": {
+          "type": "integer"
+        },
+        "distancia_media_maestro": {
+          "type": "number"
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    },
+    "_nota": {
+      "type": "string"
+    }
+  }
+}

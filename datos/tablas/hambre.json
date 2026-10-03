@@ -1,0 +1,43 @@
+{
+  "$schema": "../_esquemas/hambre.schema.json",
+  "minimo": 0,
+  "maximo": 10,
+  "estados": [
+    {
+      "id": "saciado",
+      "desde": 0,
+      "hasta": 2,
+      "danio_pct": 25,
+      "obediencia": 0,
+      "regen_combate": "siempre"
+    },
+    {
+      "id": "normal",
+      "desde": 3,
+      "hasta": 5,
+      "danio_pct": 0,
+      "obediencia": 0,
+      "regen_combate": "siempre"
+    },
+    {
+      "id": "hambriento",
+      "desde": 6,
+      "hasta": 8,
+      "danio_pct": 0,
+      "obediencia": -2,
+      "regen_combate": "rondas_pares"
+    },
+    {
+      "id": "famelico",
+      "desde": 9,
+      "hasta": 10,
+      "danio_pct": 0,
+      "obediencia": -4,
+      "regen_combate": "nunca"
+    }
+  ],
+  "combate": {
+    "cada_rondas": 5,
+    "suma": 1
+  }
+}

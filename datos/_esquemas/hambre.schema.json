@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hambre",
+  "description": "Sistema.md 7.1, 7.2, 2.2 y 5.4. Saciado es un estado derivado del valor de hambre, no un dato aparte. Lo de 0b (recuperación al dormir, apetito) entra como campos nuevos.",
+  "type": "object",
+  "required": [
+    "minimo",
+    "maximo",
+    "estados",
+    "combate"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "minimo": {
+      "type": "integer"
+    },
+    "maximo": {
+      "type": "integer"
+    },
+    "estados": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "desde",
+          "hasta",
+          "danio_pct",
+          "obediencia",
+          "regen_combate"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "desde": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hasta": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "danio_pct": {
+            "$ref": "comunes.schema.json#/$defs/puntos"
+          },
+          "obediencia": {
+            "type": "integer",
+            "maximum": 0
+          },
+          "regen_combate": {
+            "enum": [
+              "siempre",
+              "rondas_pares",
+              "nunca"
+            ]
+          },
+          "_nota": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "combate": {
+      "type": "object",
+      "required": [
+        "cada_rondas",
+        "suma"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "cada_rondas": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "suma": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

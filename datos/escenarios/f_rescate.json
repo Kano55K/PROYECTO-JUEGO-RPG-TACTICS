@@ -1,0 +1,29 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "f_rescate",
+  "_nota": "Escenario F (Sistema 11.9). ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? La rescatista es la frágil (Rodauva leal, 8 de vida); la fuerte es Neutral y no rescata. Peligro concreto: el Zancajunco salvaje llega en la ronda 2 y su primer golpe es 6 (Hacerse junco), justo la vida del Maestro: la IA de remate va por él, salvo que se encone con la Ocarra.",
+  "tipo": "test",
+  "semilla": 66001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": 6, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7],
+      "_nota": "Leal: única rescatista posible si sigue de pie" },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 7],
+      "_nota": "Neutral: pelea, no rescata. Rival del Zancajunco salvaje: Encono" }
+  ],
+  "enemigas": [
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 0] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
+      "vida": null, "posicion": [4, 1] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "b_muro",
+  "_nota": "Prueba B (Sistema 11.6). ¿Reconoce que hay que huir? ¿Guarda a la caída antes? Segunda salida legítima: las dos Ocarras salvajes son rivales entre sí (Ocarra–Ocarra mal); juntarlas con la Lanzadera provoca incidentes (20%, siempre ataque). Sin rescatista: la Rodauva es Neutral, si cae el Maestro es permadeath.",
+  "tipo": "test",
+  "semilla": 22001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7],
+      "_nota": "Compañera inicial, Neutral (umbral 7): no rescata" }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje",
+      "vida": null, "posicion": [1, 0] },
+    { "id": "ocarra_s2", "especie": "ocarra", "comportamiento": "salvaje",
+      "vida": null, "posicion": [6, 0],
+      "_nota": "Separadas al empezar: no hay incidente salvaje hasta que se junten" }
+  ],
+  "pergaminos_en_blanco": 2,
+  "toggles": { "afines_contra_cobardia": false }
+}

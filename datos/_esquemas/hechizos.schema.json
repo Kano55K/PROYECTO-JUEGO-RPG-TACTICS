@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hechizos",
+  "description": "Sistema.md 1.6. geometria y efecto son comportamientos programados; los números van acá.",
+  "type": "object",
+  "required": [
+    "hechizos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "hechizos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "costo",
+          "alcance",
+          "geometria",
+          "efecto",
+          "es_ataque"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "_nota": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "costo": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "alcance": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "incluye_si_mismo": {
+            "type": "boolean"
+          },
+          "geometria": {
+            "enum": [
+              "distancia_libre",
+              "linea_bloqueo_enemigas",
+              "adyacente"
+            ]
+          },
+          "efecto": {
+            "enum": [
+              "danio",
+              "empuje",
+              "cura"
+            ]
+          },
+          "base": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "escala_poder": {
+            "type": "boolean"
+          },
+          "es_ataque": {
+            "type": "boolean",
+            "description": "true = cuenta como eslabón y le aplican los modificadores de daño (11.4)"
+          },
+          "modos": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "empujar",
+                "atraer"
+              ]
+            }
+          },
+          "casillas": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "danio_choque": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "afecta_caidas": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "../_esquemas/especie.schema.json",
+  "id": "surcon",
+  "rol": "trabajo",
+  "rango": 2,
+  "sellable": true,
+  "vida": 18,
+  "danio": 3,
+  "movimiento": 2,
+  "alcance": 1,
+  "turnos": [
+    {
+      "velocidad": 2
+    }
+  ],
+  "rasgo": {
+    "id": "lomo_de_tierra",
+    "efecto": "reduccion_plana",
+    "danio_recibido_plano": -1
+  },
+  "huida_pct": 25
+}

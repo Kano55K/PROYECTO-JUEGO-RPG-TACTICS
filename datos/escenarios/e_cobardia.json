@@ -1,0 +1,32 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "e_cobardia",
+  "_nota": "Escenario E sin el toggle de afines (Sistema 10.6 y 11.9). ¿Sostiene a la asustada? Cobardía con balanza 2: Rodauva leal 25% (15% con el Maestro al lado), Rodauva Neutral 45% (35%). El Surcón no es rival del Tasajero: no chequea. Misma semilla que la variante con afines.",
+  "tipo": "test",
+  "semilla": 55001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [2, 6],
+      "_nota": "Compañera, leal" },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [2, 7],
+      "_nota": "Neutral. Adyacente y afín de rodauva_1" },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 6],
+      "_nota": "Leal, afín de las Rodauvas: el escudo que las puede sostener" }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 0],
+      "_nota": "Si el combate frustra por duración, bajar la vida a 20 en el panel: E mide la cobardía, no la victoria" }
+  ],
+  "pergaminos_en_blanco": 0,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "../_esquemas/especie.schema.json",
+  "id": "tasajero",
+  "rol": "combate",
+  "rango": 3,
+  "sellable": false,
+  "vida": 30,
+  "danio": 6,
+  "movimiento": 4,
+  "alcance": 1,
+  "turnos": [
+    {
+      "velocidad": 8,
+      "marca": "caza"
+    },
+    {
+      "velocidad": 3,
+      "marca": "cuenta"
+    }
+  ],
+  "rasgo": {
+    "id": "caza_y_cuenta",
+    "efecto": "ninguno"
+  },
+  "huida_pct": 25,
+  "_nota": "Dos turnos por ronda (Caza y Cuenta). En el MVP no se sella ni se domestica (Sistema.md 4.3)"
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Maestro",
+  "description": "Sistema.md 1.1, 1.6 y 11.2. Vida y daño cuerpo a cuerpo salen de la balanza (tablas/balanza.json).",
+  "type": "object",
+  "required": [
+    "movimiento",
+    "alcance",
+    "velocidad",
+    "hechizos",
+    "iniciales"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "movimiento": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "alcance": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "velocidad": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "hechizos": {
+      "type": "array",
+      "items": {
+        "$ref": "comunes.schema.json#/$defs/id"
+      }
+    },
+    "iniciales": {
+      "type": "object",
+      "required": [
+        "balanza",
+        "poder",
+        "regeneracion",
+        "hambre"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "balanza": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "poder": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "regeneracion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hambre": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

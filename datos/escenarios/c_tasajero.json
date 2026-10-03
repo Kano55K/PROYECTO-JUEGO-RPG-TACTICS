@@ -1,0 +1,32 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "c_tasajero",
+  "_nota": "Prueba C (Sistema 11.6). Meta: 2 o 3 rondas. ¿Llevo a la Rodauva? Para comparar, cambiar rodauva_1 a 'guardada' en el panel (sacarla cuesta el turno del Maestro y 2 de maná). Ocarra y Zancajunco son rivales aliadas: incidente 5% con Arrimo 3. Misma semilla que H.",
+  "tipo": "test",
+  "semilla": 33001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [2, 6],
+      "_nota": "Rival del Tasajero: chequea cobardía (25%, 15% con el Maestro al lado)" },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7],
+      "_nota": "Detrás del Maestro, alcance 2 por encima de él. Rival del Tasajero: Encono" },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 6],
+      "_nota": "Diagonal a la Ocarra: no son adyacentes al empezar" }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 0],
+      "_nota": "Dos turnos completos por ronda (Caza 8, Cuenta 3); huida y Encono se chequean al inicio de cada uno, contador de Encono único" }
+  ],
+  "pergaminos_en_blanco": 1,
+  "toggles": { "afines_contra_cobardia": false }
+}

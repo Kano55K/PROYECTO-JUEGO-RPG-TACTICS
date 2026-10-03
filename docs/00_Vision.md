@@ -1,8 +1,9 @@
 # 00 — VISIÓN DEL JUEGO
 
-> **Estado:** Borrador v0.7 · **Dueño:** Director Creativo · **Última actualización:** 01/10/2026
+> **Estado:** v1.0 — **MVP definido** · **Dueño:** Director Creativo · **Última actualización:** 03/10/2026
 > Este documento es la fuente de verdad. Ningún agente puede contradecirlo sin proponer un cambio y registrarlo en `Decisiones.md`.
-> **Documentos subordinados:** `Sistema.md` (reglas y números) · `Mundo.md` (mundo, regiones y criaturas). Este documento define **qué** y **por qué**; los números viven en `Sistema.md`, y el detalle del mundo, en `Mundo.md`.
+> **Documentos subordinados:** `Sistema.md` (reglas y números) · `Mundo.md` (mundo, regiones y criaturas) · `Arquitectura.md` (decisiones técnicas y plan de construcción). Este documento define **qué** y **por qué**; los números viven en `Sistema.md`, y el detalle del mundo, en `Mundo.md`.
+> **`Decisiones.md` es el historial, no la fuente de verdad:** registra cómo se llegó a cada regla. Queda fuera de `docs/` (Claude Code no lo lee) y es opcional en el conocimiento del proyecto.
 > Los nombres marcados como *(provisorio)* esperan la confirmación del Worldbuilder.
 
 ---
@@ -83,6 +84,15 @@ El mundo es luminoso y aventurero, pero la supervivencia no perdona. El hambre p
 - Es un **molino de agua**, callado porque la acequia se tapó. Nunca se explica por qué.
 - A futuro: repararlo destapando la acequia y mejorarlo (Capa 1); la **Mudanza** y la **involución** de las criaturas (Ideas en espera).
 
+### Fin de la partida — el epílogo
+- Una partida termina de dos maneras: por **permadeath** o al **cumplirse el plazo**, un número fijo de días: **30** en el MVP (dato editable en `Sistema.md` 13).
+- El plazo **se ve y se cuenta** desde el día 1, como el hambre y la secuela: el jugador sabe cuánto falta.
+- Al cumplirse el plazo, la partida cierra con un **epílogo que lee la tribu**: quién sigue, quién es leal, a quién perdiste y cómo (comida, abandono, muerte en combate, hambre).
+- **Sin puntaje numérico.** Llegar al final ya es sobrevivir; el epílogo dice *cómo* sobreviviste. El final es la regla de oro vista de frente.
+- **Ningún final premia vaciar la tribu.** Comerse a una criatura el último día pesa en el epílogo igual que el primero: el plazo no puede convertirse en permiso para la crueldad sin consecuencias.
+- **Las rayas y las golondrinas** marcan el plazo (`Mundo.md` 4.10): las **rayas** de carbón cuentan los días en la interfaz y en una viga del Molino; las **golondrinas** del techo del Molino son la señal del mundo, se van antes del alba del último día y no tienen mecánica. Sin simular clima (Capa 2) ni explicar el pasado del Maestro (Capas 3 y 4).
+- **Por qué:** sin un final, la única forma de terminar es morir, y la tribu bien cuidada nunca ve su recompensa. El plazo le da horizonte al reloj de supervivencia (Pilar 4) y el epílogo convierte al vínculo en el resultado de la partida (Pilar 3 y regla de oro).
+
 ## 6. Sistemas centrales (resumen)
 
 Las reglas y los números de cada sistema están en `Sistema.md`.
@@ -111,7 +121,7 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
 **Experiencia:** mixta, con peso en los **hitos de la tribu**: que una criatura llegue a Leal por primera vez, una captura o un ritual. Ganar combates también da experiencia, pero menos. **El Maestro crece cuando crece su tribu.** Comerse una criatura nunca da experiencia.
 - Por qué: si la experiencia saliera solo del combate, empujaría a buscar peleas; si saliera solo de los hitos, el combate perdería sentido (Pilar 1).
 
-**Balanza inicial:** la clase del MVP arranca **inclinada hacia el Barro**. El MVP enseña primero la tribu, porque lo que se testea es si la regla de oro es divertida.
+**Balanza inicial:** la clase del MVP, el **Menestral** (ver `Mundo.md` 2.9), arranca **inclinada hacia el Barro**. El MVP enseña primero la tribu, porque lo que se testea es si la regla de oro es divertida.
 - **La posición inicial de la balanza es parte de la identidad de cada clase** (Capa 3).
 - **Ninguna clase arranca en un polo.** La balanza es un viaje: arrancar en un extremo le quita al jugador la mitad de la decisión.
 
@@ -150,6 +160,7 @@ Reglas comunes:
 
 **Lealtad** (criatura → Maestro): un valor numérico que sube o baja según las decisiones del jugador. Define cuatro estados: **Desleal**, **Dudosa**, **Neutral** y **Leal**. Solo las leales pueden rescatar al Maestro.
 - Lo que la construye: pasar el día suelta y bien alimentada, pelear juntos y ganar, que el Maestro perdone a una atacante.
+  - **Ganar juntos** se lee por el estado **al terminar** el combate: lo reciben las que quedan de pie y las caídas que se levantan. Las guardadas al terminar, no: el pergamino congela el vínculo. Guardar a una caída le salva la vida a cambio de ese punto.
 - Lo que la destruye: el hambre, comer lo que rechaza, la muerte de compañeros y, sobre todo, que el Maestro se coma a una criatura.
 - Repartir la comida es una decisión: alimentar bien a algunas o poco a todas.
 
@@ -164,7 +175,8 @@ Reglas comunes:
 - **Rivales aliadas vecinas:** riesgo de **incidente**. Una criatura obediente se distrae; una poco obediente ataca a su rival.
 - **Rival enemiga — Encono** *(antes "provocación")*: las criaturas **de combate y mixtas** pueden ensañarse; la criatura puede ensañarse y atacar a su rival sí o sí, ganando fuerza y perdiendo control.
 - **Cobardía:** las criaturas **de trabajo**, ante una rival enemiga, no se enconan: se acobardan y quedan debilitadas. Su obediencia puede hacerlas resistir: **la regla de oro también se ve en el coraje**. Las **afines adyacentes** también la sostienen (regla a testear en el MVP).
-- **Salvajes:** siguen las mismas reglas, sin obediencia que las contenga. Atraer a dos rivales salvajes es una táctica legítima.
+- **Salvajes:** siguen las mismas reglas **de relación** (afinidad, incidentes, Encono y cobardía), sin obediencia que las contenga. Atraer a dos rivales salvajes es una táctica legítima.
+  - **Las salvajes no encadenan combos:** se sostienen entre ellas, pero no se coordinan. La cadena es algo que solo da el vínculo con el Maestro (Pilar 3).
 - Toda probabilidad de incidente o Encono se **muestra antes** de mover.
 
 Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni participan de relaciones**. El vínculo solo se construye con criaturas sueltas.
@@ -188,6 +200,8 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 - El hambre también afecta al Maestro: **reduce la regeneración de maná**, y con **hambre extrema no se regenera**.
 - **Morir de hambre:** cada día terminado famélico cuesta vida. El reloj se ve y se puede contar; cuando se acerca el final, comerse a una criatura deja de ser impensable.
 - **Comerse una criatura** nunca rinde como comida; solo como supervivencia.
+- **Cuándo se come:** solo en el **reparto de la noche, junto al fuego**, con la tribu mirando. No se puede en cualquier momento del mapa ni al terminar un combate (una caída de un combate ganado se levanta; nunca se ofrece como carne). La única otra salida es el destino de la atacante nocturna (6.4), que también se decide de noche.
+  - **Por qué:** la decisión más dura del juego tiene un solo momento y un solo lugar. Si cada victoria ofreciera carne, el combate se volvería una fuente de comida y el vínculo (Pilar 3) perdería frente al hambre.
 - En situaciones extremas: comerse una criatura, ser atacado por una criatura hambrienta, que las criaturas se ataquen entre sí o que abandonen al grupo.
 
 **Estado negativo: Enfermo**
@@ -207,17 +221,19 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 - Una salvaje en 0 huye (ver 6.3). La atacante nocturna, en cambio, queda caída para que el Maestro decida (ver 6.4).
 - El Maestro puede **guardar a una caída** gastando su acción y maná: sobrevive en su pergamino aunque después se pierda el combate. Hay que decidirlo **antes** de caer.
 - El Maestro puede **huir**: el combate termina al final de la ronda y las caídas que quedan en el tablero mueren.
+  - Si el Maestro **cae antes del cierre de la ronda**, queda caído y se aplica el rescate, como en cualquier caída. **La huida es una apuesta anticipada, no un seguro.** La interfaz muestra, al declararla, qué enemigas actúan antes del cierre y si alcanzan al Maestro.
 
 **El rescate:**
 1. El Maestro cae en combate y el combate termina.
 2. Si sobrevive al menos una criatura **suelta**, **viva** y con lealtad **igual o mayor al umbral de rescate**, lo arrastra al campamento. Las criaturas guardadas en pergamino no pueden rescatarlo. El umbral depende de la balanza: cuanto más Barro, más bajo.
 3. **Días de recuperación** en el campamento. Durante ese tiempo, las criaturas con **poca lealtad pueden abandonarlo**.
-4. Tras recuperarse, el Maestro queda **malherido** *(provisorio)*: no regenera vida ni maná, y **cada día pierde 1 punto de vida máxima**. El sanador del MVP es la **Poza Tibia**, un lugar en la orilla del Vado donde los animales lastimados se bañan en tregua (no es un NPC). Bañarse ahí le devuelve la regeneración, pero **lo perdido no vuelve: esa es la secuela**. Si nunca va, termina vagando con 1 de vida máxima.
+4. Tras recuperarse, el Maestro queda con **quebranto**: no regenera vida ni maná (tampoco al dormir), y **cada día pierde 1 punto de vida máxima**. El sanador del MVP es la **Poza Tibia**, un lugar en la orilla del Vado donde los animales lastimados se bañan en tregua (no es un NPC). Bañarse ahí le devuelve la regeneración, pero **lo perdido no vuelve: esa es la secuela**. Si nunca va, termina vagando con 1 de vida máxima.
 5. Si nadie lo rescata: **permadeath**. Se pierde todo.
 
-**Por qué así:** la secuela es un reloj visible y contable, como el hambre. Su tamaño depende de cuánto tarda el jugador en llegar a la Poza, y llegar exige cruzar dos destinos sin regenerar: la tribu tiene que sostener al Maestro débil. **Malherido no es un estado negativo** (el único del MVP sigue siendo Enfermo): es la última etapa del rescate, una marca en la barra de vida con su contador, como "lo que diste".
+**Por qué así:** la secuela es un reloj visible y contable, como el hambre. Su tamaño depende de cuánto tarda el jugador en llegar a la Poza, y llegar exige cruzar dos destinos sin regenerar: la tribu tiene que sostener al Maestro débil. **El quebranto no es un estado negativo** (el único del MVP sigue siendo Enfermo): es la última etapa del rescate, una marca en la barra de vida con su contador, como "lo que diste".
 
 **En el MVP, el permadeath es absoluto:** no hay progresión entre partidas.
+- **Salir nunca repite una tirada.** Al salir a mitad de un combate, se guarda el estado exacto (incluido el azar) y se retoma en el mismo punto. El combate se guarda solo durante la pelea, de modo que un cierre forzado tampoco devuelve al inicio.
 
 ### 6.7 Magia, maná y pergaminos
 - La magia es **exclusiva del Maestro** y usa **maná** como recurso.
@@ -278,6 +294,7 @@ Fuera del Molino, cada noche el Maestro arma un campamento. Entra completo en el
 - **Contraste:** las decisiones del jugador pueden llevar a momentos oscuros y duros. Lo oscuro no es el mundo por defecto: aparece como **rastro de decisiones pasadas** o como **consecuencia de las del jugador**.
 - **Los momentos oscuros de cada criatura** son la cara narrativa de reglas generales (abandono, ataque nocturno, muerte por hambre), no reglas propias de cada una.
 - **El ritual de sangre** se lee como sacrificio, nunca como gore.
+- **Comer a una criatura se elide: la tribu es la cámara.** El texto nunca muestra el acto: muestra quién mira, quién se aleja y la mañana siguiente (`Mundo.md` 1.3). El abandono sigue el mismo principio: nadie ve irse a la criatura; queda su rastro.
 - **Nombres:** todo en **castellano evocador**, sin lenguas inventadas (Valdelumbre, Surcón, el Molino Callado, Barro, Soplo).
 - **Originalidad:** se evitan las imágenes emblemáticas de otras franquicias (por ejemplo, el círculo de transmutación). Nuestros símbolos salen de la hechura de los Nueve: la Urdimbre es un telar, no un círculo.
 - **Vista:** 2D isométrica.
@@ -298,7 +315,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 **Alcance congelado** (01/10/2026): algo nuevo entra al MVP solo si **tapa un hueco que impide jugar** o **reemplaza algo que sale**. Todo lo demás va a Ideas en espera.
 
 **Maestro**
-- **1** clase de Maestro (con 1 rama), con la balanza inclinada hacia el **Barro** al empezar.
+- **1** clase de Maestro, el **Menestral** (con 1 rama), con la balanza inclinada hacia el **Barro** al empezar.
 - Magia con maná y sus **3 atributos**: la balanza Barro ↔ Soplo, Poder mágico y Regeneración de maná.
 - Progresión por nivel: 1 punto a Poder o Regeneración, más 1 paso opcional de balanza.
 - 3 hechizos: Martillazo, Lanzadera y Remiendo.
@@ -329,6 +346,9 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - Sistema de rescate completo, con la secuela de la Poza Tibia.
 - Permadeath absoluto, sin progresión entre partidas.
 
+**Partida**
+- Duración fija en días, con el plazo visible, y **epílogo** que lee la tribu (ver sección 5, Fin de la partida).
+
 ## 10. Roadmap de capas (tentativo)
 
 | Capa | Contenido |
@@ -340,7 +360,20 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 | 4 | Facciones, reinos, historia principal |
 | 5 | Economía, comercio, NPCs |
 
-`PROPUESTA`: dividir la Capa 0 en **0a** (rebanada de combate: tablero, relaciones, sellado, caída y rescate) y **0b** (loop completo).
+**La Capa 0 se divide en dos** `DECIDIDO`:
+- **0a — rebanada de combate:** tablero, relaciones, sellado, caída y rescate. Se juega con escenarios fijos, panel de parámetros y semilla de azar fija. Vista cenital en los hitos 0a.1 y 0a.2; **isométrica antes de cualquier playtest de criterios de éxito**.
+- **0b — loop completo:** mapa del mundo, mapa de nodos, supervivencia, campamento, ritual y fin de la partida con epílogo.
+  - **El Soplo en la 0b:** con 3 o 4 subidas por partida, el polo Soplo casi no se juega, y se acepta: el MVP enseña primero la tribu. Para los playtests, la **balanza inicial es un parámetro de test**, para poder jugar partidas enteras inclinadas al Soplo. El jugador real siempre arranca donde lo pone su clase.
+
+**Estado de construcción** `DECIDIDO` (03/10/2026):
+- **La 0a se programa ya**, desde la tarea T02 (`Arquitectura.md` B). Ninguna tarea está bloqueada. Mientras dure la 0a no se construye nada de la 0b y no entra nada nuevo al alcance.
+- **Criterios de éxito de la 0a:** se miden con las **13 métricas** de `Sistema.md` 11.9 y con los **umbrales de alarma** aprobados para cada escenario (A a H). Superar un umbral obliga a revisar la regla antes de pasar a la 0b.
+- **Hitos de la 0b** (`Arquitectura.md` B.5), validados en este orden:
+  1. **Un día:** del Molino al Molino, con un combate de nodo.
+  2. **El valle:** los tres destinos, el ritual, el camino de confianza y el Tasajero.
+  3. **La noche:** abandono, ataque nocturno, campamento al raso, rescate, quebranto y Poza Tibia. Acá se testea la regla de oro completa.
+  4. **30 días:** experiencia, plazo y epílogo.
+- **Las tareas de la 0b se detallan después de los playtests de la 0a**, porque esos tests pueden cambiar reglas.
 
 **Ideas en espera** (aprobadas en espíritu, sin capa asignada):
 
@@ -390,10 +423,17 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [ ] ¿Qué pasa si una Rodauva de la manada se quiebra? (choque entre la Muda colectiva y la involución; al darle capa a la Mudanza).
 - [ ] Nombres finales de la involución, las órdenes, el Grito, la subyugación y el esbirro (Worldbuilder).
 - [ ] ¿Elegir de quién es la prenda (del Maestro o de una criatura) debería tener consecuencias a futuro?
-- [ ] Motor de desarrollo y plataforma objetivo (Arquitecto).
-- [ ] Nombre final de "malherido" (Worldbuilder).
-- [ ] ¿Se divide la Capa 0 en 0a (rebanada de combate) y 0b (loop completo)?
 - [ ] ¿Hay progresión entre partidas en el juego completo? (en el MVP, no)
+- [ ] ¿Los playtests de los escenarios E y F incluyen una encuesta corta al final? Si no, sus umbrales se miden solo con las métricas del registro.
+- [x] ~~¿Cuándo se puede comer a una criatura?~~ → Solo en el reparto de la noche, junto al fuego (6.5).
+- [x] ~~Umbrales de las señales de alarma de la 0a~~ → Aprobados (`Sistema.md` 11.9).
+- [x] ~~Nombre de la clase del MVP~~ → El Menestral (6.1).
+- [x] ~~¿Qué marca en el mundo el final del plazo?~~ → Las rayas y las golondrinas (5).
+- [x] ~~Duración de la partida y peso de las criaturas comidas~~ → 30 días; cada comida pesa igual, sin importar el día (5).
+- [x] ~~Nombre final de "malherido"~~ → Quebranto (6.6).
+- [x] ~~Motor de desarrollo y plataforma objetivo~~ → Godot 4.7.1, solo PC (`Arquitectura.md` A.1).
+- [x] ~~¿Se divide la Capa 0 en 0a y 0b?~~ → Sí (10).
+- [x] ~~¿Cómo termina una partida del MVP?~~ → Plazo fijo con epílogo que lee la tribu (5).
 - [x] ~~¿Por qué la Rodauva está con el Maestro?~~ → Es la dueña del Molino (6.2).
 - [x] ~~¿Hay un límite de criaturas sueltas?~~ → No, aparte de los pergaminos (9).
 - [x] ~~¿Qué es el sanador del MVP y qué son las secuelas?~~ → La Poza Tibia; 1 de vida máxima perdida por cada día de demora (6.6).
@@ -477,10 +517,28 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | 01/10/2026 | Rasgos de combate y hechizos (Martillazo, Lanzadera, Remiendo) aprobados | Pilares 1 y 2; la Lanzadera vuelve táctica a las relaciones |
 | 01/10/2026 | Guardar a una caída, huida y salvajes que huyen en su turno | Decisiones informadas antes de caer |
 | 01/10/2026 | Campamento al raso completo en el MVP | Dormir afuera es inevitable; la tribu variada duerme mejor (Pilar 3) |
-| 01/10/2026 | Secuela: malherido pierde 1 de vida máxima por día hasta la Poza Tibia | Reloj visible; la tribu sostiene al Maestro débil |
+| 01/10/2026 | Secuela: el quebranto hace perder 1 de vida máxima por día hasta la Poza Tibia | Reloj visible; la tribu sostiene al Maestro débil |
 | 01/10/2026 | Experiencia mixta con peso en los hitos de la tribu | El Maestro crece cuando crece su tribu |
 | 01/10/2026 | Permadeath absoluto y sin límite de sueltas en el MVP | Testear la regla de oro sin ruido |
 | 01/10/2026 | Alcance del MVP congelado | Proteger la sección 9 |
+| 01/10/2026 | Capa 0 dividida en 0a (rebanada de combate) y 0b (loop completo) | Validar el combate antes de construir el loop |
+| 02/10/2026 | Recuperación de 2 días y Poza Tibia aprobadas; el quebranto no recupera maná al dormir | La tribu sostiene al Maestro débil (regla de oro) |
+| 02/10/2026 | Vista cenital en 0a.1 y 0a.2, isométrica antes de los playtests | Velocidad de desarrollo sin perder la lectura isométrica |
+| 02/10/2026 | La partida del MVP termina por plazo fijo con un epílogo que lee la tribu, sin puntaje | Sin final no se testea la 0b, y la regla de oro necesita su recompensa |
+| 02/10/2026 | Ningún final premia vaciar la tribu: lo comido pesa en el epílogo | Evita el exploit del último día (Pilar 4 con sentido) |
+| 02/10/2026 | Plazo de 30 días; el Menestral; quebranto; las rayas y las golondrinas | Cierres de Sistemas (`Sistema.md` 13) y del Worldbuilder (`Mundo.md` v0.6) |
+| 02/10/2026 | Guardado de suspensión: salir a mitad de un combate retoma el estado exacto | Salir nunca repite una tirada; protege el permadeath |
+| 02/10/2026 | El Maestro que cae tras declarar la huida queda caído y se busca rescatista | La huida es una apuesta anticipada, no un seguro |
+| 02/10/2026 | Las salvajes tienen afinidad, pero no encadenan combos | El combo es algo que solo da el vínculo con el Maestro (Pilar 3) |
+| 02/10/2026 | El +1 por victoria lo reciben las de pie y las caídas que se levantan, no las guardadas | Premia a la que arriesgó; el pergamino congela el vínculo |
+| 02/10/2026 | El Soplo casi no se juega en la 0b; la balanza inicial es parámetro de test | El MVP enseña la tribu sin dejar el Soplo sin probar |
+| 03/10/2026 | Los eventos de lealtad alcanzan solo a las sueltas, incluidas las muertes y comidas de compañeras | El pergamino congela el vínculo |
+| 03/10/2026 | Tasajero con dos turnos completos y un solo Encono; la Rodauva salvaje se eriza herida y acorralada; golpe inicial nocturno como ataque normal | Cierres de Sistemas (`Sistema.md` v0.9) |
+| 03/10/2026 | Textos del MVP completos y aprobados, incluido el ritmo del día; Claude Code nunca inventa un texto | La calidez del Pilar 4 vive en el ritmo del día; cada área edita lo suyo |
+| 03/10/2026 | Guardado de suspensión por grabación; flujo de Git con `main` para hitos y `develop` para el trabajo diario | Salir nunca repite una tirada; el usuario controla lo que se publica |
+| 03/10/2026 | Comer a una criatura solo en el reparto de la noche, junto al fuego | Un solo momento para la decisión más dura; el combate no se vuelve fuente de carne (Pilares 3 y 4) |
+| 03/10/2026 | Luz verde a la 0a; hitos de la 0b validados; las 13 métricas de `Sistema.md` 11.9 y sus umbrales miden los criterios de éxito | El MVP queda definido para construir |
+| 03/10/2026 | `Decisiones.md` es el historial, no la fuente de verdad; queda fuera de `docs/` | Claude Code trabaja con las reglas vigentes |
 
 ## 13. Registro de versiones
 
@@ -493,3 +551,6 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | v0.5 | 01/10/2026 | Integra `Mundo.md` v0.3 y corrige la referencia a `World.md`. Arrimo, Encono y Secundar finales (5, 6.1, 6.4). Balanza inicial por clase (6.1). Encono de las mixtas y compañera inicial (6.2). Ritual con péñola, prenda, Urdimbre, regla de "nada se arranca" y "lo que diste" (6.7). Rastros de los Nueve (6.8). Urdimbre en originalidad (7). Compañera inicial en el MVP (9). Preguntas abiertas actualizadas (11) |
 | v0.6 | 01/10/2026 | Salvajes que huyen en 0 (6.3). Caídas y fin del combate al caer el Maestro (6.6). Ideas en espera: la involución, las órdenes (Grito) y la subyugación; la barra de zozobra conecta con la involución (10). Preguntas abiertas actualizadas (11) |
 | v0.7 | 01/10/2026 | Integra `Sistema.md` v0.5 y `Mundo.md` v0.5. Emboscada y campamento al raso (Escala 1, nueva 6.9). Mapa del día, agotamiento y pudrición (Escala 2, 6.5). Molino de agua y único refugio (Campamento). Experiencia (6.1). Rasgos de combate y la Rodauva dueña del Molino (6.2). Salvajes que huyen en su turno (6.3). Afines contra la cobardía y ataque al raso (6.4). Guardar a una caída, huida, malherido, Poza Tibia y permadeath absoluto (6.6). Hechizos (6.7). Alcance congelado y MVP actualizado (9). Acequia en la Capa 1 y `PROPUESTA` 0a/0b (10). Preguntas abiertas (11) |
+| v0.8 | 02/10/2026 | Nueva subsección "Fin de la partida — el epílogo" (5). Malherido no recupera maná al dormir (6.6). Partida con plazo y epílogo en el MVP (9). División 0a/0b `DECIDIDO` y vista de la 0a (10). Preguntas abiertas: se cierran motor, 0a/0b y fin de partida; nuevas: nombre de la clase, marca del final del plazo y duración (11) |
+| v1.0 | 03/10/2026 | **MVP definido.** Regla de cuándo se come a una criatura (6.5). Elisión de comer y del abandono (7). Estado de construcción: luz verde a la 0a, criterios de éxito con umbrales e hitos de la 0b validados (10). Papel de `Decisiones.md` y `Arquitectura.md` en el encabezado. Preguntas abiertas: se cierran cuándo comer y los umbrales; nueva: encuesta en E y F (11). Registro del 03/10 (12) |
+| v0.9 | 02/10/2026 | Plazo de 30 días con las rayas y las golondrinas (5). El Menestral (6.1, 9). Victoria por estado al terminar y salvajes con afinidad sin combos (6.4). Quebranto reemplaza a malherido; caída tras declarar la huida; guardado de suspensión (6.6). El Soplo en la 0b (10). Preguntas abiertas cerradas: clase, marca del plazo, duración y quebranto (11) |

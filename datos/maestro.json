@@ -1,0 +1,18 @@
+{
+  "$schema": "_esquemas/maestro.schema.json",
+  "_nota": "Vida y daño cuerpo a cuerpo salen de tablas/balanza.json (Sistema.md 11.2)",
+  "movimiento": 3,
+  "alcance": 1,
+  "velocidad": 5,
+  "hechizos": [
+    "martillazo",
+    "lanzadera",
+    "remiendo"
+  ],
+  "iniciales": {
+    "balanza": 2,
+    "poder": 1,
+    "regeneracion": 1,
+    "hambre": 3
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "d_rivales_normal",
+  "_nota": "Escenario D, variante Normal (Sistema 11.9). Ocarra y Zancajunco rivales en la tribu, Neutrales (lealtad 5): obediencia 5, un incidente las distrae. Incidente 5% con balanza 2 (Arrimo 3). Enemigas sin relación con la tribu: no hay Encono que ensucie la medición. Misma semilla que la variante Hambriento.",
+  "tipo": "test",
+  "semilla": 44001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [5, 6] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 1],
+      "_nota": "Muro lento: alarga el combate y da tiempo a que aparezcan incidentes" },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje",
+      "vida": null, "posicion": [4, 1],
+      "_nota": "Afín del Surcón salvaje (+1 adyacentes). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente" }
+  ],
+  "pergaminos_en_blanco": 1,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "../_esquemas/lealtad.schema.json",
+  "minimo": 0,
+  "maximo": 10,
+  "desleal_hasta": 1,
+  "dudosa_hasta": 3,
+  "neutral_desde": 4,
+  "inicial_por_camino": {
+    "combate": 2,
+    "confianza": 5
+  },
+  "resellar": 1
+}

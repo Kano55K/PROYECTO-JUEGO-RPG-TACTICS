@@ -1,0 +1,9 @@
+{
+  "$schema": "../_esquemas/arrimo.schema.json",
+  "por_paso": {
+    "incidente_pts": -5,
+    "encono_pts": -5,
+    "cobardia_pts": -5,
+    "combo_pts": 10
+  }
+}

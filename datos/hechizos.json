@@ -1,0 +1,42 @@
+{
+  "$schema": "_esquemas/hechizos.schema.json",
+  "hechizos": [
+    {
+      "id": "martillazo",
+      "costo": 2,
+      "alcance": 3,
+      "geometria": "distancia_libre",
+      "efecto": "danio",
+      "base": 2,
+      "escala_poder": true,
+      "es_ataque": true
+    },
+    {
+      "id": "lanzadera",
+      "costo": 2,
+      "alcance": 2,
+      "geometria": "linea_bloqueo_enemigas",
+      "efecto": "empuje",
+      "modos": [
+        "empujar",
+        "atraer"
+      ],
+      "casillas": 1,
+      "danio_choque": 1,
+      "afecta_caidas": false,
+      "es_ataque": false
+    },
+    {
+      "id": "remiendo",
+      "costo": 4,
+      "alcance": 1,
+      "incluye_si_mismo": true,
+      "geometria": "adyacente",
+      "efecto": "cura",
+      "base": 3,
+      "escala_poder": true,
+      "afecta_caidas": false,
+      "es_ataque": false
+    }
+  ]
+}

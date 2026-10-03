@@ -1,0 +1,23 @@
+{
+  "$schema": "../_esquemas/especie.schema.json",
+  "id": "rodauva",
+  "rol": "trabajo",
+  "rango": 1,
+  "sellable": true,
+  "vida": 8,
+  "danio": 2,
+  "movimiento": 4,
+  "alcance": 1,
+  "turnos": [
+    {
+      "velocidad": 6
+    }
+  ],
+  "rasgo": {
+    "id": "erizarse",
+    "efecto": "accion_defensa",
+    "danio_recibido_pct": -50,
+    "inmovil": true
+  },
+  "huida_pct": 50
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "g_ataque_nocturno",
+  "_nota": "Posiciones y vida del Maestro son de ejemplo: el golpe gratis previo (9.2, paso 1) se carga como vida del Maestro",
+  "tipo": "nocturno",
+  "semilla": 777,
+  "tablero": {
+    "ancho": 8,
+    "alto": 8
+  },
+  "maestro": {
+    "balanza": 2,
+    "poder": 1,
+    "regeneracion": 1,
+    "vida": 16,
+    "mana_entrada": 4,
+    "hambre": 3,
+    "enfermedades": 0,
+    "posicion": [
+      3,
+      6
+    ]
+  },
+  "tribu": [
+    {
+      "id": "rodauva_1",
+      "especie": "rodauva",
+      "estado": "suelta",
+      "lealtad": 7,
+      "hambre": 3,
+      "vida": null,
+      "posicion": [
+        4,
+        6
+      ]
+    }
+  ],
+  "enemigas": [
+    {
+      "id": "ocarra_2",
+      "especie": "ocarra",
+      "comportamiento": "atacante_nocturna",
+      "vida": null,
+      "posicion": [
+        3,
+        4
+      ]
+    }
+  ],
+  "pergaminos_en_blanco": 1
+}

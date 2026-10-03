@@ -1,0 +1,22 @@
+{
+  "$schema": "../_esquemas/especie.schema.json",
+  "id": "zancajunco",
+  "rol": "mixto",
+  "rango": 2,
+  "sellable": true,
+  "vida": 12,
+  "danio": 4,
+  "movimiento": 4,
+  "alcance": 1,
+  "turnos": [
+    {
+      "velocidad": 8
+    }
+  ],
+  "rasgo": {
+    "id": "hacerse_junco",
+    "efecto": "primer_ataque",
+    "danio_plano": 2
+  },
+  "huida_pct": 50
+}

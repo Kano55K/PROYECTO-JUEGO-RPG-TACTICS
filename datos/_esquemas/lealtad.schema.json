@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lealtad",
+  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1.",
+  "type": "object",
+  "required": [
+    "minimo",
+    "maximo",
+    "desleal_hasta",
+    "dudosa_hasta",
+    "neutral_desde",
+    "inicial_por_camino",
+    "resellar"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "minimo": {
+      "type": "integer"
+    },
+    "maximo": {
+      "type": "integer"
+    },
+    "desleal_hasta": {
+      "type": "integer"
+    },
+    "dudosa_hasta": {
+      "type": "integer"
+    },
+    "neutral_desde": {
+      "type": "integer"
+    },
+    "inicial_por_camino": {
+      "type": "object",
+      "required": [
+        "combate",
+        "confianza"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "combate": {
+          "type": "integer"
+        },
+        "confianza": {
+          "type": "integer"
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    },
+    "resellar": {
+      "type": "integer",
+      "description": "Lealtad con la que vuelve una atacante resellada (con el ajuste de la balanza, nunca menos del mínimo)"
+    }
+  }
+}

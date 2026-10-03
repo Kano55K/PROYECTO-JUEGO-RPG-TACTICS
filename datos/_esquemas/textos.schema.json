@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Textos",
+  "description": "Clave → texto, o lista de variantes. Las claves usan puntos (caida.rodauva). Los huecos van entre llaves: {criatura}, {rival}.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": {
+    "type": [
+      "string",
+      "array"
+    ],
+    "items": {
+      "type": "string"
+    },
+    "minItems": 1
+  }
+}

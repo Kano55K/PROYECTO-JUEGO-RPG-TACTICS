@@ -1,0 +1,48 @@
+{
+  "$schema": "_esquemas/relaciones.schema.json",
+  "_nota": "Sistema.md 10.8. Los pares que no figuran no tienen relación",
+  "pares": [
+    {
+      "a": "rodauva",
+      "b": "surcon",
+      "relacion": "bien"
+    },
+    {
+      "a": "surcon",
+      "b": "ocarra",
+      "relacion": "bien"
+    },
+    {
+      "a": "ocarra",
+      "b": "zancajunco",
+      "relacion": "mal"
+    },
+    {
+      "a": "rodauva",
+      "b": "rodauva",
+      "relacion": "bien",
+      "_nota": "manada"
+    },
+    {
+      "a": "ocarra",
+      "b": "ocarra",
+      "relacion": "mal",
+      "_nota": "territoriales"
+    },
+    {
+      "a": "rodauva",
+      "b": "tasajero",
+      "relacion": "mal"
+    },
+    {
+      "a": "ocarra",
+      "b": "tasajero",
+      "relacion": "mal"
+    },
+    {
+      "a": "zancajunco",
+      "b": "tasajero",
+      "relacion": "bien"
+    }
+  ]
+}

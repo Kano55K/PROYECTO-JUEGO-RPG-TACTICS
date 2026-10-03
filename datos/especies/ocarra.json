@@ -1,0 +1,21 @@
+{
+  "$schema": "../_esquemas/especie.schema.json",
+  "id": "ocarra",
+  "rol": "combate",
+  "rango": 1,
+  "sellable": true,
+  "vida": 12,
+  "danio": 4,
+  "movimiento": 3,
+  "alcance": 2,
+  "turnos": [
+    {
+      "velocidad": 7
+    }
+  ],
+  "rasgo": {
+    "id": "alabarda",
+    "efecto": "ninguno"
+  },
+  "huida_pct": 0
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Costos de maná por rango",
+  "description": "Sistema.md 2.3. Valores para rango 1, 2 y 3. Los hechizos tienen su costo en hechizos.json.",
+  "type": "object",
+  "required": [
+    "sellar",
+    "invocar",
+    "resellar",
+    "guardar_caida",
+    "costo_minimo"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "sellar": {
+      "$ref": "comunes.schema.json#/$defs/por_rango"
+    },
+    "invocar": {
+      "$ref": "comunes.schema.json#/$defs/por_rango"
+    },
+    "resellar": {
+      "$ref": "comunes.schema.json#/$defs/por_rango"
+    },
+    "guardar_caida": {
+      "$ref": "comunes.schema.json#/$defs/por_rango"
+    },
+    "costo_minimo": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Con descuento, ninguna acción cuesta menos"
+    }
+  }
+}

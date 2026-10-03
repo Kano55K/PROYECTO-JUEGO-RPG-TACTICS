@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contexto de combate (escenario)",
+  "description": "Arquitectura.md A.7. Entrada del combate. En 0a cada escenario es un contexto guardado; en 0b el loop arma el mismo objeto desde la partida. null = valor por defecto (ficha, balanza o maestro.json). posicion null = la ubica el jugador en el despliegue.",
+  "type": "object",
+  "required": [
+    "id",
+    "tipo",
+    "semilla",
+    "tablero",
+    "maestro",
+    "tribu",
+    "enemigas",
+    "pergaminos_en_blanco"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "id": {
+      "$ref": "comunes.schema.json#/$defs/id"
+    },
+    "tipo": {
+      "enum": [
+        "test",
+        "nodo",
+        "emboscada",
+        "nocturno"
+      ]
+    },
+    "semilla": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tablero": {
+      "type": "object",
+      "required": [
+        "ancho",
+        "alto"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ancho": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "alto": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    },
+    "maestro": {
+      "type": "object",
+      "required": [
+        "balanza",
+        "poder",
+        "regeneracion",
+        "posicion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "balanza": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "poder": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "regeneracion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "vida": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "mana_entrada": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "hambre": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 10
+        },
+        "enfermedades": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "posicion": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    },
+    "tribu": {
+      "description": "El orden de la lista es el orden de la tribu (desempate de iniciativa y de rescate)",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/criatura_tribu"
+      }
+    },
+    "enemigas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/enemiga"
+      }
+    },
+    "pergaminos_en_blanco": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "toggles": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "afines_contra_cobardia": {
+          "type": "boolean"
+        },
+        "_nota": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "criatura_tribu": {
+      "type": "object",
+      "required": [
+        "id",
+        "especie",
+        "estado",
+        "lealtad",
+        "hambre"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "especie": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "estado": {
+          "enum": [
+            "suelta",
+            "guardada"
+          ]
+        },
+        "lealtad": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "hambre": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "enfermedades": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "vida": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "posicion": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "enemiga": {
+      "type": "object",
+      "required": [
+        "id",
+        "especie",
+        "comportamiento"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": {
+          "type": "string"
+        },
+        "id": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "especie": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "comportamiento": {
+          "enum": [
+            "salvaje",
+            "atacante_nocturna"
+          ],
+          "description": "atacante_nocturna: lógica de salvaje, no huye y queda caída en 0 (Sistema.md 9.2)"
+        },
+        "vida": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "enfermedades": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "posicion": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    }
+  }
+}

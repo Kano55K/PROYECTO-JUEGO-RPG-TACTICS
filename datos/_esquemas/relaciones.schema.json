@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Relaciones entre especies",
+  "description": "Sistema.md 10.8 y Mundo.md 6.1. Pares sin orden (a–b = b–a). Los pares que no figuran no tienen relación. El cargador rechaza pares repetidos y especies que no existen.",
+  "type": "object",
+  "required": [
+    "pares"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "pares": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "relacion"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "_nota": {
+            "type": "string"
+          },
+          "a": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "b": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "relacion": {
+            "enum": [
+              "bien",
+              "mal"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

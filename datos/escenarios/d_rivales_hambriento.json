@@ -1,0 +1,29 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "d_rivales_hambriento",
+  "_nota": "Escenario D, variante Hambriento (Sistema 11.9). Mismas unidades que la Normal con hambre 6 en las dos criaturas: obediencia 5 − 2 = 3, un incidente es un golpe a la rival. Incidente 5% con balanza 2. En la ronda 5 pasan a hambre 7 (siguen Hambrientas). Misma semilla que la variante Normal.",
+  "tipo": "test",
+  "semilla": 44001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
+      "lealtad": 5, "hambre": 6, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
+      "lealtad": 5, "hambre": 6, "enfermedades": 0,
+      "vida": null, "posicion": [5, 6] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 1],
+      "_nota": "Muro lento: alarga el combate y da tiempo a que aparezcan incidentes" },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje",
+      "vida": null, "posicion": [4, 1],
+      "_nota": "Afín del Surcón salvaje (+1 adyacentes). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente" }
+  ],
+  "pergaminos_en_blanco": 1,
+  "toggles": { "afines_contra_cobardia": false }
+}

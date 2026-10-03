@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tabla de la balanza",
+  "description": "Sistema.md 1.2. Una fila por posición, de 1 (Barro) a 5 (Soplo). Se guardan las filas, no las fórmulas: cada valor se ajusta por separado.",
+  "type": "object",
+  "required": [
+    "posiciones"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "type": "string"
+    },
+    "posiciones": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "posicion",
+          "reserva_mana",
+          "descuento",
+          "rango_max_sellable",
+          "vida_max_real",
+          "danio_cuerpo",
+          "umbral_rescate",
+          "lealtad_diaria",
+          "ajuste_lealtad_inicial",
+          "pasos_arrimo"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "posicion": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "reserva_mana": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "descuento": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Se resta a sellar, invocar, resellar y guardar caídas; nunca a hechizos"
+          },
+          "rango_max_sellable": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "vida_max_real": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "danio_cuerpo": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "umbral_rescate": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "lealtad_diaria": {
+            "description": "0b: +cantidad cada N días alimentada",
+            "type": "object",
+            "required": [
+              "cantidad",
+              "cada_dias"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "cantidad": {
+                "type": "integer"
+              },
+              "cada_dias": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "_nota": {
+                "type": "string"
+              }
+            }
+          },
+          "ajuste_lealtad_inicial": {
+            "type": "integer",
+            "maximum": 0
+          },
+          "pasos_arrimo": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "_nota": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
