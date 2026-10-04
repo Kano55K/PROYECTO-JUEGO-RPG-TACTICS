@@ -28,6 +28,9 @@ var enfermedades: int = 0
 var posicion: Vector2i = SIN_POSICION
 # "" = sin pergamino.
 var pergamino_id: String = ""
+# Sistema.md 11.2, Erizarse: hasta el inicio de su proximo turno (T08). Estado
+# del combate: no viene del escenario.
+var erizada: bool = false
 
 
 func _init(id_criatura: String, especie_criatura: Especie, bando_criatura: Bando) -> void:

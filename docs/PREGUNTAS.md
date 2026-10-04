@@ -183,3 +183,29 @@
 - **Bloquea:** no
 - **Mientras tanto:** programado con A; el Maestro nunca se saltea porque si cae el combate termina (lo resuelve otra tarea).
 - **Respuesta:** _(la completa el staff)_
+
+## P-014 — Moverse después de erizarse
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T08
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.2, fila Rodauva ("Erizarse (acción): hasta su próximo turno […] no se mueve") y 11.3, fila Turno de una unidad ("1 movimiento y 1 acción, en cualquier orden"). Es la S-15 de `Arquitectura.md` 10.5
+- **Duda:** si la Rodauva se eriza antes de usar su movimiento, ¿puede moverse después en el mismo turno?
+- **Caso que la dispara:** Rodauva de la tribu en [2,6], al empezar su turno se eriza; después intenta moverse a [1,6].
+- **Opciones:** A) no: erizarse cierra el movimiento que quede (si ya se había movido, vale). B) sí: el "no se mueve" empieza después de su turno. — Recomendación técnica: A (lectura declarada del Arquitecto, S-15).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `nucleo/combate/turno.gd` (mover se rechaza con motivo `ERIZADA`); tests (7a) y (7b) de T08 (`pruebas/combate/test_turno.gd`). Si Sistemas elige B, cambia una condición y el test (7a).
+- **Respuesta:** _(la completa el staff)_
+
+## P-015 — Terminar el turno sin usar la acción es "esperar"
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T08
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 10.2 ("No la corta: […] esperar") y 11.3, fila Turno de una unidad (acciones: "… Erizarse, esperar"). Es la S-16 (no figura todavía en la copia de `Arquitectura.md` 10.5 del repositorio)
+- **Duda:** ¿terminar el turno sin usar la acción (con o sin movimiento) cuenta como la acción "esperar"?
+- **Caso que la dispara:** la Ocarra de la tribu se mueve y cierra el turno sin atacar, entre dos golpes aliados al mismo objetivo.
+- **Opciones:** A) sí: se registra "esperar"; no corta la cadena (el corte de cadena es de T16). B) "esperar" es una acción aparte y terminar sin acción es otra cosa. — Recomendación técnica: A (lectura declarada del Arquitecto, S-16).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A: `terminar` sin haber usado la acción devuelve `espero = true` en `ResultadoAccion` (`nucleo/combate/turno.gd`); test (10) de T08. T16 lo usa para la cadena.
+- **Respuesta:** _(la completa el staff)_
