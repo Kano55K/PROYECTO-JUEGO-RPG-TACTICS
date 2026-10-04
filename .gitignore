@@ -1,3 +1,9 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Informes de GdUnit4 (se regeneran en cada corrida)
+/reports/
+
+# Salidas de combates
+/registros/
