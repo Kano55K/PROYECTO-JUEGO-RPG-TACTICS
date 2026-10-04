@@ -139,3 +139,7 @@
 - **Bloquea:** no
 - **Mientras tanto:** manda `Sistema.md` 3.2: las salvajes no tienen pergamino. El test (2) (`pruebas/unidades/test_plantel.gd`) comprueba que la vida es independiente y que las dos quedan sin pergamino.
 - **Respuesta:** _(la completa el staff)_
+
+## P-010- ESTADO --> RESPONDIDA
+
+- Arquitecto (04/10/2026): error del criterio. Las salvajes no tienen pergamino (Sistema.md 3.2); el test (2) queda como está. La independencia de pergaminos se prueba con las dos Rodauvas de la tribu de E: nuevo test (8) de T05 en Arquitectura.md v0.10. Se cierra al agregar ese test.
