@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Versión alineada con `docs/Arquitectura.md` v0.9 (03/10/2026). Dueño: Arquitecto Técnico.
+> Versión alineada con `docs/Arquitectura.md` v0.12 (04/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -18,9 +18,11 @@ Tactics RPG 2D isométrico de captura de criaturas y supervivencia medieval. Est
 | Brief de la prueba 0a (en `docs/`) | Contexto de la 0a. **Si contradice a `Sistema.md`, manda `Sistema.md`**: anotá la contradicción en `PREGUNTAS.md` y seguí con `Sistema.md` |
 | `docs/PREGUNTAS.md` | Dudas abiertas con el staff y sus respuestas |
 
+`docs/RESUMENES.md` es el historial de las sesiones de programación: **no manda sobre nada**. Si contradice a otro documento o al código, mandan ellos.
+
 - **Nunca cambies una regla para que sea más fácil de programar.**
 - **Nunca interpretes en silencio una regla ambigua.** Toda duda va a `docs/PREGUNTAS.md` (sección siguiente).
-- **No edites ningún archivo de `docs/` salvo `docs/PREGUNTAS.md`.** Los demás son copias que actualiza el usuario.
+- **No edites ningún archivo de `docs/` salvo `docs/PREGUNTAS.md` y `docs/RESUMENES.md`.** Los demás son copias que actualiza el usuario.
 
 ## Preguntas al staff: `docs/PREGUNTAS.md`
 
@@ -58,6 +60,35 @@ Es el único canal para dudas de diseño. Una duda que solo aparece en el chat s
 - Las preguntas nuevas van en el mismo commit de la tarea y se listan en el resumen final.
 
 Estados: `ABIERTA` (sin respuesta) → `RESPONDIDA` (el usuario pegó la respuesta) → `CERRADA` (aplicada en el código).
+
+## Resúmenes de sesión: `docs/RESUMENES.md`
+
+Historial de lo que se hizo en cada sesión. El staff lo lee para saber en qué está el código sin abrir el repositorio, y vos lo leés al empezar una sesión de una tarea ya empezada.
+
+**Cuándo:** al final de **cada sesión**, aunque la tarea siga. Una tarea en tres sesiones lleva tres entradas. Si la sesión se cortó con el plan sin aprobar, igual va una entrada corta.
+
+**Formato** (agregá al final del archivo, nunca arriba ni en el medio):
+
+```markdown
+## T08 · sesión 1 · dd/mm/aaaa
+- **Rama:** tarea/T08-turno
+- **Estado:** EN CURSO (sigue en la sesión 2) | TERMINADA (pendiente de PR)
+- **Hecho:** …
+- **Archivos:** creados …; modificados …
+- **Tests:** N nuevos, total M, todos pasan (sí/no)
+- **Criterio de terminado:** cumplido punto por punto (1 …, 2 …) | parcial: faltan los puntos …
+- **Lecturas declaradas:** reglas programadas con una lectura literal, con su P-00X o su S-XX (o "ninguna")
+- **Claves de texto nuevas sin texto:** … (o "ninguna")
+- **Preguntas:** nuevas P-00X (para quién, bloquea sí/no); cerradas P-00X (o "ninguna")
+- **Para la próxima sesión:** … (o "nada: tarea terminada")
+```
+
+**Reglas:**
+- Solo hechos: lo que no pasó los tests no va en "Hecho", va en "Para la próxima sesión".
+- Nunca edites ni borres entradas anteriores. Si una tenía un error, la corrección va en la entrada nueva: `- **Corrige:** T08 · sesión 1, …`.
+- Cuando la tarea termina, la última entrada resume **la tarea entera** (Hecho, Archivos, Tests y Criterio cuentan todas sus sesiones): esa entrada es la descripción del pull request.
+- La entrada va en el commit de la sesión.
+- No completes entradas de tareas viejas que no tengan una: el historial empieza donde empieza el archivo.
 
 ## Motor y entorno
 
@@ -149,21 +180,11 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 2. Leé la fila de la tarea en `docs/Arquitectura.md` (B.2 a B.4), las secciones de `docs/Sistema.md` y del Brief que cita, y las entradas de `docs/PREGUNTAS.md` que la afecten.
 3. **Proponé un plan** antes de escribir código: archivos que vas a crear o tocar, tests (uno por renglón del criterio de terminado) y dudas. Las dudas de diseño van como entradas nuevas de `PREGUNTAS.md`. Esperá la aprobación.
 4. Escribí los tests, después el código, y corré **todos** los tests.
-5. Actualizá la sección "Estado actual" de este archivo (solo esa sección).
-6. Terminá con este resumen, que el usuario usa como descripción del pull request:
-
-```
-## T0X — resumen
-- Hecho: …
-- Archivos: …
-- Tests: N nuevos, total M, todos pasan (sí/no)
-- Criterio de terminado: cumplido punto por punto (…)
-- Claves de texto nuevas sin texto: …
-- Preguntas nuevas en PREGUNTAS.md: P-00X (para quién, bloquea sí/no) … (o "ninguna")
-- Preguntas cerradas: …
-```
-
+5. Actualizá la sección "Estado actual" de este archivo (solo esa sección). Es una foto corta del presente: qué está terminado (una línea por tarea), en qué rama se trabaja, qué preguntas abiertas afectan y cuál es la siguiente tarea. La historia va en `docs/RESUMENES.md`.
+6. Agregá la entrada de la sesión a `docs/RESUMENES.md` (sección anterior) y mostrala también en el chat. Si la tarea terminó, esa entrada es la descripción del pull request.
 7. Esperá el OK del usuario para el commit.
+
+Si la tarea sigue en otra sesión: al empezar la siguiente, leé la última entrada de esa tarea en `docs/RESUMENES.md` antes de proponer el plan de la sesión.
 
 ## Estado actual
 
