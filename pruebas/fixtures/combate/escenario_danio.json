@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "danio",
+  "_nota": "Sistema.md 11.4, 7.1, 8.2 y 11.2 (tests de T09). Toda la tribu con hambre 3 (Normal, sin porcentaje) y sin enfermedades: cada test cambia lo que necesita. El Zancajunco [3,3] es adyacente al Tasajero [3,2] (vida 30, aguanta dos golpes) y a la Ocarra de la tribu [4,3]",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 7] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 3] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 3] }
+  ],
+  "enemigas": [
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [6, 0] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [7, 0] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [5, 0] },
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

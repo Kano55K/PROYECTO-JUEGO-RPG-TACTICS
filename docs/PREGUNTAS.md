@@ -209,3 +209,29 @@
 - **Bloquea:** no
 - **Mientras tanto:** programado con A: `terminar` sin haber usado la acción devuelve `espero = true` en `ResultadoAccion` (`nucleo/combate/turno.gd`); test (10) de T08. T16 lo usa para la cadena.
 - **Respuesta:** _(la completa el staff)_
+
+## P-016 — Saciado y enfermedades de las enemigas en el daño
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T09
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 7.1 ("Cada ser (el Maestro y cada criatura suelta) tiene un valor de Hambre") y 8.2. Es la S-17 de `Arquitectura.md` 10.5
+- **Duda:** las salvajes, el Tasajero y la atacante nocturna, ¿reciben el +25% de Saciado o el −25% por enfermedad en su daño?
+- **Caso que la dispara:** una Ocarra salvaje (los escenarios no le dan hambre, y el modelo lo deja en 0, que sería Saciado) pega al Maestro: ¿4 o 5? La atacante nocturna del escenario G trae hambre 9.
+- **Opciones:** A) no: pegan con su Daño base, sus rasgos y los aportes que les toquen. B) sí, con el hambre y las enfermedades que traigan. — Recomendación técnica: A (lectura declarada del Arquitecto, S-17; coincide con 11.6: dos golpes de la Ocarra salvaje tumban a la Rodauva).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `nucleo/combate/danio.gd` (hambre y enfermedades solo para el Maestro y la tribu); test (11) de T09 (`pruebas/combate/test_danio.gd`). Si Sistemas elige B, cambia una condición y ese test.
+- **Respuesta:** _(la completa el staff)_
+
+## P-017 — Daño negativo tras los porcentajes y bonos planos
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T09
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.4 (pasos 2 a 4) y 8.4 ("Redondeo hacia abajo. El daño nunca baja de 1")
+- **Duda:** si los porcentajes suman menos de −100% y el daño queda por debajo de 0 tras el paso 2, ¿los bonos planos del paso 3 se suman sobre ese valor negativo (el único recorte es el mínimo del paso 4)?
+- **Caso que la dispara:** el Zancajunco (4) con 3 enfermedades (−75%) ataca a una Rodauva erizada (−50%) en su primer ataque (+2): 4 × (−25%) = −1, +2 = **1**. Si se recorta a 0 antes de los planos: 0 + 2 = **2**.
+- **Opciones:** A) sin recorte intermedio: −1 + 2 = 1. B) recortar a 0 tras el paso 2: 2. — Recomendación técnica: A (lectura literal de 11.4 y de `Arquitectura.md` B.2, T09: "piso explícito").
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `nucleo/combate/danio.gd`; tests (8) y (10) de T09 (`pruebas/combate/test_danio.gd`: −125% sobre 2 da −1). Si Sistemas elige B, se agrega un recorte en `Danio` (no en `Porcentajes`) y cambia el test (8).
+- **Respuesta:** _(la completa el staff)_
