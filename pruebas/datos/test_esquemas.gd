@@ -86,3 +86,15 @@ func test_campo_mal_tipeado_en_unidad_falla() -> void:
 	assert_int(errores.size()).is_equal(1)
 	assert_str(errores[0]["campo"] as String).is_equal("tribu[0].danoi")
 	assert_str(errores[0]["esperado"] as String).is_equal("un campo definido en el esquema")
+
+
+# T04, sesion 4: la atacante nocturna de G lleva hambre (0-10, como la tribu).
+func test_hambre_en_enemiga_valida() -> void:
+	var errores: Array[Dictionary] = _validar_escenario("escenario_enemiga_hambre.json")
+	assert_array(errores).override_failure_message(str(errores)).is_empty()
+
+
+func test_hambre_en_enemiga_fuera_de_rango_falla() -> void:
+	var errores: Array[Dictionary] = _validar_escenario("escenario_enemiga_hambre_fuera_de_rango.json")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["campo"] as String).is_equal("enemigas[0].hambre")

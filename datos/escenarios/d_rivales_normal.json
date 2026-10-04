@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "d_rivales_normal",
-  "_nota": "Escenario D, variante Normal (Sistema 11.9). Ocarra y Zancajunco rivales en la tribu, Neutrales (lealtad 5): obediencia 5, un incidente las distrae. Incidente 5% con balanza 2 (Arrimo 3). Enemigas sin relación con la tribu: no hay Encono que ensucie la medición. Misma semilla que la variante Hambriento.",
+  "_nota": "Escenario D, variante Normal (Sistema.md 11.9). Incidentes por combate · ¿Separa con la Lanzadera? Ocarra y Zancajunco rivales en la tribu (10.8), Neutrales (lealtad 5): obediencia 5, un incidente las distrae. Incidente 5% con balanza 2 (Arrimo 3). Enemigas sin relación con la tribu: no hay Encono ni cobardía que ensucien la medición. Misma semilla que las variantes Hambriento y balanza 4.",
   "tipo": "test",
   "semilla": 44001,
   "tablero": { "ancho": 8, "alto": 8 },
@@ -11,10 +11,12 @@
   "tribu": [
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 5, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [3, 7] },
+      "vida": null, "posicion": [3, 7],
+      "_nota": "Detrás del Maestro, alcance 2 por encima de él" },
     { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
       "lealtad": 5, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [5, 6] }
+      "vida": null, "posicion": [4, 7],
+      "_nota": "Adyacente a la Ocarra: el riesgo de incidente se ve desde el primer turno (actúa primero, Vel 8). ¿Las separa o mantiene la formación?" }
   ],
   "enemigas": [
     { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
@@ -25,5 +27,6 @@
       "_nota": "Afín del Surcón salvaje (+1 adyacentes). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente" }
   ],
   "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
   "toggles": { "afines_contra_cobardia": false }
 }

@@ -227,6 +227,12 @@
           ],
           "description": "atacante_nocturna: lógica de salvaje, no huye y queda caída en 0 (Sistema.md 9.2)"
         },
+        "hambre": {
+          "description": "Solo para la atacante nocturna (Sistema.md 9.1: famélica). No cambia el combate: no suma hambre (7.2) y se trata como obediencia ≤ 3 (10.7); queda como contexto de su destino (9.3)",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
         "vida": {
           "type": [
             "integer",

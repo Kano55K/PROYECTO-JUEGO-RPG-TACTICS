@@ -1,32 +1,34 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "e_cobardia_afines",
-  "_nota": "Escenario E con el toggle de afines (PROPUESTA de Sistema 10.6): −10 por afín adyacente, máximo −20, mínimo 5%. La Rodauva leal con el Maestro, la otra Rodauva y el Surcón al lado baja al 5%. Misma semilla que la variante sin toggle.",
+  "_nota": "Escenario E con el toggle de afines (PROPUESTA de Sistema.md 10.6): −10 por afín adyacente, máximo −20, mínimo 5%. Si el Maestro cuenta como afín para el toggle está en consulta (PREGUNTAS.md P-008). Mismas posiciones y semilla que la variante sin toggle.",
   "tipo": "test",
   "semilla": 55001,
   "tablero": { "ancho": 8, "alto": 8 },
   "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
                "vida": null, "mana_entrada": null, "hambre": 3,
-               "enfermedades": 0, "posicion": [3, 6] },
+               "enfermedades": 0, "posicion": [4, 6],
+               "_nota": "No empieza al lado de ninguna Rodauva: sostenerla es decisión del jugador" },
   "tribu": [
     { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [2, 6],
-      "_nota": "Compañera, leal" },
+      "vida": null, "posicion": [6, 6],
+      "_nota": "Compañera, leal. Adyacente y afín de rodauva_2" },
     { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta",
       "lealtad": 5, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [2, 7],
+      "vida": null, "posicion": [6, 7],
       "_nota": "Neutral. Adyacente y afín de rodauva_1" },
     { "id": "surcon_1", "especie": "surcon", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [4, 6],
-      "_nota": "Leal, afín de las Rodauvas: el escudo que las puede sostener" }
+      "vida": null, "posicion": [4, 7],
+      "_nota": "Leal, afín de las Rodauvas (10.8): el escudo que las puede sostener. Empieza junto al Maestro: llevarlo junto a ellas cuesta un paso" }
   ],
   "enemigas": [
     { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
-      "vida": null, "posicion": [3, 0],
+      "vida": null, "posicion": [0, 0],
       "_nota": "Si el combate frustra por duración, bajar la vida a 20 en el panel: E mide la cobardía, no la victoria" }
   ],
   "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
   "toggles": { "afines_contra_cobardia": true }
 }

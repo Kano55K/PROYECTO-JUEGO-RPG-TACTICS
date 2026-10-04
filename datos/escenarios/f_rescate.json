@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "f_rescate",
-  "_nota": "Escenario F (Sistema 11.9). ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? La rescatista es la frágil (Rodauva leal, 8 de vida); la fuerte es Neutral y no rescata. Peligro concreto: el Zancajunco salvaje llega en la ronda 2 y su primer golpe es 6 (Hacerse junco), justo la vida del Maestro: la IA de remate va por él, salvo que se encone con la Ocarra.",
+  "_nota": "Escenario F (Sistema.md 11.9). ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? La rescatista es la frágil (Rodauva leal, 8 de vida); la fuerte es Neutral y no rescata. Peligro concreto: el Zancajunco salvaje llega en la ronda 2 y su primer golpe es 6 (Hacerse junco), justo la vida del Maestro: la IA de remate va por él, salvo que se lo bloquee o se encone con la Ocarra.",
   "tipo": "test",
   "semilla": 66001,
   "tablero": { "ancho": 8, "alto": 8 },
@@ -20,10 +20,12 @@
   ],
   "enemigas": [
     { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje",
-      "vida": null, "posicion": [3, 0] },
+      "vida": null, "posicion": [3, 0],
+      "_nota": "Con la IA de 11.8 queda en [3,4] en la ronda 1: el Maestro tiene su turno para prepararse" },
     { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
       "vida": null, "posicion": [4, 1] }
   ],
   "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
   "toggles": { "afines_contra_cobardia": false }
 }

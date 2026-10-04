@@ -1,51 +1,29 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "g_ataque_nocturno",
-  "_nota": "Posiciones y vida del Maestro son de ejemplo: el golpe gratis previo (9.2, paso 1) se carga como vida del Maestro",
+  "_nota": "Escenario G (Sistema.md 9.2, 9.3 y 11.9). Las 3 salidas: perdonar, sellar, comer · ¿Alcanza el maná para resellar? Golpe inicial de la Ocarra al Maestro antes de la ronda 1 (4 de daño, sin combo ni Encono; Arquitectura.md A.7): la vida del Maestro queda por defecto. No hay otra Ocarra suelta: no hay Centinela (12.6). Maná de entrada 4: la mitad de 8 (2.4). Resellar cuesta 2 (invocar rango 1, 2.3) y el pergamino en blanco.",
   "tipo": "nocturno",
   "semilla": 777,
-  "tablero": {
-    "ancho": 8,
-    "alto": 8
-  },
-  "maestro": {
-    "balanza": 2,
-    "poder": 1,
-    "regeneracion": 1,
-    "vida": 16,
-    "mana_entrada": 4,
-    "hambre": 3,
-    "enfermedades": 0,
-    "posicion": [
-      3,
-      6
-    ]
-  },
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": 4, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
   "tribu": [
-    {
-      "id": "rodauva_1",
-      "especie": "rodauva",
-      "estado": "suelta",
-      "lealtad": 7,
-      "hambre": 3,
-      "vida": null,
-      "posicion": [
-        4,
-        6
-      ]
-    }
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [2, 6],
+      "_nota": "Leal, junto al Maestro. Sin relación con la Ocarra" },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 6],
+      "_nota": "Leal, junto al Maestro. Rival de la Ocarra (10.8): chequea Encono" }
   ],
   "enemigas": [
-    {
-      "id": "ocarra_2",
-      "especie": "ocarra",
-      "comportamiento": "atacante_nocturna",
-      "vida": null,
-      "posicion": [
-        3,
-        4
-      ]
-    }
+    { "id": "ocarra_1", "especie": "ocarra", "comportamiento": "atacante_nocturna",
+      "hambre": 9, "vida": null, "posicion": [3, 4],
+      "_nota": "Famélica y desleal: atacó de noche (9.1). Lógica de salvaje, no huye y queda caída en 0 (9.2). A distancia 2 en línea con el Maestro: acaba de golpearlo" }
   ],
-  "pergaminos_en_blanco": 1
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": "ocarra_1",
+  "toggles": { "afines_contra_cobardia": false }
 }
