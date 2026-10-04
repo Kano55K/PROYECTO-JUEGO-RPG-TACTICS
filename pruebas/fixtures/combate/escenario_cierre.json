@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "cierre",
+  "_nota": "Sistema.md 5.2, 6 y 11.5: cierre del combate (tests de T10, sesion 2). Lealtades distintas para leer cada cambio: rodauva_1 8, rodauva_2 6, surcon_1 9, ocarra_1 7; zancajunco_1 guardada con 5. Relaciones (10.8): Rodauva-Rodauva y Rodauva-Surcon bien; Rodauva-Ocarra sin relacion. Las caidas se producen en el test con vida 0 y VidaCero",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 6] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 6, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 6] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 9, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 6] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 7, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 6] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "guardada", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [2, 2] },
+    { "id": "ocarra_n1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 0, "vida": null, "posicion": [5, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

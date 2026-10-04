@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../datos/_esquemas/relaciones.schema.json",
+  "_nota": "Copia de datos/relaciones.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 10.8. Los pares que no figuran no tienen relacion (incluidos Surcon-Surcon y Zancajunco-Zancajunco)",
+  "pares": [
+    {
+      "_nota": "Sistema.md 10.8, tabla",
+      "a": "rodauva",
+      "b": "surcon",
+      "relacion": "bien"
+    },
+    {
+      "_nota": "Sistema.md 10.8, tabla",
+      "a": "surcon",
+      "b": "ocarra",
+      "relacion": "bien"
+    },
+    {
+      "_nota": "Sistema.md 10.8, tabla",
+      "a": "ocarra",
+      "b": "zancajunco",
+      "relacion": "mal"
+    },
+    {
+      "_nota": "Sistema.md 10.8, tabla: manada",
+      "a": "rodauva",
+      "b": "rodauva",
+      "relacion": "bien"
+    },
+    {
+      "_nota": "Sistema.md 10.8, tabla: territoriales",
+      "a": "ocarra",
+      "b": "ocarra",
+      "relacion": "mal"
+    },
+    {
+      "_nota": "Sistema.md 10.8, parrafo debajo de la tabla (Tasajero)",
+      "a": "rodauva",
+      "b": "tasajero",
+      "relacion": "mal"
+    },
+    {
+      "_nota": "Sistema.md 10.8, parrafo debajo de la tabla (Tasajero)",
+      "a": "ocarra",
+      "b": "tasajero",
+      "relacion": "mal"
+    },
+    {
+      "_nota": "Sistema.md 10.8, parrafo debajo de la tabla (Tasajero)",
+      "a": "zancajunco",
+      "b": "tasajero",
+      "relacion": "bien"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 ## P-001 — Qué significa "afines" en la muerte en el grupo
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -10,6 +10,7 @@
 - **Bloquea:** no. El esquema `lealtad` guarda los dos números (`eventos.muerte_en_el_grupo` y `eventos.muerte_en_el_grupo_afines`); la regla se programa en T10.
 - **Mientras tanto:** solo están los campos en el esquema; no hay código que elija entre −2 y −4.
 - **Respuesta:** `Sistema.md` 5.2 v1.1 (03/10/2026): opción A. "Afines" es la relación de especie (10.8), mirada suelta por suelta: −4 a cada suelta cuya especie se lleve bien con la de la muerta; −2 al resto. La posición no cuenta. En el caso: Rodauva −4, Surcón −4, Ocarra −2. Además, regla nueva: todos los cambios de lealtad de un combate (o de una noche) se suman y el total se recorta a 0–10 una sola vez. Se aplica en T10.
+- **Cerrada en:** T10
 
 ## P-002 — Afines de la atacante comida por el Maestro
 - **Estado:** RESPONDIDA

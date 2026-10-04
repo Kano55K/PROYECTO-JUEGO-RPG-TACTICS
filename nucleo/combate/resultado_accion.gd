@@ -21,6 +21,8 @@ enum Motivo {
 	LINEA_BLOQUEADA,
 	FUERA_DE_ALCANCE,
 	SIN_RASGO,
+	# Sistema.md 11.5: con el combate terminado no se acepta ninguna accion.
+	COMBATE_TERMINADO,
 }
 
 var valida: bool
@@ -29,6 +31,9 @@ var motivo: Motivo
 var danio: int = 0
 # Solo al terminar: true si el turno se cierra sin haber usado la accion (P-015).
 var espero: bool = false
+# Como esta el combate: despues de aplicar, o el motivo de un rechazo por
+# COMBATE_TERMINADO. Al validar no se adelanta: la vida en 0 se resuelve al aplicar.
+var fin: FinCombate.Fin = FinCombate.Fin.EN_CURSO
 
 
 func _init(es_valida: bool, motivo_rechazo: Motivo) -> void:

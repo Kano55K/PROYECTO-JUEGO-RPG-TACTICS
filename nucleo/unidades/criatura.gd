@@ -6,8 +6,10 @@ class_name Criatura
 extends RefCounted
 
 enum Bando { TRIBU, ENEMIGA }
-# Sistema.md 3.1 y 11.5
-enum Estado { SUELTA, GUARDADA, CAIDA }
+# Sistema.md 3.1 y 11.5. FUERA: salio del tablero (la salvaje en 0; despues la
+# huida, T25, y el sellado, T24). MUERTA: la caida de la tribu en la derrota
+# (cierre, 11.5 y 6). Las dos existen solo durante el combate: no van a JSON.
+enum Estado { SUELTA, GUARDADA, CAIDA, FUERA, MUERTA }
 # NINGUNO = de la tribu. Sistema.md 10.7 (salvaje) y 9.2 (atacante nocturna).
 enum Comportamiento { NINGUNO, SALVAJE, ATACANTE_NOCTURNA }
 

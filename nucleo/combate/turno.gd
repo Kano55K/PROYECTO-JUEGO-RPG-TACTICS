@@ -92,15 +92,27 @@ func _fin_del_turno() -> void:
 	pass
 
 
+# Sistema.md 11.5: con el combate terminado se rechaza todo. Despues de cada
+# accion aplicada se mira si termino, y el resultado dice como.
 func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
+	var fin: FinCombate.Fin = FinCombate.evaluar(_plantel)
+	if fin != FinCombate.Fin.EN_CURSO:
+		var rechazo: ResultadoAccion = ResultadoAccion.rechazada(ResultadoAccion.Motivo.COMBATE_TERMINADO)
+		rechazo.fin = fin
+		return rechazo
+	var resultado: ResultadoAccion
 	match accion.tipo:
 		Accion.Tipo.MOVER:
-			return _mover(accion.casilla, aplica)
+			resultado = _mover(accion.casilla, aplica)
 		Accion.Tipo.ATACAR:
-			return _atacar(accion.objetivo_id, aplica)
+			resultado = _atacar(accion.objetivo_id, aplica)
 		Accion.Tipo.ERIZARSE:
-			return _erizarse(aplica)
-	return _terminar(aplica)
+			resultado = _erizarse(aplica)
+		_:
+			resultado = _terminar(aplica)
+	if aplica and resultado.valida:
+		resultado.fin = FinCombate.evaluar(_plantel)
+	return resultado
 
 
 # Sistema.md 11.3, Movimiento: a una casilla alcanzable (Tablero), de una vez;
@@ -124,8 +136,9 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 
 
 # Sistema.md 11.3: atacar gasta la accion. La objetivo es una enemiga de pie en
-# una casilla que la unidad golpea desde donde esta. La vida no baja de 0; lo
-# que pasa en 0 es de T10.
+# una casilla que la unidad golpea desde donde esta. La vida no baja de 0, y en
+# 0 se resuelve en el acto, solo al aplicar (11.5, VidaCero): la caida y la que
+# salio del tablero dejan de ser objetivo.
 func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
@@ -135,12 +148,13 @@ func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE)
 	if _bando(objetivo_id) == _bando(unidad_id):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_ALIADO)
-	# El Maestro como objetivo esta siempre de pie: si cae, el combate termina (11.5, T10).
+	# El Maestro como objetivo esta siempre de pie: si cae, el combate termina (11.5).
 	var objetivo: Criatura = _plantel.criatura(objetivo_id)
 	if objetivo != null and objetivo.estado == Criatura.Estado.CAIDA:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_CAIDO)
 	var hasta: Vector2i = _posicion(objetivo_id)
-	if (objetivo != null and objetivo.estado == Criatura.Estado.GUARDADA) or hasta == Criatura.SIN_POSICION:
+	if (objetivo != null and objetivo.estado in [Criatura.Estado.GUARDADA, Criatura.Estado.FUERA]) \
+			or hasta == Criatura.SIN_POSICION:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_FUERA_DEL_TABLERO)
 	var desde: Vector2i = _posicion(unidad_id)
 	var bando: Criatura.Bando = _bando(unidad_id)
@@ -154,6 +168,7 @@ func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	resultado.danio = _danio.calcular(unidad_id, objetivo_id, _plantel).total
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
+		VidaCero.resolver(objetivo_id, _plantel)
 		_danio.registrar_ataque(unidad_id, _plantel)
 		accion_usada = true
 	return resultado

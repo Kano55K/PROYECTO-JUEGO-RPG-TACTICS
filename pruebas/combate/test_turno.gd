@@ -174,7 +174,7 @@ func test_danio_de_balanza_y_de_ficha() -> void:
 	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 2)
 
 
-# (6) La vida no baja de 0; lo que pasa en 0 es de T10.
+# (6) La vida no baja de 0. La salvaje en 0 sale del tablero (T10, Sistema.md 11.5).
 func test_vida_no_baja_de_cero() -> void:
 	var escenario: Dictionary = _escenario()
 	(escenario["enemigas"] as Array)[1]["vida"] = 1
@@ -182,7 +182,7 @@ func test_vida_no_baja_de_cero() -> void:
 	var ataque: ResultadoAccion = _turno(plantel, "ocarra_1").aplicar(Accion.atacar("rodauva_s1"))
 	assert_int(ataque.danio).is_equal(4)
 	assert_int(plantel.criatura("rodauva_s1").vida).is_equal(0)
-	assert_int(plantel.criatura("rodauva_s1").estado).is_equal(Criatura.Estado.SUELTA)
+	assert_int(plantel.criatura("rodauva_s1").estado).is_equal(Criatura.Estado.FUERA)
 
 
 # (7a) Erizarse gasta la accion, y sin haberse movido pierde el movimiento (P-014).

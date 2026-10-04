@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/lealtad.schema.json",
+  "_nota": "Copia de datos/tablas/lealtad.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 5.1: escala 0-10; Desleal 0-1, Dudosa 2-3, Neutral desde neutral_desde hasta umbral - 1, Leal desde el umbral de rescate (tablas/balanza.json). 4.2: lealtad base por camino; el ajuste por balanza esta en tablas/balanza.json. 4.4: lealtad al resellar",
+  "minimo": 0,
+  "maximo": 10,
+  "desleal_hasta": 1,
+  "dudosa_hasta": 3,
+  "neutral_desde": 4,
+  "inicial_por_camino": {
+    "_nota": "Sistema.md 4.2, columna 'Lealtad base'",
+    "combate": 2,
+    "confianza": 5
+  },
+  "resellar": 1,
+  "eventos": {
+    "_nota": "Sistema.md 5.2 y 9.3. Solo a las sueltas. Afines: ver P-001. Comer a la atacante y afines: ver P-002. El +1 de victoria esta en tablas/combate.json",
+    "muerte_en_el_grupo": -2,
+    "muerte_en_el_grupo_afines": -4,
+    "rescate": 2,
+    "perdon_a_leales": 1,
+    "comer_atacante": -2
+  }
+}
