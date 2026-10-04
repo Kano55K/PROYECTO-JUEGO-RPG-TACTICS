@@ -74,6 +74,15 @@ func test_null_toma_el_valor_por_defecto() -> void:
 	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(5)
 
 
+# T07: la Velocidad del Maestro sale de maestro.json, sin depender de la balanza
+# (Sistema.md 11.2).
+func test_velocidad_del_maestro_de_maestro_json() -> void:
+	var plantel: Plantel = _crear("escenario_a.json")
+	var ficha_maestro: Dictionary = _leer("maestro.json", "maestro")
+	assert_int(plantel.maestro.velocidad).is_equal(ficha_maestro["velocidad"] as int)
+	assert_int(plantel.maestro.velocidad).is_equal(5)
+
+
 # Criterio 4: en G ocupan pergamino la tribu y la atacante; queda 1 en blanco.
 # Ids en orden: tribu, atacantes, en blanco.
 func test_pergaminos_de_g() -> void:
