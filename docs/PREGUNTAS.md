@@ -235,3 +235,16 @@
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/danio.gd`; tests (8) y (10) de T09 (`pruebas/combate/test_danio.gd`: −125% sobre 2 da −1). Si Sistemas elige B, se agrega un recorte en `Danio` (no en `Porcentajes`) y cambia el test (8).
 - **Respuesta:** _(la completa el staff)_
+
+## P-018 — La caída bloquea el paso y la línea de Alcance 2
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T10
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.5, Reglas de la caída ("queda en su casilla y la ocupa" y "no participa de ninguna relación") y 11.3, fila Alcance 2 ("nunca por encima de una enemiga")
+- **Duda:** una unidad caída, ¿bloquea el paso y la línea de Alcance 2 de la otra banda igual que si estuviera de pie?
+- **Caso que la dispara:** la Ocarra atacante nocturna cae en [3,5]; la Ocarra de la tribu en [3,6] quiere golpear a una salvaje en [3,4] por encima de ella, o el Maestro quiere pasar por [3,5]. Lectura literal: no puede (la caída ocupa la casilla y es enemiga).
+- **Opciones:** A) sí: bloquea como de pie (no se pasa por encima ni a través de una caída enemiga; por una aliada sí). B) no: la casilla está ocupada (nadie termina ahí), pero no corta la línea ni el paso. — Recomendación técnica: A (lectura literal; es lo que ya hace `Tablero` desde T06, que cuenta a las caídas como ocupantes).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A, sin cambios en `nucleo/combate/tablero.gd`. Si Sistemas elige B, `Tablero` deja de contar a las caídas para el paso y la línea (no para terminar el movimiento) y se agrega un test.
+- **Respuesta:** _(la completa el staff)_

@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "vida_cero",
+  "_nota": "Sistema.md 11.5, Vida en 0 y fin del combate (tests de T10). Vidas a un golpe: la Ocarra salvaje [2,5] (4) tumba a la Rodauva de la tribu [2,6] (vida 4); la Rodauva (2) tumba a la salvaje (vida 2); el Maestro [3,6] (balanza 2: 4) tumba a la atacante nocturna [3,5] (vida 4). Cola: ocarra_s1, ocarra_n1 (7), rodauva_1 (6), Maestro (5)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": 4, "posicion": [2, 6] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": 2, "posicion": [2, 5] },
+    { "id": "ocarra_n1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 0, "vida": 4, "posicion": [3, 5] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

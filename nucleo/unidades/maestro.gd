@@ -21,6 +21,9 @@ var velocidad: int = 0
 var posicion: Vector2i = Criatura.SIN_POSICION
 # int o null, tal cual llega del escenario; se resuelve en T21.
 var mana_entrada: Variant = null
+# Sistema.md 11.5: llego a 0 y el combate termino (T10). Estado del combate: no
+# viene del escenario.
+var caido: bool = false
 
 # Compartida y de solo lectura, como la ficha de una especie.
 var _tabla_balanza: TablaBalanza
