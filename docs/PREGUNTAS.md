@@ -139,15 +139,11 @@
 - **Opciones:** A) en (2) se comprueba la independencia de la vida y que ninguna tiene pergamino; que criaturas distintas tengan pergaminos distintos ya lo cubre el criterio (4) en G. B) el criterio (2) usa otro escenario con dos criaturas de la misma especie en la tribu. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** manda `Sistema.md` 3.2: las salvajes no tienen pergamino. El test (2) (`pruebas/unidades/test_plantel.gd`) comprueba que la vida es independiente y que las dos quedan sin pergamino.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto (04/10/2026): opción A. Error del criterio: las salvajes no tienen pergamino (`Sistema.md` 3.2); el test (2) queda como está. La independencia de pergaminos se prueba con las dos Rodauvas de la tribu de E: nuevo test (8) de T05 en `Arquitectura.md` v0.10.
 - **Cerrada en:** T06 (test (8) de T05, `pruebas/unidades/test_plantel.gd`)
 
-## P-010- ESTADO --> RESPONDIDA
-
-- Arquitecto (04/10/2026): error del criterio. Las salvajes no tienen pergamino (Sistema.md 3.2); el test (2) queda como está. La independencia de pergaminos se prueba con las dos Rodauvas de la tribu de E: nuevo test (8) de T05 en Arquitectura.md v0.10. Se cierra al agregar ese test.
-
 ## P-011 — Empate de Velocidad entre dos enemigas
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T07
 - **Fecha:** 04/10/2026
@@ -157,10 +153,10 @@
 - **Opciones:** A) orden de la lista `enemigas` (como el orden de la tribu). B) otra regla (por ejemplo, la más cercana al Maestro primero). — Recomendación técnica: A (lectura declarada del Arquitecto, S-14).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/cola_iniciativa.gd`; test (5) de T07 (`pruebas/combate/test_cola_iniciativa.gd`). Si Sistemas elige otra regla, cambia un desempate y ese test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.3 v1.2 (04/10/2026): opción A. Entre enemigas con la misma Velocidad, el orden de la lista `enemigas` del escenario. En 0b, los encuentros generados ordenan la lista según la columna Composición de 11.6. Ya programado así: no cambia código ni tests.
 
 ## P-012 — Unidad que deja de poder actuar a mitad de ronda
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T07
 - **Fecha:** 04/10/2026
@@ -170,10 +166,10 @@
 - **Opciones:** A) se saltean todas sus entradas restantes de la ronda. B) otra regla para algún caso. — Recomendación técnica: A (lectura literal).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A: al avanzar, la cola saltea las entradas de unidades que no están sueltas o no tienen posición (hoy "fuera del tablero" = sin posición; la huida de salvajes llega en su tarea). Tests (6b) de T07.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.3 v1.2 (04/10/2026): opción A. La unidad que cae, es guardada, huye o sale del tablero pierde todas sus entradas restantes de la ronda; el Tasajero que huye en Caza no juega la Cuenta. Decisión que genera: tumbarlo o hacerlo huir antes de la Cuenta le quita el segundo golpe. Ya programado así: no cambia código ni tests.
 
 ## P-013 — Velocidad del Maestro en la cola
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T07
 - **Fecha:** 04/10/2026
@@ -183,10 +179,10 @@
 - **Opciones:** A) sí, siempre 5 y siempre en la cola. B) algún estado la modifica. — Recomendación técnica: A (lectura literal).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A; el Maestro nunca se saltea porque si cae el combate termina (lo resuelve otra tarea).
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.2 v1.2 (04/10/2026): opción A. En 0a la Velocidad del Maestro es siempre la de `maestro.json` (5); ningún estado (hambre, enfermedad, quebranto, balanza) la modifica, y entra en la cola en todas las rondas. Ya programado así: no cambia código ni tests.
 
 ## P-014 — Moverse después de erizarse
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T08
 - **Fecha:** 04/10/2026
@@ -196,10 +192,10 @@
 - **Opciones:** A) no: erizarse cierra el movimiento que quede (si ya se había movido, vale). B) sí: el "no se mueve" empieza después de su turno. — Recomendación técnica: A (lectura declarada del Arquitecto, S-15).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/turno.gd` (mover se rechaza con motivo `ERIZADA`); tests (7a) y (7b) de T08 (`pruebas/combate/test_turno.gd`). Si Sistemas elige B, cambia una condición y el test (7a).
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.2 y 11.3 v1.2 (04/10/2026): opción A. Erizarse cierra el movimiento que quede: se puede mover y después erizarse, no al revés. Decisión que genera: la Rodauva elige dónde plantarse antes de cerrarse. Ya programado así: no cambia código ni tests.
 
 ## P-015 — Terminar el turno sin usar la acción es "esperar"
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T08
 - **Fecha:** 04/10/2026
@@ -209,10 +205,10 @@
 - **Opciones:** A) sí: se registra "esperar"; no corta la cadena (el corte de cadena es de T16). B) "esperar" es una acción aparte y terminar sin acción es otra cosa. — Recomendación técnica: A (lectura declarada del Arquitecto, S-16).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A: `terminar` sin haber usado la acción devuelve `espero = true` en `ResultadoAccion` (`nucleo/combate/turno.gd`); test (10) de T08. T16 lo usa para la cadena.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 10.2 y 11.3 v1.2 (04/10/2026): opción A. Terminar el turno sin usar la acción (con o sin movimiento) es esperar y no corta la cadena. Ya programado así: no cambia código ni tests.
 
 ## P-016 — Saciado y enfermedades de las enemigas en el daño
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T09
 - **Fecha:** 04/10/2026
@@ -222,10 +218,10 @@
 - **Opciones:** A) no: pegan con su Daño base, sus rasgos y los aportes que les toquen. B) sí, con el hambre y las enfermedades que traigan. — Recomendación técnica: A (lectura declarada del Arquitecto, S-17; coincide con 11.6: dos golpes de la Ocarra salvaje tumban a la Rodauva).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/danio.gd` (hambre y enfermedades solo para el Maestro y la tribu); test (11) de T09 (`pruebas/combate/test_danio.gd`). Si Sistemas elige B, cambia una condición y ese test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 8.2, 9.2 y 11.4 v1.2 (04/10/2026): opción A. Saciado y enfermedades son solo del Maestro y la tribu. Las enemigas (salvajes, Tasajero, atacante nocturna, también en su golpe inicial) pegan con su Daño base, sus rasgos y los aportes de combate. En el caso: 4. Ya programado así: no cambia código ni tests.
 
 ## P-017 — Daño negativo tras los porcentajes y bonos planos
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T09
 - **Fecha:** 04/10/2026
@@ -235,9 +231,10 @@
 - **Opciones:** A) sin recorte intermedio: −1 + 2 = 1. B) recortar a 0 tras el paso 2: 2. — Recomendación técnica: A (lectura literal de 11.4 y de `Arquitectura.md` B.2, T09: "piso explícito").
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/danio.gd`; tests (8) y (10) de T09 (`pruebas/combate/test_danio.gd`: −125% sobre 2 da −1). Si Sistemas elige B, se agrega un recorte en `Danio` (no en `Porcentajes`) y cambia el test (8).
+- **Respuesta:** `Sistema.md` 11.4 v1.2 (04/10/2026): opción A. Sin recorte intermedio: los planos se suman sobre el valor negativo y el único recorte es el mínimo final. En el caso: −1 + 2 = 1. Ya programado así: no cambia código ni tests.
 
 ## P-018 — La caída bloquea el paso y la línea de Alcance 2
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T10
 - **Fecha:** 04/10/2026
@@ -247,7 +244,7 @@
 - **Opciones:** A) sí: bloquea como de pie (no se pasa por encima ni a través de una caída enemiga; por una aliada sí). B) no: la casilla está ocupada (nadie termina ahí), pero no corta la línea ni el paso. — Recomendación técnica: A (lectura literal; es lo que ya hace `Tablero` desde T06, que cuenta a las caídas como ocupantes).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A, sin cambios en `nucleo/combate/tablero.gd`. Si Sistemas elige B, `Tablero` deja de contar a las caídas para el paso y la línea (no para terminar el movimiento) y se agrega un test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.3 v1.2 (04/10/2026): opción A. La caída bloquea el paso y la línea de Alcance 2 de la otra banda como si estuviera de pie; por una caída propia se pasa. Decisión que genera: una caída propia sigue cubriendo; guardarla libera la casilla y abre el paso. Ya programado así (`Tablero`, T06): no cambia código ni tests.
 
 ## P-019 — Nombres de motivo de lealtad en el resultado
 - **Estado:** RESPONDIDA
@@ -261,3 +258,42 @@
 - **Bloquea:** no (hoy nadie serializa el cierre; lo hace T12)
 - **Mientras tanto:** `AcumuladorLealtad` anota las claves de `lealtad.json` y `"victoria"` para el +1 (`nucleo/combate/cierre.gd`). Sin cambios en `resultado.schema.json`.
 - **Respuesta:** Respuesta: Arquitecto, 04/10/2026: opción A con un ajuste. El motivo es la clave de tablas/lealtad.json eventos. El +1 por victoria pasa de combate.json a lealtad.json eventos.victoria. Se aplica en T12 (Arquitectura.md 10.5, v0.16).
+
+## P-020 — Objetivo sin remate: cercana o menos vida primero
+- **Estado:** RESPONDIDA
+- **Para:** SISTEMAS
+- **Tarea:** T11
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.8, paso 5 ("la más cercana que pueda alcanzar; si empatan, la de menos vida") frente a la tabla de desempates ("Objetivo: Remate → menos vida actual → más cercana → la que actúa antes en la cola"). Es la S-19 de `Arquitectura.md` 10.5
+- **Duda:** cuando ninguna objetivo se puede tumbar, ¿se elige primero por cercanía y después por vida (paso 5), o primero por vida y después por cercanía (tabla)?
+- **Caso que la dispara:** la Ocarra salvaje alcanza a la Rodauva (6 de vida, a 1) y al Maestro (5 de vida, a 2) y no tumba a ninguno. Con el paso 5 va por la Rodauva; con la tabla, por el Maestro.
+- **Opciones:** A) la tabla rige el remate (menos vida → cercana → cola) y el paso 5 la elección sin remate (cercana → menos vida → cola). B) una sola regla para los dos casos. — Recomendación técnica: A (lectura declarada del Arquitecto, S-19).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `nucleo/combate/ia/ia_salvaje.gd` (`_DESEMPATE_REMATE` y `_DESEMPATE_CERCANA`); test (4) de T11 (`pruebas/combate/ia/test_ia_salvaje.gd`). Si Sistemas elige B, cambia una constante y el caso (a) del test (4).
+- **Respuesta:** `Sistema.md` 11.8 v1.2 (04/10/2026): opción A. Con remate: menos vida → más cercana → cola. Sin remate: más cercana → menos vida → cola. La tabla de desempates de 11.8 ahora tiene las dos filas. Motivo: sin remate manda la posición, y el que va adelante recibe (incluido el Maestro, Pilar 1). En el caso: la Rodauva. Ya programado así: no cambia código ni tests.
+
+## P-021 — "La que actúa antes en la cola" cuando una ya actuó
+- **Estado:** RESPONDIDA
+- **Para:** SISTEMAS
+- **Tarea:** T11
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.8, tabla de desempates ("→ la que actúa antes en la cola")
+- **Duda:** el último desempate, ¿mira el orden de la ronda entera (también las que ya actuaron en esta ronda) o solo el de las que todavía no actuaron?
+- **Caso que la dispara:** la Ocarra salvaje (Velocidad 7) actúa después de la Ocarra de la tribu (7, la tribu gana el empate) y antes que la Rodauva (6). Las dos están a la misma distancia y con la misma vida. Con la ronda entera, va por la Ocarra de la tribu (ya actuó); contando solo las que faltan, por la Rodauva.
+- **Opciones:** A) la ronda entera, por la primera entrada de cada unidad (el orden de la cola no cambia en la ronda). B) solo las que todavía no actuaron (la "próxima en actuar"); las que ya actuaron van después. — Recomendación técnica: A (lectura literal).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `IASalvaje._orden` (`nucleo/combate/ia/ia_salvaje.gd`); la unidad que no está en la cola va al final (en 0a no pasa). Si Sistemas elige B, cambia esa función y se agrega un caso al test (4).
+- **Respuesta:** `Sistema.md` 11.8 v1.2 (04/10/2026): opción A. El orden de la ronda entera, por la primera entrada de cada unidad, haya actuado o no. En el caso: la Ocarra de la tribu. Ya programado así: no cambia código ni tests.
+
+## P-022 — Una caída adyacente y Erizarse
+- **Estado:** RESPONDIDA
+- **Para:** SISTEMAS
+- **Tarea:** T11
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.8, paso 3 ("tiene una enemiga **adyacente**"), y 11.5, Reglas de la caída ("no participa de ninguna relación")
+- **Duda:** para que la salvaje se erice, ¿cuenta una unidad de la tribu **caída** como "enemiga adyacente"?
+- **Caso que la dispara:** la Rodauva salvaje con 3 de 8 de vida tiene al lado solo a la Rodauva de la tribu caída. Si cuenta, se eriza; si no, sigue la lista (se acerca a otra o la ataca).
+- **Opciones:** A) no: solo las enemigas de pie (una caída no es objetivo ni amenaza). B) sí: cualquier unidad enemiga en una casilla adyacente. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `IASalvaje._paso_erizarse` (usa `_enemigas_de_pie`). Si Sistemas elige B, cambia esa condición y se agrega un caso al test (7).
+- **Respuesta:** `Sistema.md` 11.8 v1.2 (04/10/2026): opción A. Solo cuenta una enemiga de pie: una caída adyacente no hace erizarse. Ya programado así: no cambia código ni tests.
