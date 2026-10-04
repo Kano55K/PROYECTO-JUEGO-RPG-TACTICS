@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "d_rivales_hambriento",
-  "_nota": "Escenario D, variante Hambriento (Sistema 11.9). Mismas unidades que la Normal con hambre 6 en las dos criaturas: obediencia 5 − 2 = 3, un incidente es un golpe a la rival. Incidente 5% con balanza 2. En la ronda 5 pasan a hambre 7 (siguen Hambrientas). Misma semilla que la variante Normal.",
+  "_nota": "Escenario D, variante Hambriento (Sistema.md 11.9). Mismas unidades y posiciones que la Normal, con hambre 6 solo en las dos criaturas (el Maestro sigue en 3): obediencia 5 − 2 = 3, un incidente es un golpe a la rival (5.4, 10.4). Incidente 5% con balanza 2. En la ronda 5 pasan a hambre 7 (siguen Hambrientas, 7.2). Misma semilla que las variantes Normal y balanza 4.",
   "tipo": "test",
   "semilla": 44001,
   "tablero": { "ancho": 8, "alto": 8 },
@@ -11,10 +11,12 @@
   "tribu": [
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 5, "hambre": 6, "enfermedades": 0,
-      "vida": null, "posicion": [3, 7] },
+      "vida": null, "posicion": [3, 7],
+      "_nota": "Detrás del Maestro, alcance 2 por encima de él" },
     { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
       "lealtad": 5, "hambre": 6, "enfermedades": 0,
-      "vida": null, "posicion": [5, 6] }
+      "vida": null, "posicion": [4, 7],
+      "_nota": "Adyacente a la Ocarra: el riesgo de incidente se ve desde el primer turno (actúa primero, Vel 8). ¿Las separa o mantiene la formación?" }
   ],
   "enemigas": [
     { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
@@ -25,5 +27,6 @@
       "_nota": "Afín del Surcón salvaje (+1 adyacentes). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente" }
   ],
   "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
   "toggles": { "afines_contra_cobardia": false }
 }

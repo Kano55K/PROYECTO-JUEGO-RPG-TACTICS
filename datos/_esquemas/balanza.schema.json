@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Tabla de la balanza",
   "description": "Sistema.md 1.2. Una fila por posición, de 1 (Barro) a 5 (Soplo). Se guardan las filas, no las fórmulas: cada valor se ajusta por separado.",
   "type": "object",
@@ -12,7 +11,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "posiciones": {
       "type": "array",
@@ -83,7 +82,7 @@
                 "minimum": 1
               },
               "_nota": {
-                "type": "string"
+                "$ref": "comunes.schema.json#/$defs/nota"
               }
             }
           },
@@ -96,7 +95,7 @@
             "minimum": 0
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }

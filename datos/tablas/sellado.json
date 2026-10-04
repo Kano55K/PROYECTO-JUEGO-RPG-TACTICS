@@ -1,37 +1,22 @@
 {
   "$schema": "../_esquemas/sellado.schema.json",
+  "_nota": "Sistema.md 4.1. Resellar (4.4) usa el primer tramo (vida <= 25%). El rango maximo sellable esta en tablas/balanza.json",
   "tramos": [
     {
       "hasta_vida_pct": 25,
-      "pct_por_rango": [
-        80,
-        65,
-        50
-      ]
+      "pct_por_rango": [80, 65, 50]
     },
     {
       "hasta_vida_pct": 50,
-      "pct_por_rango": [
-        50,
-        35,
-        20
-      ]
+      "pct_por_rango": [50, 35, 20]
     },
     {
       "hasta_vida_pct": 75,
-      "pct_por_rango": [
-        20,
-        10,
-        5
-      ]
+      "pct_por_rango": [20, 10, 5]
     },
     {
       "hasta_vida_pct": 100,
-      "pct_por_rango": [
-        5,
-        0,
-        0
-      ]
+      "pct_por_rango": [5, 0, 0]
     }
   ],
   "confianza_pct": 100

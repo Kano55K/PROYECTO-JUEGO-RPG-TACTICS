@@ -1,0 +1,32 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "d_rivales_balanza4",
+  "_nota": "D Normal con balanza 4 (Sistema.md 11.9 y 14: leer D también con la balanza 4). Arrimo 1: incidente 15%. Umbral de rescate 8: las lealtades 5 siguen Neutrales. Mismas unidades, posiciones y semilla que D Normal. Temporal: se borra en T31, cuando el panel de parámetros cambie la balanza (Arquitectura.md B.4).",
+  "tipo": "test",
+  "semilla": 44001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 4, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7],
+      "_nota": "Detrás del Maestro, alcance 2 por encima de él" },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 7],
+      "_nota": "Adyacente a la Ocarra: el riesgo de incidente se ve desde el primer turno (actúa primero, Vel 8). ¿Las separa o mantiene la formación?" }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 1],
+      "_nota": "Muro lento: alarga el combate y da tiempo a que aparezcan incidentes" },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje",
+      "vida": null, "posicion": [4, 1],
+      "_nota": "Afín del Surcón salvaje (+1 adyacentes). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente" }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

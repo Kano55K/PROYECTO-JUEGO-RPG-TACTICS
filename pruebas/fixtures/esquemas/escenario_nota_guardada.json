@@ -1,0 +1,26 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "nota_guardada",
+  "_nota": "T04: _nota en cada objeto y una criatura guardada",
+  "tipo": "nocturno",
+  "semilla": 7,
+  "tablero": { "ancho": 8, "alto": 8, "_nota": "tablero de referencia" },
+  "maestro": { "_nota": "maestro con nota", "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": 6, "mana_entrada": 2, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "_nota": "suelta con nota", "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 7] },
+    { "_nota": "guardada: no esta en el tablero", "id": "surcon_1", "especie": "surcon", "estado": "guardada",
+      "lealtad": 5, "hambre": 3, "enfermedades": 1,
+      "vida": 10, "posicion": null }
+  ],
+  "enemigas": [
+    { "_nota": "atacante con nota", "id": "ocarra_a1", "especie": "ocarra", "comportamiento": "atacante_nocturna",
+      "vida": null, "enfermedades": 0, "posicion": [4, 0] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": "ocarra_a1",
+  "toggles": { "_nota": "toggle con nota", "afines_contra_cobardia": true }
+}

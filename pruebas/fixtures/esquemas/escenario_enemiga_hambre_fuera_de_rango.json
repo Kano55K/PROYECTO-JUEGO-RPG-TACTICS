@@ -1,0 +1,16 @@
+{
+  "$schema": "../_esquemas/escenario.schema.json",
+  "id": "enemiga_hambre_fuera_de_rango",
+  "_nota": "T04: la atacante nocturna lleva hambre (Sistema.md 9.1: famelica)",
+  "tipo": "nocturno",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "posicion": [3, 6] },
+  "tribu": [],
+  "enemigas": [
+    { "id": "ocarra_1", "especie": "ocarra", "comportamiento": "atacante_nocturna",
+      "hambre": 11, "posicion": [3, 4] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": "ocarra_1"
+}

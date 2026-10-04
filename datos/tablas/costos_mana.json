@@ -1,24 +1,9 @@
 {
   "$schema": "../_esquemas/costos_mana.schema.json",
-  "sellar": [
-    3,
-    5,
-    7
-  ],
-  "invocar": [
-    2,
-    3,
-    4
-  ],
-  "resellar": [
-    2,
-    3,
-    4
-  ],
-  "guardar_caida": [
-    2,
-    3,
-    4
-  ],
+  "_nota": "Sistema.md 2.3 (resellar: 4.4; guardar caidas: 11.5). Los hechizos tienen su costo en hechizos.json y no llevan descuento; el descuento esta en tablas/balanza.json",
+  "sellar": [3, 5, 7],
+  "invocar": [2, 3, 4],
+  "resellar": [2, 3, 4],
+  "guardar_caida": [2, 3, 4],
   "costo_minimo": 1
 }

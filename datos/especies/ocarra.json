@@ -1,5 +1,6 @@
 {
   "$schema": "../_esquemas/especie.schema.json",
+  "_nota": "Sistema.md 4.3 (rol, rango, sellable), 11.2 (vida, danio, movimiento, alcance, velocidad), 11.7 (huida_pct: 0%, valiente de mas)",
   "id": "ocarra",
   "rol": "combate",
   "rango": 1,
@@ -14,6 +15,7 @@
     }
   ],
   "rasgo": {
+    "_nota": "Sistema.md 11.2: Alabarda. Su alcance 2 es el rasgo; no tiene efecto aparte",
     "id": "alabarda",
     "efecto": "ninguno"
   },

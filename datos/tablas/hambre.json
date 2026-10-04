@@ -1,9 +1,11 @@
 {
   "$schema": "../_esquemas/hambre.schema.json",
+  "_nota": "Sistema.md 7.1 (escala y estados; Saciado se deriva del hambre 0-2), 2.1 y 2.2 (regeneracion en combate), 5.4 (obediencia) y 7.2 (hambre en combate). Recuperacion al dormir, recoleccion y apetito: 0b",
   "minimo": 0,
   "maximo": 10,
   "estados": [
     {
+      "_nota": "Sistema.md 7.1: +25% al danio",
       "id": "saciado",
       "desde": 0,
       "hasta": 2,
@@ -20,6 +22,7 @@
       "regen_combate": "siempre"
     },
     {
+      "_nota": "Sistema.md 2.2: 'solo en turnos pares' = rondas pares (2.1). Obediencia -2 (5.4)",
       "id": "hambriento",
       "desde": 6,
       "hasta": 8,
@@ -28,6 +31,7 @@
       "regen_combate": "rondas_pares"
     },
     {
+      "_nota": "Sistema.md 2.2: sin regeneracion. Obediencia -4 (5.4)",
       "id": "famelico",
       "desde": 9,
       "hasta": 10,
@@ -37,6 +41,7 @@
     }
   ],
   "combate": {
+    "_nota": "Sistema.md 7.2: +1 al cerrar las rondas 5, 10, 15...",
     "cada_rondas": 5,
     "suma": 1
   }

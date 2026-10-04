@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Hechizos",
   "description": "Sistema.md 1.6. geometria y efecto son comportamientos programados; los números van acá.",
   "type": "object",
@@ -12,7 +11,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "hechizos": {
       "type": "array",
@@ -30,7 +29,7 @@
         "additionalProperties": false,
         "properties": {
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           },
           "id": {
             "$ref": "comunes.schema.json#/$defs/id"

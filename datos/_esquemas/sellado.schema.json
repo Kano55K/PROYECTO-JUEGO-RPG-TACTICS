@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Probabilidad de sellado",
   "description": "Sistema.md 4.1. Tramos ordenados de menor a mayor vida. Se usa el primer tramo con vida_actual × 100 ≤ vida_max × hasta_vida_pct (comparación exacta, sin redondeo).",
   "type": "object",
@@ -13,7 +12,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "tramos": {
       "type": "array",
@@ -38,7 +37,7 @@
             "maxItems": 3
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }

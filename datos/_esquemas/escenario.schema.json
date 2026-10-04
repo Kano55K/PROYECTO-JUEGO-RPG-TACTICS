@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Contexto de combate (escenario)",
   "description": "Arquitectura.md A.7. Entrada del combate. En 0a cada escenario es un contexto guardado; en 0b el loop arma el mismo objeto desde la partida. null = valor por defecto (ficha, balanza o maestro.json). posicion null = la ubica el jugador en el despliegue.",
   "type": "object",
@@ -11,7 +10,8 @@
     "maestro",
     "tribu",
     "enemigas",
-    "pergaminos_en_blanco"
+    "pergaminos_en_blanco",
+    "golpe_inicial"
   ],
   "additionalProperties": false,
   "properties": {
@@ -19,7 +19,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "id": {
       "$ref": "comunes.schema.json#/$defs/id"
@@ -53,7 +53,7 @@
           "minimum": 2
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -107,19 +107,10 @@
           "minimum": 0
         },
         "posicion": {
-          "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "minItems": 2,
-          "maxItems": 2
+          "$ref": "comunes.schema.json#/$defs/posicion"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
@@ -141,6 +132,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "golpe_inicial": {
+      "description": "A.7 y Sistema.md 9.2: id de la atacante que golpea antes de la ronda 1, o null si no hay golpe",
+      "$ref": "comunes.schema.json#/$defs/id_o_null"
+    },
     "toggles": {
       "type": "object",
       "additionalProperties": false,
@@ -149,7 +144,7 @@
           "type": "boolean"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     }
@@ -167,7 +162,7 @@
       "additionalProperties": false,
       "properties": {
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         },
         "id": {
           "$ref": "comunes.schema.json#/$defs/id"
@@ -203,16 +198,7 @@
           "minimum": 0
         },
         "posicion": {
-          "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "minItems": 2,
-          "maxItems": 2
+          "$ref": "comunes.schema.json#/$defs/posicion"
         }
       }
     },
@@ -226,7 +212,7 @@
       "additionalProperties": false,
       "properties": {
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         },
         "id": {
           "$ref": "comunes.schema.json#/$defs/id"
@@ -241,6 +227,12 @@
           ],
           "description": "atacante_nocturna: lógica de salvaje, no huye y queda caída en 0 (Sistema.md 9.2)"
         },
+        "hambre": {
+          "description": "Solo para la atacante nocturna (Sistema.md 9.1: famélica). No cambia el combate: no suma hambre (7.2) y se trata como obediencia ≤ 3 (10.7); queda como contexto de su destino (9.3)",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
         "vida": {
           "type": [
             "integer",
@@ -253,16 +245,7 @@
           "minimum": 0
         },
         "posicion": {
-          "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "minItems": 2,
-          "maxItems": 2
+          "$ref": "comunes.schema.json#/$defs/posicion"
         }
       }
     }

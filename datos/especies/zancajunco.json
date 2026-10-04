@@ -1,5 +1,6 @@
 {
   "$schema": "../_esquemas/especie.schema.json",
+  "_nota": "Sistema.md 4.3 (rol, rango, sellable), 11.2 (vida, danio, movimiento, alcance, velocidad), 11.7 (huida_pct: 50%, prefiere huir)",
   "id": "zancajunco",
   "rol": "mixto",
   "rango": 2,
@@ -14,6 +15,7 @@
     }
   ],
   "rasgo": {
+    "_nota": "Sistema.md 11.2: Hacerse junco (pasiva), +2 de danio en su primer ataque del combate. Bono plano de 11.4 paso 3",
     "id": "hacerse_junco",
     "efecto": "primer_ataque",
     "danio_plano": 2

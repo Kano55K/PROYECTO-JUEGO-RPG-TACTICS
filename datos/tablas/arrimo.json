@@ -1,6 +1,8 @@
 {
   "$schema": "../_esquemas/arrimo.schema.json",
+  "_nota": "Sistema.md 1.3. La cantidad de pasos sale de tablas/balanza.json; la tabla por posicion de 1.3 no se guarda",
   "por_paso": {
+    "_nota": "Sistema.md 1.3, 10.2, 10.4, 10.5 y 10.6. Las bases (incidente 20, combo +20 / +40, Encono, cobardia 60) van en tablas/combate.json",
     "incidente_pts": -5,
     "encono_pts": -5,
     "cobardia_pts": -5,

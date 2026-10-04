@@ -166,7 +166,7 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 ## Estado actual
 
 - **Terminadas:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador).
-- **Siguiente:** T04 (datos de 0a), en varias sesiones.
+- **T04 (datos de 0a) completa en la rama `tarea/T04-datos`, esperando OK de commit y PR.** Esquemas, contenido fijo, siete tablas y los 11 escenarios; `datos/` carga entero sin errores (`pruebas/datos/test_datos_completos.gd`, test permanente). Campo nuevo `enemiga.hambre` (atacante nocturna). Preguntas abiertas para Sistemas, ninguna bloquea: P-001 a P-009. Erizarse IA ≤ 50% (11.8) queda para T11.
 - Orden de 0a.1: T04 → T05 → T06 → T07 → T08 → T09 → T10 → T12 → **T34** → T13.
 - **T11 no se empieza** hasta que Sistemas responda las dudas S-7 a S-9 (`docs/Arquitectura.md` 10.5).
 - T04 necesita `datos/textos/es.json` del Worldbuilder; si todavía no está, el resto de T04 se hace igual y se avisa.

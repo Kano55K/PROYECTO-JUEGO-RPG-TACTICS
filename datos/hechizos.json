@@ -1,7 +1,9 @@
 {
   "$schema": "_esquemas/hechizos.schema.json",
+  "_nota": "Sistema.md 1.6. Costos tambien en 2.3: los hechizos no tienen descuento de la balanza",
   "hechizos": [
     {
+      "_nota": "Sistema.md 1.6: costo 2, distancia Manhattan <= 3 sin bloqueo, danio 2 + Poder. Es ataque (eslabon y modificadores, 11.4)",
       "id": "martillazo",
       "costo": 2,
       "alcance": 3,
@@ -12,6 +14,7 @@
       "es_ataque": true
     },
     {
+      "_nota": "Sistema.md 1.6: costo 2, linea recta <= 2 que no atraviesa enemigas, empuja o atrae 1 casilla a una unidad no caida; choque de 1 fijo (casos borde del 03/10/2026). No es ataque",
       "id": "lanzadera",
       "costo": 2,
       "alcance": 2,
@@ -27,6 +30,7 @@
       "es_ataque": false
     },
     {
+      "_nota": "Sistema.md 1.6: costo 4, adyacente o si mismo, cura 3 + Poder. No afecta a las caidas (11.5)",
       "id": "remiendo",
       "costo": 4,
       "alcance": 1,

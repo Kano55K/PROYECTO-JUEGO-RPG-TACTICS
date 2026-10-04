@@ -53,6 +53,14 @@ func cargar_carpeta(ruta_carpeta: String, claves_texto_esperadas: Array[String] 
 	return {"errores": errores, "avisos": avisos, "datos": datos_por_archivo}
 
 
+# Devuelve {"errores": Array[Dictionary], "esquema": Dictionary} con los $ref
+# entre archivos ya resueltos, para validar un dato suelto (escenario, resultado).
+func esquema_resuelto(ruta_carpeta: String, nombre_esquema: String) -> Dictionary:
+	var errores: Array[Dictionary] = []
+	var esquema: Dictionary = _obtener_esquema_resuelto(ruta_carpeta, nombre_esquema, {}, errores)
+	return {"errores": errores, "esquema": esquema}
+
+
 # --- Lectura de archivos ---------------------------------------------------
 
 func _listar_archivos_json(carpeta: String, relativo: String = "") -> Array[String]:

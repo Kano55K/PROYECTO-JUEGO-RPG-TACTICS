@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "b_muro",
-  "_nota": "Prueba B (Sistema 11.6). ¿Reconoce que hay que huir? ¿Guarda a la caída antes? Segunda salida legítima: las dos Ocarras salvajes son rivales entre sí (Ocarra–Ocarra mal); juntarlas con la Lanzadera provoca incidentes (20%, siempre ataque). Sin rescatista: la Rodauva es Neutral, si cae el Maestro es permadeath.",
+  "_nota": "Prueba B (Sistema.md 11.6 y 11.9). ¿Reconoce que hay que huir? ¿Guarda a la caída antes? Segunda salida legítima: las dos Ocarras salvajes son rivales entre sí (Ocarra–Ocarra mal, 10.8); juntarlas con la Lanzadera provoca incidentes (20%, siempre ataque, 10.7). Sin rescatista: la Rodauva es Neutral, si cae el Maestro es permadeath.",
   "tipo": "test",
   "semilla": 22001,
   "tablero": { "ancho": 8, "alto": 8 },
@@ -11,16 +11,18 @@
   "tribu": [
     { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
       "lealtad": 5, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [3, 7],
+      "vida": null, "posicion": [4, 7],
       "_nota": "Compañera inicial, Neutral (umbral 7): no rescata" }
   ],
   "enemigas": [
     { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje",
-      "vida": null, "posicion": [1, 0] },
+      "vida": null, "posicion": [0, 0],
+      "_nota": "Separada de ocarra_s2 (distancia 8). Con la IA de 11.8 llegan en diagonal sin tocarse (ronda 1: [3,0] y [4,1]; ronda 2: [3,3] y [4,4]): juntarlas es una jugada de la Lanzadera, no un regalo de la IA" },
     { "id": "ocarra_s2", "especie": "ocarra", "comportamiento": "salvaje",
-      "vida": null, "posicion": [6, 0],
-      "_nota": "Separadas al empezar: no hay incidente salvaje hasta que se junten" }
+      "vida": null, "posicion": [7, 1],
+      "_nota": "En la fila 1: el desfase evita que las dos se alineen en la misma columna al acercarse" }
   ],
   "pergaminos_en_blanco": 2,
+  "golpe_inicial": null,
   "toggles": { "afines_contra_cobardia": false }
 }

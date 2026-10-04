@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Maestro",
   "description": "Sistema.md 1.1, 1.6 y 11.2. Vida y daño cuerpo a cuerpo salen de la balanza (tablas/balanza.json).",
   "type": "object",
@@ -16,7 +15,7 @@
       "type": "string"
     },
     "_nota": {
-      "type": "string"
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
     "movimiento": {
       "type": "integer",
@@ -65,7 +64,7 @@
           "maximum": 10
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     }
