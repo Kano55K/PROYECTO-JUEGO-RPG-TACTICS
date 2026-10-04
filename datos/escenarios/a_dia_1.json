@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "a_dia_1",
-  "_nota": "¿Sello al 50% o arriesgo una ronda más?",
+  "_nota": "¿Sello al 50% o arriesgo una ronda más? Manda la IA de 11.8: la Ocarra va por la Rodauva (menos vida actual), así que la apuesta es la Rodauva, no la vida del Maestro. 11.6 es referencia de daño (Sistema.md 11.6 v1.1, P-009).",
   "tipo": "test",
   "semilla": 12345,
   "tablero": { "ancho": 8, "alto": 8 },

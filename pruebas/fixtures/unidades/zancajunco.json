@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Copia para los tests de reglas (Arquitectura.md A.6). Sistema.md 4.3 (rol, rango, sellable), 11.2 (vida, danio, movimiento, alcance, velocidad), 11.7 (huida_pct: 50%, prefiere huir)",
+  "id": "zancajunco",
+  "rol": "mixto",
+  "rango": 2,
+  "sellable": true,
+  "vida": 12,
+  "danio": 4,
+  "movimiento": 4,
+  "alcance": 1,
+  "turnos": [
+    {
+      "velocidad": 8
+    }
+  ],
+  "rasgo": {
+    "_nota": "Sistema.md 11.2: Hacerse junco (pasiva), +2 de danio en su primer ataque del combate. Bono plano de 11.4 paso 3",
+    "id": "hacerse_junco",
+    "efecto": "primer_ataque",
+    "danio_plano": 2
+  },
+  "huida_pct": 50
+}

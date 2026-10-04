@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Sistema.md 11.2: ficha del Tasajero (dos turnos completos, velocidades 8 y 3, marcas Caza y Cuenta) para los tests de reglas (Arquitectura.md A.6). Rango y sellable: 4.3; huida_pct: 11.7",
+  "id": "tasajero",
+  "rol": "combate",
+  "rango": 3,
+  "sellable": false,
+  "vida": 30,
+  "danio": 6,
+  "movimiento": 4,
+  "alcance": 1,
+  "turnos": [
+    { "velocidad": 8, "marca": "caza" },
+    { "velocidad": 3, "marca": "cuenta" }
+  ],
+  "rasgo": { "id": "caza_y_cuenta", "efecto": "ninguno" },
+  "huida_pct": 25
+}

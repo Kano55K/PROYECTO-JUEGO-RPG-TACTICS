@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../datos/_esquemas/balanza.schema.json",
+  "_nota": "Sistema.md 1.2: copia de la tabla de la balanza para los tests de reglas (Arquitectura.md A.6). El '—' de la tabla es 0",
+  "posiciones": [
+    { "posicion": 1, "reserva_mana": 7, "descuento": 0, "rango_max_sellable": 1,
+      "vida_max_real": 22, "danio_cuerpo": 5, "umbral_rescate": 6,
+      "lealtad_diaria": { "cantidad": 1, "cada_dias": 1 },
+      "ajuste_lealtad_inicial": 0, "pasos_arrimo": 4 },
+    { "posicion": 2, "reserva_mana": 8, "descuento": 0, "rango_max_sellable": 2,
+      "vida_max_real": 20, "danio_cuerpo": 4, "umbral_rescate": 7,
+      "lealtad_diaria": { "cantidad": 1, "cada_dias": 1 },
+      "ajuste_lealtad_inicial": 0, "pasos_arrimo": 3 },
+    { "posicion": 3, "reserva_mana": 9, "descuento": 1, "rango_max_sellable": 2,
+      "vida_max_real": 18, "danio_cuerpo": 4, "umbral_rescate": 7,
+      "lealtad_diaria": { "cantidad": 1, "cada_dias": 1 },
+      "ajuste_lealtad_inicial": -1, "pasos_arrimo": 2 },
+    { "posicion": 4, "reserva_mana": 10, "descuento": 1, "rango_max_sellable": 3,
+      "vida_max_real": 16, "danio_cuerpo": 3, "umbral_rescate": 8,
+      "lealtad_diaria": { "cantidad": 1, "cada_dias": 2 },
+      "ajuste_lealtad_inicial": -1, "pasos_arrimo": 1 },
+    { "posicion": 5, "reserva_mana": 11, "descuento": 2, "rango_max_sellable": 3,
+      "vida_max_real": 14, "danio_cuerpo": 3, "umbral_rescate": 8,
+      "lealtad_diaria": { "cantidad": 1, "cada_dias": 2 },
+      "ajuste_lealtad_inicial": -2, "pasos_arrimo": 0 }
+  ]
+}
