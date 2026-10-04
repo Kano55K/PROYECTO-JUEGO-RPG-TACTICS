@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<<<<<<< HEAD
-<testsuites id="2026-10-03" name="report_2" tests="1" failures="0" skipped="0" flaky="0" time="0.000">
-	<testsuite id="0" name="test_humo" package="pruebas" timestamp="2026-10-03T16:54:11" hostname="localhost" tests="1" failures="0" errors="0" skipped="0" flaky="0" time="0.532">
-		<testcase name="test_humo" classname="test_humo" time="0.184">
-=======
 <testsuites id="2026-10-03" name="report_2" tests="14" failures="0" skipped="0" flaky="0" time="0.000">
 	<testsuite id="0" name="test_validador" package="pruebas/datos" timestamp="2026-10-03T17:53:12" hostname="localhost" tests="14" failures="0" errors="0" skipped="0" flaky="0" time="4.347">
 		<testcase name="test_campo_mal_tipeado_es_rechazado" classname="test_validador" time="0.182">
@@ -33,7 +28,6 @@
 		<testcase name="test_ref_defs_resuelve_referencia_y_valida_adentro" classname="test_validador" time="0.112">
 		</testcase>
 		<testcase name="test_esquema_con_palabra_clave_desconocida_es_error" classname="test_validador" time="0.112">
->>>>>>> tarea/T03-validador
 		</testcase>
 	</testsuite>
 </testsuites>
