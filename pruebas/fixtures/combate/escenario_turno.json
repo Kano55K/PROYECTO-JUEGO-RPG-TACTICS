@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "turno",
+  "_nota": "Sistema.md 11.3, Turno de una unidad (tests de T08). El Maestro [3,6] tiene a la Ocarra salvaje [3,5] adyacente; la Ocarra de la tribu [3,7] le pega por encima del Maestro (Alcance 2) y no llega a la Rodauva salvaje [5,7] por encima de la otra salvaje [4,7]. Cola: ocarra_1, ocarra_s1 (empate en 7: tribu primero), rodauva_1, rodauva_s1, rodauva_s2 (6), Maestro (5)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 6] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 5] },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [4, 7] },
+    { "id": "rodauva_s2", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [5, 7] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}
