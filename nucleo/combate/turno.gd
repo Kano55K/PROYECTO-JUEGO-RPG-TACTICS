@@ -65,6 +65,35 @@ func objetivos_para_atacar() -> Array[String]:
 	return resultado
 
 
+# Casilla -> pasos: la actual (0) y cada destino que `mover` acepta (11.8, "la de
+# menos movimiento"). Los pasos son los del camino que da Tablero.
+func pasos_para_mover() -> Dictionary:
+	var desde: Vector2i = _posicion(unidad_id)
+	var pasos: Dictionary = _tablero.pasos_hasta(desde, _movimiento(), _bando(unidad_id), _plantel)
+	var resultado: Dictionary = {desde: 0}
+	for casilla in casillas_para_mover():
+		resultado[casilla] = pasos[casilla]
+	return resultado
+
+
+# Sistema.md 11.8, "puede tumbar" y "puede alcanzar" (S-8): el ataque como si la
+# unidad se hubiera movido a `desde`, sin modificar nada. Pasa por la misma
+# funcion que el ataque real (mismas comprobaciones, mismo danio y aportes), y
+# no gasta Hacerse junco. Si no puede llegar a `desde`, se rechaza con el motivo
+# del movimiento.
+func previsualizar_ataque(desde: Vector2i, objetivo_id: String) -> ResultadoAccion:
+	if desde != _posicion(unidad_id):
+		var movimiento: ResultadoAccion = validar(Accion.mover(desde))
+		if not movimiento.valida:
+			return movimiento
+	var fin: FinCombate.Fin = FinCombate.evaluar(_plantel)
+	if fin != FinCombate.Fin.EN_CURSO:
+		var rechazo: ResultadoAccion = ResultadoAccion.rechazada(ResultadoAccion.Motivo.COMBATE_TERMINADO)
+		rechazo.fin = fin
+		return rechazo
+	return _atacar_desde(desde, objetivo_id, false)
+
+
 func puede_erizarse() -> bool:
 	return validar(Accion.erizarse()).valida
 
@@ -105,7 +134,7 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 		Accion.Tipo.MOVER:
 			resultado = _mover(accion.casilla, aplica)
 		Accion.Tipo.ATACAR:
-			resultado = _atacar(accion.objetivo_id, aplica)
+			resultado = _atacar_desde(_posicion(unidad_id), accion.objetivo_id, aplica)
 		Accion.Tipo.ERIZARSE:
 			resultado = _erizarse(aplica)
 		_:
@@ -138,8 +167,9 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 # Sistema.md 11.3: atacar gasta la accion. La objetivo es una enemiga de pie en
 # una casilla que la unidad golpea desde donde esta. La vida no baja de 0, y en
 # 0 se resuelve en el acto, solo al aplicar (11.5, VidaCero): la caida y la que
-# salio del tablero dejan de ser objetivo.
-func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
+# salio del tablero dejan de ser objetivo. `desde` es la casilla de la unidad;
+# otra solo para previsualizar (nunca se aplica desde otra casilla).
+func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
 	if accion_usada:
@@ -156,7 +186,6 @@ func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	if (objetivo != null and objetivo.estado in [Criatura.Estado.GUARDADA, Criatura.Estado.FUERA]) \
 			or hasta == Criatura.SIN_POSICION:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_FUERA_DEL_TABLERO)
-	var desde: Vector2i = _posicion(unidad_id)
 	var bando: Criatura.Bando = _bando(unidad_id)
 	if not _tablero.golpeables(desde, _alcance(), bando, _plantel).has(hasta):
 		if _tablero.en_linea(desde, hasta) and Tablero.distancia(desde, hasta) <= _alcance() \
@@ -165,13 +194,20 @@ func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
 
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.danio = _danio.calcular(unidad_id, objetivo_id, _plantel).total
+	resultado.danio = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id)).total
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
 		VidaCero.resolver(objetivo_id, _plantel)
 		_danio.registrar_ataque(unidad_id, _plantel)
 		accion_usada = true
 	return resultado
+
+
+# Punto vacio: los aportes externos del danio (11.4) para un ataque desde
+# `desde`. Aca se enchufan afinidad (T15, depende de la casilla), combo (T16) y
+# Encono o cobardia (T19); el ataque real y la previsualizacion los ven igual.
+func _aportes(_desde: Vector2i, _objetivo_id: String) -> Array[ModificadorDanio]:
+	return []
 
 
 # Sistema.md 11.2, Erizarse: solo con el rasgo de la ficha; gasta la accion.

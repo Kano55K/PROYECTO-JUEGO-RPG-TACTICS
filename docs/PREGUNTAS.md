@@ -235,6 +235,7 @@
 - **Opciones:** A) sin recorte intermedio: −1 + 2 = 1. B) recortar a 0 tras el paso 2: 2. — Recomendación técnica: A (lectura literal de 11.4 y de `Arquitectura.md` B.2, T09: "piso explícito").
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/danio.gd`; tests (8) y (10) de T09 (`pruebas/combate/test_danio.gd`: −125% sobre 2 da −1). Si Sistemas elige B, se agrega un recorte en `Danio` (no en `Porcentajes`) y cambia el test (8).
+- **Respuesta:** _(la completa el staff)_
 
 ## P-018 — La caída bloquea el paso y la línea de Alcance 2
 - **Estado:** ABIERTA
@@ -261,3 +262,42 @@
 - **Bloquea:** no (hoy nadie serializa el cierre; lo hace T12)
 - **Mientras tanto:** `AcumuladorLealtad` anota las claves de `lealtad.json` y `"victoria"` para el +1 (`nucleo/combate/cierre.gd`). Sin cambios en `resultado.schema.json`.
 - **Respuesta:** Respuesta: Arquitecto, 04/10/2026: opción A con un ajuste. El motivo es la clave de tablas/lealtad.json eventos. El +1 por victoria pasa de combate.json a lealtad.json eventos.victoria. Se aplica en T12 (Arquitectura.md 10.5, v0.16).
+
+## P-020 — Objetivo sin remate: cercana o menos vida primero
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T11
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.8, paso 5 ("la más cercana que pueda alcanzar; si empatan, la de menos vida") frente a la tabla de desempates ("Objetivo: Remate → menos vida actual → más cercana → la que actúa antes en la cola"). Es la S-19 de `Arquitectura.md` 10.5
+- **Duda:** cuando ninguna objetivo se puede tumbar, ¿se elige primero por cercanía y después por vida (paso 5), o primero por vida y después por cercanía (tabla)?
+- **Caso que la dispara:** la Ocarra salvaje alcanza a la Rodauva (6 de vida, a 1) y al Maestro (5 de vida, a 2) y no tumba a ninguno. Con el paso 5 va por la Rodauva; con la tabla, por el Maestro.
+- **Opciones:** A) la tabla rige el remate (menos vida → cercana → cola) y el paso 5 la elección sin remate (cercana → menos vida → cola). B) una sola regla para los dos casos. — Recomendación técnica: A (lectura declarada del Arquitecto, S-19).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `nucleo/combate/ia/ia_salvaje.gd` (`_DESEMPATE_REMATE` y `_DESEMPATE_CERCANA`); test (4) de T11 (`pruebas/combate/ia/test_ia_salvaje.gd`). Si Sistemas elige B, cambia una constante y el caso (a) del test (4).
+- **Respuesta:** _(la completa el staff)_
+
+## P-021 — "La que actúa antes en la cola" cuando una ya actuó
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T11
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.8, tabla de desempates ("→ la que actúa antes en la cola")
+- **Duda:** el último desempate, ¿mira el orden de la ronda entera (también las que ya actuaron en esta ronda) o solo el de las que todavía no actuaron?
+- **Caso que la dispara:** la Ocarra salvaje (Velocidad 7) actúa después de la Ocarra de la tribu (7, la tribu gana el empate) y antes que la Rodauva (6). Las dos están a la misma distancia y con la misma vida. Con la ronda entera, va por la Ocarra de la tribu (ya actuó); contando solo las que faltan, por la Rodauva.
+- **Opciones:** A) la ronda entera, por la primera entrada de cada unidad (el orden de la cola no cambia en la ronda). B) solo las que todavía no actuaron (la "próxima en actuar"); las que ya actuaron van después. — Recomendación técnica: A (lectura literal).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `IASalvaje._orden` (`nucleo/combate/ia/ia_salvaje.gd`); la unidad que no está en la cola va al final (en 0a no pasa). Si Sistemas elige B, cambia esa función y se agrega un caso al test (4).
+- **Respuesta:** _(la completa el staff)_
+
+## P-022 — Una caída adyacente y Erizarse
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T11
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.8, paso 3 ("tiene una enemiga **adyacente**"), y 11.5, Reglas de la caída ("no participa de ninguna relación")
+- **Duda:** para que la salvaje se erice, ¿cuenta una unidad de la tribu **caída** como "enemiga adyacente"?
+- **Caso que la dispara:** la Rodauva salvaje con 3 de 8 de vida tiene al lado solo a la Rodauva de la tribu caída. Si cuenta, se eriza; si no, sigue la lista (se acerca a otra o la ataca).
+- **Opciones:** A) no: solo las enemigas de pie (una caída no es objetivo ni amenaza). B) sí: cualquier unidad enemiga en una casilla adyacente. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `IASalvaje._paso_erizarse` (usa `_enemigas_de_pie`). Si Sistemas elige B, cambia esa condición y se agrega un caso al test (7).
+- **Respuesta:** _(la completa el staff)_

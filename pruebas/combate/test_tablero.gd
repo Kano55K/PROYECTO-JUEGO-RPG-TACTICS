@@ -237,3 +237,18 @@ func _foto(plantel: Plantel) -> Array[String]:
 	for criatura in plantel.criaturas():
 		foto.append("%s:%s:%d:%d:%d" % [criatura.id, criatura.posicion, criatura.estado, criatura.vida, criatura.bando])
 	return foto
+
+
+# T11: pasos_hasta da las mismas casillas que alcanzables, con los pasos del
+# camino mas corto (el rodeo cuesta 4).
+func test_pasos_hasta_con_rodeo() -> void:
+	var escenario: Dictionary = _escenario("rodeo")
+	var plantel: Plantel = _plantel(escenario)
+	var tablero: Tablero = _tablero(escenario)
+	var desde: Vector2i = plantel.criatura("rodauva_1").posicion
+	var pasos: Dictionary = tablero.pasos_hasta(desde, 4, TRIBU, plantel)
+	assert_array(pasos.keys()).contains_exactly_in_any_order(tablero.alcanzables(desde, 4, TRIBU, plantel))
+	assert_int(pasos[desde]).is_equal(0)
+	assert_int(pasos[Vector2i(2, 7)]).is_equal(1)
+	assert_int(pasos[Vector2i(3, 5)]).is_equal(4)
+	assert_bool(pasos.has(Vector2i(3, 6))).is_false()
