@@ -1,15 +1,16 @@
 extends GdUnitTestSuite
 
-# Arquitectura.md B.2 (T04, sesiones 2 y 3a): el contenido fijo de datos/
-# (especies, maestro, hechizos, relaciones y seis tablas) carga sin errores
+# Arquitectura.md B.2 (T04, sesiones 2, 3a y 3b): el contenido fijo de datos/
+# (especies, maestro, hechizos, relaciones y siete tablas) carga sin errores
 # con el Cargador de T03. Cada caso copia los esquemas reales y solo los
 # archivos que prueba a una carpeta temporal: asi pasan tambien los chequeos
-# cruzados aunque el resto de datos/ (combate.json y escenarios) todavia no cargue.
+# cruzados aunque el resto de datos/ (escenarios) todavia no cargue.
 const _CARPETA_DATOS: String = "res://datos"
 
 const _TABLAS: Array[String] = [
 	"tablas/balanza.json", "tablas/arrimo.json", "tablas/sellado.json",
 	"tablas/costos_mana.json", "tablas/hambre.json", "tablas/lealtad.json",
+	"tablas/combate.json",
 ]
 
 const _ESPECIES: Array[String] = [
@@ -113,7 +114,11 @@ func test_lealtad_carga_sin_errores() -> void:
 	_cargar_sin_errores("lealtad", ["tablas/lealtad.json"])
 
 
-func test_seis_tablas_juntas_sin_errores_ni_avisos() -> void:
+func test_combate_carga_sin_errores() -> void:
+	_cargar_sin_errores("combate", ["tablas/combate.json"])
+
+
+func test_siete_tablas_juntas_sin_errores_ni_avisos() -> void:
 	var resultado: Dictionary = _cargar_sin_errores("tablas_juntas", _TABLAS)
 	var avisos: Array[Dictionary] = resultado["avisos"]
 	assert_array(avisos).override_failure_message(str(avisos)).is_empty()

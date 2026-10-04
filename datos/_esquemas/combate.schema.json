@@ -66,17 +66,14 @@
     },
     "incidente": {
       "type": "object",
+      "description": "Sistema.md 10.4. Distraerse o atacar depende del tramo de obediencia (5.4): es comportamiento, no dato",
       "required": [
-        "base_pct",
-        "ataca_si_obediencia_hasta"
+        "base_pct"
       ],
       "additionalProperties": false,
       "properties": {
         "base_pct": {
           "$ref": "comunes.schema.json#/$defs/pct"
-        },
-        "ataca_si_obediencia_hasta": {
-          "type": "integer"
         },
         "_nota": {
           "$ref": "comunes.schema.json#/$defs/nota"
@@ -215,15 +212,19 @@
       }
     },
     "salvajes": {
-      "description": "Sistema.md 10.7: sin lealtad, se tratan como obediencia baja y sin Arrimo",
+      "description": "Sistema.md 10.7: sin lealtad, se tratan como el tramo indicado de 5.4 y sin Arrimo",
       "type": "object",
       "required": [
-        "obediencia_equivalente"
+        "tramo_obediencia"
       ],
       "additionalProperties": false,
       "properties": {
-        "obediencia_equivalente": {
-          "type": "integer"
+        "tramo_obediencia": {
+          "enum": [
+            "leal",
+            "neutral",
+            "baja"
+          ]
         },
         "_nota": {
           "$ref": "comunes.schema.json#/$defs/nota"
