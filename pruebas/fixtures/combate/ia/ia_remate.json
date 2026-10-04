@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_remate",
+  "_nota": "Sistema.md 11.8, paso 4 (tests de T11). La Ocarra salvaje [3,2] (4 de danio) puede tumbar a rodauva_1 (vida 4, adyacente) y, moviendose, a rodauva_2 (vida 2): va por la de menos vida. Golpea a [6,4] desde [6,2] o [4,4] (distancia 2, 3 pasos): orden de lectura, [6,2]",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [7, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": 4, "posicion": [3, 3] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": 2, "posicion": [6, 4] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

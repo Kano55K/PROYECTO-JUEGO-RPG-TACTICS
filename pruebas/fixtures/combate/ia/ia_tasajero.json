@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_tasajero",
+  "_nota": "Sistema.md 11.8, Tasajero, y 11.2, Caza y cuenta (tests de T11). Cola: Caza (8), rodauva_1 (6), Maestro (5), Cuenta (3). En Caza el Tasajero [3,2] (6 de danio) tumba a la Rodauva [3,4] (vida 6) desde [3,3]; en Cuenta va por el Maestro [6,4], desde [6,3] o [5,4] (3 pasos): orden de lectura, [6,3]",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [6, 4] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": 6, "posicion": [3, 4] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

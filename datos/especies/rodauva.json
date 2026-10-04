@@ -15,11 +15,12 @@
     }
   ],
   "rasgo": {
-    "_nota": "Sistema.md 11.2: Erizarse (accion), hasta su proximo turno recibe -50% de danio y no se mueve. El -50% entra en los porcentajes de 11.4 paso 1",
+    "_nota": "Sistema.md 11.2: Erizarse (accion), hasta su proximo turno recibe -50% de danio y no se mueve. El -50% entra en los porcentajes de 11.4 paso 1. umbral_vida_pct: Sistema.md 11.8 (la IA se eriza con vida <= 50%)",
     "id": "erizarse",
     "efecto": "accion_defensa",
     "danio_recibido_pct": -50,
-    "inmovil": true
+    "inmovil": true,
+    "umbral_vida_pct": 50
   },
   "huida_pct": 50
 }

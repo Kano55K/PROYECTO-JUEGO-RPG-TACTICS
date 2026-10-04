@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_cercana",
+  "_nota": "Sistema.md 11.8, paso 5, y S-19 (P-020) (tests de T11). Base del caso (a): la Ocarra salvaje [3,2] (4 de danio) no tumba a nadie; rodauva_1 (vida 6) a 1 contra el Maestro (vida 5) a 2: va por la Rodauva. El test mueve unidades para los casos (b) y (c). surcon_1 va primero en el Plantel y despues de la Rodauva en la cola (Velocidad 2 contra 6)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": 5, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 2] },
+  "tribu": [
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 7] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": 6, "posicion": [3, 3] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}
