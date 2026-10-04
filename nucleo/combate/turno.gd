@@ -151,9 +151,10 @@ func _atacar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
 
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.danio = _danio.calcular(unidad_id, objetivo_id, _plantel)
+	resultado.danio = _danio.calcular(unidad_id, objetivo_id, _plantel).total
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
+		_danio.registrar_ataque(unidad_id, _plantel)
 		accion_usada = true
 	return resultado
 
