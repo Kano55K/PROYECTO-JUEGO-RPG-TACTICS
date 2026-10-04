@@ -17,8 +17,7 @@
     "huida_salvaje",
     "alcance_sellar",
     "alcance_guardar_caida",
-    "vida_tras_caida",
-    "lealtad_por_victoria"
+    "vida_tras_caida"
   ],
   "additionalProperties": false,
   "properties": {
@@ -265,9 +264,6 @@
       "type": "integer",
       "minimum": 1,
       "description": "Al levantarse tras ganar y al ser guardada caída"
-    },
-    "lealtad_por_victoria": {
-      "type": "integer"
     }
   }
 }

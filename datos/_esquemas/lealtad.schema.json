@@ -1,6 +1,6 @@
 {
   "title": "Lealtad",
-  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1. Los eventos de lealtad del combate y del destino de la atacante (5.2, 9.3) van en eventos; el +1 de victoria está en tablas/combate.json.",
+  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1. Los eventos de lealtad del combate y del destino de la atacante (5.2, 9.3) van en eventos, también el +1 de victoria (P-019). Sus claves son los motivos de lealtad del resultado (resultado.schema.json).",
   "type": "object",
   "required": [
     "minimo",
@@ -62,6 +62,7 @@
       "description": "Sistema.md 5.2 y 9.3. Solo cambian la lealtad de las sueltas",
       "type": "object",
       "required": [
+        "victoria",
         "muerte_en_el_grupo",
         "muerte_en_el_grupo_afines",
         "rescate",
@@ -70,6 +71,10 @@
       ],
       "additionalProperties": false,
       "properties": {
+        "victoria": {
+          "description": "A las sueltas al terminar un combate ganado; las guardadas no (5.2, P-019)",
+          "type": "integer"
+        },
         "muerte_en_el_grupo": {
           "description": "A todas las sueltas cuando muere o es comida otra del grupo (5.2)",
           "type": "integer"

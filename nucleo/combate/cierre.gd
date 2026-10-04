@@ -4,7 +4,7 @@
 class_name Cierre
 extends RefCounted
 
-# Nombres de evento (claves de tablas/lealtad.json; "victoria", P-019).
+# Nombres de evento: claves de tablas/lealtad.json eventos (P-019).
 const _MOTIVO_VICTORIA: String = "victoria"
 const _MOTIVO_MUERTE: String = "muerte_en_el_grupo"
 const _MOTIVO_MUERTE_AFINES: String = "muerte_en_el_grupo_afines"
@@ -19,7 +19,7 @@ var _relaciones: Relaciones
 static func desde_datos(tabla_combate: Dictionary, tabla_lealtad: Dictionary, relaciones: Relaciones) -> Cierre:
 	var cierre: Cierre = Cierre.new()
 	cierre._vida_tras_caida = tabla_combate["vida_tras_caida"]
-	cierre._lealtad_por_victoria = tabla_combate["lealtad_por_victoria"]
+	cierre._lealtad_por_victoria = (tabla_lealtad["eventos"] as Dictionary)[_MOTIVO_VICTORIA]
 	cierre._tabla_lealtad = tabla_lealtad
 	cierre._relaciones = relaciones
 	return cierre

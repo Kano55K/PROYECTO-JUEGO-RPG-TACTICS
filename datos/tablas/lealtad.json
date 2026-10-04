@@ -13,7 +13,8 @@
   },
   "resellar": 1,
   "eventos": {
-    "_nota": "Sistema.md 5.2 y 9.3. Solo a las sueltas. Afines: ver P-001. Comer a la atacante y afines: ver P-002. El +1 de victoria esta en tablas/combate.json",
+    "_nota": "Sistema.md 5.2 y 9.3. Solo a las sueltas. Afines: ver P-001. Comer a la atacante y afines: ver P-002. victoria: Sistema.md 5.2, fila Pelearon juntos y ganaron (P-019; antes en tablas/combate.json)",
+    "victoria": 1,
     "muerte_en_el_grupo": -2,
     "muerte_en_el_grupo_afines": -4,
     "rescate": 2,

@@ -19,6 +19,8 @@ var valido: bool = false
 var motivo: Motivo = Motivo.NINGUNO
 
 var escenario_id: String
+# Copia del escenario tal como se juega: lo guarda la Grabacion (A.7).
+var escenario: Dictionary = {}
 # "test", "nodo", "emboscada" o "nocturno", tal cual el escenario.
 var tipo: String
 var semilla: int
@@ -33,8 +35,7 @@ var azar_textos: GeneradorAzar
 var danio: Danio
 var cierre: Cierre
 var relaciones: Relaciones
-# Huella de los datos (A.7). La calcula HuellaDatos (T12, sesion 2); hasta
-# entonces queda vacia.
+# Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
 
@@ -47,6 +48,8 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 		return contexto
 	var tabla_combate: Dictionary = datos["tablas/combate.json"]
 	contexto.escenario_id = escenario["id"]
+	contexto.escenario = escenario.duplicate(true)
+	contexto.huella = HuellaDatos.calcular(datos)
 	contexto.tipo = escenario["tipo"]
 	contexto.semilla = escenario["semilla"]
 	contexto.tablero = Tablero.desde_datos(escenario["tablero"], tabla_combate)

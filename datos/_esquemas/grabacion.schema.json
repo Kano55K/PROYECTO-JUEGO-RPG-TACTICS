@@ -1,25 +1,33 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Combate grabado",
-  "description": "Arquitectura.md A.6. Contexto + semilla + decisiones del jugador. Las tiradas no se guardan: salen de la semilla. Reproducirlo da el mismo registro, siempre que huella_datos coincida.",
+  "description": "Arquitectura.md A.7 (Grabación). Versión de formato, escenario entero tal como se jugó, huella de los datos y acciones del jugador en orden, cada una con el id de su unidad. No guarda decisiones de la IA ni tiradas: salen del estado y de la semilla. Si la huella no coincide al reproducir, el reproductor avisa. Lo escribe el núcleo (Grabacion, T12).",
   "type": "object",
   "required": [
-    "contexto_id",
-    "semilla",
-    "huella_datos",
+    "version",
+    "escenario",
+    "huella",
     "acciones"
   ],
   "additionalProperties": false,
   "properties": {
-    "contexto_id": {
-      "$ref": "comunes.schema.json#/$defs/id"
+    "$schema": {
+      "type": "string"
     },
-    "semilla": {
-      "type": "integer"
+    "_nota": {
+      "$ref": "comunes.schema.json#/$defs/nota"
     },
-    "huella_datos": {
+    "version": {
+      "description": "Versión del formato de la grabación",
+      "type": "integer",
+      "minimum": 1
+    },
+    "escenario": {
+      "$ref": "escenario.schema.json"
+    },
+    "huella": {
+      "description": "SHA-256 en hex de los datos cargados (HuellaDatos, A.7)",
       "type": "string",
-      "description": "Hash de los archivos de datos al grabar. Si cambió, el reproductor avisa en vez de mostrar un falso error"
+      "pattern": "^[0-9a-f]{64}$"
     },
     "acciones": {
       "type": "array",
@@ -27,69 +35,51 @@
         "type": "object",
         "required": [
           "unidad",
-          "tipo"
+          "accion"
         ],
         "additionalProperties": false,
         "properties": {
           "unidad": {
             "$ref": "comunes.schema.json#/$defs/id"
           },
-          "tipo": {
-            "enum": [
-              "despliegue",
-              "mover",
-              "atacar",
-              "hechizo",
-              "sellar",
-              "guardar",
-              "guardar_caida",
-              "invocar",
-              "erizarse",
-              "esperar",
-              "secundar",
-              "huir",
-              "fin_turno",
-              "destino_atacante"
-            ]
-          },
-          "destino": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            },
-            "minItems": 2,
-            "maxItems": 2
-          },
-          "objetivo": {
-            "$ref": "comunes.schema.json#/$defs/id"
-          },
-          "hechizo": {
-            "$ref": "comunes.schema.json#/$defs/id"
-          },
-          "modo": {
-            "enum": [
-              "empujar",
-              "atraer"
-            ]
-          },
-          "aliado": {
-            "$ref": "comunes.schema.json#/$defs/id"
-          },
-          "opcion": {
-            "enum": [
-              "perdonar",
-              "sellar",
-              "comer"
-            ]
+          "accion": {
+            "description": "Accion.a_diccionario(). Los tipos de T22 a T28 se suman a este enum",
+            "type": "object",
+            "required": [
+              "tipo"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tipo": {
+                "enum": [
+                  "mover",
+                  "atacar",
+                  "erizarse",
+                  "terminar"
+                ]
+              },
+              "casilla": {
+                "$ref": "comunes.schema.json#/$defs/casilla"
+              },
+              "objetivo": {
+                "$ref": "comunes.schema.json#/$defs/id"
+              }
+            }
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }
+    }
+  },
+  "$defs": {
+    "criatura_tribu": {
+      "description": "El Validador busca las referencias locales del escenario (#/$defs/...) en la raíz: se traen de su esquema",
+      "$ref": "escenario.schema.json#/$defs/criatura_tribu"
     },
-    "_nota": {
-      "type": "string"
+    "enemiga": {
+      "$ref": "escenario.schema.json#/$defs/enemiga"
     }
   }
 }

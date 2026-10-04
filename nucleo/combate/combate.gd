@@ -17,11 +17,11 @@ var _cola: ColaIniciativa = ColaIniciativa.new()
 var _turno: Turno = null
 var _registro: RegistroCombate = RegistroCombate.new()
 var _fin: FinCombate.Fin = FinCombate.Fin.EN_CURSO
-var _resultado: ResultadoCierre = null
+var _resultado: ResultadoCombate = null
 # "" mientras no hubo un error de programacion (accion invalida de la IA,
 # registro con un float...). Con error, el combate se detiene.
 var _error: String = ""
-# Lo que la grabacion guarda (sesion 2): {unidad, accion} de cada accion valida del jugador.
+# Lo que guarda la Grabacion: {unidad, accion} de cada accion valida del jugador.
 var _acciones_jugador: Array[Dictionary] = []
 # Tiradas del generador de combate ya volcadas al registro.
 var _tiradas_volcadas: int = 0
@@ -79,9 +79,9 @@ func fin() -> FinCombate.Fin:
 	return _fin
 
 
-# El cierre del combate, o null mientras no termino. La sesion 2 lo envuelve en
-# el ResultadoCombate.
-func resultado() -> ResultadoCierre:
+# La salida del combate (A.7), o null mientras no termino (o si el cierre se
+# rechazo: entonces hay error()).
+func resultado() -> ResultadoCombate:
 	return _resultado
 
 
@@ -226,24 +226,18 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 func _terminar() -> void:
 	_registrar({"tipo": "fin", "desenlace": (FinCombate.Fin.keys()[_fin] as String).to_lower()})
 	var ardidos_antes: Array[String] = _pergaminos_ardidos()
-	_resultado = _contexto.cierre.cerrar(_plantel, _fin)
-	if not _resultado.valido:
-		_error = "cierre rechazado: " + ResultadoCierre.Motivo.keys()[_resultado.motivo]
+	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin)
+	if not cierre.valido:
+		_error = "cierre rechazado: " + ResultadoCierre.Motivo.keys()[cierre.motivo]
 		return
-	var ardidos: Array = []
+	var ardidos: Array[String] = []
 	for id_pergamino in _pergaminos_ardidos():
 		if not ardidos_antes.has(id_pergamino):
 			ardidos.append(id_pergamino)
-	var lealtad: Array = []
-	for cambio in _resultado.lealtad:
-		var anotaciones: Array = []
-		for anotacion in cambio.anotaciones:
-			anotaciones.append({"cambio": anotacion.cambio, "motivo": anotacion.motivo})
-		lealtad.append({"criatura": cambio.criatura_id, "antes": cambio.antes,
-				"cambio": cambio.cambio, "despues": cambio.despues, "anotaciones": anotaciones})
-	_registrar({"tipo": "cierre", "levantadas": _resultado.levantadas.duplicate(),
-			"muertas": _resultado.muertas.duplicate(), "pergaminos_ardidos": ardidos,
-			"lealtad": lealtad})
+	_resultado = ResultadoCombate.armar(_contexto, cierre, _cola.ronda, ardidos)
+	_registrar({"tipo": "cierre", "levantadas": cierre.levantadas.duplicate(),
+			"muertas": cierre.muertas.duplicate(), "pergaminos_ardidos": ardidos.duplicate(),
+			"lealtad": ResultadoCombate.cambios_a_lista(cierre.lealtad)})
 
 
 # Arquitectura.md A.7: antes de cada evento se vuelcan las tiradas nuevas del

@@ -185,8 +185,8 @@ func test_victoria_cierra_una_vez() -> void:
 	_assert_fin(combate, FinCombate.Fin.VICTORIA)
 	assert_bool(combate.esperando_jugador()).is_false()
 
-	var resultado: ResultadoCierre = combate.resultado()
-	assert_bool(resultado.valido).is_true()
+	var resultado: ResultadoCombate = combate.resultado()
+	assert_object(resultado).is_not_null()
 	assert_array(resultado.levantadas).is_equal(["rodauva_1"])
 	assert_int(rodauva.estado).is_equal(Criatura.Estado.SUELTA)
 	assert_int(rodauva.vida).is_equal(1)

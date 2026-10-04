@@ -255,7 +255,7 @@
 - **Cerrada en:** T12 (sin cambios de código)
 
 ## P-019 — Nombres de motivo de lealtad en el resultado
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T10
 - **Fecha:** 04/10/2026
@@ -266,6 +266,7 @@
 - **Bloquea:** no (hoy nadie serializa el cierre; lo hace T12)
 - **Mientras tanto:** `AcumuladorLealtad` anota las claves de `lealtad.json` y `"victoria"` para el +1 (`nucleo/combate/cierre.gd`). Sin cambios en `resultado.schema.json`.
 - **Respuesta:** Respuesta: Arquitecto, 04/10/2026: opción A con un ajuste. El motivo es la clave de tablas/lealtad.json eventos. El +1 por victoria pasa de combate.json a lealtad.json eventos.victoria. Se aplica en T12 (Arquitectura.md 10.5, v0.16).
+- **Cerrada en:** T12 (sesión 2: motivo = clave de `eventos`; +1 en `eventos.victoria`)
 
 ## P-020 — Objetivo sin remate: cercana o menos vida primero
 - **Estado:** CERRADA
@@ -310,7 +311,7 @@
 - **Cerrada en:** T12 (sin cambios de código)
 
 ## P-023 — Posición null de una guardada y DESPLIEGUE_NO_IMPLEMENTADO
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T12
 - **Fecha:** 04/10/2026
@@ -320,4 +321,5 @@
 - **Opciones:** A) solo el Maestro, las sueltas de la tribu y las enemigas; una guardada con `null` es válida. B) cualquier `null`. — Recomendación técnica: A (una guardada no se despliega).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A (decidido con el usuario al aprobar el plan) en `nucleo/combate/contexto_combate.gd`; test (9) de T12 (`pruebas/combate/test_combate.gd`) con los dos casos. Si se elige B, cambia una condición y ese test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto, 04/10/2026: opción A. DESPLIEGUE_NO_IMPLEMENTADO alcanza solo a las unidades que van al tablero (el Maestro, las sueltas de la tribu y las enemigas). Una guardada con posicion: null es válida porque no ocupa casilla (A.2, T06). La redacción de T12 en B.2 estaba mal y se corrigió en Arquitectura.md v0.18. Ya programado así: no cambia código ni tests. Se cierra en T12, sesión 2.
+- **Cerrada en:** T12 (sin cambios de código)
