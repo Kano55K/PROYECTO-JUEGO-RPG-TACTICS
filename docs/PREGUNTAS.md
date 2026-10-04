@@ -225,7 +225,7 @@
 - **Respuesta:** _(la completa el staff)_
 
 ## P-017 — Daño negativo tras los porcentajes y bonos planos
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T09
 - **Fecha:** 04/10/2026
@@ -235,30 +235,4 @@
 - **Opciones:** A) sin recorte intermedio: −1 + 2 = 1. B) recortar a 0 tras el paso 2: 2. — Recomendación técnica: A (lectura literal de 11.4 y de `Arquitectura.md` B.2, T09: "piso explícito").
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `nucleo/combate/danio.gd`; tests (8) y (10) de T09 (`pruebas/combate/test_danio.gd`: −125% sobre 2 da −1). Si Sistemas elige B, se agrega un recorte en `Danio` (no en `Porcentajes`) y cambia el test (8).
-- **Respuesta:** _(la completa el staff)_
-
-## P-018 — La caída bloquea el paso y la línea de Alcance 2
-- **Estado:** ABIERTA
-- **Para:** SISTEMAS
-- **Tarea:** T10
-- **Fecha:** 04/10/2026
-- **Fuente:** `Sistema.md` 11.5, Reglas de la caída ("queda en su casilla y la ocupa" y "no participa de ninguna relación") y 11.3, fila Alcance 2 ("nunca por encima de una enemiga")
-- **Duda:** una unidad caída, ¿bloquea el paso y la línea de Alcance 2 de la otra banda igual que si estuviera de pie?
-- **Caso que la dispara:** la Ocarra atacante nocturna cae en [3,5]; la Ocarra de la tribu en [3,6] quiere golpear a una salvaje en [3,4] por encima de ella, o el Maestro quiere pasar por [3,5]. Lectura literal: no puede (la caída ocupa la casilla y es enemiga).
-- **Opciones:** A) sí: bloquea como de pie (no se pasa por encima ni a través de una caída enemiga; por una aliada sí). B) no: la casilla está ocupada (nadie termina ahí), pero no corta la línea ni el paso. — Recomendación técnica: A (lectura literal; es lo que ya hace `Tablero` desde T06, que cuenta a las caídas como ocupantes).
-- **Bloquea:** no
-- **Mientras tanto:** programado con A, sin cambios en `nucleo/combate/tablero.gd`. Si Sistemas elige B, `Tablero` deja de contar a las caídas para el paso y la línea (no para terminar el movimiento) y se agrega un test.
-- **Respuesta:** _(la completa el staff)_
-
-## P-019 — Nombres de motivo de lealtad en el resultado
-- **Estado:** ABIERTA
-- **Para:** ARQUITECTO
-- **Tarea:** T10
-- **Fecha:** 04/10/2026
-- **Fuente:** `datos/_esquemas/resultado.schema.json`, `lealtad_cambios.motivo` (Arquitectura.md A.7), frente a `datos/tablas/lealtad.json`, `eventos`, y `combate.json`, `lealtad_por_victoria`
-- **Duda:** ¿el `motivo` de `lealtad_cambios` del resultado usa los nombres de evento de `lealtad.json` (más `victoria`), o T12 traduce los del acumulador a los del esquema actual?
-- **Caso que la dispara:** el resultado admite `victoria`, `muerte_en_el_grupo`, `rescate`, `perdon`, `comida`; `lealtad.json` nombra sus eventos `muerte_en_el_grupo`, `muerte_en_el_grupo_afines`, `rescate`, `perdon_a_leales`, `comer_atacante`. En el ejemplo de 5.2, el −4 del Surcón por la Rodauva muerta se anota como `muerte_en_el_grupo_afines`, que el esquema del resultado no admite.
-- **Opciones:** A) el enum del resultado pasa a las claves de `lealtad.json` más `victoria`. B) se deja el esquema y T12 traduce (`muerte_en_el_grupo_afines` → `muerte_en_el_grupo`, `perdon_a_leales` → `perdon`, `comer_atacante` → `comida`). — Recomendación técnica: A (un solo nombre por evento, el del dato que da el número).
-- **Bloquea:** no (hoy nadie serializa el cierre; lo hace T12)
-- **Mientras tanto:** `AcumuladorLealtad` anota las claves de `lealtad.json` y `"victoria"` para el +1 (`nucleo/combate/cierre.gd`). Sin cambios en `resultado.schema.json`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Respuesta: Arquitecto, 04/10/2026: opción A con un ajuste. El motivo es la clave de tablas/lealtad.json eventos. El +1 por victoria pasa de combate.json a lealtad.json eventos.victoria. Se aplica en T12 (Arquitectura.md 10.5, v0.16).
