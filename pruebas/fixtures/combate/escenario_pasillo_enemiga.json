@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "pasillo_enemiga",
+  "_nota": "Sistema.md 11.3, Movimiento: las salvajes en [0,2] y [2,2] hacen las paredes; la salvaje en [1,2] cierra el pasillo (muro)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 3, "alto": 5 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 4] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 4] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [0, 2] },
+    { "id": "ocarra_s2", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [2, 2] },
+    { "id": "ocarra_s3", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [1, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

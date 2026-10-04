@@ -167,8 +167,9 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 
 ## Estado actual
 
-- **Terminadas y mergeadas a `develop`:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador), T04 (esquemas y datos de 0a; test permanente `pruebas/datos/test_datos_completos.gd`).
-- **T05 terminada** (modelo de unidades), rama `tarea/T05-unidades`, pendiente de PR. `nucleo/unidades/`: `Especie`, `TablaBalanza`, `Criatura`, `Maestro`, `Pergamino` y `Plantel` (`desde_escenario` con fixtures, `desde_datos` con lo que entrega el Cargador; T12 lo reutiliza). Tests de reglas con fixtures en `pruebas/fixtures/unidades/` vía `pruebas/unidades/lector_fixture.gd`; el único con `datos/` real es `test_plantel_escenarios.gd`.
-- `docs/PREGUNTAS.md`: P-004 a P-007 y P-009 `CERRADA` en T05. Siguen `RESPONDIDA` y se cierran en su tarea: P-001 en T10, P-003 en T14, P-008 en T19, P-002 en T30. **P-010 `ABIERTA`** (Arquitecto, no bloquea): criterio (2) de T05; mientras tanto, las salvajes de B sin pergamino según `Sistema.md` 3.2.
+- **Terminadas y mergeadas a `develop`:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador), T04 (esquemas y datos de 0a; test permanente `pruebas/datos/test_datos_completos.gd`), T05 (modelo de unidades en `nucleo/unidades/`: `Especie`, `TablaBalanza`, `Criatura`, `Maestro`, `Pergamino`, `Plantel`).
+- **T06 terminada** (tablero y geometría), rama `tarea/T06-tablero`, pendiente de PR. `nucleo/combate/tablero.gd` (`Tablero`): solo consultas sobre el `Plantel`, sin modificarlo (distancia, vecinas, `alcanzables` por BFS, `en_linea`/`casillas_entre`/`linea_bloqueada`, `golpeables`, `despliegue` con `despliegue_filas` de `tablas/combate.json`). El bando que se pasa define aliada/enemiga. `Maestro` ganó `movimiento` y `alcance` (de `maestro.json`). Fixtures en `pruebas/fixtures/combate/`. También agregó el test (8) de T05.
+- Tests de reglas con fixtures vía `pruebas/unidades/lector_fixture.gd`; el único con `datos/` real (además del permanente) es `test_plantel_escenarios.gd`.
+- `docs/PREGUNTAS.md`: P-004 a P-007 y P-009 `CERRADA` en T05; P-010 `CERRADA` en T06. Siguen `RESPONDIDA` y se cierran en su tarea: P-001 en T10, P-003 en T14, P-008 en T19, P-002 en T30.
 - Al agregar un `class_name` nuevo, la caché de clases de Godot hay que refrescarla (abrir el editor o `--import`) antes de correr los tests: `runtest.cmd` no escanea.
 - Orden de 0a.1: T05 → T06 → T07 → T08 → T09 → T10 → T11 → T12 → **T34** → T13. Ninguna tarea está bloqueada.

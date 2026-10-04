@@ -47,3 +47,25 @@ func test_f_maestro_en_6() -> void:
 	var tabla: TablaBalanza = TablaBalanza.new(datos["tablas/balanza.json"])
 	var fila: Dictionary = tabla.fila(plantel.maestro.balanza)
 	assert_int(plantel.maestro.vida_max_real()).is_equal(fila["vida_max_real"] as int)
+
+
+# Arquitectura.md B.2 (T06) y A.6: con datos/ se crea el tablero de los 11
+# escenarios y toda posicion fijada queda dentro.
+func test_once_escenarios_crean_tablero() -> void:
+	var datos: Dictionary = _datos()
+	var cantidad: int = 0
+	for ruta in datos.keys():
+		if not (ruta as String).begins_with("escenarios/"):
+			continue
+		cantidad += 1
+		var escenario: Dictionary = datos[ruta]
+		var tablero: Tablero = Tablero.desde_datos(escenario["tablero"], datos["tablas/combate.json"])
+		var plantel: Plantel = Plantel.desde_datos(datos, escenario)
+		var posiciones: Array[Vector2i] = [plantel.maestro.posicion]
+		for criatura in plantel.criaturas():
+			posiciones.append(criatura.posicion)
+		for posicion in posiciones:
+			if posicion != Criatura.SIN_POSICION:
+				assert_bool(tablero.dentro(posicion)).override_failure_message("%s %s" % [ruta, posicion]).is_true()
+		assert_array(tablero.despliegue(Criatura.Bando.TRIBU)).override_failure_message(ruta).is_not_empty()
+	assert_int(cantidad).is_equal(11)
