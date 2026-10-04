@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "contrato_derrota",
+  "_nota": "Arquitectura.md B.2 (T12, test 5). Cola: ocarra_s1, ocarra_s2 (7, orden de enemigas, P-011), rodauva_1 (6), Maestro (5). La primera Ocarra [3,4] remata al Maestro [3,6] (vida 4) a distancia 2 en linea (Sistema.md 11.8): derrota en el acto (11.5), sin jugar ninguna entrada mas",
+  "tipo": "test",
+  "semilla": 42,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": 4, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [7, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 4] },
+    { "id": "ocarra_s2", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

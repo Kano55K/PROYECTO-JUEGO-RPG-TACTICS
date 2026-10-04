@@ -30,6 +30,11 @@ func siguiente(plantel: Plantel) -> EntradaCola:
 	return null
 
 
+# Cuantas entradas de la ronda ya se recorrieron (jugadas o salteadas).
+func lugar() -> int:
+	return _cursor
+
+
 func ronda_terminada() -> bool:
 	return _cursor >= _entradas.size()
 

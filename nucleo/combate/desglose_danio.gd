@@ -14,3 +14,19 @@ var planos_total: int = 0
 # true si el paso 4 subio el danio al minimo.
 var minimo_aplicado: bool = false
 var total: int = 0
+
+
+# Para el registro (Arquitectura.md A.7): solo enteros, textos y booleanos.
+func a_diccionario() -> Dictionary:
+	var lista: Array = []
+	for modificador in modificadores:
+		lista.append(modificador.a_diccionario())
+	return {
+		"base": base,
+		"modificadores": lista,
+		"porcentaje_total": porcentaje_total,
+		"tras_porcentajes": tras_porcentajes,
+		"planos_total": planos_total,
+		"minimo_aplicado": minimo_aplicado,
+		"total": total,
+	}
