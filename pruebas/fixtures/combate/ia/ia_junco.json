@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_junco",
+  "_nota": "Sistema.md 11.8 y 11.2, Hacerse junco (tests de T11). El Zancajunco salvaje [3,2] (4 + 2 en su primer ataque) tumba a la Rodauva [3,4] (vida 6) moviendose a [3,3]; si ya ataco, pega 4 y no la tumba",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [7, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": 6, "posicion": [3, 4] }
+  ],
+  "enemigas": [
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

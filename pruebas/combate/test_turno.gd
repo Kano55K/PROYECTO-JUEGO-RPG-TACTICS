@@ -362,3 +362,25 @@ func test_turno_sin_azar() -> void:
 		assert_str(fuente).is_not_empty()
 		for prohibido in _AZAR_PROHIBIDO:
 			assert_bool(fuente.contains(prohibido)).override_failure_message(ruta + " usa " + prohibido).is_false()
+
+
+# T11: previsualizar un ataque da el mismo danio que aplicarlo, desde la casilla
+# actual o desde otra a la que llega, sin cambiar nada; una casilla a la que no
+# llega se rechaza con el motivo del movimiento.
+func test_previsualizar_ataque() -> void:
+	var plantel: Plantel = _plantel()
+	var turno: Turno = _turno(plantel, "ocarra_1")
+	var antes: String = _foto(plantel)
+	var desde_otra: ResultadoAccion = turno.previsualizar_ataque(Vector2i(2, 7), "rodauva_s1")
+	_assert_valida(desde_otra)
+	assert_int(desde_otra.danio).is_equal(4)
+	_assert_rechazada(turno.previsualizar_ataque(Vector2i(0, 0), "rodauva_s1"), ResultadoAccion.Motivo.CASILLA_NO_ALCANZABLE)
+	_assert_rechazada(turno.previsualizar_ataque(Vector2i(3, 7), "rodauva_1"), ResultadoAccion.Motivo.OBJETIVO_ALIADO)
+	var previsto: ResultadoAccion = turno.previsualizar_ataque(Vector2i(3, 7), "ocarra_s1")
+	assert_str(_foto(plantel)).is_equal(antes)
+	assert_bool(turno.movimiento_usado or turno.accion_usada).is_false()
+	assert_int(turno.pasos_para_mover()[Vector2i(3, 7)]).is_equal(0)
+
+	var aplicado: ResultadoAccion = turno.aplicar(Accion.atacar("ocarra_s1"))
+	_assert_valida(aplicado)
+	assert_int(aplicado.danio).is_equal(previsto.danio)

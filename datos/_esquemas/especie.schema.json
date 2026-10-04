@@ -121,6 +121,10 @@
         "inmovil": {
           "type": "boolean"
         },
+        "umbral_vida_pct": {
+          "description": "Sistema.md 11.8, paso 3: la IA de las salvajes usa el rasgo con vida <= este % de la maxima",
+          "$ref": "comunes.schema.json#/$defs/pct"
+        },
         "danio_recibido_plano": {
           "type": "integer",
           "maximum": 0

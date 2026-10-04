@@ -52,6 +52,14 @@ func adyacentes(a: Vector2i, b: Vector2i) -> bool:
 # Se pasa por aliadas y caidas propias, nunca por enemigas; no se termina en una
 # casilla ocupada. Incluye `desde` (quedarse quieto). Orden de lectura.
 func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel) -> Array[Vector2i]:
+	var resultado: Array[Vector2i] = []
+	resultado.assign(pasos_hasta(desde, movimiento, bando, plantel).keys())
+	return _en_orden_de_lectura(resultado)
+
+
+# Las mismas casillas que `alcanzables`, cada una con los pasos del camino mas
+# corto (`desde` vale 0). La IA la usa para "la de menos movimiento" (11.8).
+func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel) -> Dictionary:
 	var ocupantes: Dictionary = _ocupantes(plantel)
 	var pasos: Dictionary = {desde: 0}
 	var frontera: Array[Vector2i] = [desde]
@@ -67,11 +75,11 @@ func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plante
 			pasos[vecina] = pasos[actual] + 1
 			frontera.append(vecina)
 
-	var resultado: Array[Vector2i] = []
+	var resultado: Dictionary = {}
 	for casilla in pasos.keys():
 		if casilla == desde or not ocupantes.has(casilla):
-			resultado.append(casilla)
-	return _en_orden_de_lectura(resultado)
+			resultado[casilla] = pasos[casilla]
+	return resultado
 
 
 # Misma fila o misma columna (y casillas distintas).

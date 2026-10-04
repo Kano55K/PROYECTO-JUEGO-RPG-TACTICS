@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_casilla_pasos",
+  "_nota": "Sistema.md 11.8, Casilla desde donde golpear (tests de T11): la Rodauva salvaje [2,4] (Alcance 1) golpea a la Rodauva [3,2] desde [3,1] (4 pasos), [2,2] o [3,3] (2 pasos) o [4,2] (4 pasos): menos pasos y despues orden de lectura, [2,2]",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [7, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 2] }
+  ],
+  "enemigas": [
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [2, 4] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}
