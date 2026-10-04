@@ -46,6 +46,22 @@ func test_dos_generadores_con_la_misma_semilla_no_se_interfieren() -> void:
 	assert_array(secuencia_b).is_equal(secuencia_referencia)
 
 
+# Arquitectura.md A.8 (T12): de una semilla se derivan generadores por sistema.
+# Mismo par semilla/sistema -> misma secuencia; otro sistema u otra semilla -> otra.
+func test_derivado_por_sistema() -> void:
+	var listas: Array = []
+	for clave in [[7, "combate"], [7, "combate"], [7, "textos"], [8, "combate"]]:
+		var generador: GeneradorAzar = GeneradorAzar.derivado(clave[0], clave[1])
+		var secuencia: Array[int] = []
+		for i in range(CANTIDAD_TIRADAS):
+			secuencia.append(generador.entero(0, 999999))
+		listas.append(secuencia)
+	assert_array(listas[1]).is_equal(listas[0])
+	assert_array(listas[2]).is_not_equal(listas[0])
+	assert_array(listas[3]).is_not_equal(listas[0])
+	assert_int(GeneradorAzar.derivado(7, "combate").semilla()).is_equal(GeneradorAzar.derivado(7, "combate").semilla())
+
+
 func test_historial_registra_cada_tirada() -> void:
 	var generador: GeneradorAzar = GeneradorAzar.new(42)
 	var resultados: Array[int] = []

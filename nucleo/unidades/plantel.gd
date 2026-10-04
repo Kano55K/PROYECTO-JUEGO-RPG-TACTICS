@@ -89,6 +89,52 @@ func pergaminos() -> Array[Pergamino]:
 	return _pergaminos.duplicate()
 
 
+# Foto del estado para comparar (tests, reproductor de T12): solo enteros,
+# textos, booleanos, null, listas y diccionarios. Criaturas en el orden del Plantel.
+func instantanea() -> Dictionary:
+	var lista_criaturas: Array = []
+	for c in _criaturas:
+		lista_criaturas.append({
+			"id": c.id,
+			"estado": nombre_estado(c.estado),
+			"vida": c.vida,
+			"lealtad": c.lealtad,
+			"posicion": casilla_a_lista(c.posicion),
+			"erizada": c.erizada,
+			"ya_ataco": c.ya_ataco,
+			"pergamino": c.pergamino_id,
+		})
+	var lista_pergaminos: Array = []
+	for p in _pergaminos:
+		lista_pergaminos.append({
+			"id": p.id,
+			"estado": (Pergamino.Estado.keys()[p.estado] as String).to_lower(),
+			"ocupante": p.ocupante_id,
+		})
+	return {
+		"maestro": {
+			"vida": maestro.vida,
+			"posicion": casilla_a_lista(maestro.posicion),
+			"caido": maestro.caido,
+		},
+		"criaturas": lista_criaturas,
+		"pergaminos": lista_pergaminos,
+		"cerrado": cerrado,
+	}
+
+
+# "suelta", "guardada", "caida", "fuera", "muerta".
+static func nombre_estado(estado: Criatura.Estado) -> String:
+	return (Criatura.Estado.keys()[estado] as String).to_lower()
+
+
+# [x, y], o null si no esta en el tablero.
+static func casilla_a_lista(casilla: Vector2i) -> Variant:
+	if casilla == Criatura.SIN_POSICION:
+		return null
+	return [casilla.x, casilla.y]
+
+
 func _nuevo_pergamino() -> Pergamino:
 	var nuevo: Pergamino = Pergamino.new(_FORMATO_ID_PERGAMINO % [_pergaminos.size() + 1])
 	_pergaminos.append(nuevo)

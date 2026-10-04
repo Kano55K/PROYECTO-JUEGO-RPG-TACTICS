@@ -194,7 +194,8 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
 
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.danio = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id)).total
+	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id))
+	resultado.danio = resultado.desglose.total
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
 		VidaCero.resolver(objetivo_id, _plantel)

@@ -38,6 +38,52 @@ static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
 
 
+# Arquitectura.md A.7: la accion como diccionario, para el registro y la
+# grabacion. Solo enteros y textos; ida y vuelta exacta con desde_diccionario.
+func a_diccionario() -> Dictionary:
+	var resultado: Dictionary = {"tipo": (Tipo.keys()[tipo] as String).to_lower()}
+	match tipo:
+		Tipo.MOVER:
+			resultado["casilla"] = [casilla.x, casilla.y]
+		Tipo.ATACAR:
+			resultado["objetivo"] = objetivo_id
+	return resultado
+
+
+# null si el diccionario no es una accion valida (tipo desconocido, falta o
+# sobra un campo, casilla mal formada).
+static func desde_diccionario(datos: Dictionary) -> Accion:
+	if not datos.get("tipo") is String:
+		return null
+	var nombre: String = (datos["tipo"] as String).to_upper()
+	if not Tipo.has(nombre) or datos["tipo"] != nombre.to_lower():
+		return null
+	var tipo_accion: Tipo = Tipo[nombre]
+	match tipo_accion:
+		Tipo.MOVER:
+			if datos.size() != 2 or not _es_casilla(datos.get("casilla")):
+				return null
+			var par: Array = datos["casilla"]
+			return mover(Vector2i(int(par[0]), int(par[1])))
+		Tipo.ATACAR:
+			if datos.size() != 2 or not datos.get("objetivo") is String:
+				return null
+			return atacar(datos["objetivo"])
+	if datos.size() != 1:
+		return null
+	return Accion.new(tipo_accion)
+
+
+# Un par [x, y] de enteros (un JSON leido sin validar los trae como 3.0).
+static func _es_casilla(valor: Variant) -> bool:
+	if not valor is Array or (valor as Array).size() != 2:
+		return false
+	for coordenada in (valor as Array):
+		if not (coordenada is int or coordenada is float) or coordenada != floorf(coordenada):
+			return false
+	return true
+
+
 # Sistema.md 11.3: invocar y huir gastan el turno completo. Ningun tipo de hoy
 # lo hace; los de T26 a T28 devolveran true aca.
 func gasta_turno_completo() -> bool:

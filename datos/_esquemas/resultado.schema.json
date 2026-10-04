@@ -1,17 +1,19 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Resultado de combate",
-  "description": "Arquitectura.md A.7. Salida del combate. La pantalla de resultado solo lo muestra; en 0b el loop lo aplica a la partida. No es un archivo que se edite: lo escribe el núcleo.",
+  "description": "Arquitectura.md A.7. Salida del combate. La pantalla de resultado solo lo muestra; en 0b el loop lo aplica a la partida. No es un archivo que se edite: lo escribe el núcleo (ResultadoCombate, T12). Los campos de tareas futuras van en null o lista vacía; su description dice qué tarea los llena.",
   "type": "object",
   "required": [
     "contexto_id",
     "semilla",
     "desenlace",
     "rondas",
+    "maestro_caido",
     "rescatista",
     "permadeath",
     "maestro",
     "unidades",
+    "levantadas",
+    "muertas",
     "capturas",
     "lealtad_cambios",
     "pergaminos",
@@ -20,6 +22,12 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "$ref": "comunes.schema.json#/$defs/nota"
+    },
     "contexto_id": {
       "$ref": "comunes.schema.json#/$defs/id"
     },
@@ -27,9 +35,10 @@
       "type": "integer"
     },
     "desenlace": {
+      "description": "Los nombres de FinCombate y del evento fin del registro. huida: T28",
       "enum": [
         "victoria",
-        "derrota",
+        "derrota_por_caida",
         "huida"
       ]
     },
@@ -37,40 +46,58 @@
       "type": "integer",
       "minimum": 0
     },
+    "maestro_caido": {
+      "type": "boolean"
+    },
     "rescatista": {
+      "description": "id de la rescatista. T12: null. Lo llena T29",
       "type": [
         "string",
         "null"
       ],
-      "description": "id de la rescatista; null si no cayó el Maestro o si no hubo"
+      "pattern": "^[a-z0-9_]+$"
     },
     "permadeath": {
-      "type": "boolean"
+      "description": "T12: null. Lo llena T29",
+      "type": [
+        "boolean",
+        "null"
+      ]
     },
     "maestro": {
       "type": "object",
       "required": [
         "vida",
+        "posicion",
         "mana",
         "hambre"
       ],
       "additionalProperties": false,
       "properties": {
         "vida": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 0
+        },
+        "posicion": {
+          "$ref": "comunes.schema.json#/$defs/posicion"
         },
         "mana": {
-          "type": "integer"
+          "description": "T12: null. Lo llena T21",
+          "type": [
+            "integer",
+            "null"
+          ]
         },
         "hambre": {
           "type": "integer"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
     "unidades": {
+      "description": "Estado final de cada criatura, en el orden del Plantel",
       "type": "array",
       "items": {
         "type": "object",
@@ -78,8 +105,10 @@
           "id",
           "especie",
           "bando",
-          "final",
-          "vida"
+          "estado",
+          "vida",
+          "lealtad",
+          "posicion"
         ],
         "additionalProperties": false,
         "properties": {
@@ -95,35 +124,52 @@
               "enemiga"
             ]
           },
-          "final": {
+          "estado": {
             "enum": [
-              "de_pie",
-              "levantada",
+              "suelta",
               "guardada",
-              "guardada_caida",
-              "muerta",
-              "huyo",
-              "sellada",
-              "caida_pendiente"
+              "caida",
+              "fuera",
+              "muerta"
             ]
           },
           "vida": {
             "type": "integer",
             "minimum": 0
           },
-          "hambre": {
-            "type": "integer"
-          },
           "lealtad": {
-            "type": "integer"
+            "description": "null en las enemigas",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "posicion": {
+            "description": "null si no está en el tablero",
+            "$ref": "comunes.schema.json#/$defs/posicion"
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }
     },
+    "levantadas": {
+      "description": "ids de las caídas de la tribu que se levantaron (victoria)",
+      "type": "array",
+      "items": {
+        "$ref": "comunes.schema.json#/$defs/id"
+      }
+    },
+    "muertas": {
+      "description": "ids de las caídas de la tribu que murieron (derrota)",
+      "type": "array",
+      "items": {
+        "$ref": "comunes.schema.json#/$defs/id"
+      }
+    },
     "capturas": {
+      "description": "T12: lista vacía. La llenan T24 (sellar) y T30 (resellar)",
       "type": "array",
       "items": {
         "type": "object",
@@ -151,39 +197,69 @@
             "type": "integer"
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }
     },
     "lealtad_cambios": {
+      "description": "Lo que devuelve el acumulador de lealtad: por criatura, antes, cambio recortado una vez y después, con cada anotación y su motivo",
       "type": "array",
       "items": {
         "type": "object",
         "required": [
           "id",
-          "delta",
-          "motivo"
+          "antes",
+          "cambio",
+          "despues",
+          "anotaciones"
         ],
         "additionalProperties": false,
         "properties": {
           "id": {
             "$ref": "comunes.schema.json#/$defs/id"
           },
-          "delta": {
+          "antes": {
             "type": "integer"
           },
-          "motivo": {
-            "enum": [
-              "victoria",
-              "muerte_en_el_grupo",
-              "rescate",
-              "perdon",
-              "comida"
-            ]
+          "cambio": {
+            "type": "integer"
+          },
+          "despues": {
+            "type": "integer"
+          },
+          "anotaciones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "cambio",
+                "motivo"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "cambio": {
+                  "type": "integer"
+                },
+                "motivo": {
+                  "description": "Las claves de tablas/lealtad.json eventos (P-019)",
+                  "enum": [
+                    "victoria",
+                    "muerte_en_el_grupo",
+                    "muerte_en_el_grupo_afines",
+                    "rescate",
+                    "perdon_a_leales",
+                    "comer_atacante"
+                  ]
+                },
+                "_nota": {
+                  "$ref": "comunes.schema.json#/$defs/nota"
+                }
+              }
+            }
           },
           "_nota": {
-            "type": "string"
+            "$ref": "comunes.schema.json#/$defs/nota"
           }
         }
       }
@@ -201,26 +277,31 @@
           "minimum": 0
         },
         "ardidos": {
+          "description": "ids de los pergaminos que ardieron en este combate (como el evento cierre del registro)",
           "type": "array",
           "items": {
-            "type": "string"
-          },
-          "description": "ids de las instancias cuyo pergamino ardió"
+            "$ref": "comunes.schema.json#/$defs/id"
+          }
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
     },
     "atacante_pendiente": {
+      "description": "id de la atacante nocturna caída al terminar, que espera la decisión del Maestro (perdonar, sellar, comer: T30); null si no hay",
       "type": [
         "string",
         "null"
       ],
-      "description": "Atacante nocturna caída que espera la decisión del Maestro (perdonar, sellar, comer)"
+      "pattern": "^[a-z0-9_]+$"
     },
     "metricas": {
-      "type": "object",
+      "description": "T12: null. Las llenan T23 y T33, desde el registro (Sistema.md 11.9)",
+      "type": [
+        "object",
+        "null"
+      ],
       "required": [
         "secundar_usos",
         "eslabones_promedio",
@@ -278,12 +359,9 @@
           "type": "number"
         },
         "_nota": {
-          "type": "string"
+          "$ref": "comunes.schema.json#/$defs/nota"
         }
       }
-    },
-    "_nota": {
-      "type": "string"
     }
   }
 }

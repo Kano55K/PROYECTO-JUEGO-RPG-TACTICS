@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "contrato_victoria",
+  "_nota": "Arquitectura.md B.2 (T12, tests 4 y 6). Cola: ocarra_s1 (7), rodauva_1 (6), Maestro (5). La Ocarra salvaje [2,4] remata a la Rodauva [2,6] (vida 2) a distancia 2 en linea, sin moverse (Sistema.md 11.8). El Maestro (balanza 2: 4 de danio) va a [2,5] y tumba a la Ocarra (vida 4): victoria, y la Rodauva caida se levanta (11.5)",
+  "tipo": "test",
+  "semilla": 41,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 2, "posicion": [2, 6] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": 4, "posicion": [2, 4] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

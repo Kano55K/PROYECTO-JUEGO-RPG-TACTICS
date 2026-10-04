@@ -14,7 +14,7 @@ var _danio: Danio
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate)
+	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:

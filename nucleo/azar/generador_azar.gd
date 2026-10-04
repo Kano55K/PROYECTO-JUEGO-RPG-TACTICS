@@ -14,6 +14,18 @@ func _init(semilla: int) -> void:
 	_rng.seed = semilla
 
 
+# Arquitectura.md A.8: de una semilla se derivan generadores separados por
+# sistema ("combate", "textos"...). La semilla derivada son los primeros 8 bytes
+# del SHA-256 de "semilla/sistema": no depende del orden en que se crean, asi
+# que sumar un sistema no cambia las tiradas de los otros.
+static func derivado(semilla_base: int, sistema: String) -> GeneradorAzar:
+	var contexto: HashingContext = HashingContext.new()
+	contexto.start(HashingContext.HASH_SHA256)
+	contexto.update(("%d/%s" % [semilla_base, sistema]).to_utf8_buffer())
+	var resumen: PackedByteArray = contexto.finish()
+	return GeneradorAzar.new(resumen.decode_s64(0))
+
+
 func semilla() -> int:
 	return _semilla
 

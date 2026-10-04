@@ -7,21 +7,23 @@ extends RefCounted
 
 var danio_minimo: int
 var _enfermedad_pct: int
-# Estados de tablas/hambre.json; vacio = nadie recibe porcentaje por hambre.
+# Estados de tablas/hambre.json.
 var _estados_hambre: Array = []
 
 
-func _init(minimo: int, enfermedad_pct: int = 0, estados_hambre: Array = []) -> void:
+func _init(minimo: int, enfermedad_pct: int, estados_hambre: Array) -> void:
 	danio_minimo = minimo
 	_enfermedad_pct = enfermedad_pct
 	_estados_hambre = estados_hambre
 
 
-# tabla_combate: tablas/combate.json. tabla_hambre: tablas/hambre.json; sin ella
-# no hay porcentaje por hambre (los tests de T08 no la pasan).
-static func desde_datos(tabla_combate: Dictionary, tabla_hambre: Dictionary = {}) -> Danio:
+# tabla_combate: tablas/combate.json. tabla_hambre: tablas/hambre.json, obligatoria
+# (Saciado, 7.1): sin sus estados devuelve null, sin valor por defecto (T12).
+static func desde_datos(tabla_combate: Dictionary, tabla_hambre: Dictionary) -> Danio:
+	if not tabla_hambre.has("estados"):
+		return null
 	return Danio.new(tabla_combate["danio_minimo"], tabla_combate["enfermedad_danio_pct"],
-			tabla_hambre.get("estados", []))
+			tabla_hambre["estados"])
 
 
 # No modifica el Plantel: sirve igual para validar y para aplicar un ataque.

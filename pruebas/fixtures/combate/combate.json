@@ -1,6 +1,6 @@
 {
   "$schema": "../../../datos/_esquemas/combate.schema.json",
-  "_nota": "Copia de datos/tablas/combate.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 8.2, 8.4, 10.1 a 10.7, 11.3, 11.5, 11.7 y 5.2 (victoria). En otros archivos: Arrimo por paso (tablas/arrimo.json), obediencia por hambre, Saciado y hambre de combate (tablas/hambre.json), % de huida y rasgos (especies/), costo de guardar caida (tablas/costos_mana.json), muerte en el grupo y rescate (tablas/lealtad.json), umbral de rescate y pasos de Arrimo (tablas/balanza.json). Las tablas de 10.2 (eslabones) y 10.6 (cobardia por balanza) se derivan, no se guardan. Campos sueltos: despliegue_filas 11.3; danio_minimo 8.4 y 11.4 paso 4; afinidad_danio_plano 10.3 (tambien es el tope por ataque) y 10.7; enfermedad_danio_pct 8.2, por enfermedad, se suman (el mismo -25 rige la recoleccion en 0b); alcance_sellar 4.1; alcance_guardar_caida y vida_tras_caida 11.5; lealtad_por_victoria 5.2",
+  "_nota": "Copia de datos/tablas/combate.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 8.2, 8.4, 10.1 a 10.7, 11.3, 11.5 y 11.7. En otros archivos: Arrimo por paso (tablas/arrimo.json), obediencia por hambre, Saciado y hambre de combate (tablas/hambre.json), % de huida y rasgos (especies/), costo de guardar caida (tablas/costos_mana.json), muerte en el grupo, rescate y victoria (tablas/lealtad.json), umbral de rescate y pasos de Arrimo (tablas/balanza.json). Las tablas de 10.2 (eslabones) y 10.6 (cobardia por balanza) se derivan, no se guardan. Campos sueltos: despliegue_filas 11.3; danio_minimo 8.4 y 11.4 paso 4; afinidad_danio_plano 10.3 (tambien es el tope por ataque) y 10.7; enfermedad_danio_pct 8.2, por enfermedad, se suman (el mismo -25 rige la recoleccion en 0b); alcance_sellar 4.1; alcance_guardar_caida y vida_tras_caida 11.5",
   "despliegue_filas": 2,
   "danio_minimo": 1,
   "afinidad_danio_plano": 1,
@@ -59,6 +59,5 @@
   },
   "alcance_sellar": 2,
   "alcance_guardar_caida": 2,
-  "vida_tras_caida": 1,
-  "lealtad_por_victoria": 1
+  "vida_tras_caida": 1
 }

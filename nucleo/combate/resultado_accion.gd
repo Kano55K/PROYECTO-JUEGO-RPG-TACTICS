@@ -23,12 +23,17 @@ enum Motivo {
 	SIN_RASGO,
 	# Sistema.md 11.5: con el combate terminado no se acepta ninguna accion.
 	COMBATE_TERMINADO,
+	# Combate.aplicar: no es el turno de una unidad del jugador (o el combate se
+	# detuvo por un error).
+	FUERA_DE_TURNO,
 }
 
 var valida: bool
 var motivo: Motivo
 # Solo al atacar: el danio que hace o haria el golpe.
 var danio: int = 0
+# Solo al atacar: el desglose de 11.4 (danio == desglose.total). Lo lee el registro.
+var desglose: DesgloseDanio = null
 # Solo al terminar: true si el turno se cierra sin haber usado la accion (P-015).
 var espero: bool = false
 # Como esta el combate: despues de aplicar, o el motivo de un rechazo por

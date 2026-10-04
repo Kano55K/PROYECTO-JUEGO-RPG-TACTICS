@@ -20,3 +20,13 @@ func _init(fuente_modificador: Fuente, tipo_modificador: Tipo, valor_modificador
 	tipo = tipo_modificador
 	valor = valor_modificador
 	detalle = detalle_modificador
+
+
+# Para el registro (Arquitectura.md A.7). Fuente y tipo, en minusculas.
+func a_diccionario() -> Dictionary:
+	return {
+		"fuente": (Fuente.keys()[fuente] as String).to_lower(),
+		"tipo": (Tipo.keys()[tipo] as String).to_lower(),
+		"valor": valor,
+		"detalle": detalle,
+	}
