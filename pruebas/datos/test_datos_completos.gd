@@ -51,10 +51,13 @@ func test_estan_los_once_escenarios() -> void:
 
 
 # Arquitectura.md A.2: a_dia_1 es el ejemplo de escenario, copiado tal cual.
+# Salvo la _nota, que T05 actualiza por P-009 (A.9, fila A).
 func test_a_dia_1_es_el_ejemplo_de_a2() -> void:
-	var ejemplo: Variant = JSON.parse_string(FileAccess.get_file_as_string(_FIXTURE_EJEMPLO_A2))
-	var archivo: Variant = JSON.parse_string(FileAccess.get_file_as_string(_CARPETA_DATOS.path_join("escenarios/a_dia_1.json")))
-	assert_dict(archivo as Dictionary).is_equal(ejemplo as Dictionary)
+	var ejemplo: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_FIXTURE_EJEMPLO_A2))
+	var archivo: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_CARPETA_DATOS.path_join("escenarios/a_dia_1.json")))
+	ejemplo.erase("_nota")
+	archivo.erase("_nota")
+	assert_dict(archivo).is_equal(ejemplo)
 
 
 # Sistema.md 11.9: las variantes que se comparan comparten semilla.
