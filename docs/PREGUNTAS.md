@@ -225,7 +225,7 @@
 - **Respuesta:** _(la completa el staff)_
 
 ## P-017 — Daño negativo tras los porcentajes y bonos planos
-- **Estado:** RESPONDIDA
+- **Estado:** ABIERTA
 - **Para:** SISTEMAS
 - **Tarea:** T09
 - **Fecha:** 04/10/2026
@@ -250,7 +250,7 @@
 - **Respuesta:** _(la completa el staff)_
 
 ## P-019 — Nombres de motivo de lealtad en el resultado
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** ARQUITECTO
 - **Tarea:** T10
 - **Fecha:** 04/10/2026
