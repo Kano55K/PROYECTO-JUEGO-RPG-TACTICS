@@ -17,6 +17,9 @@ const _COMPORTAMIENTOS: Dictionary = {
 }
 
 var maestro: Maestro
+# El cierre ya corrio (T10): se ejecuta una sola vez por combate. Estado del
+# combate: no viene del escenario.
+var cerrado: bool = false
 var _criaturas: Array[Criatura] = []
 var _pergaminos: Array[Pergamino] = []
 

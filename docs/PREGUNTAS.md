@@ -1,5 +1,5 @@
 ## P-001 — Qué significa "afines" en la muerte en el grupo
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -10,6 +10,7 @@
 - **Bloquea:** no. El esquema `lealtad` guarda los dos números (`eventos.muerte_en_el_grupo` y `eventos.muerte_en_el_grupo_afines`); la regla se programa en T10.
 - **Mientras tanto:** solo están los campos en el esquema; no hay código que elija entre −2 y −4.
 - **Respuesta:** `Sistema.md` 5.2 v1.1 (03/10/2026): opción A. "Afines" es la relación de especie (10.8), mirada suelta por suelta: −4 a cada suelta cuya especie se lleve bien con la de la muerta; −2 al resto. La posición no cuenta. En el caso: Rodauva −4, Surcón −4, Ocarra −2. Además, regla nueva: todos los cambios de lealtad de un combate (o de una noche) se suman y el total se recorta a 0–10 una sola vez. Se aplica en T10.
+- **Cerrada en:** T10
 
 ## P-002 — Afines de la atacante comida por el Maestro
 - **Estado:** RESPONDIDA
@@ -247,4 +248,17 @@
 - **Opciones:** A) sí: bloquea como de pie (no se pasa por encima ni a través de una caída enemiga; por una aliada sí). B) no: la casilla está ocupada (nadie termina ahí), pero no corta la línea ni el paso. — Recomendación técnica: A (lectura literal; es lo que ya hace `Tablero` desde T06, que cuenta a las caídas como ocupantes).
 - **Bloquea:** no
 - **Mientras tanto:** programado con A, sin cambios en `nucleo/combate/tablero.gd`. Si Sistemas elige B, `Tablero` deja de contar a las caídas para el paso y la línea (no para terminar el movimiento) y se agrega un test.
+- **Respuesta:** _(la completa el staff)_
+
+## P-019 — Nombres de motivo de lealtad en el resultado
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T10
+- **Fecha:** 04/10/2026
+- **Fuente:** `datos/_esquemas/resultado.schema.json`, `lealtad_cambios.motivo` (Arquitectura.md A.7), frente a `datos/tablas/lealtad.json`, `eventos`, y `combate.json`, `lealtad_por_victoria`
+- **Duda:** ¿el `motivo` de `lealtad_cambios` del resultado usa los nombres de evento de `lealtad.json` (más `victoria`), o T12 traduce los del acumulador a los del esquema actual?
+- **Caso que la dispara:** el resultado admite `victoria`, `muerte_en_el_grupo`, `rescate`, `perdon`, `comida`; `lealtad.json` nombra sus eventos `muerte_en_el_grupo`, `muerte_en_el_grupo_afines`, `rescate`, `perdon_a_leales`, `comer_atacante`. En el ejemplo de 5.2, el −4 del Surcón por la Rodauva muerta se anota como `muerte_en_el_grupo_afines`, que el esquema del resultado no admite.
+- **Opciones:** A) el enum del resultado pasa a las claves de `lealtad.json` más `victoria`. B) se deja el esquema y T12 traduce (`muerte_en_el_grupo_afines` → `muerte_en_el_grupo`, `perdon_a_leales` → `perdon`, `comer_atacante` → `comida`). — Recomendación técnica: A (un solo nombre por evento, el del dato que da el número).
+- **Bloquea:** no (hoy nadie serializa el cierre; lo hace T12)
+- **Mientras tanto:** `AcumuladorLealtad` anota las claves de `lealtad.json` y `"victoria"` para el +1 (`nucleo/combate/cierre.gd`). Sin cambios en `resultado.schema.json`.
 - **Respuesta:** _(la completa el staff)_

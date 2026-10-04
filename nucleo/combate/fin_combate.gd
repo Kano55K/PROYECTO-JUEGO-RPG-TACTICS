@@ -1,10 +1,11 @@
 # Sistema.md 11.5: el combate se gana cuando no queda ninguna enemiga en pie y se
 # pierde cuando cae el Maestro. No se guarda: sale del Plantel, asi todos los
-# turnos lo ven igual. El cierre (T10, sesion 2) recibe el mismo Fin.
+# turnos lo ven igual. El cierre (Cierre) recibe el mismo Fin.
 class_name FinCombate
 extends RefCounted
 
-enum Fin { EN_CURSO, VICTORIA, DERROTA_POR_CAIDA }
+# HUIDA: sin programar (T26); evaluar nunca lo devuelve.
+enum Fin { EN_CURSO, VICTORIA, DERROTA_POR_CAIDA, HUIDA }
 
 
 # La caida del Maestro termina el combate en el acto, quede quien quede.
