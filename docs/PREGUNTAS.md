@@ -126,3 +126,16 @@
 - **Mientras tanto:** `a_dia_1` queda copiado tal cual del ejemplo de A.2.
 - **Respuesta:** `Sistema.md` 11.6 v1.1 (03/10/2026): opción A. Manda la IA de 11.8; 11.6 es referencia de daño. Hay que actualizar la `_nota` de `a_dia_1.json`: la apuesta es la Rodauva, no la vida del Maestro. Se aplica en T05.
 - **Cerrada en:** T05
+
+## P-010 — Criterio (2) de T05: pergaminos de las Ocarras de B
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T05
+- **Fecha:** 04/10/2026
+- **Fuente:** `Arquitectura.md` B.2, fila T05, criterio (2) ("las dos Ocarras de B son independientes: […] y tienen pergaminos distintos") contra la misma fila ("las salvajes no [ocupan pergamino]") y `Sistema.md` 3.2 (ocupa pergamino cada criatura de la tribu)
+- **Duda:** ¿el criterio (2) debe comprobar que las dos Ocarras de B *no* tienen pergamino, ya que son salvajes?
+- **Caso que la dispara:** en `b_muro` las dos Ocarras (`ocarra_s1`, `ocarra_s2`) son enemigas salvajes: por 3.2 ninguna ocupa pergamino, así que no pueden tener "pergaminos distintos".
+- **Opciones:** A) en (2) se comprueba la independencia de la vida y que ninguna tiene pergamino; que criaturas distintas tengan pergaminos distintos ya lo cubre el criterio (4) en G. B) el criterio (2) usa otro escenario con dos criaturas de la misma especie en la tribu. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** manda `Sistema.md` 3.2: las salvajes no tienen pergamino. El test (2) (`pruebas/unidades/test_plantel.gd`) comprueba que la vida es independiente y que las dos quedan sin pergamino.
+- **Respuesta:** _(la completa el staff)_

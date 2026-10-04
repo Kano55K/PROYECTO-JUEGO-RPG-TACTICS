@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "a_dia_1",
+  "_nota": "Copia de datos/escenarios/a_dia_1.json para los tests de reglas (Arquitectura.md A.6). ¿Sello al 50% o arriesgo una ronda más? Manda la IA de 11.8: la Ocarra va por la Rodauva (menos vida actual), así que la apuesta es la Rodauva, no la vida del Maestro. 11.6 es referencia de daño (Sistema.md 11.6 v1.1, P-009).",
+  "tipo": "test",
+  "semilla": 12345,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 5, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje",
+      "vida": null, "posicion": [4, 0] }
+  ],
+  "pergaminos_en_blanco": 2,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

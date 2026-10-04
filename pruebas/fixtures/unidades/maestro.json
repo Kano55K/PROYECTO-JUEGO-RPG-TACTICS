@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/maestro.schema.json",
+  "_nota": "Copia para los tests de reglas (Arquitectura.md A.6). Sistema.md 11.2 (movimiento, alcance, velocidad: no dependen de la balanza) y 1.6 (hechizos). Vida y danio cuerpo a cuerpo salen de tablas/balanza.json (Sistema.md 1.2 y 11.2): no van aca",
+  "movimiento": 3,
+  "alcance": 1,
+  "velocidad": 5,
+  "hechizos": [
+    "martillazo",
+    "lanzadera",
+    "remiendo"
+  ],
+  "iniciales": {
+    "_nota": "Sistema.md 1.1 (balanza 2, poder 1, regeneracion 1). Hambre 3: Sistema.md 11.9, reglas de los escenarios",
+    "balanza": 2,
+    "poder": 1,
+    "regeneracion": 1,
+    "hambre": 3
+  }
+}

@@ -168,7 +168,7 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 ## Estado actual
 
 - **Terminadas y mergeadas a `develop`:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador), T04 (esquemas y datos de 0a; test permanente `pruebas/datos/test_datos_completos.gd`).
-- **En curso: T05** (modelo de unidades), rama `tarea/T05-unidades`. **Sesión 1 hecha:** `nucleo/unidades/` con `Especie`, `TablaBalanza`, `Criatura` y `Maestro` (vida máxima y daño derivados de la balanza, nunca guardados); tests (1) y (7) con fixtures en `pruebas/fixtures/unidades/`, validados con los esquemas reales vía `pruebas/unidades/lector_fixture.gd`. **Sesión 2 pendiente:** `Pergamino`, `Plantel`, creación desde escenario y tests (2) a (6).
-- `docs/PREGUNTAS.md`: P-004 a P-007 y P-009 `CERRADA` en T05. Siguen `RESPONDIDA` y se cierran en su tarea: P-001 en T10, P-003 en T14, P-008 en T19, P-002 en T30.
+- **T05 terminada** (modelo de unidades), rama `tarea/T05-unidades`, pendiente de PR. `nucleo/unidades/`: `Especie`, `TablaBalanza`, `Criatura`, `Maestro`, `Pergamino` y `Plantel` (`desde_escenario` con fixtures, `desde_datos` con lo que entrega el Cargador; T12 lo reutiliza). Tests de reglas con fixtures en `pruebas/fixtures/unidades/` vía `pruebas/unidades/lector_fixture.gd`; el único con `datos/` real es `test_plantel_escenarios.gd`.
+- `docs/PREGUNTAS.md`: P-004 a P-007 y P-009 `CERRADA` en T05. Siguen `RESPONDIDA` y se cierran en su tarea: P-001 en T10, P-003 en T14, P-008 en T19, P-002 en T30. **P-010 `ABIERTA`** (Arquitecto, no bloquea): criterio (2) de T05; mientras tanto, las salvajes de B sin pergamino según `Sistema.md` 3.2.
 - Al agregar un `class_name` nuevo, la caché de clases de Godot hay que refrescarla (abrir el editor o `--import`) antes de correr los tests: `runtest.cmd` no escanea.
 - Orden de 0a.1: T05 → T06 → T07 → T08 → T09 → T10 → T11 → T12 → **T34** → T13. Ninguna tarea está bloqueada.
