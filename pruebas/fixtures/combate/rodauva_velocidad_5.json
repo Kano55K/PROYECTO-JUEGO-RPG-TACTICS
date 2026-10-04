@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Rodauva con Velocidad 5, la misma que el Maestro de la fixture maestro.json, para el empate Maestro contra criatura (Sistema.md 11.3, Empates). El resto es copia de la ficha de prueba (Arquitectura.md A.6; Sistema.md 4.3, 11.2, 11.7)",
+  "id": "rodauva",
+  "rol": "trabajo",
+  "rango": 1,
+  "sellable": true,
+  "vida": 8,
+  "danio": 2,
+  "movimiento": 4,
+  "alcance": 1,
+  "turnos": [
+    {
+      "velocidad": 5
+    }
+  ],
+  "rasgo": {
+    "_nota": "Sistema.md 11.2: Erizarse (accion), hasta su proximo turno recibe -50% de danio y no se mueve",
+    "id": "erizarse",
+    "efecto": "accion_defensa",
+    "danio_recibido_pct": -50,
+    "inmovil": true
+  },
+  "huida_pct": 50
+}

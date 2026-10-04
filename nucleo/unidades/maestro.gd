@@ -4,6 +4,9 @@
 class_name Maestro
 extends RefCounted
 
+# Id fijo del Maestro en la cola y en todo lo que apunta a unidades por id (A.5, A.7).
+const ID: String = "maestro"
+
 var balanza: int
 var poder: int = 0
 var regeneracion: int = 0
@@ -13,6 +16,7 @@ var enfermedades: int = 0
 # De maestro.json, sin modificadores: no dependen de la balanza (Sistema.md 11.2).
 var movimiento: int = 0
 var alcance: int = 0
+var velocidad: int = 0
 # Coordenadas de grilla [x, y], con y = 0 arriba.
 var posicion: Vector2i = Criatura.SIN_POSICION
 # int o null, tal cual llega del escenario; se resuelve en T21.

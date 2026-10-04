@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "c_tasajero",
+  "_nota": "Copia de datos/escenarios/c_tasajero.json para los tests de reglas (Arquitectura.md A.6). Prueba C (Sistema.md 11.6 y 11.9). Iniciativa (Sistema.md 11.2 y 11.3): Zancajunco 8, Tasajero Caza 8, Ocarra 7, Rodauva 6, Maestro 5, Tasajero Cuenta 3; el empate en 8 lo gana el bando del jugador. La tribu va en otro orden (Rodauva, Ocarra, Zancajunco): el orden de la cola no sale de la lista.",
+  "tipo": "test",
+  "semilla": 33001,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [2, 6] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [3, 7] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [4, 6] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
+      "vida": null, "posicion": [3, 0],
+      "_nota": "Dos turnos completos por ronda: Caza (8) y Cuenta (3), Sistema.md 11.2" }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

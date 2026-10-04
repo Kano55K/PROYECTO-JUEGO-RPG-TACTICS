@@ -144,3 +144,42 @@
 ## P-010- ESTADO --> RESPONDIDA
 
 - Arquitecto (04/10/2026): error del criterio. Las salvajes no tienen pergamino (Sistema.md 3.2); el test (2) queda como está. La independencia de pergaminos se prueba con las dos Rodauvas de la tribu de E: nuevo test (8) de T05 en Arquitectura.md v0.10. Se cierra al agregar ese test.
+
+## P-011 — Empate de Velocidad entre dos enemigas
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T07
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.3, fila Empates (desempata tribu contra enemigas, Maestro contra criaturas y criaturas de la tribu entre sí, pero no dos enemigas entre sí). Es la S-14 de `Arquitectura.md` 10.5
+- **Duda:** dos enemigas con la misma Velocidad, ¿actúan en el orden de la lista `enemigas` del escenario?
+- **Caso que la dispara:** escenario B: `ocarra_s1` y `ocarra_s2`, las dos con Velocidad 7.
+- **Opciones:** A) orden de la lista `enemigas` (como el orden de la tribu). B) otra regla (por ejemplo, la más cercana al Maestro primero). — Recomendación técnica: A (lectura declarada del Arquitecto, S-14).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `nucleo/combate/cola_iniciativa.gd`; test (5) de T07 (`pruebas/combate/test_cola_iniciativa.gd`). Si Sistemas elige otra regla, cambia un desempate y ese test.
+- **Respuesta:** _(la completa el staff)_
+
+## P-012 — Unidad que deja de poder actuar a mitad de ronda
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T07
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.5 (la caída "no actúa"; la salvaje en 0 "huye del tablero") y 11.3 (fila Criatura invocada)
+- **Duda:** si una unidad queda caída, es guardada o sale del tablero después de armada la cola, ¿pierde todos sus turnos restantes de esa ronda, incluida la Cuenta del Tasajero si huye después de su Caza?
+- **Caso que la dispara:** escenario C: el Tasajero actúa en Caza (8), baja a ≤ 25% y huye antes de su Cuenta (3). Lectura literal: la Cuenta se saltea.
+- **Opciones:** A) se saltean todas sus entradas restantes de la ronda. B) otra regla para algún caso. — Recomendación técnica: A (lectura literal).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A: al avanzar, la cola saltea las entradas de unidades que no están sueltas o no tienen posición (hoy "fuera del tablero" = sin posición; la huida de salvajes llega en su tarea). Tests (6b) de T07.
+- **Respuesta:** _(la completa el staff)_
+
+## P-013 — Velocidad del Maestro en la cola
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T07
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 11.2 ("su Movimiento, Alcance y Velocidad no dependen de [la balanza]") y 11.5 (si el Maestro cae, el combate termina en el acto)
+- **Duda:** ¿la Velocidad del Maestro es siempre la de `maestro.json` (5), sin ningún modificador en 0a (hambre, enfermedad, balanza), y el Maestro entra en la cola en todas las rondas?
+- **Caso que la dispara:** escenario D Hambriento o un Maestro en balanza 5: la cola lo pone igual con Velocidad 5.
+- **Opciones:** A) sí, siempre 5 y siempre en la cola. B) algún estado la modifica. — Recomendación técnica: A (lectura literal).
+- **Bloquea:** no
+- **Mientras tanto:** programado con A; el Maestro nunca se saltea porque si cae el combate termina (lo resuelve otra tarea).
+- **Respuesta:** _(la completa el staff)_
