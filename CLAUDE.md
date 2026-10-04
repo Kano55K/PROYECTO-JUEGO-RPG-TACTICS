@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Versión alineada con `docs/Arquitectura.md` v0.7 más las decisiones del 03/10/2026. Dueño: Arquitecto Técnico.
+> Versión alineada con `docs/Arquitectura.md` v0.9 (03/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -15,7 +15,7 @@ Tactics RPG 2D isométrico de captura de criaturas y supervivencia medieval. Est
 | `docs/Sistema.md` | Reglas y números |
 | `docs/Mundo.md` | Nombres y textos |
 | `docs/Arquitectura.md` | Cómo se construye: estructura, datos, tareas (B.2 a B.4) |
-| Brief de la prueba 0a (en `docs/`) | Reglas de 0a y escenarios |
+| Brief de la prueba 0a (en `docs/`) | Contexto de la 0a. **Si contradice a `Sistema.md`, manda `Sistema.md`**: anotá la contradicción en `PREGUNTAS.md` y seguí con `Sistema.md` |
 | `docs/PREGUNTAS.md` | Dudas abiertas con el staff y sus respuestas |
 
 - **Nunca cambies una regla para que sea más fácil de programar.**
@@ -82,6 +82,7 @@ registros/     salidas de combates (fuera de Git).
 - Todo lo que una clase del núcleo necesita le llega por parámetro (incluida la carpeta de datos).
 - El núcleo trabaja en coordenadas de grilla `[x, y]`, con `y = 0` arriba. No sabe si la vista es cenital o isométrica.
 - Las previsualizaciones usan **"calcular sin aplicar"**: la misma función que aplica la regla, sin modificar el estado.
+- **Las entidades se apuntan por `id` (texto), nunca guardando el objeto de otra entidad**: la criatura guarda `pergamino_id`, el pergamino guarda `ocupante_id`, y quien necesita el objeto lo pide al contenedor. Dos `RefCounted` que se apuntan entre sí nunca se liberan. La ficha de especie sí se comparte como objeto de solo lectura.
 
 ## Principios que no se negocian
 
@@ -130,6 +131,7 @@ addons/gdUnit4/runtest.cmd -a res://pruebas
 Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://pruebas/azar`. Antes de cerrar una tarea, siempre el comando completo.
 
 - Escribí los tests **antes** del código, a partir del criterio "Terminada cuando…" de la tarea.
+- **Tests de reglas: con datos de prueba propios en `pruebas/fixtures/`, nunca con `datos/`.** Llevan los números del ejemplo de `Sistema.md` que reproducen (los tests sí pueden tener esos números: son la comprobación; el código no) y la sección en `_nota`, y validan con los mismos esquemas. Así, cambiar un número de balance en `datos/` no rompe ningún test de reglas. Solo usan `datos/` real los tests que comprueban que todo carga y se puede crear (`docs/Arquitectura.md` A.6).
 - Cada regla con sus casos de `docs/Sistema.md` y del Brief. Si la tarea cita un ejemplo numérico, el test lo reproduce.
 - Una tarea no está terminada si **un solo test** del proyecto falla, aunque sea de otra tarea.
 - **Si el comando falla por algo que no es un test** (no encuentra Godot, `GODOT_BIN` vacía, error de GdUnit4), no improvises otra forma de correr los tests: pará y mostrale el error al usuario.
@@ -165,8 +167,7 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 
 ## Estado actual
 
-- **Terminadas:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador).
-- **T04 (datos de 0a) completa en la rama `tarea/T04-datos`, esperando OK de commit y PR.** Esquemas, contenido fijo, siete tablas y los 11 escenarios; `datos/` carga entero sin errores (`pruebas/datos/test_datos_completos.gd`, test permanente). Campo nuevo `enemiga.hambre` (atacante nocturna). Preguntas abiertas para Sistemas, ninguna bloquea: P-001 a P-009. Erizarse IA ≤ 50% (11.8) queda para T11.
-- Orden de 0a.1: T04 → T05 → T06 → T07 → T08 → T09 → T10 → T12 → **T34** → T13.
-- **T11 no se empieza** hasta que Sistemas responda las dudas S-7 a S-9 (`docs/Arquitectura.md` 10.5).
-- T04 necesita `datos/textos/es.json` del Worldbuilder; si todavía no está, el resto de T04 se hace igual y se avisa.
+- **Terminadas y mergeadas a `develop`:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador), T04 (esquemas y datos de 0a; test permanente `pruebas/datos/test_datos_completos.gd`).
+- **Siguiente: T05** (modelo de unidades), en dos sesiones dentro de la rama `tarea/T05-unidades` (ver la fila de T05 en `docs/Arquitectura.md` B.2).
+- `docs/PREGUNTAS.md`: P-001 a P-009 están `RESPONDIDA`. T05 cierra P-004 a P-007 (ya aplicadas en los datos de T04) y P-009 (`_nota` de `a_dia_1.json`). Las demás se cierran en su tarea: P-001 en T10, P-003 en T14, P-008 en T19, P-002 en T30.
+- Orden de 0a.1: T05 → T06 → T07 → T08 → T09 → T10 → T11 → T12 → **T34** → T13. Ninguna tarea está bloqueada.

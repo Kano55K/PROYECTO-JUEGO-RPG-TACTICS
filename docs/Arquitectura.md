@@ -1,8 +1,8 @@
-# ARQUITECTURA — Borrador v0.7
+# ARQUITECTURA — Borrador v0.9
 
 > **Dueño:** Arquitecto Técnico
-> **Estado:** BORRADOR. Base para `05_Arquitectura.md`. Secciones A.1 a A.7 y B.1 a B.5 `DECIDIDO`; A.8 en `PROPUESTA` (tiene filas ya `DECIDIDO`). **T01 terminada.** Próximo paso: sincronizar `docs/` y seguir con la tarea T02. **No queda ninguna tarea de 0a bloqueada**; T11 espera los desempates de la IA (10.5) antes de empezar.
-> **Sincronizado con:** `00_Vision.md` v1.0, `Sistema.md` v0.9 y `Mundo.md` v1.0 (03/10/2026).
+> **Estado:** BORRADOR. Base para `05_Arquitectura.md`. Secciones A.1 a A.7, A.9, A.10 y B.1 a B.5 `DECIDIDO`; A.8 en `PROPUESTA` (tiene filas ya `DECIDIDO`). **T01 a T04 terminadas y mergeadas a `develop`** (03/10/2026). Próximo paso: **T05**. **Ninguna tarea de 0a está bloqueada** y no quedan dudas abiertas con Sistemas: `Sistema.md` v1.1 respondió P-001 a P-009, S-8, S-10 y S-12 (10.5). Queda abierta solo D-1 (Director), que necesita T33.
+> **Sincronizado con:** `00_Vision.md` v1.0, `Sistema.md` v1.1 y `Mundo.md` v1.0 (03/10/2026).
 > **Contenido:** consolidación de todos los pedidos `PARA ARQUITECTO` de `Decisiones.md` al 01/10/2026 (59 pedidos en 18 bloques → 53 requisitos, sin duplicados y con la terminología actual).
 > Las reglas y los números viven en `Sistema.md`; este documento solo dice **qué tiene que soportar el código**.
 
@@ -57,6 +57,9 @@ La clasificación 0a / 0b sigue el `Brief para el Arquitecto — Prueba 0a` (sec
 | Chequeos cruzados | Lo que un esquema no puede expresar lo revisa el cargador después: el `id` de cada ficha coincide con su archivo; las especies de relaciones y escenarios existen; no hay pares repetidos; la balanza tiene las posiciones 1 a 5; los tramos de sellado son crecientes; los estados de hambre cubren 0–10 sin huecos; los ids de un escenario no se repiten y las posiciones caen dentro del tablero | Mismo mensaje: archivo, campo y valor esperado |
 | Mecánica contra número | Los **comportamientos** (efecto de un rasgo, geometría de un hechizo) son un `enum` cerrado programado una vez; sus **números** son dato | Agregar un efecto nuevo es código con su test; ajustarlo, solo dato |
 | Saciado | **No se guarda aparte**: es el estado de hambre 0–2 (`Sistema.md` 7.1). El escenario tiene solo `hambre` | Una sola fuente de verdad. Ver la consulta a Sistemas en 10.4 |
+| Quién escribe los esquemas | `DECIDIDO` (03/10/2026): **T03** construye y prueba el validador y el cargador con archivos de prueba en `pruebas/fixtures/`; los esquemas reales de `datos/_esquemas/` se escriben al **principio de T04**, antes que los datos | T03 prueba la herramienta; los esquemas dependen de los números de `Sistema.md` |
+| Carpeta de datos | El cargador recibe la carpeta como **parámetro**: no busca `datos/` por su cuenta | Los tests apuntan a fixtures sin trucos |
+| Resultado del cargador | Devuelve `errores` y `avisos`, cada uno con archivo, campo y valor esperado. **Con un solo error no entrega ningún dato.** Un JSON con error de sintaxis es un error con archivo y línea | Nunca hay datos a medias. El bloqueo del arranque del juego lo hace la escena principal (T13) leyendo este resultado |
 
 Archivos de datos de 0a y su esquema:
 
@@ -75,7 +78,7 @@ Archivos de datos de 0a y su esquema:
 | `tablas/combate.json` | `combate` | Combos, afinidad, incidente, Encono, cobardía, obediencia, salvajes, enfermedad, huida, alcances, caída y victoria (8.2, 10, 11) |
 | `escenarios/<id>.json` | `escenario` | Contexto de combate (A.7) |
 | `textos/es.json` | `textos` | Clave → texto o lista de variantes; huecos entre llaves: `{criatura}` |
-| (salida) | `resultado`, `grabacion` | Resultado del combate y combate grabado (A.6, A.7) |
+| (salida) | `resultado`, `grabacion` | Resultado del combate y combate grabado (A.6, A.7). Sus esquemas se escriben en **T12**, no en T04 |
 
 **Ejemplo de escenario** (escenario A del Brief):
 
@@ -120,7 +123,29 @@ Archivos de datos de 0a y su esquema:
 | Dónde vive | `nucleo/textos/`: arma huecos, mayúsculas y variantes sin nodos, con tests. La pantalla solo pide "clave + datos" y recibe el texto (T34) | Se testea sin abrir ventana, como el resto del núcleo |
 | Variantes al azar | Una clave puede tener una **lista** de variantes; la elección sale del **generador de textos**, separado del de combate (A.8) | Agregar o quitar una frase no puede cambiar las tiradas de un combate grabado |
 | Variantes por condición en 0a | Cada condición es una **clave propia** (`sellar.fallo.erizada`, `nocturno.comer.zancajunco_suelto`); el código elige la clave. No hay lenguaje de condiciones | Alcanza para 0a. Las condiciones como dato llegan con los eventos de nodo (A.8) |
-| Chequeo del cargador | Lista de claves que usa el código contra claves del archivo: avisa de las faltantes (sin impedir el arranque) y de las que sobran. Además, cada clave debe cumplir `^[a-z0-9_]+(\.[a-z0-9_]+)*$` (error) y se avisa de todo hueco que no sea una forma conocida (aviso) | El Worldbuilder sabe qué falta escribir; un hueco mal tipeado no llega a la pantalla |
+| Chequeo del cargador | Lista de claves que usa el código contra claves del archivo: avisa de las faltantes (sin impedir el arranque) y de las que sobran. La lista de claves usadas **llega como parámetro** (`DECIDIDO`, 03/10/2026). Además, cada clave debe cumplir `^[a-z0-9_]+(\.[a-z0-9_]+)*$` (error) | El Worldbuilder sabe qué falta escribir |
+| Huecos desconocidos | El aviso de todo hueco que no sea una forma conocida lo da el **armador de textos (T34)**, no el cargador (`DECIDIDO`, 03/10/2026) | Solo el armador conoce las formas de hueco: una sola lista, sin copias que diverjan |
+| Entrega | `textos/es.json` entregado por el Worldbuilder (`Mundo.md` v0.9, 493 claves) y copiado al repositorio por el usuario en T04. Hasta que exista código que use textos, la carga da avisos de claves sobrantes: es lo esperado | Claude Code no edita `datos/textos/` |
+
+### A.2.2 Reglas de transcripción de los datos — `DECIDIDO` (03/10/2026, T04)
+
+Aplicadas al escribir los datos de 0a. Valen para todo dato futuro.
+
+| Regla | Detalle | Motivo |
+|---|---|---|
+| **Cada número en un solo archivo** | Antes de agregar un número, se busca si ya está en otro archivo de `datos/` | Dos copias de un número terminan diferentes |
+| Tablas derivadas | Las tablas de `Sistema.md` que se calculan desde otras **no se guardan**: se usan como comprobación en la revisión. Son: Arrimo por posición (1.3), lealtad inicial por balanza (4.2), factibilidad de resellar (4.4), referencia de días (5.3), cobardía por balanza (10.6), bonos por eslabón (10.2) y los ejemplos numéricos (5/6/7/7 del Encono, 7 de 11.4) | Son vistas para el diseñador, no fuentes |
+| Vida y daño del Maestro | Solo en `tablas/balanza.json`. `maestro.json` lleva lo que no depende de la balanza: Movimiento, Alcance, Velocidad, hechizos y valores iniciales (balanza 2, Poder 1, Regeneración 1) | M-01: todo se deriva de la posición |
+| Dónde vive cada número | Efecto por paso de Arrimo → `arrimo.json`. Penalización de obediencia por hambre, Saciado y hambre de combate → `hambre.json`. % de huida por especie y números de los rasgos → `especies/`. Costos de hechizos y daño del choque → `hechizos.json`. Costos de sellar, invocar, resellar y guardar caídas, y costo mínimo → `costos_mana.json`. Eventos de lealtad de 5.2 (victoria, rescate, muerte en el grupo con y sin afines, comer a la atacante) → `tablas/lealtad.json`, objeto `eventos` | Mapa para no duplicar |
+| Lista de turnos | La Velocidad es una **lista de turnos**: una entrada por especie, dos para el Tasajero (Caza 8 y Cuenta 3) | `Sistema.md` 11.2 |
+| Relaciones | `relaciones.json` incluye los pares de la misma especie (Rodauva–Rodauva bien, Ocarra–Ocarra mal) y los pares con el Tasajero del párrafo debajo de la tabla 10.8 (Rodauva y Ocarra mal, Zancajunco bien) | Sin ellos no existe el Encono contra el Tasajero (T19) |
+| Estados de lealtad | Cortes fijos (desleal 0–1, dudosa 2–3) más "neutral hasta umbral − 1"; el umbral sale de la balanza | Los estados son relativos a la balanza |
+| Formatos no numéricos | "+1 cada 2 días" → cantidad y cada cuántos días. El "—" de descuento → 0. "Solo en turnos pares" → valor de `enum` (significa rondas pares, 2.1). Tramos de sellado con su límite superior incluido (25, 50, 75, 100) y el camino de confianza aparte | Que el dato no dependa de leer texto |
+| Obediencia de las salvajes | Se guarda como **tramo** (`"baja"`), no como un número. Los tramos de obediencia usan **los mismos cortes** que los estados de lealtad de 5.1 (`DECIDIDO`, P-003, `Sistema.md` 5.4 v1.1): el límite se lee de `tablas/lealtad.json`. **T14** quita `obediencia.baja.hasta` de `tablas/combate.json` y de su esquema, en el mismo PR que empieza a leer el corte | `Sistema.md` 10.7 dice "se tratan como obediencia ≤ 3" sin dar valor |
+| Orden y fórmulas son código | El orden del inicio del turno (11.3), la lista de la IA (11.8) y fórmulas como "a su alcance = Movimiento + Alcance" se programan con tests; solo sus números son dato | Principio de determinismo |
+| Fuera de 0a | Las causas y duraciones de enfermedad (8.1) no se cargan todavía: 0a usa solo el −25% por enfermedad (8.2) | Principio 6 |
+| Cita de la fuente | Cada objeto transcripto lleva en `_nota` la sección de `Sistema.md` | Revisión y mantenimiento |
+| Revisión | Cada entrega de datos trae una **tabla de cotejo** (`valor | archivo y campo | sección`), una tabla de derivadas reproducidas desde los datos y una de números leídos que no se guardaron y dónde están. La revisa el usuario contra `Sistema.md` | La revisión es contra el documento, no contra el JSON |
 
 ### A.3 Vista de 0a — `DECIDIDO` (01/10/2026, responde B-03)
 
@@ -138,8 +163,10 @@ Archivos de datos de 0a y su esquema:
 ```
 juego/
 ├── CLAUDE.md          instrucciones para Claude Code
+├── .claude/settings.json  permisos de Claude Code (A.5)
 ├── project.godot
 ├── docs/              copia de los documentos del estudio (Visión, Sistema, Mundo, Brief, Arquitectura)
+│   └── PREGUNTAS.md   dudas de Claude Code al staff (A.5)
 ├── addons/gdUnit4/    framework de tests
 ├── datos/             contenido editable (JSON)
 │   ├── _esquemas/     un esquema por tipo de archivo (A.2)
@@ -157,7 +184,8 @@ juego/
 │   ├── textos/        armador de textos: huecos, mayúsculas y variantes (A.2.1)
 │   └── combate/       tablero, iniciativa, acciones, daño, cadenas, IA
 ├── pantalla/          escenas de Godot: tablero, paneles, previsualizaciones
-├── pruebas/           tests del núcleo
+├── pruebas/           tests del núcleo, con la estructura de nucleo/
+│   └── fixtures/      datos chicos de prueba, con errores a propósito
 ├── herramientas/      reproductor de partidas y scripts de consola
 └── registros/         salidas de combates (fuera de Git)
 ```
@@ -174,8 +202,14 @@ juego/
 | Números | **Ningún número de balance escrito en el código.** Si aparece uno, es un error |
 | Azar | Ninguna tirada fuera del generador con semilla del núcleo |
 | Núcleo | Las clases de `nucleo/` extienden `RefCounted` (nunca `Node`) y no usan autoloads: todo lo que necesitan les llega como parámetro |
-| Control de versiones | Git con repositorio privado en GitHub. `DECIDIDO` (03/10/2026): **`main`** solo recibe hitos terminados y revisados (con etiqueta `0a.1`, `0a.2`…); **`develop`** es la rama de trabajo diario. Claude Code trabaja solo en `develop`, un commit por tarea, y nunca hace push ni toca `main`: eso lo hace el usuario |
-| Documentos | Al cambiar la versión de un documento del estudio, se copia a `docs/` en un commit propio (`docs: sincronización <fecha>`) antes de seguir programando: Claude Code trabaja con `docs/`, y una copia vieja es una regla vieja |
+| Referencias entre entidades | `DECIDIDO` (03/10/2026, para T05): una entidad del núcleo apunta a otra **por su `id` (texto), nunca guardando el objeto**. La criatura guarda `pergamino_id`; el pergamino, `ocupante_id`; quien necesita el objeto lo pide al contenedor (`Plantel`). Los textos y números de una ficha de especie sí se comparten como objeto de solo lectura | Dos `RefCounted` que se apuntan entre sí nunca se liberan (fuga de memoria en Godot). Además, lo que se guarda por `id` se graba y se reproduce sin traducir (A.7, guardado de 0b) |
+| Control de versiones | Git con repositorio privado en GitHub. `DECIDIDO` (03/10/2026): **`main`** solo recibe hitos terminados y revisados (con etiqueta `0a.1`, `0a.2`…); **`develop`** solo recibe tareas revisadas. **Una rama por tarea** (`tarea/T05-unidades`), creada desde `develop`; si la tarea lleva varias sesiones, todas usan la misma rama. Claude Code commitea en la rama (con confirmación del usuario) y **nunca** hace push, merge ni rebase, ni toca `main` o `develop`. El usuario abre el pull request, lo revisa y mergea |
+| Permisos | `DECIDIDO` (03/10/2026): `.claude/settings.json` en el repositorio. Permitidos sin preguntar: `git status`, `git diff`, `git log`, `git add` y el comando de tests. Con confirmación: `git commit`. Prohibidos: `git push`, comandos sobre `main`, `merge`, `rebase`, `reset --hard`, y editar `docs/00_Vision.md`, `docs/Sistema.md`, `docs/Mundo.md`, `docs/Arquitectura.md`, `docs/Brief*` y `datos/textos/` | Que el flujo de Git y la propiedad de los documentos no dependan solo de la instrucción escrita. El bloqueo por comandos no es infalible: el push lo hace siempre el usuario |
+| Preguntas al staff | `DECIDIDO` (03/10/2026): **`docs/PREGUNTAS.md`** es el único canal de dudas de diseño de Claude Code. Entradas `P-001`, `P-002`… con formato fijo (para quién, tarea, fuente, duda, caso, opciones, si bloquea, qué hizo mientras tanto). Estados: `ABIERTA` → `RESPONDIDA` (el usuario pega la respuesta) → `CERRADA` (aplicada en el código). Claude Code nunca responde ni elige una opción, nunca borra entradas y lee las `RESPONDIDA` al empezar cada tarea. **La copia del repositorio manda**: la sincronización de `docs/` nunca la sobrescribe. Si una respuesta cambia una regla, el área la escribe también en su documento | Las dudas del chat se perdían |
+| Ciclo de cada tarea | `DECIDIDO` (03/10/2026): rama → modo plan → plan aprobado por el usuario (archivos, un test por renglón del criterio de terminado, dudas) → tests primero → código → **todos** los tests pasan → Claude Code actualiza la sección "Estado actual" de `CLAUDE.md` → resumen fijo (usado como descripción del PR) → commit confirmado → `/clear` antes de la tarea siguiente. Las tareas grandes se dividen en sesiones dentro de la misma rama | Cada sesión se puede revisar entera |
+| Documentos | Al cambiar la versión de un documento del estudio, se copia a `docs/` en un commit propio (`docs: sincronización <fecha>`) antes de seguir programando: Claude Code trabaja con `docs/`, y una copia vieja es una regla vieja. **Excepción:** `docs/PREGUNTAS.md` no se sobrescribe; viaja del repositorio al Project |
+| `CLAUDE.md` | Dueño: Arquitecto. Versión vigente alineada con esta v0.9. Claude Code solo edita su sección "Estado actual" |
+| El Brief y `Sistema.md` | `DECIDIDO` (03/10/2026): si la copia del Brief en `docs/` contradice a `Sistema.md`, **manda `Sistema.md`** (es más nuevo: v1.0 reemplazó, por ejemplo, las "7 métricas del Brief" por las 13 de 11.9). Claude Code anota la contradicción en `PREGUNTAS.md` y sigue con `Sistema.md`. Escrita en `CLAUDE.md` v0.9 | Cierra el pendiente de `Sistema.md` 15 sin tener que revisar el Brief línea por línea |
 
 ### A.6 Cómo se testea — `DECIDIDO` (01/10/2026)
 
@@ -185,6 +219,15 @@ juego/
 | Reproducción | Un combate = escenario + semilla + lista de acciones del jugador. Reproducirlo da exactamente el mismo registro | Reproductor en `herramientas/` |
 | Previsualizaciones | El núcleo ofrece **calcular sin aplicar**: la pantalla pregunta "¿qué pasaría si…?" y muestra el resultado. Así la previsualización y el resultado real nunca difieren | Un test por previsualización que compara lo previsto con lo aplicado |
 | Juego | Los 8 escenarios del Brief, jugados por personas | Métricas exportadas por combate |
+
+**Comando de tests** — `DECIDIDO` (02/10/2026): `addons/gdUnit4/runtest.cmd -a res://pruebas`, desde la raíz del proyecto. Godot se encuentra por la variable de entorno `GODOT_BIN` (configurada en T01 con `setx`); la ruta de la máquina nunca se escribe en un comando ni en un script. Si el comando falla por algo que no es un test, Claude Code para y muestra el error.
+
+**Qué datos usa cada test** — `DECIDIDO` (03/10/2026, desde T05). Los tests son código, y cambiar un número de balance no puede obligar a tocar código (principio 1):
+- **Tests de reglas** (T05 en adelante): usan **datos de prueba propios** en `pruebas/fixtures/`, con los números del ejemplo de `Sistema.md` que reproducen y la sección citada en `_nota`. Nunca leen `datos/`. Si Sistemas cambia la vida de la Ocarra, ningún test de reglas falla: la mecánica sigue igual.
+- **Tests de datos reales**: solo los que comprueban que `datos/` carga y se puede usar entero (el test permanente y, desde T05, la creación del plantel de los 11 escenarios). No comparan números contra `Sistema.md`: eso es la revisión del usuario con la tabla de cotejo (A.2.2).
+- Los fixtures se escriben con los **mismos esquemas** que `datos/`, así que no pueden desviarse del formato real.
+
+**Test permanente de datos** — `DECIDIDO` (03/10/2026): desde T04, un test carga **toda la carpeta `datos/`** con el cargador real y exige cero errores (los avisos de claves de texto sobrantes se aceptan hasta T13 y T34). Cualquier cambio que rompa los datos lo hace fallar.
 
 **Fuera de 0a:** la simulación masiva de balance necesita un "jugador automático". Queda como enchufe: como las acciones son datos y los combates se reproducen, se puede sumar después sin cambiar el núcleo.
 
@@ -220,6 +263,70 @@ No se construye nada de esto en 0a (principio 6). Se escriben ahora para no cerr
 | Partida de prueba | La configuración inicial de la partida es un dato; en modo de prueba se pueden cambiar la balanza inicial (Visión v0.9, 10), la duración (30 o 20 días, `Sistema.md` 13) y la semilla | Jugar partidas enteras inclinadas al Soplo sin tocar la clase real |
 | Flujo | Máquina de estados de la partida: apertura → Molino → mapa del mundo → mapa de nodos → (evento o combate) → noche → cierre del día → … → epílogo. La pantalla observa la fase; el núcleo la cambia | Mismo principio que el combate: reglas sin pantalla |
 
+### A.9 Escenarios de 0a — `DECIDIDO` (03/10/2026, T04)
+
+Los 11 archivos de `datos/escenarios/`. Lo que mide cada uno vive en su `_nota`.
+
+| Archivo | Origen | Notas |
+|---|---|---|
+| `a_dia_1.json` | Arquitecto | El ejemplo de A.2 |
+| `b_muro.json` | Sistemas, 11.9 | |
+| `c_tasajero.json` | Sistemas, 11.9 | La Rodauva se pasa a guardada desde el panel (T31) |
+| `d_rivales_normal.json` · `d_rivales_hambriento.json` | Sistemas, 11.9 | |
+| `d_rivales_balanza4.json` | Sistemas, 11.9 y 14 | D normal con balanza 4. **Temporal:** se borra cuando T31 permita cambiar la balanza desde el panel |
+| `e_cobardia.json` · `e_cobardia_afines.json` | Sistemas, 11.9 | Sin y con el toggle de afines (10.6) |
+| `f_rescate.json` | Sistemas, 11.9 | |
+| `g_ataque_nocturno.json` | Arquitecto | Definido abajo |
+| `h_soplo.json` | Sistemas, 11.9 | C con balanza 5 y Poder 3 |
+
+**Semillas:** arbitrarias, pero compartidas por las variantes que se comparan: C y H; las tres D; las dos E (11.9). Las 10 semillas de los playtests son de T31 y T33.
+
+**Escenario G** (11.9 lo deja como borrador del Arquitecto):
+
+| Campo | Valor | Motivo |
+|---|---|---|
+| Tipo | `nocturno` | A.7 |
+| Maestro | Balanza 2, hambre 3, **maná de entrada 4** | La mitad de la reserva completa (2.4); coincide con el "tope nocturno 4" de 4.4 |
+| Atacante | Ocarra, `atacante_nocturna`, hambre 9 | Famélica y desleal: la condición del abandono nocturno (9.1) |
+| Golpe inicial | El `id` de la Ocarra | Golpe de 4 (9.2). No hay otra Ocarra suelta: no hay Centinela |
+| Tribu | Rodauva y Zancajunco, lealtad **8** (leales) | El Zancajunco suelto habilita `nocturno.comer.zancajunco_suelto`. Las dos leales: solo las leales defienden al Maestro (S-12, `Sistema.md` 9.2) |
+| Pergaminos en blanco | 1 | Sin él no existe la salida "sellar" |
+
+La pregunta de G es "¿alcanza para resellar?": resellar a la Ocarra cuesta 2; con un Martillazo todavía alcanza, con un Remiendo no.
+
+**Valores de los huecos de 11.9** — propuestos por el Arquitecto en T04 y `DECIDIDO` por Sistemas (`Sistema.md` 11.9 v1.1, responde P-004 a P-007). Ya están en los datos; no cambia nada:
+
+| Hueco de 11.9 | Valor |
+|---|---|
+| "Leal" y "Neutral" sin número (Surcón de E; Rodauva y Ocarra de F) | Leal 8, Neutral 5, como en B, C y E. 8 sigue siendo leal con la balanza en 5 (P-004) |
+| D y E no nombran al Maestro | Está en los 11, con los valores iniciales salvo F (vida 6), G (maná 4), H (balanza 5, Poder 3) y `d_rivales_balanza4` (P-005) |
+| D hambriento: ¿el Maestro también con hambre 6? | No: solo las criaturas. La única diferencia entre las dos D es la obediencia (P-006) |
+| Posiciones fijas | Propuestas por Claude Code en T04 y aprobadas por Sistemas **como provisorias** (tabla siguiente; motivo de cada una en P-007). **Ante una alarma de 11.9, primero se descarta que la causa sea la posición; después se toca la regla** |
+
+**Posiciones iniciales provisorias** (P-007). Coordenadas `[x, y]`, `y = 0` arriba; M = Maestro.
+
+| Escenario | Tribu | Enemigas | Lo que buscan |
+|---|---|---|---|
+| A | M [3,7], Rodauva [4,7] | Ocarra [4,0] | Copia del ejemplo de A.2. La IA de 11.8 manda: la Ocarra va por la Rodauva, y la apuesta de A es la Rodauva, no la vida del Maestro (P-009, `Sistema.md` 11.6). T05 actualiza la `_nota` |
+| B | M [3,6], Rodauva [4,7] | Ocarras [0,0] y [7,1] | Llegan en diagonal sin tocarse: juntarlas con la Lanzadera es una jugada real, no un incidente gratis |
+| C y H | M [3,6], Rodauva [2,6], Ocarra [3,7], Zancajunco [4,6] | Tasajero [3,0] | Pega en la Cuenta de la ronda 1; la suerte de la Rodauva la decide el jugador |
+| D (3 variantes) | M [3,6], Ocarra [3,7], Zancajunco [4,7] | Surcón [3,1], Rodauva [4,1] | Las rivales aliadas empiezan adyacentes: separarlas es la primera decisión |
+| E (2 variantes) | M [4,6], Rodauva leal [6,6], Rodauva Neutral [6,7], Surcón [4,7] | Tasajero [0,0] | La primera tirada de cobardía cae en la ronda 2, con la formación elegida |
+| F | M [3,6] (vida 6), Rodauva [3,7], Ocarra [4,7] | Zancajunco [3,0], Surcón [4,1] | El Zancajunco tumba al Maestro en la ronda 2 si no se lo bloquea |
+| G | M [3,6], Rodauva [2,6], Zancajunco [4,6] | Ocarra atacante [3,4] | Única enemiga fuera de las filas 0–1: acaba de golpear al Maestro dormido |
+
+### A.10 Estado de la construcción — `DECIDIDO` (03/10/2026)
+
+| Tarea | Estado | Fecha | Notas |
+|---|---|---|---|
+| T01 | ✅ Mergeada | 02/10/2026 | Godot 4.7.1, GdUnit4 6.2.1, estructura, `GODOT_BIN` |
+| T02 | ✅ Mergeada | 03/10/2026 | Generador de azar con semilla. 5 tests |
+| T03 | ✅ Mergeada | 03/10/2026 | Dos sesiones: validador (15 tests) y cargador con chequeos cruzados |
+| T04 | ✅ Mergeada | 03/10/2026 | Cuatro sesiones: esquemas; especies, Maestro, hechizos y relaciones; seis tablas (3a); `combate.json` (3b); escenarios y textos. Test permanente de carga |
+| T05 | Siguiente | — | Modelo de unidades. Dos sesiones (B.2) |
+
+Orden que sigue en 0a.1: T05 → T06 → T07 → T08 → T09 → T10 → T11 → T12 → T34 → T13.
+
 ---
 
 ## B. Plan de construcción de 0a — `DECIDIDO` (01/10/2026)
@@ -242,19 +349,19 @@ Tablero, movimiento, iniciativa, ataque, rasgos, caída y fin del combate. Vista
 | ID | Tarea | Requisitos | Terminada cuando… |
 |---|---|---|---|
 | T01 | ✅ **Terminada** (02/10/2026). Instalar Godot (versión exacta), Git y GdUnit4; crear el proyecto con la estructura de A.4 y un primer `CLAUDE.md` | A.1, A.4, A.5 | Un test de ejemplo corre por consola sin abrir el editor y pasa |
-| T02 | Generador de azar con semilla que registra cada tirada. Es un **objeto que se crea** (no un global): puede haber varios a la vez, y de una semilla se derivan generadores independientes (combate, textos) | Principio 3, A.7, A.2.1 | Misma semilla → misma secuencia de 1.000 tiradas; otra semilla → otra secuencia; dos generadores con la misma semilla no se interfieren |
-| T03 | Cargador y validador de JSON: subconjunto de JSON Schema, enteros de Godot y chequeos cruzados | A.2 | Un archivo con un error devuelve archivo, campo y valor esperado, y el juego no arranca. Tests con: campo mal tipeado, decimal donde va entero, valor fuera de rango, obligatorio faltante, `enum` inválido, especie inexistente, `type` con lista de tipos y diccionario de claves libres (clave con formato inválido) |
-| T04 | Datos de 0a según los esquemas de A.2: fichas, Maestro, hechizos, relaciones, 7 tablas, escenarios A y G (Arquitecto) y B a F y H (Sistemas, 03/10/2026), más `d_rivales_balanza4.json`, variante temporal de D con la misma semilla hasta que exista T31. `textos/es.json` del Worldbuilder | W-01, A.2, `Sistema.md` 11.9 | Todo carga sin errores y los números coinciden con `Sistema.md` (revisión del usuario). Los escenarios validan con `_nota` dentro de cada unidad y `"guardada"` como `estado`: si fallan ahí, se corrige el esquema, no el escenario |
-| T05 | Modelo de unidades: especie e instancia con `id` estable, balanza derivada, `vida_max_real`, estados suelta / guardada / caída, pergaminos como entidades | C-01, C-02, M-01, M-03, P-01, A.7 | Tests: el Maestro con balanza 2 y 5 tiene la vida y el daño de la tabla; dos Ocarras tienen estados independientes |
+| T02 | ✅ **Terminada** (03/10/2026). Generador de azar con semilla que registra cada tirada. Es un **objeto que se crea** (no un global): puede haber varios a la vez, y de una semilla se derivan generadores independientes (combate, textos) | Principio 3, A.7, A.2.1 | Misma semilla → misma secuencia de 1.000 tiradas; otra semilla → otra secuencia; dos generadores con la misma semilla no se interfieren |
+| T03 | ✅ **Terminada** (03/10/2026, dos sesiones). Cargador y validador de JSON: subconjunto de JSON Schema, enteros de Godot y chequeos cruzados | A.2 | Un archivo con un error devuelve archivo, campo y valor esperado, y el juego no arranca. Tests con: campo mal tipeado, decimal donde va entero, valor fuera de rango, obligatorio faltante, `enum` inválido, especie inexistente, `type` con lista de tipos y diccionario de claves libres (clave con formato inválido) |
+| T04 | ✅ **Terminada** (03/10/2026, cuatro sesiones; ver A.2.2 y A.9). Esquemas reales de `datos/_esquemas/` y datos de 0a según A.2: fichas, Maestro, hechizos, relaciones, 7 tablas, escenarios A y G (Arquitecto) y B a F y H (Sistemas, 03/10/2026), más `d_rivales_balanza4.json`, variante temporal de D con la misma semilla hasta que exista T31. `textos/es.json` del Worldbuilder | W-01, A.2, `Sistema.md` 11.9 | Todo carga sin errores y los números coinciden con `Sistema.md` (revisión del usuario). Los escenarios validan con `_nota` dentro de cada unidad y `"guardada"` como `estado`: si fallan ahí, se corrige el esquema, no el escenario |
+| T05 | Modelo de unidades en `nucleo/unidades/`. **Sesión 1:** `Especie` (la ficha, de solo lectura), `Criatura` (instancia: `id`, especie, bando, comportamiento si es enemiga, estado `suelta` / `guardada` / `caida`, vida, lealtad, hambre, enfermedades, posición, `pergamino_id`) y `Maestro` (balanza, Poder, Regeneración, vida, hambre, enfermedades, posición, `mana_entrada` tal cual llega: se resuelve en T21). **Balanza derivada:** una función devuelve la fila de `tablas/balanza.json` para la posición; `vida_max_real` y el daño del Maestro salen de ahí y **nunca se guardan** (M-01). **Sesión 2:** `Pergamino` (`id`, estado en blanco / ocupado / ardido, `ocupante_id`) y `Plantel` (contenedor del combate: el Maestro, las criaturas en el orden de la tribu y los pergaminos, todo buscable por `id`), creado desde `maestro`, `tribu`, `enemigas` y `pergaminos_en_blanco` de un escenario, resolviendo los `null`. Ocupan pergamino: cada criatura de la tribu (suelta o guardada) y la atacante nocturna (`Sistema.md` 3.2); las salvajes no. Ids `pergamino_1`, `pergamino_2`… en orden: tribu, atacantes, en blanco. Referencias por `id` (A.5). **No incluye** métodos que cambien vida, lealtad, hambre o estado por una regla: llegan con T08–T10, T14 y T24–T27. El resto del contexto (tablero, semilla, golpe inicial, toggles) es de T12. Al empezar: cierra P-004 a P-007 (ya aplicadas en T04) y aplica P-009 en la `_nota` de `a_dia_1.json` | C-01, C-02, M-01, M-03, P-01, A.5, A.7, `Sistema.md` 1.2, 3.1, 3.2, 11.2 | Tests (con fixtures, A.6, salvo el 3): (1) con una tabla de balanza de prueba que copia la 1.2, el Maestro con balanza 2 tiene vida 20 y daño 4, y con balanza 5, vida 14 y daño 3, sin esos números en el código; (2) las dos Ocarras de B son independientes: cambiar la vida de una no toca la otra y tienen pergaminos distintos; (3) con `datos/` real, se crea el plantel de los 11 escenarios sin errores, y en F el Maestro queda en 6 con la vida máxima de su balanza; (3b) con fixtures, `vida: null` da la vida máxima de la ficha o de la balanza; (4) en G, la Rodauva, el Zancajunco y la Ocarra atacante ocupan un pergamino cada una y queda 1 en blanco; en A, la Ocarra salvaje no tiene pergamino; (5) dos creaciones del mismo escenario dan los mismos `id` de pergamino; (6) un pergamino ocupado no se vuelve a ocupar y uno ardido no se usa; (7) la ficha del Tasajero tiene dos turnos (8 y 3) |
 | T06 | Tablero y geometría: Manhattan, adyacencia ortogonal, movimiento que atraviesa aliadas y caídas propias, alcance 2 con bloqueo solo por enemigas | K-03 | Un test por cada regla de `Sistema.md` 11.3 y del Brief (reglas 2 y 3) |
 | T07 | Cola de iniciativa: Velocidad, desempates, Tasajero con dos entradas (Caza y Cuenta) que son **dos turnos completos** (movimiento y acción en cada uno), lugar para la invocada de la ronda siguiente | K-01, `Sistema.md` 11.2 | Tests con el orden de la Prueba A y de la Prueba C; el Tasajero mueve y actúa en cada una de sus dos entradas |
 | T08 | Turno: 1 movimiento y 1 acción en cualquier orden; atacar; Erizarse | Brief regla 1 | Tests de turno; no se puede partir el movimiento |
 | T09 | Fórmula de daño con porcentajes, planos y rasgos (Lomo de tierra, Hacerse junco, Erizarse); Saciado (derivado del hambre) y enfermedades como parámetros | K-04, K-05, C-07 (0a) | Tests que reproducen los dos ejemplos de `Sistema.md` 11.4 (7 de daño y Rodauva saciada en 2) |
-| T10 | Vida en 0: caída, salvaje que sale del tablero, victoria sin enemigas en pie, derrota al caer el Maestro, caídas que mueren y pergaminos que arden. +1 de lealtad por victoria a las **sueltas al terminar** (de pie, caídas que se levantan, invocadas durante el combate); las guardadas no | K-08, K-09, P-01, `Sistema.md` 5.2 | Tests de cada fila de `Sistema.md` 11.5, salvo el rescate, y del +1 de victoria con una guardada que no lo recibe |
-| T11 | IA de salvajes base: Erizarse → remate → cercana → acercarse; nadie apunta a una caída; las salvajes no Secundan; la Ocarra ataca desde distancia 2 si puede. Desempates según la respuesta de Sistemas (10.5). El Tasajero recorre la lista en cada uno de sus dos turnos | K-07, `Sistema.md` 11.8 | Tests de elección de objetivo y de casilla, incluidos los empates; la Rodauva salvaje con vida ≤ 50% y una enemiga adyacente se eriza; huida y Encono quedan con su lugar reservado. **Empieza cuando Sistemas responda 10.5** |
+| T10 | Vida en 0: caída, salvaje que sale del tablero, victoria sin enemigas en pie, derrota al caer el Maestro, caídas que mueren y pergaminos que arden. +1 de lealtad por victoria a las **sueltas al terminar** (de pie, caídas que se levantan, invocadas durante el combate); las guardadas no. Muerte en el grupo: −2 a cada suelta y **−4 a las de especie afín** a la muerta (relación "bien" de 10.8, suelta por suelta, sin mirar posiciones; P-001), una vez por cada muerte. **Suma y recorte únicos:** los cambios de lealtad del combate se acumulan con su motivo y se recortan a 0–10 **una sola vez** al cerrar (`Sistema.md` 5.2 v1.1) | K-08, K-09, P-01, `Sistema.md` 5.2 | Tests de cada fila de `Sistema.md` 11.5, salvo el rescate; del +1 de victoria con una guardada que no lo recibe; del ejemplo de 5.2 (muere una Rodauva: la otra Rodauva y el Surcón −4, la Ocarra −2); y del acumulador: 9, +2 y −2 da 9, no 8. Cierra P-001 |
+| T11 | IA de salvajes base: Erizarse → remate → cercana → acercarse; nadie apunta a una caída; las salvajes no Secundan; la Ocarra ataca desde distancia 2 si puede. Desempates de `Sistema.md` 11.8 (objetivo: remate → menos vida → más cercana → antes en la cola; casilla: si ya alcanza no se mueve → la Ocarra prefiere distancia 2 → menos movimiento → orden de lectura). "Puede tumbar" y "puede alcanzar" incluyen moverse y atacar en el mismo turno (S-8, confirmada por Sistemas en 11.8). El Tasajero recorre la lista en cada uno de sus dos turnos | K-07, `Sistema.md` 11.8 | Tests de elección de objetivo y de casilla, incluidos los empates; la Rodauva salvaje con vida ≤ 50% y una enemiga adyacente se eriza; huida y Encono quedan con su lugar reservado. **Desbloqueada** (03/10/2026) |
 | T12 | Contrato del combate: contexto desde JSON, resultado como objeto, registro y reproductor. El reproductor puede **detenerse en la acción N** (base del guardado de suspensión) | B-04, A.6, A.7 | Un combate grabado se reproduce con un registro idéntico; el resultado valida contra su esquema; reproducir hasta la acción N deja el mismo estado que jugarlo en vivo hasta ahí |
-| T34 | Armador de textos en `nucleo/textos/`: huecos gramaticales desde `especie.<id>.articulo`, mayúsculas automáticas, variantes que reemplazan y complementos, elección al azar con el generador de textos. **Se hace antes de T13** (el número es posterior porque los ID no se renumeran) | A.2.1, `Mundo.md` 1.5 | Tests: `¿{criatura}?` → "¿La Rodauva?"; `flac{criatura_o}` con el Surcón → "flaco"; `{a_rival}` con el Surcón → "al Surcón"; una clave `.maestro` reemplaza a la base; `caida.*` se agrega después de la base; clave faltante → `[FALTA: clave]`; misma semilla → mismas variantes |
-| T13 | Pantalla cenital con placeholders: tablero, unidades, casillas de movimiento y ataque, cola de iniciativa, desglose de daño, resultado básico (lee el resultado de A.7), recarga del escenario con una tecla. Textos desde `textos/es.json` armados por T34, con `[FALTA: clave]` si no está | Brief 4, A.2.1, T34 | Los escenarios A y B se juegan de punta a punta con el mouse |
+| T34 | Armador de textos en `nucleo/textos/`: huecos gramaticales desde `especie.<id>.articulo`, mayúsculas automáticas, variantes que reemplazan y complementos, elección al azar con el generador de textos. **Se hace antes de T13** (el número es posterior porque los ID no se renumeran) | A.2.1, `Mundo.md` 1.5 | Tests: `¿{criatura}?` → "¿La Rodauva?"; `flac{criatura_o}` con el Surcón → "flaco"; `{a_rival}` con el Surcón → "al Surcón"; una clave `.maestro` reemplaza a la base; `caida.*` se agrega después de la base; clave faltante → `[FALTA: clave]`; misma semilla → mismas variantes; un hueco que no es una forma conocida da un aviso (pasa de T03 a T34) |
+| T13 | Pantalla cenital con placeholders: tablero, unidades, casillas de movimiento y ataque, cola de iniciativa, desglose de daño, resultado básico (lee el resultado de A.7), recarga del escenario con una tecla. Textos desde `textos/es.json` armados por T34, con `[FALTA: clave]` si no está. La escena principal **no arranca** si el cargador devuelve errores y le pasa la lista de claves usadas | Brief 4, A.2, A.2.1, T34 | Los escenarios A y B se juegan de punta a punta con el mouse; con un dato roto, el juego no arranca y muestra el error |
 
 **Hito terminado cuando:** A y B se juegan completos, todos los tests pasan y una partida grabada se reproduce igual.
 
@@ -264,12 +371,12 @@ Obediencia, maná, afinidad, combos, Secundar, incidentes, Encono, cobardía y h
 
 | ID | Tarea | Requisitos | Terminada cuando… |
 |---|---|---|---|
-| T14 | Obediencia en vivo, hambre de combate (+1 al cerrar las rondas 5, 10… al Maestro y a toda la tribu en el tablero, **de pie o caída**; no a las guardadas, salvajes ni atacante) y Arrimo derivado de la balanza | C-03, C-04, `Sistema.md` 7.2 | Tests de `Sistema.md` 5.4 y del recálculo en el acto; una caída suma hambre y una caída guardada no |
+| T14 | Obediencia en vivo, hambre de combate (+1 al cerrar las rondas 5, 10… al Maestro y a toda la tribu en el tablero, **de pie o caída**; no a las guardadas, salvajes ni atacante) y Arrimo derivado de la balanza. Los tramos de obediencia usan los cortes de `tablas/lealtad.json` (piso de Neutral y umbral de rescate); se quita `obediencia.baja.hasta` de `tablas/combate.json` y de su esquema (P-003) | C-03, C-04, `Sistema.md` 5.4, 7.2 | Tests de `Sistema.md` 5.4 y del recálculo en el acto; una caída suma hambre y una caída guardada no; si se cambia el piso de Neutral en `lealtad.json`, cambia el tramo de obediencia. Cierra P-003 |
 | T15 | Afinidad por adyacencia (+1 como máximo; el Maestro es afín de las leales). **Solo dentro del mismo bando**: también entre salvajes afines. Las caídas no dan ni reciben | Brief regla 7, `Sistema.md` 10.7, 11.5 | Tests con varias afines adyacentes; Rodauva de la tribu junto a Rodauva salvaje no suma; dos Rodauvas salvajes pegan 3 |
 | T16 | Cadenas: registro de objetivo, eslabón e instancias participantes; bonos; reglas de corte. Las salvajes **no encadenan**, pero sus turnos cortan las cadenas de la tribu | K-02, F-02 (enchufe), `Sistema.md` 10.7 | Tests de la Prueba A, de cada corte de la regla 6 del Brief y de dos salvajes seguidas sin bono |
 | T17 | Secundar: inserción en la cola y previsualización | K-01 | Tests; la cola muestra el lugar resultante antes de confirmar |
 | T18 | Incidentes con rival aliada, con % en la casilla destino antes de mover. Las caídas no provocan ni sufren incidentes | Brief regla 10, `Sistema.md` 11.5 | Tests de los dos resultados según la obediencia y con una rival caída al lado (0%) |
-| T19 | Chequeo único de rival enemiga → Encono (contador 0–3) o cobardía (con el toggle de afines), con % al inicio del turno. El Tasajero chequea al inicio de **cada uno de sus dos turnos**, con un **contador único**. **Todo golpe a la rival suma Encono**; el bono rige **solo enconada** y usa el valor **después** de sumar. Una caída no cuenta como rival a su alcance | K-06, `Sistema.md` 10.5, 11.5 | Tests de las dos ramas; escenario E con y sin toggle; Ocarra enconada (daño 4) pega 5 / 6 / 7 / 7; golpe voluntario sube el contador sin bono; Tasajero con dos chequeos por ronda y un solo contador |
+| T19 | Chequeo único de rival enemiga → Encono (contador 0–3) o cobardía (con el toggle de afines), con % al inicio del turno. El Tasajero chequea al inicio de **cada uno de sus dos turnos**, con un **contador único**. **Todo golpe a la rival suma Encono**; el bono rige **solo enconada** y usa el valor **después** de sumar. Una caída no cuenta como rival a su alcance | K-06, `Sistema.md` 10.5, 11.5 | Tests de las dos ramas; escenario E con y sin toggle; Ocarra enconada (daño 4) pega 5 / 6 / 7 / 7; golpe voluntario sube el contador sin bono; Tasajero con dos chequeos por ronda y un solo contador; con el toggle, el Maestro adyacente resta solo su −10 propio, no cuenta como afín (P-008: Rodauva leal con solo el Maestro al lado, balanza 2 → 15%). Cierra P-008 |
 | T20 | IA de salvajes: suma huida (lugar reservado para T25), Encono e incidentes entre salvajes, en cada turno del Tasajero | K-07, `Sistema.md` 11.8 | Tests: el Tasajero enconado va por la Rodauva en sus dos turnos; un incidente entre salvajes siempre es ataque |
 | T21 | Maná: reserva, `maná_al_entrar`, regeneración al inicio del turno del Maestro, efecto del hambre | M-04 | Tests de tope y de rondas pares |
 | T22 | Martillazo, Lanzadera (con choque) y Remiendo, con previsualización del empuje | Anexo 11 | Tests de alcance, bloqueo, choque y "no cura caídas" |
@@ -286,11 +393,11 @@ Obediencia, maná, afinidad, combos, Secundar, incidentes, Encono, cobardía y h
 | T26 | Guardar en combate (acción de la criatura, adyacente al Maestro) e invocar (turno completo, casilla libre, entra la ronda siguiente) | C-01 | Tests de los dos casos |
 | T27 | Guardar a una caída (acción del Maestro, distancia ≤ 2, costo de invocar, queda con 1 de vida) | Anexo 11 | Tests; sobrevive si después el Maestro cae |
 | T28 | Huida del Maestro (turno completo, termina al final de la ronda, caídas que mueren, sin +1 de victoria). Si cae antes del cierre, el combate termina **por caída**: rescate y caídas que mueren. Previsualización al declarar: enemigas que actúan antes del cierre y **daño máximo** sobre el Maestro | Anexo 11, `Sistema.md` 11.7 | Tests de `Sistema.md` 11.7, incluido el Maestro que cae tras declarar; la previsualización coincide con el peor caso aplicado |
-| T29 | Rescate: rescatista según lealtad real, desempates del Brief (también las que iban a huir con el Maestro), caídas que quedan atrás; pantalla de resultado completa; "quién puede rescatar ahora" visible | C-04 | Escenario F jugable; tests de desempate |
-| T30 | Escenario G: golpe inicial desde el campo `golpe_inicial` (A.7), atacante con lógica de salvaje que no huye, caída en 0 y tres salidas (perdonar, sellar, comer); texto `nocturno.comer.zancajunco_suelto` | P-02, K-09, `Sistema.md` 9.2, `Mundo.md` 4.6 | G jugable con sus tres salidas; con la Ocarra atacante, el primer evento del registro es un golpe de 4 al Maestro, sin combo ni Encono; con `golpe_inicial: null`, no hay golpe |
+| T29 | Rescate: rescatista según lealtad real, desempates del Brief (también las que iban a huir con el Maestro), caídas que quedan atrás; pantalla de resultado completa; "quién puede rescatar ahora" visible | C-04 | Escenario F jugable; tests de desempate; ejemplo de 5.2: una rescatista con 9 que pierde 2 por una caída que muere queda en 9 |
+| T30 | Escenario G: golpe inicial desde el campo `golpe_inicial` (A.7), atacante con lógica de salvaje que no huye, caída en 0 y tres salidas (perdonar, sellar, comer); texto `nocturno.comer.zancajunco_suelto` | P-02, K-09, `Sistema.md` 9.2, `Mundo.md` 4.6 | G jugable con sus tres salidas; con la Ocarra atacante, el primer evento del registro es un golpe de 4 al Maestro, sin combo ni Encono; con `golpe_inicial: null`, no hay golpe; comerla da −2 en total a todas las sueltas, **incluidas sus afines**, sin el −3 extra (P-002, `Sistema.md` 5.2). Cierra P-002 |
 | T31 | Panel de parámetros dentro del juego, con toggles y semilla | B-04 | Se edita un escenario sin tocar el JSON; D se juega con balanza 4 desde el panel y se borra `d_rivales_balanza4.json` |
 | T32 | Vista isométrica y lectura de la adyacencia | A.3 | Los 8 escenarios se juegan en isométrica |
-| T33 | Métricas completas y exportación por combate. Si el Director aprueba la encuesta de E y F, una pantalla de 2 o 3 preguntas exportada junto con las métricas. Si los umbrales de alarma llegan como números, se cargan como dato y la exportación marca las alarmas | B-05, `Sistema.md` 11.9, Visión v1.0 (10, 11) | Las **13 métricas de `Sistema.md` 11.9** se exportan en cada combate |
+| T33 | Métricas completas y exportación por combate. Si el Director aprueba la encuesta de E y F, una pantalla de 2 o 3 preguntas exportada junto con las métricas. Los umbrales de alarma de `Sistema.md` 11.9 (ya en números) se cargan como dato y la exportación marca las alarmas | B-05, `Sistema.md` 11.9, Visión v1.0 (10, 11) | Las **13 métricas de `Sistema.md` 11.9** se exportan en cada combate |
 
 **0a terminada cuando:** los 8 escenarios se juegan en isométrica, con todas las previsualizaciones y las métricas exportadas. Ahí empiezan los playtests de criterios de éxito.
 
@@ -302,7 +409,7 @@ Se construyen en este orden. Las **tareas detalladas se escriben después de los
 |---|---|---|---|
 | 0b.1 "Un día" | Partida y guardado, inventario, mapa del día de los Huertos, eventos de nodo, combate enchufado por el contrato, reparto de comida, cierre del día en el Molino | G-01, I-01, W-02, N-01, N-03, C-03, C-05, W-07 | Un día completo, del Molino al Molino, con un combate de nodo |
 | 0b.2 "El valle" | Los 3 destinos, viaje, agotamiento y pudrición, Enfermo completo, ritual, camino de confianza, Tasajero y su hostilidad, río | C-07, M-05, I-02 a I-04, W-03 a W-06, W-08 | Una vuelta al Robledal con ritual |
-| 0b.3 "La noche" | Abandono y ataque nocturno (enchufa el escenario G), campamento al raso, guardias, emboscadas, recuperación, quebranto y Poza Tibia | N-02, M-03, M-06, M-07, M-09, W-05 | Caer, ser rescatado y curarse en la Poza |
+| 0b.3 "La noche" | Abandono y ataque nocturno (enchufa el escenario G), campamento al raso, guardias, emboscadas, recuperación, quebranto y Poza Tibia. Ataque nocturno (`Sistema.md` 9.2 v1.1): defienden **solo** las sueltas con lealtad real ≥ umbral, medidas una vez después del golpe inicial; las que miran no están en el tablero, no suman +1 ni rescatan, pero sí sufren los eventos de 5.2; Centinela con cualquier lealtad; golpe inicial letal termina el combate antes de la ronda 1. Variante de escenario `g_sin_leales` (Rodauva y Zancajunco en 5, misma semilla que G) | N-02, M-03, M-06, M-07, M-09, W-05 | Caer, ser rescatado y curarse en la Poza |
 | 0b.4 "30 días" | Experiencia y nivel, plazo, epílogo y métricas de partida | C-06, M-02, M-08, G-02, G-03 | Una partida entera hasta el epílogo |
 
 ---
@@ -362,7 +469,7 @@ El Brief agrega dos preguntas que no están en `Decisiones.md`: el **formato de 
 | K-04 | Cálculo de daño en el orden de `Sistema.md` 11.4 | 0a | D13 | Porcentajes sumados → redondeo abajo → planos → mínimo 1 |
 | K-05 | Modificadores porcentuales sumados y aplicados al total | 0a / 0b | D06 | 0a: daño. 0b: recolección del nodo. **Una sola función** para los dos casos |
 | K-06 | Un solo chequeo por rival enemiga que deriva a **Encono** o a **cobardía** según el rol | 0a | D08 | Combate y mixta → Encono; trabajo → cobardía |
-| K-07 | IA de salvajes que respete los incidentes y el Encono | 0a | D06 | Orden de decisión en el Brief (huida → Encono → remate → cercana → acercarse) |
+| K-07 | IA de salvajes que respete los incidentes y el Encono | 0a | D06 | Orden de `Sistema.md` 11.8: huida → Encono → Erizarse → remate → cercana → acercarse, con sus desempates deterministas |
 | K-08 | Estado **caída**; el combate termina al caer el Maestro; las caídas mueren si se pierde | 0a | D13 | |
 | K-09 | La salvaje sale del tablero al llegar a 0; la atacante nocturna queda caída | 0a | D13 | Escenario G |
 | K-10 | Probabilidad de sellado leída desde una tabla (vida × rango) | 0a | D02 | |
@@ -479,16 +586,33 @@ Los bloques viejos de `Decisiones.md` no se editan, así que algunos pedidos usa
 
 Las dudas S-1 a S-6 están cerradas. Las nuevas están en 10.5.
 
-### 10.5 Dudas abiertas para otras áreas — `PREGUNTA ABIERTA` (03/10/2026)
+### 10.5 Dudas para otras áreas — actualizado 03/10/2026
 
-| # | Para | Duda | Recomendación del Arquitecto | Bloquea |
+**Resueltas** (`Sistema.md` v1.1, 03/10/2026). Las `P-00X` son de Claude Code y viven en `docs/PREGUNTAS.md`: el usuario pega la respuesta (`RESPONDIDA`) y Claude Code la pasa a `CERRADA` en la tarea que la aplica.
+
+| # | Duda | Respuesta | Se cierra en |
+|---|---|---|---|
+| S-7 | IA: dos objetivos empatados en vida | Menos vida → más cercana → la que actúa antes en la cola (11.8) | T11 |
+| S-8 | IA: "puede tumbar" y "puede alcanzar", ¿incluyen moverse? | Sí: turno completo, moverse y después una acción (11.8) | T11 |
+| S-9 | IA: casilla para moverse o golpear | Si ya alcanza, no se mueve → la Ocarra prefiere distancia 2 → menos movimiento → orden de lectura (11.8) | T11 |
+| S-10 | Golpe inicial nocturno que deja al Maestro en 0 | El combate termina por caída antes de la ronda 1 (9.2) | 0b.3 |
+| S-11 | Umbrales de alarma en números | En 11.9, aprobados por el Director | T33 |
+| S-12 | Ataque nocturno: ¿qué hace una suelta no leal? | Mira: no entra al tablero. Solo las leales defienden (9.2) | 0b.3 |
+| P-001 | "Afines" en la muerte en el grupo | Relación de especie (10.8), suelta por suelta, sin posiciones. Además: suma y recorte únicos por combate (5.2) | T10 |
+| P-002 | Comer a la atacante: ¿sus afines −2 o −4? | −2 en total a todas, incluidas sus afines (5.2) | T30 |
+| P-003 | Tramos de obediencia contra estados de lealtad | Mismos cortes; cada número en un solo dato (5.4) | T14 |
+| P-004 | "Leal" y "Neutral" sin número | Leal 8, Neutral 5 (11.9) | T05 (ya en los datos) |
+| P-005 | El Maestro en todos los escenarios | Sí, con los valores iniciales salvo F, G, H y `d_rivales_balanza4` (11.9) | T05 (ya en los datos) |
+| P-006 | D hambriento: ¿el Maestro con hambre 6? | No: solo las criaturas (11.9) | T05 (ya en los datos) |
+| P-007 | Posiciones iniciales | Aprobadas como provisorias; ante una alarma, primero se descarta la posición (11.9) | T05 (ya en los datos) |
+| P-008 | Toggle de afines: ¿el Maestro cuenta como afín? | No: solo su −10 propio (10.6) | T19 |
+| P-009 | Objetivo de la Ocarra en A y B | Manda la IA de 11.8; 11.6 es referencia de daño (11.6) | T05 (`_nota` de `a_dia_1.json`) |
+
+**Abiertas** — `PREGUNTA ABIERTA`:
+
+| # | Para | Duda | Recomendación | Antes de |
 |---|---|---|---|---|
-| S-7 | Sistemas | IA (11.8): con dos objetivos empatados en vida, en remate o cercana, ¿a cuál ataca? | A la que actúa antes en la cola de iniciativa: la cola es visible y el jugador lo puede prever | T11 |
-| S-8 | Sistemas | IA: "puede alcanzar" y "puede tumbar", ¿incluyen moverse y después atacar en el mismo turno? | Sí | T11 |
-| S-9 | Sistemas | IA: con varias casillas posibles para moverse, ¿cuál elige? | La que la deja más cerca del objetivo; si empatan, la que menos movimiento gasta; si siguen empatadas, orden fijo (arriba, derecha, abajo, izquierda). La Ocarra prefiere quedar a distancia 2 | T11 |
-| S-10 | Sistemas | Si el golpe inicial del ataque nocturno deja al Maestro en 0, ¿el combate termina por caída antes de la ronda 1 (rescate y caídas que mueren)? | Sí, por coherencia con 11.5 | 0b.3 (en el escenario G no puede pasar) |
-| S-11 | Sistemas / Director | La Visión v1.0 da por aprobados los umbrales de alarma en `Sistema.md` 11.9, pero la v0.9 tiene solo las señales en texto | Pasarlos a números en 11.9; se cargan como dato para T33 | Playtests de criterios (no la programación) |
-| D-1 | Director | ¿Los playtests de E y F incluyen una encuesta corta al final? (Visión 11) | — | T33 (0a.3) |
+| D-1 | Director | ¿Los playtests de E y F incluyen una encuesta corta al final? (Visión 11) | — | T33 |
 
 ---
 
@@ -519,7 +643,7 @@ Las dudas S-1 a S-6 están cerradas. Las nuevas están en 10.5.
 | Variantes con criatura suelta en el colgadero (Rodauva) y en el juncal (Ocarra) | 0b |
 | Emboscadas por destino con variantes; textos del ataque nocturno por criatura | 0b |
 | Escenario G con variante de texto por Zancajunco suelto (`nocturno.comer.zancajunco_suelto`); fallo de sellado con texto propio si la Rodauva está erizada (`sellar.fallo.erizada`) (T24, T30) | 0a |
-| Huecos gramaticales y mayúsculas automáticas (`Mundo.md` 1.5) → A.2.1, T34 | 0a |
+| Huecos gramaticales y mayúsculas automáticas (`Mundo.md` 1.5) → A.2.1, T34. Textos entregados (493 claves) y en el repositorio desde T04 | 0a |
 | Textos rotativos sin repetición consecutiva y marca de "primera visita" por destino | 0b |
 | Regla de testigos al comer a una criatura (`PROPUESTA` de Mundo, 4.12), contador de veces que el Maestro comió y guardadas presentes en ese momento | 0b |
 | Líneas de hambre solo al cambiar de estado; aviso de muerte por hambre antes del reparto | 0b |
@@ -560,6 +684,8 @@ Las dudas S-1 a S-6 están cerradas. Las nuevas están en 10.5.
 
 | Versión | Fecha | Cambio |
 |---|---|---|
+| v0.9 | 03/10/2026 | Sincronización con `Sistema.md` v1.1, que responde P-001 a P-009, S-8, S-10 y S-12 (10.5 reescrita: solo queda abierta D-1). **T05 detallada** en dos sesiones: `Especie`, `Criatura`, `Maestro`, `Pergamino` y `Plantel`, creación desde escenario, balanza derivada y límites de la tarea. Nuevas convenciones: **referencias entre entidades por `id`** (A.5) y **tests de reglas con fixtures, nunca con `datos/`** (A.6). Ante una contradicción, `Sistema.md` manda sobre el Brief (A.5). Criterios nuevos: T10 (afines por especie, suma y recorte únicos), T14 (cortes de obediencia desde `lealtad.json`; sale `obediencia.baja.hasta`), T19 (Maestro fuera del toggle), T29 (ejemplo 9 + 2 − 2), T30 (comer a la atacante). Valores de escenarios `DECIDIDO` (A.9). 0b.3 suma defensoras y `g_sin_leales` (B.5). K-07 con el orden de 11.8 |
+| v0.8 | 03/10/2026 | **T01 a T04 terminadas y mergeadas** (nueva A.10). Nueva A.2.2: reglas de transcripción (cada número en un solo archivo, tablas derivadas, mapa de dónde vive cada número, obediencia de salvajes como tramo). Nueva A.9: los 11 escenarios, escenario G definido y valores provisorios. A.2: esquemas reales en T04, carpeta de datos como parámetro, con un error no se entregan datos; esquemas de salida en T12. A.2.1: claves usadas como parámetro; aviso de huecos desconocidos pasa a T34; textos entregados. A.4: `.claude/settings.json`, `docs/PREGUNTAS.md`, `pruebas/fixtures/`. A.5: rama por tarea con PR, permisos, canal `PREGUNTAS.md`, ciclo de cada tarea, `CLAUDE.md`. A.6: comando de tests con `GODOT_BIN` y test permanente de carga. T11 desbloqueada (S-7 a S-9 resueltas por `Sistema.md` 11.8; S-8 por lectura declarada). S-11 resuelta (umbrales en 11.9). Nueva S-12 y registro en 10.5 de las preguntas P-001 a P-009 de `docs/PREGUNTAS.md` (cinco de ellas encontradas por Claude Code en T04), con la tarea que necesita cada respuesta. Eventos de lealtad en `tablas/lealtad.json` (A.2.2). Posiciones provisorias de los escenarios en A.9. T13 bloquea el arranque con datos rotos; T33 carga los umbrales |
 | v0.7 | 03/10/2026 | Sincronización con Visión v1.0, `Sistema.md` v0.9 y `Mundo.md` v1.0. Huecos gramaticales, mayúsculas y resolución de variantes `DECIDIDO` (A.2.1); armador en `nucleo/textos/` (A.4) y nueva **T34** antes de T13. Validador: `type` como lista y diccionarios de claves libres (A.2, T03). Claves `sellar.fallo.erizada` y `nocturno.comer.zancajunco_suelto`. Golpe inicial como campo del contexto (A.7, `DECIDIDO`). Escenarios B a F y H en T04, con variante temporal de D en balanza 4 hasta T31. Mandan las 13 métricas de 11.9 (T23, T33). Tasajero con dos turnos completos y contador único (T07, T19, T20, T25); Erizarse en la IA (T11). B.5 pasa a `DECIDIDO`. G-03 suma "solo guardadas". Nueva 10.5 con dudas S-7 a S-11 y D-1; T11 espera S-7 a S-9 |
 | v0.6 | 03/10/2026 | Sincronización con Visión v0.9, `Sistema.md` v0.8 y `Mundo.md` v0.8. 10.4 resuelta (S-1 a S-6) y **T28 desbloqueada**; criterios nuevos en T02, T10, T11, T12, T13, T14, T15, T16, T18, T19, T20, T24, T28, T29 y T30. Nueva A.2.1: textos (`DECIDIDO`). Guardado de suspensión por grabación (A.7, `DECIDIDO`). Generador de azar de textos y partida de prueba en A.8. Flujo de Git y sincronización de `docs/` `DECIDIDO` (A.5). Quebranto reemplaza a malherido; C-07 sin contagio; W-08 y G-03 actualizados. Anexo 11 con los pedidos nuevos de `Mundo.md` 9 |
 | v0.5 | 02/10/2026 | Sincronización con Visión v0.8 y `Sistema.md` v0.7. T01 terminada. Esquemas JSON y datos de 0a (A.2, `DECIDIDO`); Saciado derivado del hambre. Nueva A.7: contrato del combate (`DECIDIDO`). Nueva A.8: decisiones técnicas para 0b (`PROPUESTA`). Ajustes de criterio en T02, T03, T04, T05, T12 y T13. Nueva B.5: hitos de 0b (`PROPUESTA`). Nuevos requisitos M-08, M-09, W-07, W-08, G-02 y G-03; cambian C-06, M-06, W-05 y W-06. 10.3 resuelta; nueva 10.4 con 6 dudas para Sistemas. B-02 y B-04 resueltos |

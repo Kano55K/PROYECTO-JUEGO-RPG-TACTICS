@@ -1,5 +1,5 @@
 ## P-001 — Qué significa "afines" en la muerte en el grupo
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -9,10 +9,10 @@
 - **Opciones:** A) solo la relación de especie, suelta por suelta: Rodauva −4, Surcón −4, Ocarra −2. B) afinidad de combate (10.3): −4 solo a las que se llevan bien con la muerta y estaban adyacentes a ella al morir; el resto, −2. — Recomendación técnica: A (no depende de la posición, y la muerte por huida o derrota ocurre con el combate ya terminado).
 - **Bloquea:** no. El esquema `lealtad` guarda los dos números (`eventos.muerte_en_el_grupo` y `eventos.muerte_en_el_grupo_afines`); la regla se programa en T10.
 - **Mientras tanto:** solo están los campos en el esquema; no hay código que elija entre −2 y −4.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 5.2 v1.1 (03/10/2026): opción A. "Afines" es la relación de especie (10.8), mirada suelta por suelta: −4 a cada suelta cuya especie se lleve bien con la de la muerta; −2 al resto. La posición no cuenta. En el caso: Rodauva −4, Surcón −4, Ocarra −2. Además, regla nueva: todos los cambios de lealtad de un combate (o de una noche) se suman y el total se recorta a 0–10 una sola vez. Se aplica en T10.
 
 ## P-002 — Afines de la atacante comida por el Maestro
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -22,10 +22,10 @@
 - **Opciones:** A) −2 a todas, sin excepción ("solo −2 a todas"). B) −2 a todas y −4 a las afines (la fila de muerte en el grupo sigue aplicando; "solo" quita únicamente el −3 extra). — Recomendación técnica: A (es la lectura literal).
 - **Bloquea:** no. `tablas/lealtad.json` guarda `eventos.comer_atacante: -2` y `eventos.muerte_en_el_grupo_afines: -4`; la regla se programa en T10.
 - **Mientras tanto:** solo están los datos; no hay código que elija.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 5.2 v1.1 (03/10/2026): opción A. −2 en total a todas las sueltas, incluidas sus afines; reemplaza a la fila de muerte en el grupo y no suma el −3 extra. Se aplica en T30.
 
 ## P-003 — Tramos de obediencia y estados de lealtad
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -35,10 +35,10 @@
 - **Opciones:** A) mismos cortes: el código lee el límite de `tablas/lealtad.json` (`dudosa_hasta`) y se quita `obediencia.baja.hasta` de `tablas/combate.json`. B) umbrales propios: queda `obediencia.baja.hasta: 3` en `tablas/combate.json`. — Recomendación técnica: A (la fila de 5.4 repite la de 5.1 y así cada número vive en un solo archivo).
 - **Bloquea:** no. Hoy los dos valen 3 y dan el mismo resultado.
 - **Mientras tanto:** `tablas/combate.json` guarda `obediencia.baja.hasta: 3` citando 5.4; no hay código que lo lea todavía.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 5.4 v1.1 (03/10/2026): opción A. Los tramos de obediencia usan los mismos cortes que los estados de lealtad de 5.1 (piso de Neutral y umbral de rescate); cada número en un solo dato. Se aplica en T14, que quita `obediencia.baja.hasta` de `tablas/combate.json`.
 
 ## P-004 — Lealtad de "leal" y "Neutral" en los escenarios
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -48,10 +48,10 @@
 - **Opciones:** A) 8 y 5, valores provisorios que fijó el Arquitecto (8 sigue leal con la balanza en 5). B) otros valores. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** los 11 escenarios usan 8 y 5.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.9 v1.1 (03/10/2026): opción A. Leal 8, Neutral 5. Ya está en los datos (T04).
 
 ## P-005 — El Maestro en todos los escenarios
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -61,10 +61,10 @@
 - **Opciones:** A) Maestro con sus valores iniciales en todos, valor provisorio que fijó el Arquitecto. B) D y/o E sin Maestro. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** el Maestro está en los 11, con valores iniciales salvo F (vida 6), G (maná de entrada 4), H (balanza 5 y Poder 3) y `d_rivales_balanza4` (balanza 4).
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.9 v1.1 (03/10/2026): opción A. El Maestro está en los 11 escenarios con sus valores iniciales, salvo F, G, H y `d_rivales_balanza4`. Ya está en los datos (T04).
 
 ## P-006 — Hambre del Maestro en D Hambriento
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -74,10 +74,10 @@
 - **Opciones:** A) solo las criaturas en 6; el Maestro en 3 (valor provisorio que fijó el Arquitecto). B) todos en 6. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** Ocarra y Zancajunco con hambre 6; Maestro con hambre 3.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.9 v1.1 (03/10/2026): opción A. Hambre 6 solo en las criaturas; el Maestro en 3. Ya está en los datos (T04).
 
 ## P-007 — Posiciones iniciales de los escenarios
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -94,10 +94,10 @@
 - **Opciones:** A) confirmar las posiciones (valores provisorios propuestos por Claude Code y aprobados por el Arquitecto). B) cambiar las de algún escenario. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** los 11 archivos usan estas posiciones; el panel (T31) las podrá cambiar.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.9 v1.1 (03/10/2026): opción A. Posiciones aprobadas como provisorias. Ante una alarma de 11.9, primero se descarta que la causa sea la posición; después se toca la regla. Ya está en los datos (T04).
 
 ## P-008 — El Maestro en el toggle de afines contra la cobardía
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -107,10 +107,10 @@
 - **Opciones:** A) no cuenta como afín para el toggle: solo su −10 de 10.6. B) cuenta las dos veces. — Recomendación técnica: A (el toggle anticipa la barra de zozobra entre criaturas; el Maestro ya tiene su fila).
 - **Bloquea:** no (se programa en T19)
 - **Mientras tanto:** la `_nota` de `e_cobardia_afines` no da ese número y remite a esta pregunta.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 10.6 v1.1 (03/10/2026): opción A. El Maestro no cuenta como afín adyacente para el toggle: solo su −10 propio. En el caso: 15%. Se aplica en T19.
 
 ## P-009 — Objetivo de la Ocarra en las Pruebas A y B
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -120,4 +120,4 @@
 - **Opciones:** A) manda 11.8; 11.6 es referencia de daño y la decisión de A (sellar al 50% o arriesgar) sigue en pie. B) A y B necesitan otras posiciones o una regla para que la Ocarra pegue al Maestro. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** `a_dia_1` queda copiado tal cual del ejemplo de A.2.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 11.6 v1.1 (03/10/2026): opción A. Manda la IA de 11.8; 11.6 es referencia de daño. Hay que actualizar la `_nota` de `a_dia_1.json`: la apuesta es la Rodauva, no la vida del Maestro. Se aplica en T05.
