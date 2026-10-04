@@ -128,7 +128,7 @@
 - **Cerrada en:** T05
 
 ## P-010 — Criterio (2) de T05: pergaminos de las Ocarras de B
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T05
 - **Fecha:** 04/10/2026
@@ -139,6 +139,7 @@
 - **Bloquea:** no
 - **Mientras tanto:** manda `Sistema.md` 3.2: las salvajes no tienen pergamino. El test (2) (`pruebas/unidades/test_plantel.gd`) comprueba que la vida es independiente y que las dos quedan sin pergamino.
 - **Respuesta:** _(la completa el staff)_
+- **Cerrada en:** T06 (test (8) de T05, `pruebas/unidades/test_plantel.gd`)
 
 ## P-010- ESTADO --> RESPONDIDA
 

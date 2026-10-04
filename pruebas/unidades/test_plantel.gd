@@ -1,9 +1,9 @@
 extends GdUnitTestSuite
 
-# Arquitectura.md B.2 (T05, criterios 2, 3b, 4 y 5): el Plantel creado desde
+# Arquitectura.md B.2 (T05, criterios 2, 3b, 4, 5 y 8): el Plantel creado desde
 # un escenario, con fixtures (A.6). Sistema.md 3.2 y 9.2.
 const _CARPETA: String = "res://pruebas/fixtures/unidades/"
-const _ESPECIES: Array[String] = ["ocarra", "rodauva", "zancajunco"]
+const _ESPECIES: Array[String] = ["ocarra", "rodauva", "surcon", "tasajero", "zancajunco"]
 
 
 func _leer(archivo: String, nombre_esquema: String) -> Dictionary:
@@ -36,6 +36,26 @@ func test_ocarras_de_b_independientes() -> void:
 
 	assert_str(ocarra_1.pergamino_id).is_empty()
 	assert_str(ocarra_2.pergamino_id).is_empty()
+
+
+# Criterio 8 (P-010): las dos Rodauvas de la tribu de E tienen lealtad propia
+# y pergaminos distintos (C-02).
+func test_rodauvas_de_e_independientes() -> void:
+	var plantel: Plantel = _crear("escenario_e.json")
+	var leal: Criatura = plantel.criatura("rodauva_1")
+	var neutral: Criatura = plantel.criatura("rodauva_2")
+	assert_object(leal).is_not_same(neutral)
+	assert_int(leal.lealtad).is_equal(8)
+	assert_int(neutral.lealtad).is_equal(5)
+
+	leal.lealtad -= 1
+	assert_int(neutral.lealtad).is_equal(5)
+
+	assert_str(leal.pergamino_id).is_not_empty()
+	assert_str(neutral.pergamino_id).is_not_empty()
+	assert_str(leal.pergamino_id).is_not_equal(neutral.pergamino_id)
+	assert_str(plantel.pergamino(leal.pergamino_id).ocupante_id).is_equal("rodauva_1")
+	assert_str(plantel.pergamino(neutral.pergamino_id).ocupante_id).is_equal("rodauva_2")
 
 
 # Criterio 3b: null toma el valor por defecto; un valor explicito se respeta.

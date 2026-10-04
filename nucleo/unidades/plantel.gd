@@ -105,6 +105,8 @@ static func _crear_maestro(datos_maestro: Dictionary, tabla_balanza: TablaBalanz
 	else:
 		nuevo.hambre = (ficha_maestro["iniciales"] as Dictionary)["hambre"]
 	nuevo.enfermedades = datos_maestro.get("enfermedades", 0)
+	nuevo.movimiento = ficha_maestro["movimiento"]
+	nuevo.alcance = ficha_maestro["alcance"]
 	nuevo.posicion = _posicion(datos_maestro.get("posicion"))
 	# Tal cual llega: se resuelve en T21.
 	nuevo.mana_entrada = datos_maestro.get("mana_entrada")
