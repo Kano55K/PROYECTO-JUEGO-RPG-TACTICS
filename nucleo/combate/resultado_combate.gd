@@ -43,7 +43,7 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	for pergamino in plantel.pergaminos():
 		if pergamino.estado == Pergamino.Estado.EN_BLANCO:
 			resultado.pergaminos_en_blanco += 1
-	# Lectura literal de B.2 (T12): la atacante caida, sea cual sea el desenlace.
+	# Lectura literal de B.2 (T12): la atacante caida, sea cual sea el desenlace (P-024, S-20).
 	for criatura in plantel.criaturas():
 		if criatura.comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA \
 				and criatura.estado == Criatura.Estado.CAIDA:

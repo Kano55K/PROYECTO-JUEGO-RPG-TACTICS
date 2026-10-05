@@ -323,3 +323,16 @@
 - **Mientras tanto:** programado con A (decidido con el usuario al aprobar el plan) en `nucleo/combate/contexto_combate.gd`; test (9) de T12 (`pruebas/combate/test_combate.gd`) con los dos casos. Si se elige B, cambia una condición y ese test.
 - **Respuesta:** Arquitecto, 04/10/2026: opción A. DESPLIEGUE_NO_IMPLEMENTADO alcanza solo a las unidades que van al tablero (el Maestro, las sueltas de la tribu y las enemigas). Una guardada con posicion: null es válida porque no ocupa casilla (A.2, T06). La redacción de T12 en B.2 estaba mal y se corrigió en Arquitectura.md v0.18. Ya programado así: no cambia código ni tests. Se cierra en T12, sesión 2.
 - **Cerrada en:** T12 (sin cambios de código)
+
+## P-024 — Destino de la atacante nocturna caída si el combate termina en derrota
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T12
+- **Fecha:** 04/10/2026
+- **Fuente:** `Sistema.md` 9.3 y 11.5. Es la S-20 de `Arquitectura.md` 10.5
+- **Duda:** si un combate nocturno termina en derrota (cae el Maestro) con la atacante ya caída, ¿su destino queda pendiente para después del rescate, o sigue otra regla?
+- **Caso que la dispara:** en un combate nocturno con más de una enemiga, la atacante cae y después otra enemiga tumba al Maestro. En 0a no pasa: en G la atacante es la única enemiga, y si cae se gana.
+- **Opciones:** A) queda pendiente (`atacante_pendiente` = su id) con cualquier desenlace. B) otra regla (huye, queda libre o muere). — Recomendación técnica: A (lectura literal, ya programada).
+- **Bloquea:** no (se necesita antes de T30)
+- **Mientras tanto:** programado con A en `nucleo/combate/resultado_combate.gd`, `ResultadoCombate.armar`: toma la criatura `ATACANTE_NOCTURNA` en estado `CAIDA` sin mirar `cierre.fin`, con un comentario que remite a esta pregunta y a S-20. Test: `pruebas/combate/test_contrato.gd`, `test_resultados_validan_contra_el_esquema` (test 11 de T12, caso G con la atacante en 0: `atacante_pendiente = "ocarra_1"`). Ese test cubre la atacante caída en una victoria. Ningún test arma una derrota con la atacante caída. Si Sistemas elige B, cambia una condición de `armar` y se suma ese caso al test 11.
+- **Respuesta:** _(la completa el staff)_
