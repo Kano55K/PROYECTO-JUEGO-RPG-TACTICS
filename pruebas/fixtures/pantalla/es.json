@@ -16,5 +16,11 @@
   "hambre.estado.saciado.maestro": "Saciado",
   "hambre.estado.normal": "Normal",
   "iniciativa.caza": "Caza",
-  "iniciativa.cuenta": "Cuenta"
+  "iniciativa.cuenta": "Cuenta",
+  "accion.mover": "Mover",
+  "accion.atacar": "Atacar",
+  "rasgo.hacerse_junco.nombre": "Hacerse junco",
+  "combate.victoria": "El claro queda en silencio. Se terminó.",
+  "caida": "{criatura} cae y no se levanta. Todavía respira.",
+  "caida.rodauva": "Queda hecha bola, quieta. Las frutas se le cayeron de las púas."
 }

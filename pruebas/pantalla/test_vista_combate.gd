@@ -1,11 +1,13 @@
 extends GdUnitTestSuite
 
-# Arquitectura.md A.3, A.6 y B.2 (T13, sesion 1): la vista de combate con los
+# Arquitectura.md A.3, A.6 y B.2 (T13, sesiones 1 y 2): la vista de combate con los
 # escenarios reales de datos/ (se crean y se pueden usar; no compara numeros),
 # con el runner de escenas de GdUnit4.
 const _ESCENA: String = "res://pantalla/combate/vista_combate.tscn"
 const _CARPETA_DATOS: String = "res://datos"
 const _PREFIJO_ESCENARIOS: String = "escenarios/"
+# Corta un combate que no termina (la politica del test siempre se acerca).
+const _TOPE_ACCIONES: int = 300
 
 
 func _datos() -> Dictionary:
@@ -14,10 +16,11 @@ func _datos() -> Dictionary:
 	return carga["datos"]
 
 
-func _vista(escenario: Dictionary, datos: Dictionary) -> GdUnitSceneRunner:
+func _vista(escenario: Dictionary, datos: Dictionary, carpeta_registros: String = "") -> GdUnitSceneRunner:
 	# Con una instancia, el runner no la libera: auto_free la libera al terminar.
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
-	(runner.scene() as VistaCombate).empezar(escenario, datos)
+	# Sin carpeta: los combates de estos tests no terminan, no se escribe nada.
+	(runner.scene() as VistaCombate).empezar(escenario, datos, [], carpeta_registros)
 	return runner
 
 
@@ -91,3 +94,119 @@ func _casillas_en_tablero(foto: Dictionary) -> Dictionary:
 		if criatura["posicion"] != null and criatura["estado"] in ["suelta", "caida"]:
 			casillas[criatura["id"]] = Vector2i(criatura["posicion"][0], criatura["posicion"][1])
 	return casillas
+
+
+# (8) El desglose que se muestra con el mouse sobre una objetivo es igual al del
+# evento `ataque` del registro cuando se la golpea.
+func test_desglose_mostrado_es_el_del_ataque() -> void:
+	var datos: Dictionary = _datos()
+	var runner: GdUnitSceneRunner = _vista(datos["escenarios/a_dia_1.json"], datos, create_temp_dir("t13_desglose"))
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = runner.scene()
+	for _i in range(_TOPE_ACCIONES):
+		assert_bool(vista.combate().esperando_jugador()).is_true()
+		var turno: Turno = vista.combate().turno_actual()
+		var objetivos: Array[String] = turno.objetivos_para_atacar()
+		if objetivos.is_empty():
+			_acercarse(vista)
+			vista.pulsar_terminar()
+			continue
+		var casilla: Vector2i = _casilla_de(vista.combate().instantanea(), objetivos[0])
+		vista.sobre_casilla(casilla)
+		var mostrado: Dictionary = vista.desglose_mostrado()
+		assert_dict(mostrado).is_not_empty()
+		vista.clic_casilla(casilla)
+		var ataque: Dictionary = _ultimo_evento(vista.combate().registro(), "ataque")
+		assert_dict(ataque).is_not_empty()
+		assert_str(ataque["atacante"]).is_equal(turno.unidad_id)
+		assert_dict(ataque["desglose"]).is_equal(mostrado)
+		return
+	fail("nunca hubo una objetivo a tiro")
+
+
+# (9) Jugar A hasta el final mandando acciones por la vista guarda la grabacion
+# y el registro, y reproducir esa grabacion con el Reproductor da el mismo registro.
+func test_jugar_a_guarda_y_se_reproduce_igual() -> void:
+	var datos: Dictionary = _datos()
+	var escenario: Dictionary = datos["escenarios/a_dia_1.json"]
+	var carpeta: String = create_temp_dir("t13_jugar_a")
+	var runner: GdUnitSceneRunner = _vista(escenario, datos, carpeta)
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = runner.scene()
+	for _i in range(_TOPE_ACCIONES):
+		if vista.combate().terminado():
+			break
+		assert_bool(vista.combate().esperando_jugador()).override_failure_message(vista.combate().error()).is_true()
+		var turno: Turno = vista.combate().turno_actual()
+		var objetivos: Array[String] = turno.objetivos_para_atacar()
+		if not objetivos.is_empty():
+			vista.clic_casilla(_casilla_de(vista.combate().instantanea(), objetivos[0]))
+		else:
+			_acercarse(vista)
+		if not vista.combate().terminado():
+			vista.pulsar_terminar()
+	assert_bool(vista.combate().terminado()).is_true()
+	await runner.simulate_frames(1)
+	assert_bool(runner.find_child("PantallaResultado").visible).is_true()
+
+	var base: String = carpeta.path_join("%s_%d_1" % [escenario["id"], escenario["semilla"]])
+	assert_bool(FileAccess.file_exists(base + ".json")).override_failure_message(base).is_true()
+	assert_bool(FileAccess.file_exists(base + ".jsonl")).override_failure_message(base).is_true()
+	var guardadas: PackedStringArray = FileAccess.get_file_as_string(base + ".jsonl").split("\n", false)
+	assert_array(Array(guardadas)).is_equal(Array(vista.combate().registro().lineas_json()))
+
+	var esquema: Dictionary = Cargador.new().esquema_resuelto(_CARPETA_DATOS, "grabacion")["esquema"]
+	var validacion: Dictionary = Validador.new().validar(
+			JSON.parse_string(FileAccess.get_file_as_string(base + ".json")), esquema, "grabacion")
+	assert_array(validacion["errores"]).override_failure_message(str(validacion["errores"])).is_empty()
+	var reproduccion: Reproductor = Reproductor.reproducir(Grabacion.desde_diccionario(validacion["datos"]), datos)
+	assert_str(reproduccion.error).is_empty()
+	assert_bool(reproduccion.aviso_huella).is_false()
+	assert_array(Array(reproduccion.combate.registro().lineas_json())).is_equal(Array(guardadas))
+
+
+# Politica del test: mueve a la casilla alcanzable mas cercana a una enemiga.
+func _acercarse(vista: VistaCombate) -> void:
+	var turno: Turno = vista.combate().turno_actual()
+	var casillas: Array[Vector2i] = turno.casillas_para_mover()
+	if casillas.is_empty():
+		return
+	var foto: Dictionary = vista.combate().instantanea()
+	var plantel: Plantel = vista.combate().contexto().plantel
+	var enemigas: Array[Vector2i] = []
+	for criatura in foto["criaturas"]:
+		if criatura["estado"] == "suelta" and criatura["posicion"] != null \
+				and plantel.criatura(criatura["id"]).bando != Criatura.Bando.TRIBU:
+			enemigas.append(Vector2i(criatura["posicion"][0], criatura["posicion"][1]))
+	var mejor: Vector2i = casillas[0]
+	var mejor_distancia: int = _distancia_minima(mejor, enemigas)
+	for casilla in casillas:
+		var distancia: int = _distancia_minima(casilla, enemigas)
+		if distancia < mejor_distancia:
+			mejor = casilla
+			mejor_distancia = distancia
+	vista.clic_casilla(mejor)
+
+
+func _distancia_minima(desde: Vector2i, hasta: Array[Vector2i]) -> int:
+	var minima: int = 1 << 30
+	for casilla in hasta:
+		minima = mini(minima, absi(desde.x - casilla.x) + absi(desde.y - casilla.y))
+	return minima
+
+
+func _casilla_de(foto: Dictionary, unidad_id: String) -> Vector2i:
+	if unidad_id == Maestro.ID:
+		return Vector2i(foto["maestro"]["posicion"][0], foto["maestro"]["posicion"][1])
+	for criatura in foto["criaturas"]:
+		if criatura["id"] == unidad_id:
+			return Vector2i(criatura["posicion"][0], criatura["posicion"][1])
+	return Criatura.SIN_POSICION
+
+
+func _ultimo_evento(registro: RegistroCombate, tipo: String) -> Dictionary:
+	var lineas: Array[Dictionary] = registro.lineas()
+	for i in range(lineas.size() - 1, -1, -1):
+		if lineas[i]["tipo"] == tipo:
+			return lineas[i]
+	return {}

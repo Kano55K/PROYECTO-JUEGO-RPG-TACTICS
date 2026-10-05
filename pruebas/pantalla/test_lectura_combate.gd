@@ -83,3 +83,63 @@ func _casilla(id_unidad: String) -> Vector2i:
 		if criatura["id"] == id_unidad:
 			return Vector2i(criatura["posicion"][0], criatura["posicion"][1])
 	return Criatura.SIN_POSICION
+
+
+# T13, sesion 2: lo nuevo del registro como lineas. El movimiento se arma con
+# claves que ya existen; la caida usa `caida` con su complemento de especie.
+func test_sucesos() -> void:
+	var lectura: LecturaCombate = _lectura()
+	var desde: int = _combate.registro().lineas().size()
+	var destino: Vector2i = _combate.turno_actual().casillas_para_mover()[0]
+	assert_bool(_combate.aplicar(Accion.mover(destino)).valida).is_true()
+	assert_array(lectura.sucesos(desde)).is_equal(["Zancajunco · Mover"])
+	assert_array(lectura.suceso({"tipo": "estado", "unidad": "rodauva_1", "de": "suelta", "a": "caida"})) \
+			.is_equal(["La Rodauva cae y no se levanta. Todavía respira.",
+					"Queda hecha bola, quieta. Las frutas se le cayeron de las púas."])
+	assert_array(lectura.suceso({"tipo": "ataque", "atacante": "zancajunco_1", "objetivo": "tasajero_s1",
+			"desglose": {"total": 6}, "vida_antes": 14, "vida_despues": 8})) \
+			.is_equal(["Zancajunco · Atacar · Tasajero −6 (14 → 8)"])
+	assert_array(lectura.suceso({"tipo": "fin", "desenlace": "victoria"})) \
+			.is_equal(["El claro queda en silencio. Se terminó."])
+	assert_array(lectura.suceso({"tipo": "tirada"})).is_empty()
+
+
+# El desglose de 11.4 tal como viene del nucleo: base, cada modificador con su
+# fuente, total y si actuo el minimo. Ninguna cuenta en la pantalla.
+func test_desglose() -> void:
+	var lectura: LecturaCombate = _lectura()
+	var desglose: Dictionary = {"base": 4, "modificadores": [
+			{"fuente": "hambre", "tipo": "porcentaje", "valor": 25, "detalle": "saciado"},
+			{"fuente": "combo", "tipo": "porcentaje", "valor": 50, "detalle": ""},
+			{"fuente": "rasgo_atacante", "tipo": "plano", "valor": 2, "detalle": "hacerse_junco"},
+			{"fuente": "rasgo_objetivo", "tipo": "plano", "valor": -1, "detalle": "hacerse_junco"}],
+			"porcentaje_total": 75, "tras_porcentajes": 7, "planos_total": 1, "minimo_aplicado": false, "total": 8}
+	assert_array(lectura.desglose(desglose, "zancajunco_1")).is_equal([
+			"[FALTA: desglose.base]: 4", "Saciada: +25%", "[FALTA: desglose.fuente.combo]: +50%",
+			"Hacerse junco: +2", "Hacerse junco: -1", "[FALTA: desglose.total]: 8"])
+	desglose["minimo_aplicado"] = true
+	desglose["total"] = 1
+	assert_str(lectura.desglose(desglose, "zancajunco_1").back()) \
+			.is_equal("[FALTA: desglose.total]: 1 ([FALTA: desglose.minimo])")
+
+
+# La pantalla de resultado desde ResultadoCombate.a_diccionario(): desenlace,
+# rondas, estado final de cada unidad y cambios de lealtad con su motivo.
+func test_resultado() -> void:
+	var lectura: LecturaCombate = _lectura()
+	var resultado: Dictionary = {"desenlace": "victoria", "rondas": 3, "maestro_caido": false,
+			"maestro": {"vida": 20}, "unidades": [
+				{"id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "vida": 1},
+				{"id": "tasajero_s1", "especie": "tasajero", "estado": "fuera", "vida": 0}],
+			"lealtad_cambios": [{"id": "rodauva_1", "antes": 8, "cambio": 1, "despues": 9,
+				"anotaciones": [{"cambio": 1, "motivo": "victoria"}]}]}
+	assert_array(lectura.resultado(resultado)).is_equal([
+			"[FALTA: resultado.titulo]",
+			"[FALTA: resultado.desenlace.victoria]",
+			"[FALTA: resultado.rondas]: 3",
+			"[FALTA: maestro.nombre] · [FALTA: panel.vida]: 20",
+			"Rodauva · [FALTA: estado.suelta] · [FALTA: panel.vida]: 1",
+			"Tasajero · [FALTA: estado.fuera] · [FALTA: panel.vida]: 0",
+			"[FALTA: resultado.lealtad]",
+			"Rodauva: 8 → 9",
+			"  [FALTA: lealtad.motivo.victoria]: +1"])

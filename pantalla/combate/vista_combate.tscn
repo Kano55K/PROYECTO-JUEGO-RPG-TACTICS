@@ -9,6 +9,9 @@ script = ExtResource("1_script")
 [node name="Tablero" type="TileMapLayer" parent="."]
 tile_set = ExtResource("2_casillas")
 
+[node name="Marcas" type="TileMapLayer" parent="Tablero"]
+tile_set = ExtResource("2_casillas")
+
 [node name="Unidades" type="Node2D" parent="Tablero"]
 
 [node name="Camara" type="Camera2D" parent="."]
@@ -26,15 +29,57 @@ offset_left = 16.0
 offset_top = 44.0
 offset_right = 216.0
 offset_bottom = 344.0
+mouse_filter = 2
+
+[node name="Botones" type="HBoxContainer" parent="Interfaz"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -56.0
+offset_right = 416.0
+offset_bottom = -16.0
+mouse_filter = 2
+
+[node name="BotonErizarse" type="Button" parent="Interfaz/Botones"]
+visible = false
+layout_mode = 2
+
+[node name="BotonTerminar" type="Button" parent="Interfaz/Botones"]
+layout_mode = 2
 
 [node name="PanelTurno" type="Label" parent="Interfaz"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -236.0
+offset_left = -276.0
 offset_top = 12.0
 offset_right = -16.0
 offset_bottom = 132.0
+
+[node name="PanelDesglose" type="Label" parent="Interfaz"]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -276.0
+offset_top = 140.0
+offset_right = -16.0
+offset_bottom = 300.0
+theme_override_colors/font_color = Color(1, 0.85, 0.6, 1)
+
+[node name="Sucesos" type="Label" parent="Interfaz"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -436.0
+offset_top = -256.0
+offset_right = -16.0
+offset_bottom = -16.0
+vertical_alignment = 2
+autowrap_mode = 3
 
 [node name="Mensaje" type="Label" parent="Interfaz"]
 visible = false
@@ -50,6 +95,29 @@ offset_bottom = -12.0
 theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
 horizontal_alignment = 1
 autowrap_mode = 3
+
+[node name="PantallaResultado" type="PanelContainer" parent="Interfaz"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -220.0
+offset_right = 260.0
+offset_bottom = 220.0
+
+[node name="Contenido" type="VBoxContainer" parent="Interfaz/PantallaResultado"]
+layout_mode = 2
+
+[node name="TextoResultado" type="Label" parent="Interfaz/PantallaResultado/Contenido"]
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+
+[node name="BotonVolver" type="Button" parent="Interfaz/PantallaResultado/Contenido"]
+layout_mode = 2
 
 [node name="PanelDepuracion" type="TextEdit" parent="Interfaz"]
 visible = false

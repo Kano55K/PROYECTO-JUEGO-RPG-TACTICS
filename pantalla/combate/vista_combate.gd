@@ -1,19 +1,31 @@
-# Arquitectura.md B.2 (T13, sesion 1): la vista del combate, cenital y con
-# placeholders. Arma el combate (la IA juega hasta el primer turno del jugador)
-# y se redibuja entera desde el nucleo: no guarda copias del estado de reglas.
-# Casilla <-> pantalla solo con map_to_local / local_to_map (A.3): T32 cambia
-# solo el tileset.
+# Arquitectura.md B.2 (T13): la vista del combate, cenital y con placeholders.
+# Arma el combate (la IA juega hasta el primer turno del jugador) y se redibuja
+# entera desde el nucleo: no guarda copias del estado de reglas. Casilla <->
+# pantalla solo con map_to_local / local_to_map (A.3): T32 cambia solo el
+# tileset. Sesion 2: el jugador juega con el mouse (InterpreteClic y botones),
+# ve las marcas, el desglose de previsualizar_ataque y los sucesos del registro;
+# al terminar, se guardan solos la grabacion y el registro y se ve el resultado.
 class_name VistaCombate
 extends Node2D
+
+# El jugador pidio volver al selector desde la pantalla de resultado.
+signal volver
 
 const _ESCENA_FICHA: PackedScene = preload("res://pantalla/combate/ficha_unidad.tscn")
 const _FUENTE_CASILLAS: int = 0
 const _CASILLA_CLARA: Vector2i = Vector2i(0, 0)
 const _CASILLA_OSCURA: Vector2i = Vector2i(1, 0)
+const _FUENTE_MARCAS: int = 1
+const _MARCA_MOVER: Vector2i = Vector2i(0, 0)
+const _MARCA_OBJETIVO: Vector2i = Vector2i(1, 0)
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
 const _ACCION_DEPURACION: String = "depuracion"
+const _ACCION_SELECCIONAR: String = "seleccionar"
+const _CARPETA_REGISTROS: String = "res://registros"
+# Presentacion: cuantas lineas de sucesos se ven a la vez.
+const _SUCESOS_VISIBLES: int = 12
 const _COLOR_ACTUAL: Color = Color(1.0, 0.85, 0.3)
 const _COLOR_ACTUO: Color = Color(0.6, 0.6, 0.6)
 const _COLOR_PENDIENTE: Color = Color(1, 1, 1)
@@ -23,21 +35,49 @@ var _combate: Combate = null
 var _armador: ArmadorTextos = null
 var _estados: EstadosUnidad = null
 var _avisos_carga: Array[Dictionary] = []
+var _carpeta_registros: String = _CARPETA_REGISTROS
+# Lineas de sucesos ya armadas y cuantas lineas del registro ya se leyeron.
+var _sucesos: Array[String] = []
+var _lineas_leidas: int = 0
+# Ruta (sin extension) de lo guardado al terminar; "" mientras no se guardo.
+var _guardado: String = ""
+var _desglose_mostrado: Dictionary = {}
+# La casilla bajo el mouse la ultima vez, para no rearmar el desglose en cada pixel.
+var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
 
 @onready var _tablero: TileMapLayer = $Tablero
+@onready var _marcas: TileMapLayer = $Tablero/Marcas
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
 @onready var _ronda: Label = $Interfaz/Ronda
 @onready var _cola: VBoxContainer = $Interfaz/Cola
 @onready var _panel_turno: Label = $Interfaz/PanelTurno
+@onready var _panel_desglose: Label = $Interfaz/PanelDesglose
+@onready var _texto_sucesos: Label = $Interfaz/Sucesos
+@onready var _botones: HBoxContainer = $Interfaz/Botones
+@onready var _boton_erizarse: Button = $Interfaz/Botones/BotonErizarse
+@onready var _boton_terminar: Button = $Interfaz/Botones/BotonTerminar
+@onready var _pantalla_resultado: Control = $Interfaz/PantallaResultado
+@onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/TextoResultado
+@onready var _boton_volver: Button = $Interfaz/PantallaResultado/Contenido/BotonVolver
 @onready var _depuracion: TextEdit = $Interfaz/PanelDepuracion
 
 
+func _ready() -> void:
+	_boton_erizarse.pressed.connect(pulsar_erizarse)
+	_boton_terminar.pressed.connect(pulsar_terminar)
+	_boton_volver.pressed.connect(volver.emit)
+
+
 # escenario y datos: los del Cargador. avisos_carga: sus avisos, para el panel
-# de depuracion.
-func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dictionary] = []) -> void:
+# de depuracion. carpeta_registros: donde se guardan la grabacion y el registro
+# al terminar ("" = res://registros).
+func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dictionary] = [],
+		carpeta_registros: String = "") -> void:
 	_avisos_carga = avisos_carga
+	if not carpeta_registros.is_empty():
+		_carpeta_registros = carpeta_registros
 	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
 	if not contexto.valido:
 		# Pantalla de desarrollo: muestra el motivo tecnico.
@@ -47,7 +87,7 @@ func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dicti
 	_combate = Combate.empezar(contexto)
 	_armador = ArmadorTextos.desde_datos(datos[_TEXTOS], contexto.azar_textos)
 	_estados = EstadosUnidad.desde_datos(datos[_TABLA_HAMBRE], datos[_TABLA_LEALTAD])
-	redibujar()
+	_despues_de_un_cambio()
 	for aviso in _avisos_armador():
 		print("[textos] ", aviso)
 
@@ -77,11 +117,55 @@ func filas_cola() -> Array[Label]:
 	return lista
 
 
+# Un clic en una casilla: la Accion que da el InterpreteClic, si hay alguna.
+# Devuelve true si se aplico.
+func clic_casilla(casilla: Vector2i) -> bool:
+	if _combate == null or not _combate.esperando_jugador():
+		return false
+	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla)
+	if accion == null:
+		return false
+	return _aplicar(accion)
+
+
+# El mouse sobre una casilla: con una objetivo atacable, el desglose de
+# previsualizar_ataque desde donde esta la unidad; si no, nada.
+func sobre_casilla(casilla: Vector2i) -> void:
+	_desglose_mostrado = {}
+	if _combate != null and _combate.esperando_jugador():
+		var turno: Turno = _combate.turno_actual()
+		var foto: Dictionary = _combate.instantanea()
+		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
+		if not objetivo.is_empty():
+			var vista_previa: ResultadoAccion = turno.previsualizar_ataque(_casilla_de(foto, turno.unidad_id), objetivo)
+			if vista_previa.valida:
+				_desglose_mostrado = vista_previa.desglose.a_diccionario()
+	_dibujar_desglose()
+
+
+# El desglose que se ve ahora (DesgloseDanio.a_diccionario()), o {}.
+func desglose_mostrado() -> Dictionary:
+	return _desglose_mostrado.duplicate(true)
+
+
+func pulsar_erizarse() -> bool:
+	return _combate != null and _aplicar(Accion.erizarse())
+
+
+func pulsar_terminar() -> bool:
+	return _combate != null and _aplicar(Accion.terminar())
+
+
 func redibujar() -> void:
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
 	_dibujar_tablero()
+	_dibujar_marcas()
 	_dibujar_fichas(lectura)
 	_dibujar_interfaz(lectura)
+	_dibujar_botones(lectura)
+	_dibujar_desglose()
+	_texto_sucesos.text = "\n".join(_sucesos.slice(maxi(0, _sucesos.size() - _SUCESOS_VISIBLES)))
+	_dibujar_resultado(lectura)
 	_dibujar_depuracion()
 	if not _combate.error().is_empty():
 		_mostrar_mensaje("Error del combate: " + _combate.error())
@@ -91,6 +175,43 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(_ACCION_DEPURACION):
 		_depuracion.visible = not _depuracion.visible
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_SELECCIONAR):
+		clic_casilla(_casilla_del_mouse())
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion:
+		var casilla: Vector2i = _casilla_del_mouse()
+		if casilla != _casilla_mouse:
+			_casilla_mouse = casilla
+			sobre_casilla(casilla)
+
+
+func _casilla_del_mouse() -> Vector2i:
+	return _tablero.local_to_map(_tablero.get_local_mouse_position())
+
+
+# Una accion del jugador: si el nucleo la acepta, se redibuja todo.
+func _aplicar(accion: Accion) -> bool:
+	if not _combate.aplicar(accion).valida:
+		return false
+	_desglose_mostrado = {}
+	_casilla_mouse = Criatura.SIN_POSICION
+	_despues_de_un_cambio()
+	return true
+
+
+# Lo nuevo del registro pasa a los sucesos; con el combate terminado se guarda
+# una sola vez. Despues, se redibuja todo desde el nucleo.
+func _despues_de_un_cambio() -> void:
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	_sucesos.append_array(lectura.sucesos(_lineas_leidas))
+	_lineas_leidas = _combate.registro().lineas().size()
+	if _combate.terminado() and _guardado.is_empty():
+		_guardado = GuardadoCombate.guardar(_combate, _carpeta_registros)
+		if _guardado.is_empty():
+			_mostrar_mensaje("No se pudo guardar la partida en " + _carpeta_registros)
+		else:
+			print("[registros] guardado: %s.json y .jsonl" % ProjectSettings.globalize_path(_guardado))
+	redibujar()
 
 
 # El damero es decorado: alterna las dos casillas del tileset.
@@ -104,6 +225,19 @@ func _dibujar_tablero() -> void:
 	var esquina_a: Vector2 = _tablero.map_to_local(Vector2i(0, 0))
 	var esquina_b: Vector2 = _tablero.map_to_local(Vector2i(tablero_combate.ancho - 1, tablero_combate.alto - 1))
 	_camara.global_position = _tablero.to_global((esquina_a + esquina_b) / 2.0)
+
+
+# Solo en el turno del jugador: a donde puede moverse y a quien puede atacar.
+func _dibujar_marcas() -> void:
+	_marcas.clear()
+	if not _combate.esperando_jugador():
+		return
+	var turno: Turno = _combate.turno_actual()
+	for casilla in turno.casillas_para_mover():
+		_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_MOVER)
+	var foto: Dictionary = _combate.instantanea()
+	for objetivo in turno.objetivos_para_atacar():
+		_marcas.set_cell(_casilla_de(foto, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO)
 
 
 func _dibujar_fichas(lectura: LecturaCombate) -> void:
@@ -137,6 +271,35 @@ func _dibujar_interfaz(lectura: LecturaCombate) -> void:
 	_panel_turno.text = "\n".join(lectura.panel_turno())
 
 
+func _dibujar_botones(lectura: LecturaCombate) -> void:
+	var esperando: bool = _combate.esperando_jugador()
+	_botones.visible = esperando
+	if not esperando:
+		return
+	_boton_terminar.text = lectura.texto_terminar()
+	_boton_erizarse.visible = _combate.turno_actual().puede_erizarse()
+	var rasgo: Array[String] = lectura.boton_rasgo()
+	_boton_erizarse.text = rasgo[0]
+	_boton_erizarse.tooltip_text = rasgo[1]
+
+
+func _dibujar_desglose() -> void:
+	_panel_desglose.visible = not _desglose_mostrado.is_empty()
+	if _panel_desglose.visible:
+		var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+		_panel_desglose.text = "\n".join(lectura.desglose(_desglose_mostrado, _combate.turno_actual().unidad_id))
+
+
+# A.7: la pantalla de resultado desde ResultadoCombate.a_diccionario().
+func _dibujar_resultado(lectura: LecturaCombate) -> void:
+	var resultado: ResultadoCombate = _combate.resultado()
+	_pantalla_resultado.visible = resultado != null
+	if resultado == null:
+		return
+	_texto_resultado.text = "\n".join(lectura.resultado(resultado.a_diccionario()))
+	_boton_volver.text = _armador.armar(ClavesTextos.RESULTADO_VOLVER)
+
+
 # Pantalla de desarrollo: registro crudo y avisos, con ids y datos tecnicos.
 func _dibujar_depuracion() -> void:
 	var lineas: Array[String] = ["== registro =="]
@@ -158,6 +321,20 @@ func _avisos_armador() -> Array[String]:
 		if not vistos.has(texto):
 			vistos.append(texto)
 	return vistos
+
+
+# La casilla de una unidad segun instantanea().
+func _casilla_de(foto: Dictionary, unidad_id: String) -> Vector2i:
+	var posicion: Variant = null
+	if unidad_id == Maestro.ID:
+		posicion = foto["maestro"]["posicion"]
+	else:
+		for criatura in foto["criaturas"]:
+			if criatura["id"] == unidad_id:
+				posicion = criatura["posicion"]
+	if posicion == null:
+		return Criatura.SIN_POSICION
+	return Vector2i(posicion[0], posicion[1])
 
 
 func _mostrar_mensaje(texto: String) -> void:
