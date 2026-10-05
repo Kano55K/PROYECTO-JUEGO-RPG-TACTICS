@@ -1,8 +1,8 @@
 extends GdUnitTestSuite
 
 # Arquitectura.md A.7 (Huella de los datos) y B.2 (T12, test 16, primera parte):
-# SHA-256 de los datos cargados sin textos/, sin _nota ni $schema, con las
-# claves ordenadas. Con los datos de prueba (DatosFixture), nunca con datos/.
+# SHA-256 de los datos cargados sin textos/ ni escenarios/, sin _nota ni $schema,
+# con las claves ordenadas. Con los datos de prueba (DatosFixture), nunca con datos/.
 
 
 func _datos() -> Dictionary:
@@ -12,8 +12,8 @@ func _datos() -> Dictionary:
 	return lectura["datos"]
 
 
-# (16) Cambiar un numero cambia la huella; cambiar solo una _nota, el $schema
-# o un texto no; el orden de las claves no importa.
+# (16) Cambiar un numero cambia la huella; cambiar solo una _nota, el $schema,
+# un texto o un numero de un escenario no; el orden de las claves no importa.
 func test_huella_cambia_con_numeros_y_no_con_notas_ni_textos() -> void:
 	var datos: Dictionary = _datos()
 	var huella: String = HuellaDatos.calcular(datos)
@@ -37,6 +37,16 @@ func test_huella_cambia_con_numeros_y_no_con_notas_ni_textos() -> void:
 	assert_str(HuellaDatos.calcular(con_textos)).is_equal(huella)
 	con_textos["textos/es.json"] = {"caida.rodauva": "Otro texto."}
 	assert_str(HuellaDatos.calcular(con_textos)).is_equal(huella)
+
+	# A.7 (correccion del 04/10/2026): la grabacion lleva su escenario entero.
+	var lectura_escenario: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/escenario_c.json", "escenario")
+	var errores_escenario: Array[Dictionary] = lectura_escenario["errores"]
+	assert_array(errores_escenario).override_failure_message(str(errores_escenario)).is_empty()
+	var con_escenario: Dictionary = datos.duplicate(true)
+	con_escenario["escenarios/c_tasajero.json"] = lectura_escenario["datos"]
+	assert_str(HuellaDatos.calcular(con_escenario)).is_equal(huella)
+	(con_escenario["escenarios/c_tasajero.json"] as Dictionary)["semilla"] = 33002
+	assert_str(HuellaDatos.calcular(con_escenario)).is_equal(huella)
 
 	# Las mismas claves agregadas en orden inverso.
 	var invertido: Dictionary = {}

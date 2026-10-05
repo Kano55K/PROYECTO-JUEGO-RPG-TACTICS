@@ -84,3 +84,16 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** ninguna.
 - **Preguntas:** nuevas: ninguna en la sesión 2 (P-023 en la sesión 1). Cerradas: P-011 a P-018 y P-020 a P-022 (sesión 1), P-019 y P-023 (sesión 2).
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T12 · ajustes · 04/10/2026
+- **Rama:** tarea/T12-ajustes
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:** dos correcciones chicas a T12, ya mergeada. (1) `HuellaDatos.calcular` excluye `escenarios/` además de `textos/`, `_nota` y `$schema` (`Arquitectura.md` v0.19, A.7, "Huella de los datos"). Motivo: la grabación lleva su escenario entero. (2) S-20 de `Arquitectura.md` 10.5 registrada para Sistemas como P-024, sin cambiar la regla. En `ResultadoCombate.armar`, el comentario donde se decide `atacante_pendiente` remite a P-024 y S-20.
+- **Archivos:** modificados `nucleo/datos/huella_datos.gd`, `nucleo/combate/resultado_combate.gd` (solo un comentario), `pruebas/datos/test_huella_datos.gd`, `docs/PREGUNTAS.md`, `CLAUDE.md` (Estado actual).
+- **Tests:** 0 nuevos (se sumó un caso dentro del test 16); total 179, todos pasan (sí).
+- **Criterio de terminado:** cumplido punto por punto. (1) Rama `tarea/T12-ajustes` desde `develop`. (2) Test 16: con `escenario_c.json` agregado como `escenarios/c_tasajero.json`, la huella es la misma que sin él, y cambiar su `semilla` (33001 → 33002) no la cambia. Los casos anteriores siguen igual, incluido "cambiar `danio_minimo` cambia la huella". (3) P-024 registrada. El comentario en `ResultadoCombate` cambió y la lógica no. (4) 179/179.
+- **Corrige:** T12 · sesión 2, Lecturas declaradas: "la huella incluye `escenarios/`" ya no vale. Desde A.7 v0.19 la excluye.
+- **Lecturas declaradas:** P-024 / S-20: `atacante_pendiente` es la atacante nocturna `caida` al terminar, sea cual sea el desenlace (lectura literal, ya programada en T12). El test 11 la cubre solo en una victoria (caso G). Ningún test arma una derrota con la atacante caída.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nueva P-024 (SISTEMAS, no bloquea; se necesita antes de T30). Cerradas: ninguna.
+- **Para la próxima sesión:** nada: tarea terminada.
