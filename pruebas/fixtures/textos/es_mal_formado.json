@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../datos/_esquemas/textos.schema.json",
+  "_nota": "Fixture con huecos mal formados a proposito, para ArmadorTextos.revisar (Arquitectura.md A.2.1, B.2 T34). Textos de prueba, no son del jugador. La _nota no se revisa: {Criatura} [Criatura] {sin cerrar",
+  "prueba.correcta": "{criatura} ve {a_rival}. {porcentaje}%.",
+  "prueba.mayuscula": "{Criatura} se levanta.",
+  "prueba.espacios": "Se levanta { criatura }.",
+  "prueba.corchetes": "[Criatura] se levanta.",
+  "prueba.sin_cerrar": "{criatura se levanta.",
+  "prueba.lista": [
+    "{criatura} cae.",
+    "{Rival} mira."
+  ]
+}

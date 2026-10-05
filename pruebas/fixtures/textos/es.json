@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../datos/_esquemas/textos.schema.json",
+  "_nota": "Fixture del armador de textos (Arquitectura.md A.2.1 y A.6; Mundo.md 1.5). Las claves especie.*, comer.elegir, incidente.distraida, caida*, hambre.estado.famelico*, sellar.* y noche.molino son copias textuales de datos/textos/es.json. Las claves prueba.* son textos de prueba, no son del jugador: reproducen las tablas de huecos y mayusculas de Mundo.md 1.5.",
+  "especie.rodauva.nombre": "Rodauva",
+  "especie.rodauva.articulo": "la",
+  "especie.surcon.nombre": "Surcón",
+  "especie.surcon.articulo": "el",
+  "especie.ocarra.nombre": "Ocarra",
+  "especie.ocarra.articulo": "la",
+  "especie.tasajero.nombre": "Tasajero",
+  "especie.tasajero.articulo": "el",
+  "hambre.estado.famelico": "Famélica",
+  "hambre.estado.famelico.maestro": "Famélico",
+  "sellar.tooltip": "{porcentaje}% de que el hilo {criatura_la} sujete. Si se suelta, el maná se pierde igual.",
+  "sellar.fallo": "El hilo {criatura_la} roza y se suelta. El maná ya se fue.",
+  "sellar.fallo.surcon": "El hilo se le enreda en los terrones y se cae con ellos.",
+  "incidente.distraida": "{criatura} no le saca el ojo {a_rival}. Se le va el turno mirándol{rival_o}.",
+  "caida": "{criatura} cae y no se levanta. Todavía respira.",
+  "caida.rodauva": "Queda hecha bola, quieta. Las frutas se le cayeron de las púas.",
+  "caida.levantarse": "{criatura} se levanta. Despacio, pero se levanta.",
+  "comer.elegir": "¿{criatura}?",
+  "noche.molino": [
+    "El fuego cruje. Por una noche, nadie cuenta nada.",
+    "Los tuyos se acomodan alrededor del fuego, cada uno en su lugar.",
+    "Dormís con la espalda contra la piedra del fuego. Afuera, el río pasa de largo."
+  ],
+  "prueba.formas": "formas: {a_rival}, {de_rival}, flac{criatura_o}, {criatura_la}, {criatura_ella}",
+  "prueba.mayusculas": "{criatura_ella} cae. {criatura_ella} se levanta. ¡{criatura_ella} sigue, y la Rodauva no!"
+}
