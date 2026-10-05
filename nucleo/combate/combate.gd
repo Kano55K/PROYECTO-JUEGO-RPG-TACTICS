@@ -97,6 +97,19 @@ func contexto() -> ContextoCombate:
 	return _contexto
 
 
+# La cola de la ronda en curso, en orden (Sistema.md 11.3), para mostrarla.
+# Las entradas son de solo lectura: la cola la edita solo el combate.
+func cola() -> Array[EntradaCola]:
+	return _cola.entradas()
+
+
+# Indice en cola() de la entrada del turno en curso, o -1 si no hay turno.
+func entrada_actual() -> int:
+	if _turno == null or _cola.lugar() == 0:
+		return -1
+	return _cola.lugar() - 1
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 

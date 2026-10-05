@@ -109,3 +109,60 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** ninguna.
 - **Preguntas:** ninguna nueva; cerradas: ninguna. Las `RESPONDIDA` (P-002, P-003, P-008) no son de T34.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T13 · sesión 1 · 05/10/2026
+- **Rama:** tarea/T13-pantalla
+- **Estado:** EN CURSO (sigue en la sesión 2)
+- **Hecho:** arranque, tablero y lectura del combate, sin interacción de juego (`Arquitectura.md` B.2, A.2.1, A.3, A.6).
+  - **Núcleo** (consultas que faltaban para mostrar sin calcular):
+    - `Combate.cola()` (la cola de la ronda en curso) y `Combate.entrada_actual()` (su índice, o −1).
+    - `EstadosUnidad` en `nucleo/unidades/`: `hambre(valor)` da el id del tramo de `hambre.json` (7.1); `lealtad(valor, umbral)` da desleal, dudosa, neutral o leal (5.1), con el umbral de `fila_balanza()`. `fila_hambre` es estática y ahora la usa también `Danio`, así la búsqueda del tramo vive en un solo lugar.
+  - **Pantalla** (`pantalla/`):
+    - `principal.tscn` (`Principal`) toma la carpeta del `@export`, de `-- --datos=<carpeta>` (`ArgumentosPantalla`) o, si no hay ninguna, de `res://datos`. Carga en dos pasos: la segunda carga le pasa al `Cargador` `ClavesTextos.usadas(datos)`, que son las constantes más `especie.<id>.nombre` por especie y `hambre.estado.<id>` por estado de hambre.
+    - Con un error, muestra solo la pantalla de error (archivo · campo · esperado · recibido) y no arranca.
+    - Los avisos van a la consola (las claves faltantes una por una; las sobrantes, solo la cantidad) y al panel de depuración.
+    - El selector muestra un botón por `id` de escenario.
+    - `combate/vista_combate.tscn` (`VistaCombate`) arma el `ContextoCombate` y el `Combate` (la IA juega hasta el primer turno del jugador), el `ArmadorTextos` con `azar_textos` y `EstadosUnidad`. Se redibuja entera desde `LecturaCombate`, una clase sin nodos que lee `instantanea()`, la cola y el `Plantel` y pide los textos a T34.
+    - El tablero es un `TileMapLayer` con el tileset placeholder `casillas_cenital.tres` (damero de dos tiles). Las fichas son hijas del `TileMapLayer` y van en `map_to_local(casilla)`. La cámara se centra con `map_to_local` de las esquinas.
+    - `FichaUnidad`: círculo con el color del bando (gris si está caída), aro dorado si es el Maestro, nombre, vida `actual/máx` y marcas (caída, erizada).
+    - Interfaz: ronda, cola de la ronda (con Caza y Cuenta, la entrada actual resaltada y las ya jugadas en gris) y panel de la unidad del turno (nombre, vida, lealtad con su estado y hambre con su estado; el Maestro usa la variante `.maestro`).
+    - Panel de depuración, oculto: registro crudo y avisos de la carga y del armador. Se abre con la acción `depuracion` (F3) del InputMap.
+    - `run/main_scene` apunta a `principal.tscn`.
+- **Archivos:**
+  - Creados en el núcleo: `nucleo/unidades/estados_unidad.gd`.
+  - Creados en la pantalla: `pantalla/principal.tscn`, `principal.gd`, `argumentos.gd`, `claves_textos.gd`, `pantalla/combate/vista_combate.tscn`, `vista_combate.gd`, `ficha_unidad.tscn`, `ficha_unidad.gd`, `lectura_combate.gd`, `casillas_cenital.tres`, `casilla_placeholder.svg`, `figura_placeholder.svg` y `aro_placeholder.svg`.
+  - Creados en las pruebas: `pruebas/pantalla/test_principal.gd`, `test_vista_combate.gd`, `test_lectura_combate.gd`, `test_argumentos.gd`, `test_claves_textos.gd`, `pruebas/unidades/test_estados_unidad.gd`, `pruebas/fixtures/pantalla/es.json` (copias textuales de `datos/textos/es.json`) y `pruebas/fixtures/pantalla/textos_incompletos/` (esquema copiado de un fixture del cargador + un `es.json` sin `iniciativa.caza`).
+  - Modificados: `nucleo/combate/combate.gd`, `nucleo/combate/danio.gd`, `pruebas/combate/test_combate.gd`, `project.godot` (escena principal y acción `depuracion`), `CLAUDE.md` (Estado actual).
+- **Tests:** 16 nuevos, total 206, todos pasan (sí).
+  - 13 de pantalla: los 6 del criterio, distribuidos en 5 funciones, y 8 sin nodos.
+  - 3 del núcleo: cola y entrada actual, estados de hambre y estados de lealtad.
+  - Los tests de escenas usan `scene_runner(auto_free(escena.instantiate()))`, porque con una instancia el runner no la libera: sin `auto_free` quedaban nodos huérfanos y GdUnit4 salía con 101.
+- **Criterio de terminado:** sesión 1 cumplida punto por punto.
+  - (1) Con `pruebas/fixtures/cargador/un_error_ningun_dato`, la pantalla de error es visible y muestra `especies/rodauva.json` y `vida`; el selector está oculto y no hay vista.
+  - (2) Con `res://datos`: sin errores, sin pantalla de error y 11 botones con los `id` de los escenarios, en orden.
+  - (3) Los 11 escenarios reales crean su vista: combate sin error, `esperando_jugador()` verdadero y ningún mensaje.
+  - (4) En los 11, cada ficha está en `map_to_local` de su casilla de `instantanea()`, `local_to_map` de su posición da la casilla, y hay una ficha por unidad de pie o caída con posición.
+  - (5) Con `textos_incompletos`, los avisos traen `iniciativa.caza` (y `maestro.nombre`) como «presente en el archivo», pero no `iniciativa.cuenta`, que sí está. El juego arranca igual.
+  - (6) En C, las filas de la cola coinciden entrada por entrada con `combate().cola()` (unidad y marca), la resaltada es `entrada_actual()`, y las filas de Caza y Cuenta dicen "Caza" y "Cuenta".
+  - Faltan los tests 7 a 10 y la lista manual (sesión 2).
+- **Lecturas declaradas:** ninguna de reglas.
+  - Panel: muestra número **y** estado de lealtad y de hambre (B.2 dice "vida, lealtad, hambre"; ningún documento dice que el número se oculte). El hambre de una criatura se pide con su especie como sujeto, y como `es.json` no tiene `hambre.estado.<x>.surcon`, el Surcón sale "Saciada" (base). Es contenido del Worldbuilder, no se tocó.
+  - Dos unidades de la misma especie se ven con el mismo nombre (sus `id` están en el panel de depuración).
+  - Las unidades sin posición o fuera del tablero no se dibujan.
+  - `rasgo.erizarse.nombre` no se reutiliza como marca: nombra la acción, no el estado.
+  - Colores, tamaños y la marca `> ` de la entrada actual son de presentación.
+- **Claves de texto nuevas sin texto** (se ven como `[FALTA: …]`; nombres propuestos, para el Worldbuilder):
+  - `maestro.nombre`: nombre del Maestro en la ficha, la cola y el panel.
+  - `combate.ronda`: "Ronda {n}", con `{n}` literal.
+  - `iniciativa.titulo`: título de la cola.
+  - `panel.vida`, `panel.lealtad`, `panel.hambre`: etiquetas del panel del turno.
+  - `marca.caida`, `marca.erizada`: marcas sobre la ficha.
+- **Preguntas:** ninguna nueva; cerradas: ninguna. P-024 sigue ABIERTA (no es de T13). P-002, P-003 y P-008 siguen RESPONDIDA (son de T30, T14 y T19).
+- **Para la próxima sesión** (tests 7 a 10 y la lista de prueba manual en el resumen final):
+  - `pantalla/combate/interprete_clic.gd` (RefCounted, con tests: casilla alcanzable → `mover`; objetivo atacable → `atacar`; cualquier otra → nada).
+  - Botones Erizarse (con `puede_erizarse`) y Esperar / Terminar turno.
+  - Marcar `casillas_para_mover` y `objetivos_para_atacar`; desglose de `previsualizar_ataque` con el mouse sobre una objetivo.
+  - Mostrar lo nuevo del registro después de los turnos de la IA.
+  - Pantalla de resultado desde `ResultadoCombate.a_diccionario()`.
+  - Guardar sola la grabación (`.json`) y el registro (`.jsonl`) en `registros/<escenario>_<semilla>_<n>`.
+  - Acción `recargar` en el InputMap: recarga los datos del disco y reinicia el escenario.

@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://pantalla/combate/ficha_unidad.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://pantalla/combate/figura_placeholder.svg" id="2_figura"]
+[ext_resource type="Texture2D" path="res://pantalla/combate/aro_placeholder.svg" id="3_aro"]
+
+[node name="FichaUnidad" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Aro" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_aro")
+
+[node name="Figura" type="Sprite2D" parent="."]
+texture = ExtResource("2_figura")
+
+[node name="Nombre" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -34.0
+offset_right = 40.0
+offset_bottom = -20.0
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="Vida" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -8.0
+offset_right = 40.0
+offset_bottom = 8.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+
+[node name="Marcas" type="Label" parent="."]
+offset_left = -40.0
+offset_top = 18.0
+offset_right = 40.0
+offset_bottom = 32.0
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1

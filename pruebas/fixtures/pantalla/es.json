@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../datos/_esquemas/textos.schema.json",
+  "_nota": "Arquitectura.md B.2 (T13): copias textuales de datos/textos/es.json para los tests de la pantalla. maestro.nombre y las demas claves nuevas de T13 faltan a proposito, como en es.json",
+  "especie.rodauva.nombre": "Rodauva",
+  "especie.rodauva.articulo": "la",
+  "especie.surcon.nombre": "Surcón",
+  "especie.surcon.articulo": "el",
+  "especie.ocarra.nombre": "Ocarra",
+  "especie.ocarra.articulo": "la",
+  "especie.zancajunco.nombre": "Zancajunco",
+  "especie.zancajunco.articulo": "el",
+  "especie.tasajero.nombre": "Tasajero",
+  "especie.tasajero.articulo": "el",
+  "lealtad.estado.leal": "Leal",
+  "hambre.estado.saciado": "Saciada",
+  "hambre.estado.saciado.maestro": "Saciado",
+  "hambre.estado.normal": "Normal",
+  "iniciativa.caza": "Caza",
+  "iniciativa.cuenta": "Cuenta"
+}

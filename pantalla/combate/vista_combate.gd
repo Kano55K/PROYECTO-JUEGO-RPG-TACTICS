@@ -1,0 +1,166 @@
+# Arquitectura.md B.2 (T13, sesion 1): la vista del combate, cenital y con
+# placeholders. Arma el combate (la IA juega hasta el primer turno del jugador)
+# y se redibuja entera desde el nucleo: no guarda copias del estado de reglas.
+# Casilla <-> pantalla solo con map_to_local / local_to_map (A.3): T32 cambia
+# solo el tileset.
+class_name VistaCombate
+extends Node2D
+
+const _ESCENA_FICHA: PackedScene = preload("res://pantalla/combate/ficha_unidad.tscn")
+const _FUENTE_CASILLAS: int = 0
+const _CASILLA_CLARA: Vector2i = Vector2i(0, 0)
+const _CASILLA_OSCURA: Vector2i = Vector2i(1, 0)
+const _TEXTOS: String = "textos/es.json"
+const _TABLA_HAMBRE: String = "tablas/hambre.json"
+const _TABLA_LEALTAD: String = "tablas/lealtad.json"
+const _ACCION_DEPURACION: String = "depuracion"
+const _COLOR_ACTUAL: Color = Color(1.0, 0.85, 0.3)
+const _COLOR_ACTUO: Color = Color(0.6, 0.6, 0.6)
+const _COLOR_PENDIENTE: Color = Color(1, 1, 1)
+const _MARCA_ACTUAL: String = "> "
+
+var _combate: Combate = null
+var _armador: ArmadorTextos = null
+var _estados: EstadosUnidad = null
+var _avisos_carga: Array[Dictionary] = []
+
+@onready var _tablero: TileMapLayer = $Tablero
+@onready var _unidades: Node2D = $Tablero/Unidades
+@onready var _camara: Camera2D = $Camara
+@onready var _mensaje: Label = $Interfaz/Mensaje
+@onready var _ronda: Label = $Interfaz/Ronda
+@onready var _cola: VBoxContainer = $Interfaz/Cola
+@onready var _panel_turno: Label = $Interfaz/PanelTurno
+@onready var _depuracion: TextEdit = $Interfaz/PanelDepuracion
+
+
+# escenario y datos: los del Cargador. avisos_carga: sus avisos, para el panel
+# de depuracion.
+func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dictionary] = []) -> void:
+	_avisos_carga = avisos_carga
+	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
+	if not contexto.valido:
+		# Pantalla de desarrollo: muestra el motivo tecnico.
+		_mostrar_mensaje("El escenario %s no se puede armar: %s" % [escenario.get("id", ""),
+				ContextoCombate.Motivo.keys()[contexto.motivo]])
+		return
+	_combate = Combate.empezar(contexto)
+	_armador = ArmadorTextos.desde_datos(datos[_TEXTOS], contexto.azar_textos)
+	_estados = EstadosUnidad.desde_datos(datos[_TABLA_HAMBRE], datos[_TABLA_LEALTAD])
+	redibujar()
+	for aviso in _avisos_armador():
+		print("[textos] ", aviso)
+
+
+# null si el escenario no se pudo armar.
+func combate() -> Combate:
+	return _combate
+
+
+func tablero() -> TileMapLayer:
+	return _tablero
+
+
+func fichas() -> Array[FichaUnidad]:
+	var lista: Array[FichaUnidad] = []
+	for hijo in _unidades.get_children():
+		lista.append(hijo as FichaUnidad)
+	return lista
+
+
+# Las filas de la cola tal como se ven (Label con meta unidad_id, marca y actual).
+func filas_cola() -> Array[Label]:
+	var lista: Array[Label] = []
+	for hijo in _cola.get_children():
+		if hijo.has_meta("unidad_id"):
+			lista.append(hijo as Label)
+	return lista
+
+
+func redibujar() -> void:
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	_dibujar_tablero()
+	_dibujar_fichas(lectura)
+	_dibujar_interfaz(lectura)
+	_dibujar_depuracion()
+	if not _combate.error().is_empty():
+		_mostrar_mensaje("Error del combate: " + _combate.error())
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(_ACCION_DEPURACION):
+		_depuracion.visible = not _depuracion.visible
+		get_viewport().set_input_as_handled()
+
+
+# El damero es decorado: alterna las dos casillas del tileset.
+func _dibujar_tablero() -> void:
+	var tablero_combate: Tablero = _combate.contexto().tablero
+	_tablero.clear()
+	for y in range(tablero_combate.alto):
+		for x in range(tablero_combate.ancho):
+			var clara: bool = (x + y) % 2 == 0
+			_tablero.set_cell(Vector2i(x, y), _FUENTE_CASILLAS, _CASILLA_CLARA if clara else _CASILLA_OSCURA)
+	var esquina_a: Vector2 = _tablero.map_to_local(Vector2i(0, 0))
+	var esquina_b: Vector2 = _tablero.map_to_local(Vector2i(tablero_combate.ancho - 1, tablero_combate.alto - 1))
+	_camara.global_position = _tablero.to_global((esquina_a + esquina_b) / 2.0)
+
+
+func _dibujar_fichas(lectura: LecturaCombate) -> void:
+	for hijo in _unidades.get_children():
+		_unidades.remove_child(hijo)
+		hijo.queue_free()
+	for datos_ficha in lectura.fichas():
+		var ficha: FichaUnidad = _ESCENA_FICHA.instantiate()
+		_unidades.add_child(ficha)
+		ficha.mostrar(datos_ficha)
+		ficha.position = _tablero.map_to_local(datos_ficha["casilla"])
+
+
+func _dibujar_interfaz(lectura: LecturaCombate) -> void:
+	_ronda.text = lectura.texto_ronda()
+	for hijo in _cola.get_children():
+		_cola.remove_child(hijo)
+		hijo.queue_free()
+	var titulo: Label = Label.new()
+	titulo.text = lectura.titulo_cola()
+	_cola.add_child(titulo)
+	for fila in lectura.filas_cola():
+		var etiqueta: Label = Label.new()
+		var actual: bool = fila["actual"]
+		etiqueta.text = (_MARCA_ACTUAL if actual else "") + (fila["texto"] as String)
+		etiqueta.modulate = _COLOR_ACTUAL if actual else (_COLOR_ACTUO if fila["actuo"] else _COLOR_PENDIENTE)
+		etiqueta.set_meta("unidad_id", fila["unidad_id"])
+		etiqueta.set_meta("marca", fila["marca"])
+		etiqueta.set_meta("actual", actual)
+		_cola.add_child(etiqueta)
+	_panel_turno.text = "\n".join(lectura.panel_turno())
+
+
+# Pantalla de desarrollo: registro crudo y avisos, con ids y datos tecnicos.
+func _dibujar_depuracion() -> void:
+	var lineas: Array[String] = ["== registro =="]
+	lineas.append_array(_combate.registro().lineas_json())
+	lineas.append("== avisos de la carga (%d) ==" % _avisos_carga.size())
+	for aviso in _avisos_carga:
+		lineas.append(str(aviso))
+	var avisos_textos: Array[String] = _avisos_armador()
+	lineas.append("== avisos de textos (%d) ==" % avisos_textos.size())
+	lineas.append_array(avisos_textos)
+	_depuracion.text = "\n".join(lineas)
+
+
+# Los avisos del armador sin repetidos: cada redibujo vuelve a pedir los textos.
+func _avisos_armador() -> Array[String]:
+	var vistos: Array[String] = []
+	for aviso in _armador.avisos():
+		var texto: String = str(aviso)
+		if not vistos.has(texto):
+			vistos.append(texto)
+	return vistos
+
+
+func _mostrar_mensaje(texto: String) -> void:
+	_mensaje.text = texto
+	_mensaje.visible = true
+	push_warning(texto)
