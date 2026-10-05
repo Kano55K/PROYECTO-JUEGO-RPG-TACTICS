@@ -398,3 +398,21 @@ func test_registro_rechaza_float() -> void:
 	assert_str(registro.error).contains("resultado")
 	assert_int(registro.lineas().size()).is_equal(1)
 	assert_str(registro.lineas_json()[0]).is_equal('{"lista":[1,"a",true,null,{"x":2}],"n":0,"tipo":"inicio"}')
+
+
+# T13: la cola que muestra la pantalla sale del combate, no se rearma afuera.
+# Prueba C (Sistema.md 11.3): el primer turno del jugador es el del Zancajunco.
+func test_cola_y_entrada_actual_para_la_pantalla() -> void:
+	var combate: Combate = _combate(_escenario(_CARPETA + "escenario_c.json"))
+	var unidades: Array[String] = []
+	var marcas: Array[String] = []
+	for entrada in combate.cola():
+		unidades.append(entrada.unidad_id)
+		marcas.append(entrada.marca)
+	assert_array(unidades).is_equal(["zancajunco_1", "tasajero_s1", "ocarra_1", "rodauva_1", Maestro.ID, "tasajero_s1"])
+	assert_array(marcas).is_equal(["", "caza", "", "", "", "cuenta"])
+	assert_int(combate.entrada_actual()).is_equal(0)
+	_aplicar_valida(combate, Accion.terminar())
+	# Despues de terminar, juega el Tasajero (Caza) y el combate se detiene en la
+	# Ocarra: la entrada actual sigue al turno en curso.
+	assert_str(combate.cola()[combate.entrada_actual()].unidad_id).is_equal(combate.turno_actual().unidad_id)

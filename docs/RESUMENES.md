@@ -109,3 +109,185 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** ninguna.
 - **Preguntas:** ninguna nueva; cerradas: ninguna. Las `RESPONDIDA` (P-002, P-003, P-008) no son de T34.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T13 · sesión 1 · 05/10/2026
+- **Rama:** tarea/T13-pantalla
+- **Estado:** EN CURSO (sigue en la sesión 2)
+- **Hecho:** arranque, tablero y lectura del combate, sin interacción de juego (`Arquitectura.md` B.2, A.2.1, A.3, A.6).
+  - **Núcleo** (consultas que faltaban para mostrar sin calcular):
+    - `Combate.cola()` (la cola de la ronda en curso) y `Combate.entrada_actual()` (su índice, o −1).
+    - `EstadosUnidad` en `nucleo/unidades/`: `hambre(valor)` da el id del tramo de `hambre.json` (7.1); `lealtad(valor, umbral)` da desleal, dudosa, neutral o leal (5.1), con el umbral de `fila_balanza()`. `fila_hambre` es estática y ahora la usa también `Danio`, así la búsqueda del tramo vive en un solo lugar.
+  - **Pantalla** (`pantalla/`):
+    - `principal.tscn` (`Principal`) toma la carpeta del `@export`, de `-- --datos=<carpeta>` (`ArgumentosPantalla`) o, si no hay ninguna, de `res://datos`. Carga en dos pasos: la segunda carga le pasa al `Cargador` `ClavesTextos.usadas(datos)`, que son las constantes más `especie.<id>.nombre` por especie y `hambre.estado.<id>` por estado de hambre.
+    - Con un error, muestra solo la pantalla de error (archivo · campo · esperado · recibido) y no arranca.
+    - Los avisos van a la consola (las claves faltantes una por una; las sobrantes, solo la cantidad) y al panel de depuración.
+    - El selector muestra un botón por `id` de escenario.
+    - `combate/vista_combate.tscn` (`VistaCombate`) arma el `ContextoCombate` y el `Combate` (la IA juega hasta el primer turno del jugador), el `ArmadorTextos` con `azar_textos` y `EstadosUnidad`. Se redibuja entera desde `LecturaCombate`, una clase sin nodos que lee `instantanea()`, la cola y el `Plantel` y pide los textos a T34.
+    - El tablero es un `TileMapLayer` con el tileset placeholder `casillas_cenital.tres` (damero de dos tiles). Las fichas son hijas del `TileMapLayer` y van en `map_to_local(casilla)`. La cámara se centra con `map_to_local` de las esquinas.
+    - `FichaUnidad`: círculo con el color del bando (gris si está caída), aro dorado si es el Maestro, nombre, vida `actual/máx` y marcas (caída, erizada).
+    - Interfaz: ronda, cola de la ronda (con Caza y Cuenta, la entrada actual resaltada y las ya jugadas en gris) y panel de la unidad del turno (nombre, vida, lealtad con su estado y hambre con su estado; el Maestro usa la variante `.maestro`).
+    - Panel de depuración, oculto: registro crudo y avisos de la carga y del armador. Se abre con la acción `depuracion` (F3) del InputMap.
+    - `run/main_scene` apunta a `principal.tscn`.
+- **Archivos:**
+  - Creados en el núcleo: `nucleo/unidades/estados_unidad.gd`.
+  - Creados en la pantalla: `pantalla/principal.tscn`, `principal.gd`, `argumentos.gd`, `claves_textos.gd`, `pantalla/combate/vista_combate.tscn`, `vista_combate.gd`, `ficha_unidad.tscn`, `ficha_unidad.gd`, `lectura_combate.gd`, `casillas_cenital.tres`, `casilla_placeholder.svg`, `figura_placeholder.svg` y `aro_placeholder.svg`.
+  - Creados en las pruebas: `pruebas/pantalla/test_principal.gd`, `test_vista_combate.gd`, `test_lectura_combate.gd`, `test_argumentos.gd`, `test_claves_textos.gd`, `pruebas/unidades/test_estados_unidad.gd`, `pruebas/fixtures/pantalla/es.json` (copias textuales de `datos/textos/es.json`) y `pruebas/fixtures/pantalla/textos_incompletos/` (esquema copiado de un fixture del cargador + un `es.json` sin `iniciativa.caza`).
+  - Modificados: `nucleo/combate/combate.gd`, `nucleo/combate/danio.gd`, `pruebas/combate/test_combate.gd`, `project.godot` (escena principal y acción `depuracion`), `CLAUDE.md` (Estado actual).
+- **Tests:** 16 nuevos, total 206, todos pasan (sí).
+  - 13 de pantalla: los 6 del criterio, distribuidos en 5 funciones, y 8 sin nodos.
+  - 3 del núcleo: cola y entrada actual, estados de hambre y estados de lealtad.
+  - Los tests de escenas usan `scene_runner(auto_free(escena.instantiate()))`, porque con una instancia el runner no la libera: sin `auto_free` quedaban nodos huérfanos y GdUnit4 salía con 101.
+- **Criterio de terminado:** sesión 1 cumplida punto por punto.
+  - (1) Con `pruebas/fixtures/cargador/un_error_ningun_dato`, la pantalla de error es visible y muestra `especies/rodauva.json` y `vida`; el selector está oculto y no hay vista.
+  - (2) Con `res://datos`: sin errores, sin pantalla de error y 11 botones con los `id` de los escenarios, en orden.
+  - (3) Los 11 escenarios reales crean su vista: combate sin error, `esperando_jugador()` verdadero y ningún mensaje.
+  - (4) En los 11, cada ficha está en `map_to_local` de su casilla de `instantanea()`, `local_to_map` de su posición da la casilla, y hay una ficha por unidad de pie o caída con posición.
+  - (5) Con `textos_incompletos`, los avisos traen `iniciativa.caza` (y `maestro.nombre`) como «presente en el archivo», pero no `iniciativa.cuenta`, que sí está. El juego arranca igual.
+  - (6) En C, las filas de la cola coinciden entrada por entrada con `combate().cola()` (unidad y marca), la resaltada es `entrada_actual()`, y las filas de Caza y Cuenta dicen "Caza" y "Cuenta".
+  - Faltan los tests 7 a 10 y la lista manual (sesión 2).
+- **Lecturas declaradas:** ninguna de reglas.
+  - Panel: muestra número **y** estado de lealtad y de hambre (B.2 dice "vida, lealtad, hambre"; ningún documento dice que el número se oculte). El hambre de una criatura se pide con su especie como sujeto, y como `es.json` no tiene `hambre.estado.<x>.surcon`, el Surcón sale "Saciada" (base). Es contenido del Worldbuilder, no se tocó.
+  - Dos unidades de la misma especie se ven con el mismo nombre (sus `id` están en el panel de depuración).
+  - Las unidades sin posición o fuera del tablero no se dibujan.
+  - `rasgo.erizarse.nombre` no se reutiliza como marca: nombra la acción, no el estado.
+  - Colores, tamaños y la marca `> ` de la entrada actual son de presentación.
+- **Claves de texto nuevas sin texto** (se ven como `[FALTA: …]`; nombres propuestos, para el Worldbuilder):
+  - `maestro.nombre`: nombre del Maestro en la ficha, la cola y el panel.
+  - `combate.ronda`: "Ronda {n}", con `{n}` literal.
+  - `iniciativa.titulo`: título de la cola.
+  - `panel.vida`, `panel.lealtad`, `panel.hambre`: etiquetas del panel del turno.
+  - `marca.caida`, `marca.erizada`: marcas sobre la ficha.
+- **Preguntas:** ninguna nueva; cerradas: ninguna. P-024 sigue ABIERTA (no es de T13). P-002, P-003 y P-008 siguen RESPONDIDA (son de T30, T14 y T19).
+- **Para la próxima sesión** (tests 7 a 10 y la lista de prueba manual en el resumen final):
+  - `pantalla/combate/interprete_clic.gd` (RefCounted, con tests: casilla alcanzable → `mover`; objetivo atacable → `atacar`; cualquier otra → nada).
+  - Botones Erizarse (con `puede_erizarse`) y Esperar / Terminar turno.
+  - Marcar `casillas_para_mover` y `objetivos_para_atacar`; desglose de `previsualizar_ataque` con el mouse sobre una objetivo.
+  - Mostrar lo nuevo del registro después de los turnos de la IA.
+  - Pantalla de resultado desde `ResultadoCombate.a_diccionario()`.
+  - Guardar sola la grabación (`.json`) y el registro (`.jsonl`) en `registros/<escenario>_<semilla>_<n>`.
+  - Acción `recargar` en el InputMap: recarga los datos del disco y reinicia el escenario.
+
+## T13 · sesión 2 · 05/10/2026
+- **Rama:** tarea/T13-pantalla
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera (sesiones 1 y 2).
+- **Hecho:** pantalla cenital con placeholders en `pantalla/`, la primera tarea con nodos (`Arquitectura.md` B.2, A.2.1, A.3, A.6, A.7). La pantalla no calcula ninguna regla: lee el núcleo, le manda `Accion` y se redibuja entera después de cada cambio.
+  - **Núcleo (sesión 1)** — consultas que faltaban para mostrar sin calcular:
+    - `Combate.cola()` y `Combate.entrada_actual()`.
+    - `EstadosUnidad`: `hambre(valor)` (7.1) y `lealtad(valor, umbral)` (5.1). `fila_hambre` también la usa `Danio`.
+    - En la sesión 2 no hizo falta ninguna consulta nueva.
+  - **Arranque (sesión 1)** — `principal.tscn`:
+    - La carpeta de datos sale de `@export`, de `-- --datos=` o de `res://datos`. Carga en dos pasos, pasando `ClavesTextos.usadas(datos)`.
+    - Con un error, solo se ve la pantalla de error. Los avisos van a la consola y al panel de depuración.
+    - El selector muestra un botón por `id` de escenario.
+  - **Tablero y lectura (sesión 1)** — `vista_combate.tscn`:
+    - `TileMapLayer` con damero placeholder. Las fichas van en `map_to_local`.
+    - Interfaz: cola de la ronda (con Caza y Cuenta), ronda y panel de la unidad del turno.
+    - Panel de depuración (F3).
+    - `LecturaCombate`, sin nodos, traduce el estado en lo que se dibuja y pide los textos al `ArmadorTextos`.
+  - **Jugar (sesión 2):**
+    - `InterpreteClic` (RefCounted): casilla con una objetivo de `objetivos_para_atacar()` → `atacar`; casilla de `casillas_para_mover()` → `mover`; cualquier otra → nada. Las posiciones salen de `instantanea()`.
+    - El clic es la acción `seleccionar` del InputMap (clic izquierdo).
+    - Botones:
+      - El del rasgo (nombre y tooltip del rasgo de la ficha) se ve solo si `puede_erizarse()`.
+      - Esperar / Terminar turno manda `terminar`. Dice "Esperar" si la acción no se usó (P-015) y "Terminar turno" si se usó.
+    - Marcas en una capa `Marcas` del mismo tileset, solo en el turno del jugador: azul en `casillas_para_mover`, rojo en las casillas de `objetivos_para_atacar`.
+    - Con el mouse sobre una objetivo atacable, el panel muestra el desglose de `previsualizar_ataque` desde la casilla actual: base, cada modificador con su fuente, total y si actuó el mínimo.
+  - **Sucesos (sesión 2):** después de cada cambio, lo nuevo del registro pasa a un panel con las últimas 12 líneas.
+    - Movimiento, ataque (con el daño y la vida antes → después) y Erizarse.
+    - Caída (`caida` con su complemento de especie), Maestro caído (`maestro.caida`) y salida del tablero.
+    - Victoria (`combate.victoria`) y, del cierre, levantadas (`caida.levantarse`) y muertas.
+    - Tiradas, turnos y rondas no se muestran: están en el panel de depuración.
+  - **Fin (sesión 2):**
+    - Pantalla de resultado desde `ResultadoCombate.a_diccionario()`: desenlace, rondas, estado final del Maestro y de cada unidad, y cambios de lealtad (antes → después, con cada anotación y su motivo).
+    - Su botón vuelve al selector.
+    - Al terminar, `GuardadoCombate` guarda solos la grabación (`.json`) y el registro (`.jsonl`) en `registros/<escenario>_<semilla>_<n>`, con `n` el primer número libre.
+  - **Recarga (sesión 2):** la acción `recargar` (tecla R) vuelve a leer la carpeta de datos.
+    - Con un error, saca la vista y muestra la pantalla de error.
+    - Si no, reinicia el escenario abierto, o vuelve al selector si no había ninguno.
+    - Después de una pantalla de error, otra R con los datos arreglados vuelve al escenario.
+- **Archivos:**
+  - **Sesión 1:**
+    - Creados en el núcleo: `nucleo/unidades/estados_unidad.gd`.
+    - Creados en la pantalla: `pantalla/principal.tscn`, `principal.gd`, `argumentos.gd`, `claves_textos.gd`, `pantalla/combate/vista_combate.tscn`, `vista_combate.gd`, `ficha_unidad.tscn`, `ficha_unidad.gd`, `lectura_combate.gd`, `casillas_cenital.tres`, `casilla_placeholder.svg`, `figura_placeholder.svg` y `aro_placeholder.svg`.
+    - Creados en las pruebas: `pruebas/pantalla/test_principal.gd`, `test_vista_combate.gd`, `test_lectura_combate.gd`, `test_argumentos.gd`, `test_claves_textos.gd`, `pruebas/unidades/test_estados_unidad.gd`, `pruebas/fixtures/pantalla/es.json` y `pruebas/fixtures/pantalla/textos_incompletos/`.
+    - Modificados: `nucleo/combate/combate.gd`, `nucleo/combate/danio.gd`, `pruebas/combate/test_combate.gd` y `project.godot`.
+  - **Sesión 2:**
+    - Creados en la pantalla: `pantalla/combate/interprete_clic.gd`, `guardado_combate.gd` y `marcas_placeholder.svg`.
+    - Creados en las pruebas: `pruebas/pantalla/test_interprete_clic.gd` y `test_guardado_combate.gd`.
+    - Modificados: `pantalla/principal.gd`, `principal.tscn` (`mouse_filter`), `claves_textos.gd`, `pantalla/combate/vista_combate.gd`, `vista_combate.tscn`, `lectura_combate.gd`, `casillas_cenital.tres`, `project.godot` (acciones `recargar` y `seleccionar`), `pruebas/pantalla/test_principal.gd`, `test_vista_combate.gd`, `test_lectura_combate.gd`, `test_claves_textos.gd` y `pruebas/fixtures/pantalla/es.json` (más copias textuales de `datos/textos/es.json`).
+  - En las dos sesiones: `CLAUDE.md` (Estado actual) y `docs/RESUMENES.md`.
+- **Tests:** 29 nuevos en la tarea (16 en la sesión 1 y 13 en la 2). Total 219, todos pasan (sí).
+  - Sesión 2: 4 del intérprete, 2 del guardado, 2 de la vista (8 y 9), 2 de la principal (10, y un clic de mouse real que mueve a la unidad) y 3 de `LecturaCombate` (sucesos, desglose y resultado).
+  - El test del clic real encontró un error: `Principal` (un `Control` de pantalla completa) y los contenedores de la cola y los botones se comían el clic antes del `_unhandled_input` de la vista. Ahora tienen `mouse_filter` IGNORE.
+  - También se probó a mano el paso 6 de la lista manual: A jugado por consola y guardado con `GuardadoCombate` en `registros/`; la copia se reprodujo con `herramientas/reproducir.gd` y dio un `.jsonl` idéntico byte por byte. Después se borró `registros/`.
+- **Criterio de terminado:** cumplido punto por punto.
+  - (1) Con datos rotos se ve la pantalla de error con archivo y campo, sin selector.
+  - (2) Con `datos/` arranca sin errores y lista los 11 escenarios.
+  - (3) Los 11 crean su vista y esperan al jugador.
+  - (4) Cada ficha está en `map_to_local` de su casilla, y `local_to_map` de su posición da la casilla.
+  - (5) Una clave que falta en un fixture de textos aparece como aviso.
+  - (6) La cola mostrada coincide con la del combate, entrada por entrada.
+  - (7) Intérprete con `escenario_turno.json` (fixtures):
+    - casilla alcanzable → `mover` a esa casilla;
+    - la Ocarra salvaje adyacente → `atacar` con su id;
+    - la Rodauva aliada, una casilla lejana, `[-1, 0]` y `[8, 8]` → nada;
+    - después de mover, una casilla vacía → nada (y la objetivo sigue dando `atacar`).
+  - (8) En A, el desglose mostrado con `sobre_casilla` es igual, diccionario completo, al `desglose` del evento `ataque` del registro al golpear.
+  - (9) A jugado hasta el final solo con `clic_casilla` y `pulsar_terminar`:
+    - se guardaron `a_dia_1_12345_1.json` y `.jsonl`, y la grabación valida contra `grabacion.schema.json`;
+    - el `.jsonl` es igual a `lineas_json()`, y `Reproductor.reproducir` da las mismas líneas, sin aviso de huella;
+    - la pantalla de resultado es visible.
+  - (10) Sobre una copia de `datos/`:
+    - con la `vida` de la Ocarra +1 en el archivo, `recargar()` reinicia A con `vida_max_real()` +1, en otra vista y esperando al jugador;
+    - con `"vida": "x"`, muestra la pantalla de error con `especies/ocarra.json`, sin selector y sin vista.
+- **Lecturas declaradas:** ninguna de reglas. Técnicas y de presentación:
+  - El test (10) usa una copia temporal de `datos/` y no "una copia de fixtures" (B.2), porque no hay una carpeta de fixtures completa (escenarios, textos y todos los esquemas) y armarla duplicaría los esquemas. El test no depende de ningún número: lee el valor y le suma 1.
+  - Los textos de sucesos, desglose y resultado viven en `LecturaCombate` y no en una clase `TextosCombate` aparte, como decía el plan: es la misma función (traducir el estado en lo que se dibuja).
+  - Los sucesos de movimiento, ataque y Erizarse se arman como "nombre · acción" con claves que ya existen (`accion.mover`, `accion.atacar`, el nombre del rasgo), más los números del registro. Son las mismas cuentas del registro, no prosa nueva.
+  - El desglose nombra las fuentes con textos que ya existen: hambre con `hambre.estado.<id>` (con el sujeto de la atacante), enfermedad con `enfermo.nombre` y rasgos con `rasgo.<id>.nombre`. Las demás fuentes (combo, afinidad, Encono, cobardía) tienen clave propia.
+  - Las marcas, los colores, el máximo de 12 líneas de sucesos, la tecla R y el formato "antes → después" son presentación.
+  - Una partida que termina con error del combate no se guarda: solo se guarda al terminar.
+- **Claves de texto nuevas sin texto** (se ven como `[FALTA: …]`; nombres propuestos, para el Worldbuilder):
+  - **Sesión 1:**
+    - `maestro.nombre`, `combate.ronda` (`{n}`) e `iniciativa.titulo`;
+    - `panel.vida`, `panel.lealtad` y `panel.hambre`;
+    - `marca.caida` y `marca.erizada`.
+  - **Sesión 2:**
+    - `accion.terminar`: botón "Terminar turno" cuando la acción ya se usó.
+    - `marca.fuera`: suceso de una salvaje que sale del tablero.
+    - `desglose.base`, `desglose.total` y `desglose.minimo`; `desglose.fuente.combo`, `desglose.fuente.afinidad`, `desglose.fuente.encono` y `desglose.fuente.cobardia` (no aparecen en 0a.1).
+    - `resultado.titulo`, `resultado.rondas`, `resultado.lealtad` y `resultado.volver`; `resultado.desenlace.victoria` y `resultado.desenlace.derrota_por_caida`.
+    - `estado.suelta`, `estado.guardada`, `estado.caida`, `estado.fuera` y `estado.muerta`.
+    - `lealtad.motivo.<evento>`, una por clave de `tablas/lealtad.json` `eventos`: `victoria`, `muerte_en_el_grupo`, `muerte_en_el_grupo_afines`, `rescate`, `perdon_a_leales` y `comer_atacante`.
+  - Ya existían y se usan: `accion.mover`, `accion.atacar`, `accion.esperar`, `rasgo.<id>.nombre`, `rasgo.<id>.tooltip`, `caida` (y `caida.<especie>`), `caida.levantarse`, `maestro.caida`, `combate.victoria` y `enfermo.nombre`.
+- **Preguntas:** ninguna nueva; cerradas: ninguna. P-024 sigue ABIERTA (no es de T13). P-002, P-003 y P-008 siguen RESPONDIDA (son de T30, T14 y T19).
+- **Prueba manual del usuario** (cierra el hito 0a.1). Los comandos son para `cmd`; en PowerShell, `& $env:GODOT_BIN` en lugar de `"%GODOT_BIN%"`.
+  1. **Abrir:** F5 en el editor (o `"%GODOT_BIN%" --path .`). Se ve el selector con los 11 escenarios. En la consola solo hay avisos `[textos] falta la clave …`, ningún error.
+  2. **A, victoria:** `a_dia_1`.
+     - En cada turno del jugador: las casillas azules son a dónde puede moverse la unidad del turno, y las rojas, a quién puede atacar.
+     - Clic en una azul para mover; con el mouse sobre una roja se ve el desglose a la derecha; clic en la roja para atacar.
+     - "Esperar" o "Terminar turno" pasa el turno. Los turnos de la Ocarra se ven en los sucesos, abajo a la derecha.
+     - Jugar hasta ganar. Comprobar que:
+       - aparece la pantalla de resultado (desenlace, rondas, unidades y lealtad con su motivo: +1 por la victoria);
+       - la consola dice `[registros] guardado: …/registros/a_dia_1_12345_1.json y .jsonl`.
+  3. **A, derrota:** botón de volver → `a_dia_1` otra vez. Apretar "Esperar" en todos los turnos, sin mover ni atacar.
+     - La Ocarra va por la Rodauva hasta tumbarla y después por el Maestro.
+     - Al caer el Maestro: resultado de derrota, con la Rodauva muerta. Se guarda `a_dia_1_12345_2`.
+  4. **B con Erizarse:** volver → `b_muro`.
+     - En el turno de la Rodauva aparece el botón "Erizarse", con tooltip. Apretarlo: la ficha muestra la marca de erizada y desaparecen las casillas azules.
+     - Jugar B hasta el final, ganando o perdiendo.
+  5. **Recarga:** con A abierto y el juego corriendo, abrir `datos/especies/ocarra.json`, cambiar `"vida": 12` por `13` y guardar. Apretar R.
+     - El escenario se reinicia y la Ocarra tiene 13 de vida.
+     - Cambiar a `"vida": "x"`, guardar y apretar R: pantalla de error con `especies/ocarra.json · vida`.
+     - Volver a `12`, guardar y apretar R: vuelve A.
+     - Dejar el archivo como estaba (`git diff datos/` sin cambios).
+  6. **Reproducir por consola** (desde la raíz del proyecto, en `cmd`):
+     ```
+     copy registros\a_dia_1_12345_1.json registros\copia.json
+     "%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- res://registros/copia.json
+     fc registros\a_dia_1_12345_1.jsonl registros\copia.jsonl
+     ```
+     - La herramienta imprime `Registro: …/registros/copia.jsonl`, sin `AVISO` de huella (si en el paso 5 los datos quedaron como estaban).
+     - `fc` dice que no encontró diferencias.
+     - La copia hace falta porque la herramienta escribe `registros/<nombre>.jsonl` y pisaría el registro que guardó la pantalla.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan la prueba manual del usuario, el PR y el cierre del hito 0a.1.

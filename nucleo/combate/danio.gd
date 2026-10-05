@@ -94,20 +94,13 @@ func _hambre_y_enfermedades(atacante_id: String, plantel: Plantel, porcentajes: 
 			return
 		hambre = atacante.hambre
 		enfermedades = atacante.enfermedades
-	var estado: Dictionary = _estado_hambre(hambre)
+	var estado: Dictionary = EstadosUnidad.fila_hambre(_estados_hambre, hambre)
 	if estado.get("danio_pct", 0) != 0:
 		porcentajes.append(ModificadorDanio.new(ModificadorDanio.Fuente.HAMBRE,
 				ModificadorDanio.Tipo.PORCENTAJE, estado["danio_pct"], estado["id"]))
 	for i in enfermedades:
 		porcentajes.append(ModificadorDanio.new(ModificadorDanio.Fuente.ENFERMEDAD,
 				ModificadorDanio.Tipo.PORCENTAJE, _enfermedad_pct))
-
-
-func _estado_hambre(hambre: int) -> Dictionary:
-	for estado in _estados_hambre:
-		if hambre >= estado["desde"] and hambre <= estado["hasta"]:
-			return estado
-	return {}
 
 
 # Sistema.md 11.2: rasgos de la objetivo, por su efecto en la ficha. Erizarse

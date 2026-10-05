@@ -1,0 +1,21 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://pantalla/combate/casilla_placeholder.svg" id="1_casilla"]
+[ext_resource type="Texture2D" path="res://pantalla/combate/marcas_placeholder.svg" id="2_marcas"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_casillas"]
+texture = ExtResource("1_casilla")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_marcas"]
+texture = ExtResource("2_marcas")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+
+[resource]
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_casillas")
+sources/1 = SubResource("TileSetAtlasSource_marcas")
