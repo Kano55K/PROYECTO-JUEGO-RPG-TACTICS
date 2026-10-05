@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Versión alineada con `docs/Arquitectura.md` v0.12 (04/10/2026). Dueño: Arquitecto Técnico.
+> Revisado por última vez contra `docs/Arquitectura.md` v0.20 (04/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -103,7 +103,7 @@ Historial de lo que se hizo en cada sesión. El staff lo lee para saber en qué 
 nucleo/        reglas puras. Clases que extienden RefCounted. Sin Node, sin escenas, sin autoloads.
 pantalla/      escenas de Godot. Leen el estado del núcleo y le mandan acciones. Nunca calculan reglas.
 datos/         JSON + esquemas. Sin código.
-pruebas/       tests del núcleo, con la misma estructura de carpetas que nucleo/.
+pruebas/       tests del núcleo (misma estructura que nucleo/) y de la pantalla (pruebas/pantalla/).
 pruebas/fixtures/  datos chicos de prueba, con errores a propósito si hace falta.
 herramientas/  reproductor y scripts de consola.
 registros/     salidas de combates (fuera de Git).
@@ -114,6 +114,20 @@ registros/     salidas de combates (fuera de Git).
 - El núcleo trabaja en coordenadas de grilla `[x, y]`, con `y = 0` arriba. No sabe si la vista es cenital o isométrica.
 - Las previsualizaciones usan **"calcular sin aplicar"**: la misma función que aplica la regla, sin modificar el estado.
 - **Las entidades se apuntan por `id` (texto), nunca guardando el objeto de otra entidad**: la criatura guarda `pergamino_id`, el pergamino guarda `ocupante_id`, y quien necesita el objeto lo pide al contenedor. Dos `RefCounted` que se apuntan entre sí nunca se liberan. La ficha de especie sí se comparte como objeto de solo lectura.
+
+## Pantalla (desde T13)
+
+`pantalla/` es la única carpeta con nodos y escenas. Se rige por esto:
+
+- **Cero reglas.** La pantalla no calcula daño, alcance, orden ni nada de `Sistema.md`. Pregunta al núcleo (consultas de `Turno`, `previsualizar_ataque`, `instantanea`, `registro`, `resultado`) y le manda `Accion`. Si para mostrar algo necesitás una cuenta, falta una consulta en el núcleo: agregala en `nucleo/` con su test.
+- **Se redibuja desde el núcleo** después de cada cambio. No guarda copias propias de vida, posición ni estado.
+- **Casilla ↔ pantalla solo con `TileMapLayer.map_to_local` y `local_to_map`.** Nunca multipliques coordenadas por un tamaño de casilla: la vista isométrica (T32) cambia solo el tileset.
+- **Textos del jugador solo por `ArmadorTextos`**, con el generador de textos del contexto. Clave que falta → `[FALTA: clave]`, y va al resumen. Las pantallas de desarrollo (error de datos, selector de escenario, panel de depuración) pueden mostrar ids y datos técnicos.
+- **La pantalla nunca usa un generador de azar.** Ni el de combate ni ninguno propio.
+- **Teclas como acciones del `InputMap`** (`recargar`, `depuracion`…), nunca códigos de tecla en un script.
+- La lógica de entrada que se pueda separar de los nodos (por ejemplo, traducir un clic en una `Accion`) va en una clase `RefCounted` dentro de `pantalla/`, con tests normales.
+- Tests de pantalla en `pruebas/pantalla/`. Las escenas se prueban con el runner de escenas de GdUnit4 (arranque, creación, posiciones), y la experiencia de juego la prueba el usuario con la **lista de prueba manual** que va en el resumen de la última sesión de la tarea.
+- Lo que escribe a disco (grabaciones y registros) va a `registros/`, que no se commitea.
 
 ## Principios que no se negocian
 
