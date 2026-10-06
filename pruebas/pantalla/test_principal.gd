@@ -116,6 +116,35 @@ func test_clic_del_mouse_llega_al_tablero() -> void:
 	assert_object(vista.combate().turno_actual()).is_same(turno)
 
 
+# T40, sesion 2 (test 6d): la accion `recargar` anda durante una secuencia de
+# la IA y la corta limpia: la vista vieja se libera con su Timer, la nueva
+# arranca sin secuencia y sin error.
+func test_recargar_corta_la_secuencia_de_la_ia() -> void:
+	var runner: GdUnitSceneRunner = _principal("res://datos")
+	await runner.simulate_frames(1)
+	var principal: Principal = runner.scene()
+	var vista: VistaCombate = principal.abrir_escenario("c_tasajero")
+	await runner.simulate_frames(1)
+	# Presentacion: una pausa que no llega a correr durante el test.
+	vista.pausa_ia = 100.0
+	for _i in range(20):
+		if vista.en_secuencia():
+			break
+		assert_bool(vista.pulsar_terminar()).is_true()
+	assert_bool(vista.en_secuencia()).is_true()
+
+	var evento: InputEventAction = InputEventAction.new()
+	evento.action = "recargar"
+	evento.pressed = true
+	Input.parse_input_event(evento)
+	await runner.simulate_frames(3)
+	assert_object(principal.vista()).is_not_null()
+	assert_object(principal.vista()).is_not_same(vista)
+	assert_bool(principal.vista().en_secuencia()).is_false()
+	assert_str(principal.vista().combate().error()).is_empty()
+	assert_bool(principal.vista().combate().esperando_jugador()).is_true()
+
+
 # Casilla -> posicion en el viewport: map_to_local y la transformacion del lienzo (camara).
 func _en_pantalla(vista: VistaCombate, casilla: Vector2i) -> Vector2:
 	var tablero: TileMapLayer = vista.tablero()

@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "caza_surco",
+  "_nota": "Sistema.md 11.2.1 (el surco es intransitable) y 11.2.3 (zona de Caza): test de T40 (criterio 1). Copia de escenario_caza con el Surcon de la tribu [3,1], ultimo de la ronda 1 (Vel 2): cava en [3,2], la unica salida del Tasajero [3,3], que queda encerrado por el Maestro [2,3], la Rodauva [3,4] y la Ocarra [4,3]",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 3] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 4] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 3] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 1] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 3] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -77,6 +77,7 @@ func test_vista_pulsa_la_activa_del_efecto() -> void:
 	var datos: Dictionary = _datos()
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
 	var vista: VistaCombate = runner.scene()
+	vista.pausa_ia = 0.0
 	vista.empezar(_escenario(_CARPETA + "escenario_especie_prueba.json"), datos)
 	await runner.simulate_frames(1)
 	var boton: Button = runner.find_child("Activa_" + LecturaCombate.ACTIVA_HACERSE_JUNCO)

@@ -23,12 +23,15 @@ const _MARCA_SURCO_TRIBU: Vector2i = Vector2i(2, 0)
 const _MARCA_SURCO_ENEMIGA: Vector2i = Vector2i(3, 0)
 const _MARCA_ZONA: Vector2i = Vector2i(4, 0)
 const _MARCA_CAVAR: Vector2i = Vector2i(5, 0)
+# T40, sesion 2: el destino de cada paso de la IA.
+const _MARCA_DESTINO: Vector2i = Vector2i(6, 0)
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
 const _ACCION_DEPURACION: String = "depuracion"
 const _ACCION_SELECCIONAR: String = "seleccionar"
 const _ACCION_ZONA: String = "zona"
+const _ACCION_SALTAR: String = "saltar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
@@ -39,6 +42,10 @@ const _COLOR_ACTUAL: Color = Color(1.0, 0.85, 0.3)
 const _COLOR_ACTUO: Color = Color(0.6, 0.6, 0.6)
 const _COLOR_PENDIENTE: Color = Color(1, 1, 1)
 const _MARCA_ACTUAL: String = "> "
+
+# T40, sesion 2: segundos entre los pasos de la IA. Es presentacion, no un dato
+# de balance; con 0 no se anima (los tests la ponen en 0).
+@export var pausa_ia: float = 0.4
 
 var _combate: Combate = null
 var _armador: ArmadorTextos = null
@@ -59,6 +66,10 @@ var _eligiendo_cavar: bool = false
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
+# T40, sesion 2: los pasos de la IA que faltan mostrar (SecuenciaIA) y si hay
+# una secuencia en curso.
+var _secuencia: Array[Dictionary] = []
+var _en_secuencia: bool = false
 
 @onready var _tablero: TileMapLayer = $Tablero
 @onready var _capa_surcos: TileMapLayer = $Tablero/Surcos
@@ -80,11 +91,13 @@ var _aviso_mostrado: String = ""
 @onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/TextoResultado
 @onready var _boton_volver: Button = $Interfaz/PantallaResultado/Contenido/BotonVolver
 @onready var _depuracion: TextEdit = $Interfaz/PanelDepuracion
+@onready var _pausa: Timer = $PausaIA
 
 
 func _ready() -> void:
 	_boton_terminar.pressed.connect(pulsar_terminar)
 	_boton_volver.pressed.connect(volver.emit)
+	_pausa.timeout.connect(_siguiente_paso)
 
 
 # escenario y datos: los del Cargador. avisos_carga: sus avisos, para el panel
@@ -137,7 +150,7 @@ func filas_cola() -> Array[Label]:
 # Un clic en una casilla: la Accion que da el InterpreteClic, si hay alguna.
 # Devuelve true si se aplico.
 func clic_casilla(casilla: Vector2i) -> bool:
-	if _combate == null or not _combate.esperando_jugador():
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
 	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar)
 	if accion == null:
@@ -153,7 +166,9 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
-	if _combate == null:
+	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
+	# las fichas todavia no.
+	if _combate == null or _en_secuencia:
 		return
 	var foto: Dictionary = _combate.instantanea()
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
@@ -187,7 +202,7 @@ func aviso_mostrado() -> String:
 # T40: el boton de una activa (LecturaCombate.ACTIVA_*). Cavar no aplica nada:
 # entra (o sale) del modo "elegir casilla". Devuelve true si hizo algo.
 func pulsar_activa(tipo: String) -> bool:
-	if _combate == null or not _combate.esperando_jugador():
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
 	match tipo:
 		LecturaCombate.ACTIVA_ERIZARSE:
@@ -220,7 +235,7 @@ func desglose_mostrado() -> Dictionary:
 
 
 func pulsar_terminar() -> bool:
-	return _combate != null and _aplicar(Accion.terminar())
+	return _combate != null and not _en_secuencia and _aplicar(Accion.terminar())
 
 
 func redibujar() -> void:
@@ -244,6 +259,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(_ACCION_DEPURACION):
 		_depuracion.visible = not _depuracion.visible
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_SALTAR) and _en_secuencia:
+		saltar()
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(_ACCION_ZONA):
 		alternar_zona()
 		get_viewport().set_input_as_handled()
@@ -261,7 +279,8 @@ func _casilla_del_mouse() -> Vector2i:
 	return _tablero.local_to_map(_tablero.get_local_mouse_position())
 
 
-# Una accion del jugador: si el nucleo la acepta, se redibuja todo.
+# Una accion del jugador: si el nucleo la acepta, se redibuja todo. T40, sesion
+# 2: si despues jugo la IA y hay pausa, antes se muestran sus pasos de a uno.
 func _aplicar(accion: Accion) -> bool:
 	if not _combate.aplicar(accion).valida:
 		return false
@@ -270,8 +289,82 @@ func _aplicar(accion: Accion) -> bool:
 	_aviso_mostrado = ""
 	_eligiendo_cavar = false
 	_casilla_mouse = Criatura.SIN_POSICION
-	_despues_de_un_cambio()
+	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
+	if pausa_ia > 0.0 and not pasos.is_empty():
+		_empezar_secuencia(pasos)
+	else:
+		_despues_de_un_cambio()
 	return true
+
+
+# T40, sesion 2: hay una secuencia de la IA en curso (la entrada de juego esta
+# bloqueada).
+func en_secuencia() -> bool:
+	return _en_secuencia
+
+
+# La accion `saltar`: termina la secuencia y redibuja desde el nucleo. Devuelve
+# true si habia una.
+func saltar() -> bool:
+	if not _en_secuencia:
+		return false
+	_pausa.stop()
+	_terminar_secuencia()
+	return true
+
+
+# Las fichas quedan como estaban antes de la accion; se apagan los botones, las
+# marcas, la zona, el desglose y el tooltip.
+func _empezar_secuencia(pasos: Array[Dictionary]) -> void:
+	_secuencia = pasos
+	_en_secuencia = true
+	_botones.visible = false
+	_marcas.clear()
+	_capa_zona.clear()
+	_dibujar_desglose()
+	_dibujar_tooltip()
+	_siguiente_paso()
+
+
+# Muestra un paso con lo que dice el registro (la unidad resaltada y su destino
+# marcado) y espera la pausa. Sin pasos, termina.
+func _siguiente_paso() -> void:
+	if not _en_secuencia:
+		return
+	if _secuencia.is_empty():
+		_terminar_secuencia()
+		return
+	var paso: Dictionary = _secuencia.pop_front()
+	_marcas.clear()
+	for ficha in fichas():
+		ficha.modulate = Color(1, 1, 1, ficha.modulate.a)
+	var actua: FichaUnidad = _ficha(paso["unidad"])
+	if actua != null:
+		actua.modulate = Color(_COLOR_ACTUAL, actua.modulate.a)
+	if paso["tipo"] == SecuenciaIA.MOVIMIENTO:
+		var hasta: Vector2i = paso["hasta"]
+		_marcas.set_cell(hasta, _FUENTE_MARCAS, _MARCA_DESTINO)
+		if actua != null:
+			actua.position = _tablero.map_to_local(hasta)
+	else:
+		var objetivo: FichaUnidad = _ficha(paso["objetivo"])
+		if objetivo != null:
+			_marcas.set_cell(_tablero.local_to_map(objetivo.position), _FUENTE_MARCAS, _MARCA_DESTINO)
+			objetivo.mostrar_vida(paso["vida_despues"])
+	_pausa.start(pausa_ia)
+
+
+func _terminar_secuencia() -> void:
+	_secuencia = []
+	_en_secuencia = false
+	_despues_de_un_cambio()
+
+
+func _ficha(unidad_id: String) -> FichaUnidad:
+	for ficha in fichas():
+		if ficha.unidad_id == unidad_id:
+			return ficha
+	return null
 
 
 # Lo nuevo del registro pasa a los sucesos; con el combate terminado se guarda
@@ -350,7 +443,8 @@ func _dibujar_zona() -> void:
 
 func alternar_zona() -> void:
 	_zona_visible = not _zona_visible
-	if _combate != null:
+	# Durante la secuencia de la IA, se ve en el redibujo final.
+	if _combate != null and not _en_secuencia:
 		_dibujar_zona()
 
 

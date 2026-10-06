@@ -20,6 +20,8 @@ func _vista(escenario: Dictionary, datos: Dictionary, carpeta_registros: String 
 	# Con una instancia, el runner no la libera: auto_free la libera al terminar.
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
 	# Sin carpeta: los combates de estos tests no terminan, no se escribe nada.
+	# T40, sesion 2: sin animar la IA (la pausa de los tests vale 0).
+	(runner.scene() as VistaCombate).pausa_ia = 0.0
 	(runner.scene() as VistaCombate).empezar(escenario, datos, [], carpeta_registros)
 	return runner
 
@@ -164,6 +166,74 @@ func test_jugar_a_guarda_y_se_reproduce_igual() -> void:
 	assert_str(reproduccion.error).is_empty()
 	assert_bool(reproduccion.aviso_huella).is_false()
 	assert_array(Array(reproduccion.combate.registro().lineas_json())).is_equal(Array(guardadas))
+
+
+# T40 (test 7): jugar C hasta el final por la vista, con activas y animando la
+# IA (pausa larga y `saltar` en cada secuencia), guarda una grabacion que se
+# reproduce igual: animar no cambia nada del combate. Politica: atacar si hay
+# objetivo; si no, la primera activa habilitada; si no, acercarse.
+func test_jugar_c_con_activas_se_reproduce_igual() -> void:
+	var datos: Dictionary = _datos()
+	var escenario: Dictionary = datos["escenarios/c_tasajero.json"]
+	var carpeta: String = create_temp_dir("t40_jugar_c")
+	var runner: GdUnitSceneRunner = _vista(escenario, datos, carpeta)
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = runner.scene()
+	# Presentacion: una pausa que no llega a correr durante el test.
+	vista.pausa_ia = 100.0
+	var secuencias: int = 0
+	for _i in range(_TOPE_ACCIONES):
+		if vista.combate().terminado():
+			break
+		assert_bool(vista.combate().esperando_jugador()).override_failure_message(vista.combate().error()).is_true()
+		var turno: Turno = vista.combate().turno_actual()
+		var objetivos: Array[String] = turno.objetivos_para_atacar()
+		if not objetivos.is_empty():
+			vista.clic_casilla(_casilla_de(vista.combate().instantanea(), objetivos[0]))
+		elif not _usar_activa(vista):
+			_acercarse(vista)
+		if not vista.combate().terminado():
+			assert_bool(vista.pulsar_terminar()).is_true()
+		if vista.saltar():
+			secuencias += 1
+	assert_bool(vista.combate().terminado()).is_true()
+	assert_int(secuencias).is_greater(0)
+	await runner.simulate_frames(1)
+	assert_bool(runner.find_child("PantallaResultado").visible).is_true()
+
+	var base: String = carpeta.path_join("%s_%d_1" % [escenario["id"], escenario["semilla"]])
+	assert_bool(FileAccess.file_exists(base + ".json")).override_failure_message(base).is_true()
+	var guardadas: PackedStringArray = FileAccess.get_file_as_string(base + ".jsonl").split("\n", false)
+	assert_array(Array(guardadas)).is_equal(Array(vista.combate().registro().lineas_json()))
+	var esquema: Dictionary = Cargador.new().esquema_resuelto(_CARPETA_DATOS, "grabacion")["esquema"]
+	var validacion: Dictionary = Validador.new().validar(
+			JSON.parse_string(FileAccess.get_file_as_string(base + ".json")), esquema, "grabacion")
+	assert_array(validacion["errores"]).override_failure_message(str(validacion["errores"])).is_empty()
+	# Se usaron activas.
+	var tipos: Array = []
+	for accion in validacion["datos"]["acciones"]:
+		tipos.append(accion["accion"]["tipo"])
+	assert_bool(tipos.has("hacerse_junco") or tipos.has("erizarse")).override_failure_message(str(tipos)).is_true()
+	var reproduccion: Reproductor = Reproductor.reproducir(Grabacion.desde_diccionario(validacion["datos"]), datos)
+	assert_str(reproduccion.error).is_empty()
+	assert_bool(reproduccion.aviso_huella).is_false()
+	assert_array(Array(reproduccion.combate.registro().lineas_json())).is_equal(Array(guardadas))
+
+
+# Politica del test 7: la primera activa habilitada, por los botones que se ven
+# (Activa_<tipo>). Cavar entra en "elegir casilla" y cava en la primera de
+# casillas_para_cavar.
+func _usar_activa(vista: VistaCombate) -> bool:
+	for hijo in vista.get_node("Interfaz/Botones").get_children():
+		var boton: Button = hijo as Button
+		if not boton.name.begins_with("Activa_") or boton.disabled:
+			continue
+		var tipo: String = boton.name.trim_prefix("Activa_")
+		if tipo == LecturaCombate.ACTIVA_CAVAR:
+			vista.pulsar_activa(tipo)
+			return vista.clic_casilla(vista.combate().turno_actual().casillas_para_cavar()[0])
+		return vista.pulsar_activa(tipo)
+	return false
 
 
 # Politica del test: mueve a la casilla alcanzable mas cercana a una enemiga.

@@ -63,6 +63,30 @@ func test_zona_amenaza() -> void:
 	assert_array(combate.zona_amenaza("tasajero_s1")).is_empty()
 
 
+# (1a') zona_amenaza usa los surcos del combate (Sistema.md 11.2.1: el surco es
+# intransitable). escenario_caza_surco: el de arriba mas el Surcon de la tribu
+# [3,1], ultimo de la ronda 1. Antes de cavar, el Tasajero sale por [3,2] y la
+# zona llega a [1,4], [0,3], [5,4] y [6,3]; con el surco en [3,2] queda
+# encerrado y la zona es solo lo que golpea desde su casilla. Con una lista de
+# surcos vacia seguiria saliendo por [3,2].
+func test_zona_amenaza_con_surco() -> void:
+	var combate: Combate = _combate("escenario_caza_surco")
+	for _i in range(4):
+		if combate.turno_actual().unidad_id == "surcon_1":
+			break
+		assert_bool(combate.aplicar(Accion.terminar()).valida).is_true()
+	assert_str(combate.turno_actual().unidad_id).is_equal("surcon_1")
+	assert_int(combate.instantanea()["ronda"]).is_equal(1)
+	assert_array(combate.zona_amenaza("tasajero_s1")).contains(
+			[Vector2i(1, 4), Vector2i(0, 3), Vector2i(5, 4), Vector2i(6, 3)])
+
+	assert_bool(combate.aplicar(Accion.cavar(Vector2i(3, 2))).valida).is_true()
+	var foto: String = JSON.stringify(combate.instantanea())
+	assert_array(combate.zona_amenaza("tasajero_s1")).is_equal(
+			[Vector2i(3, 2), Vector2i(2, 3), Vector2i(4, 3), Vector2i(3, 4)])
+	assert_str(JSON.stringify(combate.instantanea())).is_equal(foto)
+
+
 # (1b) destaparia, con el Plantel (Junco) y con el Combate: da las ocultas del
 # otro bando adyacentes a la casilla donde terminaria; una oculta aliada, una
 # casilla lejos o una unidad caida, nada. No destapa a nadie.

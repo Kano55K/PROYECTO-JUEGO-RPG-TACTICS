@@ -737,3 +737,63 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   - La animación en la vista, con `pausa_ia` exportada, `en_secuencia()`, la entrada bloqueada y la acción `saltar` (Espacio).
   - Test 6 (pausa 0 y `saltar` dan el dibujo del núcleo) y test 7 (C jugado por la vista con activas se reproduce igual).
   - Correr la suite completa, el cierre de la tarea y la lista de prueba manual.
+
+## T40 · sesión 2 · 06/10/2026
+- **Rama:** tarea/T40-pantalla-rasgos
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho (la tarea entera):**
+  - Sesión 1, rasgos visibles (detalle en `T40 · sesión 1`):
+    - Núcleo: `Combate.zona_amenaza(id)` y `Combate.destaparia(id, casilla)`, con la regla del contacto en `Junco.destaparia`.
+    - `LecturaCombate`: `botones_activas()` por efecto, `tooltip_unidad(id)`, sucesos de los eventos nuevos de A.7, la fuente `modo` como `iniciativa.<modo>` y concordancia con sujeto.
+    - `VistaCombate`: botones de activas, modo cavar, capas `Surcos` y `Zona` (acción `zona`, Z), tooltip y aviso de destapar.
+  - Sesión 2, ritmo de la IA:
+    - `SecuenciaIA.pasos(lineas, desde)` (`pantalla/combate/secuencia_ia.gd`) copia del registro los `movimiento` y `ataque` de las acciones con origen `ia`. No decide ni calcula.
+    - `VistaCombate`:
+      - `@export pausa_ia` (0,4 s; es presentación, no va a `datos/`); con 0 no anima.
+      - Después de una acción del jugador que hace jugar a la IA, muestra sus pasos de a uno: la unidad resaltada, el destino con la marca `destino` y la vida del registro (`FichaUnidad.mostrar_vida`). Al terminar se redibuja entera desde el núcleo.
+      - `en_secuencia()`, `saltar()` y la acción `saltar` (Espacio). La pausa la lleva un nodo `Timer` (`PausaIA`) que se libera con la vista, así R corta la secuencia limpia.
+    - Durante la secuencia:
+      - se bloquean los clics, los botones (ocultos), las activas y `terminar`;
+      - F3 y R andan.
+    - Test nuevo del criterio 1, pedido por el usuario: `zona_amenaza` con un surco en el camino del Tasajero. Lo comprobé con una mutación: pasándole a `zona_amenaza` un `Surcos.new()` vacío, el test falla.
+- **Corrige:** T40 · sesión 1, criterio 1: el caso del surco en la zona no lo cubrían los tests de T37 (prueban `Tablero`, no el `Combate`). Ahora lo cubre `test_zona_amenaza_con_surco`.
+- **Decisiones técnicas de la sesión 2** (en el plan aprobado):
+  - Durante la secuencia, el hover (tooltip, desglose y aviso) y la capa de zona se apagan, porque mostrarían el estado final del núcleo con las fichas en posiciones intermedias. Z cambia el interruptor y se ve al final.
+  - Los turnos de la IA del arranque (antes del primer turno del jugador) no se animan: no hay dibujo previo, y armarlo desde el escenario sería una copia del estado fuera del núcleo.
+- **Archivos (la tarea entera):**
+  - Creados:
+    - Código: `pantalla/combate/secuencia_ia.gd`.
+    - Tests: `pruebas/combate/test_zona_y_destape.gd`; en `pruebas/pantalla/`: `test_botones_activas.gd`, `test_vista_rasgos.gd`, `test_secuencia_ia.gd` y `test_vista_ritmo_ia.gd`.
+    - Fixtures: `pruebas/fixtures/pantalla/es_rasgos.json`, `especie_prueba.json` y `escenario_especie_prueba.json`; `pruebas/fixtures/combate/escenario_caza_surco.json`.
+  - Modificados:
+    - Núcleo: `nucleo/combate/combate.gd`, `junco.gd` y `turno.gd`.
+    - Pantalla: `pantalla/claves_textos.gd`; en `pantalla/combate/`: `lectura_combate.gd`, `interprete_clic.gd`, `vista_combate.gd`, `vista_combate.tscn`, `ficha_unidad.gd`, `casillas_cenital.tres` y `marcas_placeholder.svg`.
+    - `project.godot` (`zona`, `saltar`).
+    - Tests en `pruebas/pantalla/`: `test_claves_textos.gd`, `test_interprete_clic.gd`, `test_lectura_combate.gd`, `test_vista_combate.gd` y `test_principal.gd`.
+    - `CLAUDE.md` (Estado actual).
+- **Tests:** 22 nuevos en la tarea (14 en la sesión 1 y 8 en la 2), total 287, todos pasan (sí).
+- **Criterio de terminado:** cumplido punto por punto:
+  - 1: `test_zona_amenaza`, `test_zona_amenaza_con_surco` y `test_destaparia`.
+  - 2: `test_botones_salen_del_efecto` y `test_vista_pulsa_la_activa_del_efecto`.
+  - 3: `test_modo_cavar` y `test_modo_cavar_en_la_vista`.
+  - 4: `test_t40_sucesos_de_los_rasgos`.
+  - 5: `test_t40_tooltip_de_una_enemiga` y `test_tooltip_de_una_enemiga`.
+  - 6: `test_pausa_cero_dibuja_el_nucleo`, `test_saltar_deja_el_mismo_dibujo` (con la entrada bloqueada y F3 andando), `test_la_secuencia_termina_sola` y `test_recargar_corta_la_secuencia_de_la_ia`. Además, `test_secuencia_ia.gd`.
+  - 7: `test_jugar_c_con_activas_se_reproduce_igual`: C con `datos/` real, con activas, animando y saltando cada secuencia. La grabación valida y se reproduce igual, sin aviso de huella.
+  - 8: `test_t40_etiquetas_con_concordancia` y `test_claves_de_rasgos_y_variantes`.
+  - 9: `test_t40_desglose_nombra_el_modo` y `test_claves_de_rasgos_y_variantes`.
+- **Tests de tareas anteriores reescritos:** ninguno. Los helpers de `test_vista_combate.gd`, `test_vista_rasgos.gd` y `test_botones_activas.gd` ponen `pausa_ia = 0`, y sus tests no cambian.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** ninguna nueva; cerradas: ninguna.
+- **Lista de prueba manual (usuario):**
+  1. Copiar `es.json` v1.1 si todavía no está (`Mundo.md`, pendientes) y abrir el juego (F5).
+  2. C, D normal, E, F y H con el mouse, hasta el final. A y B otra vez (regresión).
+  3. Ver al Tasajero cambiar a Cuenta (suceso, ficha y cola) y su umbral en el tooltip.
+  4. E: cavar con el Surcón (botón, casillas marcadas, surco con el color del bando, tope con cierre del más viejo).
+  5. C: ocultar al Zancajunco, verlo semitransparente con el bono, el aviso al mover junto a una oculta enemiga, destaparlo y ver los sucesos.
+  6. La zona de Caza con el Tasajero en Caza; Z la oculta y la muestra.
+  7. Ritmo de la IA: después de `terminar`, la IA se ve de a un paso. Espacio salta. R a mitad de una secuencia reinicia sin errores en la consola. F3 abre el panel durante la secuencia.
+  8. Anotar los textos `[FALTA]` y los tooltips desactualizados.
+  9. Por escenario, anotar si se usó cada activa disponible (señal temprana de la métrica 14, sin umbral, `Sistema.md` 11.9 v1.5).
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual; después, el cierre del hito 0a.1b.

@@ -16,6 +16,8 @@ func _vista(nombre: String) -> GdUnitSceneRunner:
 	datos["textos/es.json"] = LectorFixture.leer(_TEXTOS, "textos")["datos"]
 	var escenario: Dictionary = LectorFixture.leer(_CARPETA_COMBATE + nombre + ".json", "escenario")["datos"]
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
+	# T40, sesion 2: sin animar la IA (la pausa de los tests vale 0).
+	(runner.scene() as VistaCombate).pausa_ia = 0.0
 	(runner.scene() as VistaCombate).empezar(escenario, datos)
 	return runner
 
