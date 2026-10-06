@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_caza_linea",
+  "_nota": "Sistema.md 11.8 paso 6b y 11.2.3, Dos presas, geometria (tests de T39). En linea, Maestro [2,5] (20), Rodauva [3,5] (8) y Ocarra [4,5] (12): ninguna casilla queda junto a dos. El Tasajero salvaje [3,1] (5 de danio) elige [3,4], a 3 pasos, la unica desde la que tumba a alguien: 5 + 5 contra la Rodauva (Sistema.md 11.2.3, Contra la Rodauva). El Surcon [7,7] queda lejos; el test del bloque lo mueve",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 5] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 5] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 5] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [7, 7] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 1] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

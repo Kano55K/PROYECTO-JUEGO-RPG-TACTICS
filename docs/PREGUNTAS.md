@@ -349,3 +349,29 @@
 - **Bloquea:** no (se necesita antes de T26)
 - **Mientras tanto:** `nucleo/combate/objetivos.gd` (`Objetivos.Clase`) tiene `HOSTIL` y `ALIADA`, y `ALIADA` deja afuera a la caída, que es lo que pide el Remiendo. Test: `pruebas/combate/test_junco.gd`, `test_aliada_vale_sobre_oculta` (una caída da `OBJETIVO_CAIDO` como aliada). Ninguna acción aliada existe todavía.
 - **Respuesta:** _(la completa el staff)_
+
+## P-026 — Qué presas elige el Tasajero en Caza y en qué orden las ataca
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T39
+- **Fecha:** 06/10/2026
+- **Fuente:** `Sistema.md` 11.8, tabla de desempates, fila "Casilla del Tasajero en Caza (paso 6b)" ("Con 3 o más presas adyacentes, ataca a las 2 de menos vida"), y 11.2.3, fila "Primera presa tumbada"
+- **Duda:** entre las presas de la casilla elegida, ¿se usa "menos vida → antes en la cola" (el criterio de S-23) para elegir las 2 cuando empatan en vida y para decidir a cuál va el primer ataque?
+- **Caso que la dispara:** junto a [3,4] están la Ocarra, la Rodauva y el Maestro, las tres con 8 de vida. ¿A cuáles dos ataca? Otro caso: dos presas, el Maestro con 4 y la Rodauva con 8. Si el primer golpe va al Maestro, lo tumba, el combate termina y la Rodauva no recibe el segundo. Si va a la Rodauva, recibe 5 y después cae el Maestro.
+- **Opciones:** A) Menos vida → antes en la cola, para elegir y para el orden (el primer ataque va a la de menos vida, como el segundo de S-23). B) Solo antes en la cola. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A como lectura declarada: `nucleo/combate/ia/ia_salvaje.gd`, `_DESEMPATE_PRESAS` y `_presas_elegidas`. Test: `pruebas/combate/ia/test_ia_salvaje.gd`, `test_t39_desempates_de_la_caza`, caso (g). Si la respuesta es otra, cambian esa constante y ese caso.
+- **Respuesta:** _(la completa el staff)_
+
+## P-027 — Empate en "la enemiga de pie más cercana"
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T39
+- **Fecha:** 06/10/2026
+- **Fuente:** `Sistema.md` 11.8, tabla de desempates, filas "Retirada del Tasajero en Cuenta" y "Casilla del surco (Surcón salvaje, paso 7)"
+- **Duda:** si dos enemigas de pie están a la misma distancia, ¿cuál es "la enemiga de pie más cercana", de la que el Tasajero se aleja y hacia la que el Surcón cava?
+- **Caso que la dispara:** escenario F. El Surcón salvaje [4,1] tiene al Maestro [3,6] y a la Ocarra [4,7] a 6. Hacia el Maestro cava en [3,1] (justo debajo del Zancajunco salvaje, y le cambia el camino); hacia la Ocarra cavaría en [4,2].
+- **Opciones:** A) Más cercana → menos vida → antes en la cola, como el objetivo de "Acercarse". B) Mirar todas las empatadas: la casilla que queda más cerca (en la retirada, más lejos) de cualquiera de ellas. — Recomendación técnica: A. En el caso de F, A y B dan la misma casilla, [3,1].
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A como lectura declarada: `nucleo/combate/ia/ia_salvaje.gd`, `_enemiga_mas_cercana` (usa `_DESEMPATE_CERCANA`). Tests: `pruebas/combate/ia/test_ia_salvaje.gd`, `test_t39_surcon_cava_hacia_la_mas_cercana` (caso con la Rodauva a 6) y `test_t39_f_el_zancajunco_se_oculta_avanza_y_embiste` (el camino de F depende del surco en [3,1]).
+- **Respuesta:** _(la completa el staff)_

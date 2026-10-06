@@ -591,3 +591,98 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** ninguna.
 - **Preguntas:** nueva P-025 (ARQUITECTO, no bloquea, se necesita antes de T26). Cerradas: ninguna. P-002, P-003, P-008 y P-024 siguen `RESPONDIDA` (son de T14, T19 y T30).
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T39.
+
+## T39 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T39-ia-v13
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **IA v1.3** (`IASalvaje`, `Sistema.md` 11.8 v1.3), con los principios de T11: sin azar, devuelve `Accion`, explica el paso y decidir no cambia nada. Los comentarios siguen la numeración nueva: 1 huida (vacío), 2 cambio de modo, 3 Encono (vacío, con la nota "en Caza, solo el primer ataque va a la rival", T20), 4 Erizarse, 5 remate, 6 cercana, 6b Caza, 7 prepararse y 8 acercarse. Cada rasgo se reconoce por su efecto o por los números del modo, nunca por el id.
+    - **Paso 2:** lo resuelve el inicio del turno (T36). `DecisionIA` copia `modo` y `cambio_modo` del turno, y `describir()` los muestra.
+    - **Paso 6b, Caza** (el modo da 2 ataques o más sin partir el movimiento): reemplaza a los pasos 5 y 6.
+      - Por cada casilla a la que llega, sus presas son las opciones de ataque, que ya pasan por la consulta única.
+      - Con 2 presas o más, un ataque a cada una de las dos de menos vida; con 1, los dos ataques a esa.
+      - Clave de la casilla: 2 presas > 1 → la que tumba → menos vida sumada → menos pasos → orden de lectura.
+      - Si el primer golpe tumba a la única presa, se planea un solo ataque: el segundo se pierde (S-23).
+    - **Cuenta** (el modo parte el movimiento):
+      - Golpea desde la casilla de menos pasos, y después el orden de lectura.
+      - Después se retira a la casilla más lejana de la enemiga de pie más cercana. Esa enemiga no puede estar oculta ni ser la objetivo, si el golpe la tumba. Si ninguna casilla lo aleja, no se mueve.
+      - `DecisionIA.retirada`.
+    - **Paso 7, prepararse**, solo sin ninguna opción de ataque:
+      - **Con el efecto `ocultarse`:** sin el bono y si `hacerse_junco` vale, se oculta.
+      - **Con el efecto `surco`:** con menos surcos que el `tope` de la ficha, cava en la casilla de `casillas_para_cavar` más cercana a la enemiga de pie más cercana (sin ocultas), y después el orden de lectura.
+      - Si no se cumple nada, sigue al paso 8.
+    - **Paso 8:** sin cambios. El Zancajunco con el bono llega acá y avanza: el `Turno` lo destapa y conserva el bono.
+    - La IA no planifica destapar y pegar: elige antes de moverse.
+  - **`DecisionIA`:**
+    - `Paso` suma `CAZA` y `PREPARARSE`.
+    - Campos nuevos: `objetivos` (uno por ataque; `objetivo_id` es el primero), `retirada`, `modo`, `cambio_modo` y `sumar_ataque()`.
+    - `describir()` dice "paso N" con el número de 11.8 (4, 5, 6, 6b, 7, 8), el modo y "paso 2: de->a".
+    - El registro escribe los pasos nuevos como `caza` y `prepararse`.
+  - **Consultas nuevas del núcleo** (calcular sin aplicar):
+    - `Turno.casillas_para_cavar()`: las vecinas donde `cavar` vale, en orden de lectura. La usan la IA y, en T40, la pantalla.
+    - `Turno.surcos_propios()`.
+    - `Turno.pasos_para_retirarse(desde)`: casilla → pasos después de moverse a `desde` y atacar. Sin movimiento partido, solo `desde`.
+    - `Tablero.pasos_hasta(..., dejada)`: parámetro opcional; la casilla que la unidad deja cuenta como vacía. Los llamados actuales no cambian.
+- **Archivos:**
+  - Creados (fixtures):
+    - `pruebas/fixtures/combate/escenario_f.json` (copia de `datos/escenarios/f_rescate.json`).
+    - En `pruebas/fixtures/combate/ia/`: `ia_caza_cruz.json`, `ia_caza_linea.json`, `ia_caza.json`, `ia_cuenta.json`, `ia_surcon.json` e `ia_oculta.json`.
+  - Modificados:
+    - `nucleo/combate/ia/ia_salvaje.gd`, `nucleo/combate/ia/decision_ia.gd`, `nucleo/combate/turno.gd` y `nucleo/combate/tablero.gd`.
+    - `pruebas/combate/ia/test_ia_salvaje.gd`, `pruebas/combate/test_surco.gd`, `pruebas/combate/test_caza_y_cuenta.gd` y `pruebas/combate/test_combate.gd`.
+    - `docs/PREGUNTAS.md`, `docs/RESUMENES.md` y `CLAUDE.md` ("Estado actual").
+- **Tests:** 11 nuevos (9 del criterio y 2 de las consultas), total 265, todos pasan (sí).
+  - **Tests reescritos por la v1.3:**
+    - `test_ia_salvaje.gd::test_tasajero_decide_en_cada_turno`, por `Sistema.md` 11.8 paso 6b. En Caza el paso es `CAZA`: contra la Rodauva (5) el primer golpe la tumba y el segundo se pierde (S-23), y al Maestro le da los dos ataques (5 + 5).
+    - `test_combate.gd::test_registro_de_una_ronda_de_c`, por `Sistema.md` 11.8 paso 6b. El Tasajero de C pega dos veces al Maestro desde [3,5]: dos pares `accion`/`ataque`.
+    - `test_surco.gd::test_registro_instantanea_y_grabacion`, por `Sistema.md` 11.8 paso 7. El Surcón salvaje ahora cava ([6,0] y [7,1]) y en la ronda 3 se acerca. Las cuentas de la tribu se filtran por dueño, y los `orden` de sus surcos pasan a 3 y 5.
+- **Criterio de terminado:** cumplido punto por punto (`test_ia_salvaje.gd`):
+  1. `test_t39_caza_cruz_y_linea`:
+     - En cruz va a la esquina [2,4] y le da un ataque a la Rodauva y otro a la Ocarra (8 → 3 y 12 → 7).
+     - En línea y en un bloque de 2 × 2, le da los dos ataques a la Rodauva desde [3,4]: 5 + 5, y cae.
+  2. `test_t39_desempates_de_la_caza`, un caso por desempate:
+     - 2 presas > 1, aunque la de 1 tumbe.
+     - La que tumba, aunque sume más vida.
+     - Menos vida sumada.
+     - Menos pasos, aunque la otra vaya antes en orden de lectura.
+     - Orden de lectura.
+     - Con 3 presas, las 2 de menos vida.
+     - Con empate de vida, la que va antes en la cola (P-026).
+  3. `test_t39_el_primer_golpe_tumba`:
+     - Con 2 presas, la Rodauva (5) cae y el segundo ataque va a la Ocarra.
+     - Con 1 presa, cae y la decisión lleva un solo ataque; el turno termina bien.
+  4. `test_t39_cuenta_golpea_y_se_retira`:
+     - Golpea desde [3,3], la de menos pasos (4 de daño), y se retira a [3,1], la casilla de la que salió.
+     - Arrinconado en [0,0], ataca y no se mueve.
+  5. `test_t39_f_el_zancajunco_se_oculta_avanza_y_embiste`, con `Combate` y fixtures:
+     - Ronda 1: `prepararse` (`hacerse_junco`).
+     - Ronda 2: `acercarse`, con `destape` `mover` y el bono intacto.
+     - Ronda 3: pega 7 al Maestro, que tiene 6: derrota.
+     - Si el Maestro lo golpea en la ronda 2, en la 3 pega 4.
+  6. `test_t39_surcon_cava_hacia_la_mas_cercana`:
+     - Cava en [2,1], hacia el Maestro.
+     - Con la Rodauva a la misma distancia, cava hacia ella, que tiene menos vida (P-027).
+     - Con el tope lleno no cava y se acerca.
+  7. `test_t39_ninguna_ia_elige_a_una_oculta`: con el Zancajunco oculto, ninguna IA lo toma en cuenta:
+     - La Caza no lo cuenta como tercera presa.
+     - La Cuenta no lo toma como "más cercana" para retirarse.
+     - El Surcón no cava hacia él.
+     - Acercarse queda probado en el 9.
+  8. `test_t39_la_explicacion_dice_el_paso`:
+     - `describir()` dice paso 4, 5, 6, 6b, 7 y 8, el modo y "paso 2: caza->cuenta" (con 15 de 30 juega en Cuenta y se retira).
+     - En Caza, Cuenta, cavar y ocultarse, decidir no cambia el Plantel ni los surcos y da lo mismo dos veces.
+  9. `test_t39_termina_al_lado_de_una_oculta_y_no_la_ataca`: la Rodauva salvaje va hacia el Maestro, termina junto al Zancajunco oculto, lo destapa (`destape` `contacto`) y no lo ataca.
+  - Consultas: `test_surco.gd::test_casillas_para_cavar_y_surcos_propios` y `test_caza_y_cuenta.gd::test_pasos_para_retirarse`.
+- **Lecturas declaradas:**
+  - P-026: presas de la Caza y orden de los dos ataques, por menos vida → antes en la cola.
+  - P-027: empate en "la enemiga de pie más cercana", por más cercana → menos vida → antes en la cola.
+  - Las dos están programadas con la recomendación de la pregunta, citada en el código.
+  - Decisión técnica: dos golpes a la misma presa dan el mismo daño, porque entre uno y otro solo cambia la vida. Con 1 presa, "tumba" es `2 × daño ≥ vida`.
+- **Estado intermedio:** la pantalla todavía no muestra a la oculta, los surcos ni los eventos nuevos (T40). `casillas_para_cavar` ya está para el botón Cavar.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:**
+  - Nuevas: P-026 y P-027 (SISTEMAS, no bloquean).
+  - Cerradas: ninguna.
+  - P-002, P-003, P-008 y P-024 siguen `RESPONDIDA`; son de T14, T19 y T30.
+  - Nota sin pregunta: la tabla de desempates de 11.8 todavía dice "remate (paso 4)" y "sin remate (paso 5)", con la numeración vieja.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T40.

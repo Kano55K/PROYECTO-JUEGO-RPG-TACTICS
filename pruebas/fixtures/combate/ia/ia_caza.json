@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_caza",
+  "_nota": "Sistema.md 11.8, tabla de desempates, Casilla del Tasajero en Caza (tests de T39). Dos pares en diagonal: Rodauva [1,4] y Ocarra [2,5] (esquina [2,4]); Maestro [4,4] y Surcon [5,5] (esquinas [5,4] y [4,5]). Desde [3,2], el Tasajero salvaje (5 de danio, Movimiento 4) llega a [2,4] en 3 pasos y a [5,4] y [4,5] en 4; desde [4,2], a [5,4] en 3 y a [2,4] en 4. Los tests cambian la vida y la posicion del Tasajero para cada desempate. Cola: Tasajero (8), Ocarra (7), Rodauva (6), Maestro (5), Surcon (2)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [4, 4] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 4] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 5] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [5, 5] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

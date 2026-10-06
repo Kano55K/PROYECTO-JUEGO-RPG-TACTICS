@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_surcon",
+  "_nota": "Sistema.md 11.8 paso 7 y tabla, Casilla del surco; 11.2.1 (tests de T39). El Surcon salvaje [3,1] (Movimiento 2) no alcanza a nadie: el Maestro [2,6] esta a 6 y la Rodauva [7,6] a 9. Cava en la casilla valida mas cercana al Maestro: [2,1] y [3,2] quedan a 5, orden de lectura, [2,1]. El Zancajunco de la tribu [0,7] queda lejos; los tests lo mueven",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [7, 6] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 7] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [3, 1] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

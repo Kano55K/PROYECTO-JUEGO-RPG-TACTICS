@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_oculta",
+  "_nota": "Sistema.md 11.2.2 v1.4, Destapar y pegar: la IA no lo planifica (test 9 de T39; el test oculta al Zancajunco). La Rodauva salvaje [3,0] (Movimiento 4) va hacia el Maestro [3,7]: el Zancajunco de la tribu [4,4] esta mas cerca (a 5) pero oculto no es objetivo. Termina en [3,4], junto a el: lo destapa y no lo ataca en ese turno",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 4] }
+  ],
+  "enemigas": [
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [3, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}
