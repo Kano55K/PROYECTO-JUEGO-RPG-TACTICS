@@ -49,11 +49,11 @@ func _plantel(escenario: Dictionary = {}) -> Plantel:
 
 # Turno suelto, sin cola: la entrada se arma a mano.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio)
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
 
 
 func _siguiente_turno(cola: ColaIniciativa, plantel: Plantel) -> Turno:
-	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio)
+	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new())
 
 
 # Todo lo que una accion puede cambiar en el Plantel.
@@ -229,7 +229,7 @@ func test_erizada_hasta_su_proximo_turno() -> void:
 		assert_bool(rodauva.erizada).override_failure_message("en el turno de " + turno.unidad_id).is_true()
 		turno.aplicar(Accion.terminar())
 		var entrada: EntradaCola = cola.siguiente(plantel)
-		turno = null if entrada == null else Turno.empezar(entrada, plantel, _tablero, _danio)
+		turno = null if entrada == null else Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new())
 	cola.terminar_ronda()
 
 	cola.empezar_ronda(plantel)

@@ -62,9 +62,9 @@ func test_rodear_a_una_enemiga_cuesta_pasos() -> void:
 	assert_int(Tablero.distancia(desde, destino)).is_equal(2)
 
 	# En linea recta serian 2 pasos; rodeando a la Ocarra en [3,6] son 4.
-	assert_array(tablero.alcanzables(desde, 3, TRIBU, plantel)).not_contains([destino])
-	assert_array(tablero.alcanzables(desde, 4, TRIBU, plantel)).contains([destino])
-	assert_array(tablero.alcanzables(desde, 4, TRIBU, plantel)).not_contains([Vector2i(3, 6)])
+	assert_array(tablero.alcanzables(desde, 3, TRIBU, plantel, Surcos.new(), false)).not_contains([destino])
+	assert_array(tablero.alcanzables(desde, 4, TRIBU, plantel, Surcos.new(), false)).contains([destino])
+	assert_array(tablero.alcanzables(desde, 4, TRIBU, plantel, Surcos.new(), false)).not_contains([Vector2i(3, 6)])
 
 
 # Se atraviesa a una aliada y a una caida propia, pero no se termina encima.
@@ -75,7 +75,7 @@ func test_atraviesa_aliada_y_caida_propia() -> void:
 	var tablero: Tablero = _tablero(escenario)
 	var zancajunco: Criatura = plantel.criatura("zancajunco_1")
 
-	var alcanzables: Array[Vector2i] = tablero.alcanzables(zancajunco.posicion, zancajunco.especie.movimiento(), TRIBU, plantel)
+	var alcanzables: Array[Vector2i] = tablero.alcanzables(zancajunco.posicion, zancajunco.especie.movimiento(), TRIBU, plantel, Surcos.new(), false)
 	# Del otro lado del Maestro [3,6] y de la caida [3,5].
 	assert_array(alcanzables).contains([Vector2i(3, 4), Vector2i(3, 3)])
 	assert_array(alcanzables).not_contains([Vector2i(3, 6), Vector2i(3, 5)])
@@ -88,12 +88,12 @@ func test_enemiga_en_pasillo_hace_de_muro() -> void:
 	var escenario: Dictionary = _escenario("pasillo_enemiga")
 	var plantel: Plantel = _plantel(escenario)
 	var tablero: Tablero = _tablero(escenario)
-	for casilla in tablero.alcanzables(Vector2i(1, 4), 4, TRIBU, plantel):
+	for casilla in tablero.alcanzables(Vector2i(1, 4), 4, TRIBU, plantel, Surcos.new(), false):
 		assert_int(casilla.y).override_failure_message(str(casilla)).is_greater(2)
 
 	var escenario_aliada: Dictionary = _escenario("pasillo_aliada")
 	var plantel_aliada: Plantel = _plantel(escenario_aliada)
-	var alcanzables: Array[Vector2i] = _tablero(escenario_aliada).alcanzables(Vector2i(1, 4), 4, TRIBU, plantel_aliada)
+	var alcanzables: Array[Vector2i] = _tablero(escenario_aliada).alcanzables(Vector2i(1, 4), 4, TRIBU, plantel_aliada, Surcos.new(), false)
 	assert_array(alcanzables).contains([Vector2i(1, 1), Vector2i(1, 0)])
 
 
@@ -188,7 +188,7 @@ func test_nada_se_sale_del_tablero() -> void:
 	assert_array(tablero.vecinas(Vector2i(0, 7))).contains_exactly_in_any_order([Vector2i(0, 6), Vector2i(1, 7)])
 
 	var casillas: Array[Vector2i] = []
-	casillas.append_array(tablero.alcanzables(plantel.maestro.posicion, 7, TRIBU, plantel))
+	casillas.append_array(tablero.alcanzables(plantel.maestro.posicion, 7, TRIBU, plantel, Surcos.new(), false))
 	casillas.append_array(tablero.golpeables(Vector2i(7, 0), 2, ENEMIGA, plantel))
 	casillas.append_array(tablero.golpeables(Vector2i(7, 7), 2, TRIBU, plantel))
 	casillas.append_array(tablero.casillas_entre(Vector2i(7, 0), Vector2i(7, 7)))
@@ -210,12 +210,12 @@ func test_consultas_no_cambian_el_plantel() -> void:
 		var antes: Array[String] = _foto(plantel)
 
 		for criatura in plantel.criaturas():
-			tablero.alcanzables(criatura.posicion, criatura.especie.movimiento(), criatura.bando, plantel)
+			tablero.alcanzables(criatura.posicion, criatura.especie.movimiento(), criatura.bando, plantel, Surcos.new(), false)
 			tablero.golpeables(criatura.posicion, criatura.especie.alcance(), criatura.bando, plantel)
 			for otra in plantel.criaturas():
 				tablero.linea_bloqueada(criatura.posicion, otra.posicion, criatura.bando, plantel)
 		var maestro: Maestro = plantel.maestro
-		tablero.alcanzables(maestro.posicion, maestro.movimiento, TRIBU, plantel)
+		tablero.alcanzables(maestro.posicion, maestro.movimiento, TRIBU, plantel, Surcos.new(), false)
 		tablero.golpeables(maestro.posicion, maestro.alcance, TRIBU, plantel)
 		tablero.despliegue(TRIBU)
 		tablero.despliegue(ENEMIGA)
@@ -246,8 +246,8 @@ func test_pasos_hasta_con_rodeo() -> void:
 	var plantel: Plantel = _plantel(escenario)
 	var tablero: Tablero = _tablero(escenario)
 	var desde: Vector2i = plantel.criatura("rodauva_1").posicion
-	var pasos: Dictionary = tablero.pasos_hasta(desde, 4, TRIBU, plantel)
-	assert_array(pasos.keys()).contains_exactly_in_any_order(tablero.alcanzables(desde, 4, TRIBU, plantel))
+	var pasos: Dictionary = tablero.pasos_hasta(desde, 4, TRIBU, plantel, Surcos.new(), false)
+	assert_array(pasos.keys()).contains_exactly_in_any_order(tablero.alcanzables(desde, 4, TRIBU, plantel, Surcos.new(), false))
 	assert_int(pasos[desde]).is_equal(0)
 	assert_int(pasos[Vector2i(2, 7)]).is_equal(1)
 	assert_int(pasos[Vector2i(3, 5)]).is_equal(4)

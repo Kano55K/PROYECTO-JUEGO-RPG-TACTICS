@@ -36,6 +36,8 @@ func cerrar(plantel: Plantel, fin: FinCombate.Fin) -> ResultadoCierre:
 	else:
 		_derrota(plantel, resultado, acumulador)
 	resultado.lealtad = acumulador.aplicar(plantel.criaturas())
+	# Sistema.md 11.2.2, Fin del combate: se borran el estado oculto y el bono.
+	Junco.limpiar(plantel)
 	plantel.cerrado = true
 	return resultado
 

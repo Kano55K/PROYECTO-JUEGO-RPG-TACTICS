@@ -41,11 +41,11 @@ func _plantel(escenario: Dictionary = {}) -> Plantel:
 
 # Turno suelto, sin cola: la entrada se arma a mano.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio)
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
 
 
 func _siguiente_turno(cola: ColaIniciativa, plantel: Plantel) -> Turno:
-	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio)
+	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new())
 
 
 # Todo lo que una accion puede cambiar en el Plantel.

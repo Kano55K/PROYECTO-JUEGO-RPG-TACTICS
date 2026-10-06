@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "junco_salvaje",
+  "_nota": "Sistema.md 11.2.2 v1.4 (tests 12 y 13 de T38: destapar y pegar, y la Cuenta). Zancajunco salvaje [3,2]. De la tribu: Rodauva [3,5] (danio 2, Movimiento 4) y Tasajero [6,2] (danio 5; en Cuenta, -1 y movimiento partido de 4), los dos a 3 del Zancajunco. El Maestro [0,7] queda lejos",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 5] },
+    { "id": "tasajero_1", "especie": "tasajero", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 2] }
+  ],
+  "enemigas": [
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

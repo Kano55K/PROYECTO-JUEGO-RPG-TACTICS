@@ -4,7 +4,7 @@ class_name Accion
 extends RefCounted
 
 # Hechizo, sellar, guardar, invocar y huir son tipos nuevos en T22, T24 y T26 a T28.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR }
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco.
@@ -38,6 +38,11 @@ static func cavar(casilla_surco: Vector2i) -> Accion:
 	var accion: Accion = Accion.new(Tipo.CAVAR)
 	accion.casilla = casilla_surco
 	return accion
+
+
+# Sistema.md 11.2.2: Hacerse junco (solo con el efecto ocultarse).
+static func hacerse_junco() -> Accion:
+	return Accion.new(Tipo.HACERSE_JUNCO)
 
 
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).

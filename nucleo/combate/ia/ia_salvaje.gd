@@ -57,7 +57,7 @@ static func _paso_erizarse(turno: Turno, plantel: Plantel) -> DecisionIA:
 	if unidad.vida * 100 > unidad.vida_max_real() * int(rasgo["umbral_vida_pct"]):
 		return null
 	var adyacente: bool = false
-	for id_enemiga in _enemigas_de_pie(unidad.bando, plantel):
+	for id_enemiga in _enemigas(unidad.bando, plantel, false):
 		if Tablero.distancia(unidad.posicion, _posicion(id_enemiga, plantel)) == 1:
 			adyacente = true
 	if not adyacente:
@@ -91,15 +91,16 @@ static func _paso_cercana(turno: Turno, plantel: Plantel, opciones: Array[Opcion
 	return _atacar(DecisionIA.Paso.CERCANA, turno, plantel, opciones, objetivo_id)
 
 
-# Paso 6: no alcanza a nadie. Va hacia la enemiga de pie mas cercana (-> menos
-# vida -> antes en la cola), a la casilla alcanzable mas cercana a ella (->
-# orden de lectura). Si ninguna la acerca, no se mueve.
+# Paso 6: no alcanza a nadie. Va hacia la enemiga mas cercana que puede ser su
+# objetivo (-> menos vida -> antes en la cola), a la casilla alcanzable mas
+# cercana a ella (-> orden de lectura). Si ninguna la acerca, no se mueve. Una
+# oculta no es objetivo (11.2.2): no va hacia ella.
 static func _paso_acercarse(turno: Turno, plantel: Plantel, orden: Dictionary) -> DecisionIA:
 	var unidad: Criatura = plantel.criatura(turno.unidad_id)
 	var decision: DecisionIA = DecisionIA.new(DecisionIA.Paso.ACERCARSE)
 	decision.casilla = unidad.posicion
 	var candidatas: Array[Dictionary] = []
-	for id_enemiga in _enemigas_de_pie(unidad.bando, plantel):
+	for id_enemiga in _enemigas(unidad.bando, plantel, true):
 		candidatas.append(_candidata(id_enemiga, _vida(id_enemiga, plantel),
 				Tablero.distancia(unidad.posicion, _posicion(id_enemiga, plantel))))
 	if not candidatas.is_empty():
@@ -118,8 +119,9 @@ static func _paso_acercarse(turno: Turno, plantel: Plantel, orden: Dictionary) -
 
 
 # Todos los ataques del turno completo (S-8): cada casilla a la que llega
-# (incluida la suya) contra cada unidad. Turno descarta aliadas, caidas y las
-# que no estan en el tablero: nadie apunta a una caida (11.8).
+# (incluida la suya) contra cada unidad. Turno descarta aliadas y lo que la
+# consulta unica rechaza (Objetivos): nadie apunta a una caida (11.8) ni a una
+# oculta (11.2.2).
 static func _opciones(turno: Turno, plantel: Plantel) -> Array[OpcionAtaque]:
 	var origen: Vector2i = plantel.criatura(turno.unidad_id).posicion
 	var ids: Array[String] = [Maestro.ID]
@@ -239,16 +241,21 @@ static func _menor(a: Array, b: Array) -> bool:
 	return false
 
 
-# Ids de las unidades de pie en el tablero del otro bando: el Maestro y las sueltas.
-static func _enemigas_de_pie(bando: Criatura.Bando, plantel: Plantel) -> Array[String]:
+# Ids de las unidades del otro bando, en el orden del Plantel (el Maestro
+# primero). objetivo: solo las que la consulta unica acepta para un ataque; si
+# no, las de pie en el tablero (ocultas incluidas).
+static func _enemigas(bando: Criatura.Bando, plantel: Plantel, objetivo: bool) -> Array[String]:
 	var ids: Array[String] = []
-	if bando != Criatura.Bando.TRIBU and not plantel.maestro.caido \
-			and plantel.maestro.posicion != Criatura.SIN_POSICION:
-		ids.append(Maestro.ID)
+	var todas: Array[String] = []
+	if bando != Criatura.Bando.TRIBU:
+		todas.append(Maestro.ID)
 	for criatura in plantel.criaturas():
-		if criatura.bando != bando and criatura.estado == Criatura.Estado.SUELTA \
-				and criatura.posicion != Criatura.SIN_POSICION:
-			ids.append(criatura.id)
+		if criatura.bando != bando:
+			todas.append(criatura.id)
+	for id_unidad in todas:
+		if (objetivo and Objetivos.puede_ser_objetivo(id_unidad, Objetivos.Clase.HOSTIL, plantel)) \
+				or (not objetivo and Objetivos.de_pie(id_unidad, plantel)):
+			ids.append(id_unidad)
 	return ids
 
 
