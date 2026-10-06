@@ -1,6 +1,7 @@
 # 00 — VISIÓN DEL JUEGO
 
-> **Estado:** v1.0 — **MVP definido** · **Dueño:** Director Creativo · **Última actualización:** 03/10/2026
+> **Estado:** v1.2 — **MVP definido, rasgos en revisión** · **Dueño:** Director Creativo · **Última actualización:** 05/10/2026
+> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2.
 > Este documento es la fuente de verdad. Ningún agente puede contradecirlo sin proponer un cambio y registrarlo en `Decisiones.md`.
 > **Documentos subordinados:** `Sistema.md` (reglas y números) · `Mundo.md` (mundo, regiones y criaturas) · `Arquitectura.md` (decisiones técnicas y plan de construcción). Este documento define **qué** y **por qué**; los números viven en `Sistema.md`, y el detalle del mundo, en `Mundo.md`.
 > **`Decisiones.md` es el historial, no la fuente de verdad:** registra cómo se llegó a cada regla. Queda fuera de `docs/` (Claude Code no lo lee) y es opcional en el conocimiento del proyecto.
@@ -68,6 +69,7 @@ El mundo es luminoso y aventurero, pero la supervivencia no perdona. El hambre p
 
 ### Escala 3 — Tablero táctico
 - Combate **por turnos** con movimiento **por casillas**, vista **isométrica**.
+- **Cuadrícula ortogonal, sin diagonales** (`DECIDIDO` 05/10/2026): moverse, atacar y la adyacencia usan las 4 casillas vecinas. Las diagonales abaratan la táctica: los muros, los pasillos y la formación pierden peso.
 - El orden de actuación lo define la **iniciativa** de cada unidad. Una unidad puede **Secundar**: actuar justo después de un aliado elegido, a cambio de dejar que los enemigos intermedios actúen antes.
 - El Maestro y sus criaturas pelean juntos en el tablero.
 - Los turnos de combate **suman hambre**: los combates largos tienen costo.
@@ -134,7 +136,27 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
 - Pueden combatir, trabajar y transportar objetos.
 - Compromiso fijo: más aptitud de combate = menos utilidad, y viceversa. El rol también define el temperamento ante una rival enemiga: las criaturas **de trabajo** **se acobardan**; las **de combate y las mixtas** **se enconan** (ver 6.4).
 - Tienen un **rango** (1 a 3) que representa su fuerza y define cuánto cuesta sellarlas e invocarlas.
-- En el MVP, cada criatura tiene **un solo rasgo de combate**: **Erizarse** (Rodauva), **Lomo de tierra** (Surcón), **Alabarda** (Ocarra), **Hacerse junco** (Zancajunco) y **Caza y cuenta** (Tasajero, dos turnos por ronda).
+- En el MVP, cada criatura tiene **un solo rasgo de combate**. Donde el rasgo no generaba decisiones, se reescribió como **activa**: el rasgo nuevo **reemplaza** al anterior, nunca se suma (05/10/2026). La segunda habilidad de cada criatura queda reservada para la Mudanza (Ideas en espera).
+- **Principio de las activas:** toda habilidad activa es un **trueque sobre el propio cuerpo**. Mejora algo de la criatura por un tiempo, o cambia el tablero, y siempre la paga la criatura con otra característica. Nunca es gratis.
+  - **Sin estadísticas nuevas:** los costos se pagan con lo que ya existe (vida, daño, daño recibido, movimiento, alcance, velocidad). No hay Defensa en el MVP.
+  - **Las de trabajo no se vuelven guerreras:** la activa de una criatura de trabajo es de defensa o de apoyo, nunca de daño (Pilar 2).
+  - Erizarse es el modelo: menos daño recibido a cambio de quedarse quieta.
+- **Rasgos del MVP** (los números viven en `Sistema.md` 11.2):
+
+| Criatura | Rasgo | Tipo | Qué hace y qué paga |
+|---|---|---|---|
+| Rodauva | **Erizarse** | Activa | Recibe menos daño hasta su próximo turno; no se mueve |
+| Ocarra | **Alabarda** | Característica | Alcance 2 en línea recta |
+| Surcón | **El surco** *(provisorio)* | Activa | Cava un surco en una casilla. **Solo un Surcón puede pasarlo**, de cualquier bando: andar por la tierra removida es de su naturaleza. Para el resto es intransitable. Reemplaza a Lomo de tierra. Trueque: **cavar le gasta el turno completo** (no se mueve ni ataca ese turno). Cuánto dura el surco y cuántos puede haber a la vez lo define Sistemas. **La Rodauva aguanta; el Surcón cierra el paso y lo usa** |
+| Zancajunco | **Hacerse junco** | Activa | Se queda quieto entre los juncos y su próximo ataque suma daño; si lo golpean antes de atacar, pierde el bono |
+| Tasajero | **Caza y cuenta** | Activa de un solo uso | Dos modos, ver abajo |
+
+- **Caza y cuenta (Tasajero):** **un solo turno por ronda**, con dos modos. Empieza el combate en **Caza**, porque se expuso para cazar. Su activa es **pasar a Cuenta**: es gratis, solo se usa **al principio de su turno** (si se mueve o ataca, ya no puede ese turno) y **no tiene vuelta**. El cambio es el evento del combate.
+  - **Caza:** se mueve normal y hace **dos ataques separados**, a una o a dos presas **adyacentes**. Recibe **más daño** que lo normal.
+  - **Cuenta:** se mueve normal y **puede partir el movimiento** (acercarse, pegar y retirarse). Un solo ataque, con **menos daño**. Recibe daño normal.
+  - **El Tasajero desgasta, no ejecuta.** Pegarle a dos presas es lo propio de un cazador. Del lado del jugador, la pregunta es *dónde no me paro*: formar apretado suma afinidad, pero le da al Tasajero dos presas en un turno.
+  - **Su IA** la propone Sistemas, con estos criterios de visión: prefiere repartir los golpes antes que gastarlos en una sola presa; es predecible y sin azar; no tumba a una presa entera de un solo turno sin una decisión previa del jugador. Cuándo cambia de modo también se ve antes.
+- **Todo rasgo se ve:** nombre y explicación al pasar el mouse sobre cualquier unidad, propia o enemiga, y un aviso cada vez que el rasgo actúa. Un rasgo que no se ve no existe para el jugador (hallazgo del playtest 0a.1).
 - Cada criatura tiene una comida **favorita**, comidas que **acepta** y comidas que **rechaza** (ver 6.5).
 - Cada criatura está en uno de dos estados: **guardada** en su pergamino o **suelta** (ver 6.7).
 - **La compañera inicial:** el Maestro **no arranca solo**. Empieza con **una criatura fija**, **suelta**, que **ocupa uno de los pergaminos iniciales** y empieza **Neutral**: le faltan pocos días bien alimentada para poder rescatarlo.
@@ -187,6 +209,8 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 - Criterio de visión: ante una criatura desleal y famélica, **irse es la norma; atacar al Maestro es la excepción**.
 - **Ataque nocturno:** la criatura golpea primero y empieza un combate donde se duerme, en el Molino o al raso. Las sueltas leales defienden al Maestro. El sueño interrumpido le deja menos maná.
 - **La atacante derrotada** queda caída y el Maestro elige: **perdonarla** (se va libre; la tribu valora la clemencia), **sellarla** de nuevo (con un pergamino nuevo y lealtad mínima) o **comerla** (la tribu vio la traición, y el golpe social es menor).
+  - **Si el Maestro cae antes de decidir**, la atacante **se va**: su pergamino arde y vuelve a ser salvaje. La tribu **no gana ni pierde lealtad**, porque nadie decidió. Nadie la ve irse; queda su rastro (ver 7).
+  - **Por qué:** la decisión más dura tiene un solo momento (6.5); dejarla pendiente durante la recuperación la saca de ese momento, y matarla castigaría una derrota con algo que el jugador no eligió. Irse es la norma.
 - **Todo vínculo roto quema el pergamino** (ver 6.7) y la criatura vuelve a ser salvaje.
 
 ### 6.5 Supervivencia
@@ -325,7 +349,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 
 **Criaturas**
 - **5** criaturas con roles distintos (2 de trabajo, 2 de combate, 1 mixta): **4 reclutables** (Rodauva, Surcón, Ocarra, Zancajunco) y **1 aspiracional**, el **Tasajero** (rango 3), que aparece como **encuentro de combate** y se puede apaciguar, pero no domesticar ni sellar.
-- **1** rasgo de combate por criatura.
+- **1** rasgo de combate por criatura, reescrito como activa con trueque donde aporta (6.2), y visible en pantalla.
 - Pergaminos con **solo dos estados** por criatura: guardada o suelta.
 - Cantidad inicial fija de pergaminos y **ritual de sangre** como única reposición.
 - Captura por ambos caminos.
@@ -338,7 +362,8 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - La **Poza Tibia**, en el Vado, como sanador.
 
 **Supervivencia y combate**
-- Combate táctico básico en tablero pequeño, con iniciativa, Secundar, combos, afinidad, incidentes, Encono y cobardía.
+- Combate táctico básico en tablero pequeño de **cuadrícula ortogonal**, con iniciativa, Secundar, combos, afinidad, incidentes, Encono y cobardía.
+- **Sin terreno**, salvo una excepción: **el surco del Surcón**, el único terreno del MVP, que lo crea una criatura en combate. No abre un sistema de terreno.
 - Hambre como único recurso de supervivencia, con **7 tipos de comida** y preferencias por criatura.
 - **1** estado negativo: **Enfermo**, acumulable, con cura por descanso o viaje.
 - Huida, caídas y guardar a una caída.
@@ -374,6 +399,10 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
   3. **La noche:** abandono, ataque nocturno, campamento al raso, rescate, quebranto y Poza Tibia. Acá se testea la regla de oro completa.
   4. **30 días:** experiencia, plazo y epílogo.
 - **Las tareas de la 0b se detallan después de los playtests de la 0a**, porque esos tests pueden cambiar reglas.
+- **Hallazgos del hito 0a.1** (05/10/2026):
+  - **Los rasgos pasivos no se notaron** (Lomo de tierra, Hacerse junco). Respuesta: todo rasgo se ve en pantalla (6.2).
+  - **El combate se sintió rígido.** Se evaluaron y **descartaron las diagonales** (Escala 3). Respuesta: los rasgos reescritos (6.2), que agregan control del espacio (el surco), emboscada (Hacerse junco) y un jefe que castiga la formación apretada (Caza y cuenta). Se vuelve a juzgar con la 0a.2, que suma relaciones, magia y combos, y en isométrica.
+- **Los rasgos reescritos se programan antes de cerrar la 0a.2**, porque tocan tareas terminadas (cola, turno, daño, tablero e IA). Sistemas cierra los números en **una sola pasada de balance**. El Arquitecto decide si T14 avanza en paralelo. Son reemplazos, no agregados: el alcance sigue congelado.
 
 **Ideas en espera** (aprobadas en espíritu, sin capa asignada):
 
@@ -408,6 +437,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - **La despensa como pasiva:** reserva de comida de emergencia que no se echa a perder.
 - **El Surcón cava bajo las reservas** del campamento cuando está famélico.
 - **Reencontrar a una criatura que se fue**, ya salvaje, en su hábitat.
+- **La prenda en el epílogo:** el epílogo nombra quién dio la prenda de cada pergamino. Solo narrativa, sin consecuencia mecánica: una consecuencia volvería al ritual una optimización, y el ritual duele por la sangre. En el MVP, la prenda no tiene consecuencias.
 
 ## 11. Preguntas abiertas
 
@@ -422,9 +452,15 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [ ] ¿El esbirro que se suelta ataca más de lo que abandona? (excepción a "irse es la norma"; al darle capa a la Mudanza).
 - [ ] ¿Qué pasa si una Rodauva de la manada se quiebra? (choque entre la Muda colectiva y la involución; al darle capa a la Mudanza).
 - [ ] Nombres finales de la involución, las órdenes, el Grito, la subyugación y el esbirro (Worldbuilder).
-- [ ] ¿Elegir de quién es la prenda (del Maestro o de una criatura) debería tener consecuencias a futuro?
 - [ ] ¿Hay progresión entre partidas en el juego completo? (en el MVP, no)
-- [ ] ¿Los playtests de los escenarios E y F incluyen una encuesta corta al final? Si no, sus umbrales se miden solo con las métricas del registro.
+- [ ] Nombre final del surco del Surcón (Worldbuilder).
+- [x] ~~¿Los playtests de E y F incluyen una encuesta?~~ → No: los umbrales se miden solo con el registro. Se reabre si los comentarios de los jugadores contradicen los números.
+- [x] ~~¿La prenda tiene consecuencias?~~ → No en el MVP; el epílogo que la nombra queda en Ideas en espera (10).
+- [x] ~~Destino de la atacante caída si cae el Maestro (P-024)~~ → Se va: el pergamino arde, sin cambio de lealtad (6.4).
+- [x] ~~Trueque del surco~~ → Cavar le gasta el turno completo (6.2).
+- [ ] Regla de IA del Tasajero: reparto de los dos ataques de Caza y momento del cambio a Cuenta (Sistemas, con los criterios de 6.2).
+- [x] ~~¿El combate admite diagonales?~~ → No: cuadrícula ortogonal (Escala 3).
+- [x] ~~¿Cada criatura tiene una activa y una pasiva de combate en el MVP?~~ → No: un solo rasgo, reescrito como activa donde aporta (6.2).
 - [x] ~~¿Cuándo se puede comer a una criatura?~~ → Solo en el reparto de la noche, junto al fuego (6.5).
 - [x] ~~Umbrales de las señales de alarma de la 0a~~ → Aprobados (`Sistema.md` 11.9).
 - [x] ~~Nombre de la clase del MVP~~ → El Menestral (6.1).
@@ -539,6 +575,18 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | 03/10/2026 | Comer a una criatura solo en el reparto de la noche, junto al fuego | Un solo momento para la decisión más dura; el combate no se vuelve fuente de carne (Pilares 3 y 4) |
 | 03/10/2026 | Luz verde a la 0a; hitos de la 0b validados; las 13 métricas de `Sistema.md` 11.9 y sus umbrales miden los criterios de éxito | El MVP queda definido para construir |
 | 03/10/2026 | `Decisiones.md` es el historial, no la fuente de verdad; queda fuera de `docs/` | Claude Code trabaja con las reglas vigentes |
+| 05/10/2026 | Todo rasgo se ve en pantalla y avisa cuando actúa | Playtest 0a.1: los rasgos pasivos no se notaron |
+| 05/10/2026 | Se evalúa y se descarta el combate en 8 direcciones: cuadrícula ortogonal | Las diagonales abaratan la táctica |
+| 05/10/2026 | Principio de las activas: trueque sobre el propio cuerpo, sin estadísticas nuevas; las de trabajo nunca de daño | Generaliza Erizarse; refuerza los Pilares 2 y 4 |
+| 05/10/2026 | Un solo rasgo por criatura, reescrito como activa donde aporta | Respeta el alcance congelado; la Mudanza conserva su premio |
+| 05/10/2026 | Hacerse junco pasa a ser activa; el surco reemplaza a Lomo de tierra y es el único terreno del MVP | Rasgos que generan decisiones; defensa para una criatura de trabajo |
+| 05/10/2026 | Caza y cuenta: un turno por ronda, empieza en Caza (dos ataques, recibe más daño) y pasa una vez a Cuenta (parte el movimiento, pega menos) | El Tasajero desgasta, no ejecuta; castiga la formación apretada |
+| 05/10/2026 | Los rasgos reescritos se programan antes de cerrar la 0a.2 | Tocan tareas terminadas; una sola pasada de balance |
+| 05/10/2026 | El surco solo lo atraviesa un Surcón, de cualquier bando | Identidad de cavador; el surco es un pasillo propio, no solo un muro |
+| 05/10/2026 | Cavar el surco le gasta al Surcón el turno completo | Paga con su movimiento y su ataque: el Surcón que cava no pelea |
+| 05/10/2026 | Los playtests de E y F no llevan encuesta: los umbrales se miden solo con el registro | Tests livianos; se reabre si los comentarios contradicen los números |
+| 05/10/2026 | La prenda no tiene consecuencias en el MVP; el epílogo que la nombra queda en espera | Pilar 3 sin reglas nuevas; alcance congelado; el ritual duele por la sangre, no por una optimización |
+| 05/10/2026 | Si el Maestro cae con la atacante nocturna caída, ella se va: su pergamino arde, sin cambio de lealtad | La decisión moral tiene un solo momento (6.5); irse es la norma; sin decisión del Maestro, la tribu no reacciona |
 
 ## 13. Registro de versiones
 
@@ -552,5 +600,7 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | v0.6 | 01/10/2026 | Salvajes que huyen en 0 (6.3). Caídas y fin del combate al caer el Maestro (6.6). Ideas en espera: la involución, las órdenes (Grito) y la subyugación; la barra de zozobra conecta con la involución (10). Preguntas abiertas actualizadas (11) |
 | v0.7 | 01/10/2026 | Integra `Sistema.md` v0.5 y `Mundo.md` v0.5. Emboscada y campamento al raso (Escala 1, nueva 6.9). Mapa del día, agotamiento y pudrición (Escala 2, 6.5). Molino de agua y único refugio (Campamento). Experiencia (6.1). Rasgos de combate y la Rodauva dueña del Molino (6.2). Salvajes que huyen en su turno (6.3). Afines contra la cobardía y ataque al raso (6.4). Guardar a una caída, huida, malherido, Poza Tibia y permadeath absoluto (6.6). Hechizos (6.7). Alcance congelado y MVP actualizado (9). Acequia en la Capa 1 y `PROPUESTA` 0a/0b (10). Preguntas abiertas (11) |
 | v0.8 | 02/10/2026 | Nueva subsección "Fin de la partida — el epílogo" (5). Malherido no recupera maná al dormir (6.6). Partida con plazo y epílogo en el MVP (9). División 0a/0b `DECIDIDO` y vista de la 0a (10). Preguntas abiertas: se cierran motor, 0a/0b y fin de partida; nuevas: nombre de la clase, marca del final del plazo y duración (11) |
-| v1.0 | 03/10/2026 | **MVP definido.** Regla de cuándo se come a una criatura (6.5). Elisión de comer y del abandono (7). Estado de construcción: luz verde a la 0a, criterios de éxito con umbrales e hitos de la 0b validados (10). Papel de `Decisiones.md` y `Arquitectura.md` en el encabezado. Preguntas abiertas: se cierran cuándo comer y los umbrales; nueva: encuesta en E y F (11). Registro del 03/10 (12) |
 | v0.9 | 02/10/2026 | Plazo de 30 días con las rayas y las golondrinas (5). El Menestral (6.1, 9). Victoria por estado al terminar y salvajes con afinidad sin combos (6.4). Quebranto reemplaza a malherido; caída tras declarar la huida; guardado de suspensión (6.6). El Soplo en la 0b (10). Preguntas abiertas cerradas: clase, marca del plazo, duración y quebranto (11) |
+| v1.0 | 03/10/2026 | **MVP definido.** Regla de cuándo se come a una criatura (6.5). Elisión de comer y del abandono (7). Estado de construcción: luz verde a la 0a, criterios de éxito con umbrales e hitos de la 0b validados (10). Papel de `Decisiones.md` y `Arquitectura.md` en el encabezado. Preguntas abiertas: se cierran cuándo comer y los umbrales; nueva: encuesta en E y F (11). Registro del 03/10 (12) |
+| v1.1 | 05/10/2026 | **Rasgos reescritos tras el playtest 0a.1.** Cuadrícula ortogonal, diagonales descartadas (Escala 3). Principio de las activas, rasgos del MVP, Caza y cuenta en dos modos y rasgos visibles (6.2). Rasgo por criatura y el surco como único terreno, que solo atraviesa un Surcón (9). Hallazgos de la 0a.1 y orden de trabajo (10). Preguntas abiertas: nuevas sobre el surco y la IA del Tasajero; cerradas las diagonales y las activas (11). Registro del 05/10 (12) |
+| v1.2 | 05/10/2026 | La atacante nocturna se va si el Maestro cae antes de decidir, sin cambio de lealtad (6.4, responde P-024). La prenda en el epílogo pasa a Ideas en espera (10). Preguntas abiertas: se cierran la encuesta de E y F, la prenda y la atacante (11). Registro del 05/10 (12) |

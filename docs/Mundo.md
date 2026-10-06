@@ -1,8 +1,8 @@
-# MUNDO — Mundo, regiones y criaturas (v1.0)
+# MUNDO — Mundo, regiones y criaturas (v1.1)
 
-03/10/2026 · @Joaquín
+05/10/2026 · @Joaquín
 
-**Estado:** v1.0 · **Textos del MVP completos, aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0) · Sincronizado con `00_Vision.md` v1.0 · **Dueño:** Worldbuilder y Diseñador Narrativo
+**Estado:** v1.1 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1) · Sincronizado con `00_Vision.md` v1.2 y `Sistema.md` v1.5 · **Dueño:** Worldbuilder y Diseñador Narrativo
 
 Este documento define la identidad del mundo. Si algo acá contradice `00_Vision.md`, manda la Visión: se propone el cambio y se registra en `Decisiones.md`. Los números (rangos, apetito, efectos, costos) viven en `Sistema.md`.
 
@@ -41,6 +41,18 @@ Todo se nombra en **castellano evocador**: palabras reales o compuestas que suen
 | **Las rayas** | El contador del plazo de la partida | Rayas de carbón del fuego del Molino, una por día (ver 4.10) |
 | **Las golondrinas del Molino** | La señal del fin del plazo en el mundo | Se juntan en el techo a medida que pasan los días y se van el último (ver 4.10) |
 
+### 1.2.1 Nombres de la v1.1 — `PROPUESTA` (PARA DIRECTOR CREATIVO)
+
+Nombres que dejaron pendientes los rasgos reescritos tras el playtest 0a.1 (Visión 6.2 v1.1; `Sistema.md` 11.2.1 a 11.2.3). Ya están en `es.json` con la opción recomendada, para que la prueba manual de T40 no muestre `[FALTA]`. Si el Director elige otra, cambia solo el texto: las claves (`rasgo.surco.*`, `accion.cavar`, `marca.oculto`, `marca.bono`) no se tocan.
+
+| Qué se nombra | Provisorio | Recomendado | Alternativas | Por qué |
+| --- | --- | --- | --- | --- |
+| Activa del Surcón | El surco | **Arar** | Abrir surco · Zanjar | Un verbo, como Erizarse y Hacerse junco: el nombre de la activa es su botón. Su hocico es una reja de arado, y un surco es lo que deja el arado. La casilla se sigue llamando **surco**, como nombre común. *Zanjar* queda como alternativa: una zanja no es un surco |
+| Estado del Zancajunco oculto | Oculto | **Hecho junco** | Entre juncos · Quieto | Repite el nombre de la activa, como Erizarse → erizada: el jugador une la acción con su efecto sin leer el tooltip. *Quieto* no explica por qué no se lo puede elegir como blanco |
+| Bono pendiente del Zancajunco | Bono | **Embestida** | Golpe en espera · Impulso | Así lo describe `Sistema.md` 11.2.2: moverse con el bono es una embestida. Se descarta *Al acecho*, que ya es su habilidad de campamento (4.7) |
+| Modos del Tasajero | Caza · Cuenta | **Caza · Cuenta** (sin cambio) | — | Ya son las marcas de la cola (`iniciativa.caza`, `iniciativa.cuenta`). Ahora nombran modos y no turnos, y el nombre del rasgo sigue diciendo lo que pasa: primero caza, después cuenta |
+| Hostilidad "Cazando" del Tasajero (4.5) | — | **Rastreando** | Cazando (sin cambio) | Choca con el modo Caza (lo marca `Sistema.md` 15): "Cazando" en el mapa sugiere que el modo de combate depende de la hostilidad, y no depende (siempre empieza cazando). *Rastreando* conserva el tooltip *"Te busca."* Es 0b: **no se cambia en `es.json` hasta que decida el Director** |
+
 ### 1.3 Tono
 
 **Calidez con dientes** (Pilar 4). El mundo es luminoso por defecto. Lo oscuro aparece como **rastro de decisiones pasadas** o como **consecuencia de las del jugador**, nunca como decorado.
@@ -52,7 +64,7 @@ Todo se nombra en **castellano evocador**: palabras reales o compuestas que suen
 - Sprites en 4 direcciones (2 dibujadas + 2 espejadas): **evitar asimetrías fuertes** (marcas, cicatrices o vendas de un solo lado).
 - Cada criatura del MVP tiene una **silueta distinta**: redonda, baja y ancha, cuello largo, vertical y horizontal.
 
-### 1.5 Textos como datos — `DECIDIDO` (contenido) · `PROPUESTA` (huecos, al Arquitecto)
+### 1.5 Textos como datos — `DECIDIDO`
 
 Los textos de este documento viven como datos en **`juego/datos/textos/es.json`** (`Arquitectura.md` A.2.1 y A.4). El Worldbuilder es dueño del contenido; el Arquitecto, del esquema. Este documento sigue siendo la fuente: si un texto cambia acá, cambia en el JSON.
 
@@ -67,8 +79,9 @@ Los textos de este documento viven como datos en **`juego/datos/textos/es.json`*
 | `[comida]` (tipo de comida) | `{comida}` | `fruta`, `raíces`, `grano`… |
 | `[comida]` (la criatura comida, 4.12) | `{ausente}` | La que ya no está |
 | "1 día", "2 días" | `{duracion}` | Se arma con `tiempo.dia` / `tiempo.dias` |
+| Un número de la pantalla | `{n}` | Ronda, vida de cambio de modo (literal) |
 
-#### Huecos gramaticales — `PROPUESTA` (PARA ARQUITECTO)
+#### Huecos gramaticales — `DECIDIDO` (`Arquitectura.md` A.2.1, programados en T34)
 
 Los textos piensan en "la criatura", pero las especies no comparten género (*la* Rodauva, *el* Surcón). Cada hueco de criatura tiene seis formas, que el código arma una sola vez a partir de `especie.<id>.articulo`:
 
@@ -88,7 +101,7 @@ Valen para cualquier rol (`{a_rival}`, `{de_guardiana}`, `{testigo_o}`). Ejemplo
 - **Mayúscula automática** al principio del texto y después de `. ? ! ¿ ¡`: *"¿{criatura}?"* da *"¿La Rodauva?"*.
 - **Variantes por condición:** las claves terminadas en `.<especie>` o `.maestro` **reemplazan** a la clave base. Excepción: `caida.*`, `nocturno.base.*` y `nocturno.raso.*` son **complementos** que se muestran después de la línea base.
 - **Variantes al azar** (lista): solo `noche.molino`, con 3 variantes. Los textos de varios párrafos (ritual, apertura, epílogo) son un solo texto separado con `\n\n`, nunca una lista.
-- **Estados de hambre:** en femenino para las criaturas (*Famélica*) y en masculino para el Maestro (*Famélico*), con la clave `.maestro`.
+- **Etiquetas de estado** (hambre, lealtad, estado de la unidad y marcas sobre la ficha): en femenino para las criaturas (*Famélica*: "la criatura") y en masculino para el Maestro, con la clave `.maestro`. **Desde la v1.1, las especies de nombre masculino concuerdan**, con variantes `.surcon`, `.zancajunco` y `.tasajero` (*Famélico*, *Caído*): la etiqueta se lee pegada al nombre, y "Surcón · Saciada" parece un error (hallazgo de T13). Los tooltips de un estado (*"Famélica: come lo que rechaza…"*) siguen en femenino: hablan de "la criatura". **PARA ARQUITECTO:** pedir estas etiquetas con la especie como sujeto, como ya se hace con el hambre.
 
 #### Textos nuevos de la entrega — `DECIDIDO`
 
@@ -106,6 +119,29 @@ Escritos para que ninguna pantalla muestre `[FALTA]`. Están en el JSON. Aprobad
 | Lanzadera contra el Maestro | `lanzadera.choque.contra_maestro` | *"[Unidad] sale despedida y se te viene encima."* |
 | Reacciones de Encono | `encono.<especie>.<rival>` | Las reacciones de la sección 5 pasan a línea de registro, con los mismos gestos |
 | Centinela | `nocturno.centinela` | *"La otra Ocarra grazna una vez, fuerte. Te alcanza para rodar a un costado."* (las criaturas no tienen nombre propio; ver 4.6) |
+
+#### Textos de la pantalla de combate (T13) — `PROPUESTA`
+
+Claves que dejó T13 sin texto (`RESUMENES.md`). Son etiquetas de interfaz: cortas, sin prosa, para que lo que se lea sea el estado y no la palabra.
+
+| Qué | Claves | Texto |
+| --- | --- | --- |
+| Nombre del Maestro (ficha, cola y panel) | `maestro.nombre` | Maestro |
+| Ronda | `combate.ronda` | Ronda {n} |
+| Título de la cola | `iniciativa.titulo` | Orden de la ronda |
+| Panel de la unidad del turno | `panel.vida` · `panel.lealtad` · `panel.hambre` | Vida · Lealtad · Hambre |
+| Botón con la acción ya usada | `accion.terminar` | Terminar turno |
+| Marcas sobre la ficha | `marca.caida` · `marca.erizada` · `marca.fuera` | Caída (*Caído* en el Surcón y el Zancajunco) · Erizada · Se fue |
+| Desglose del daño | `desglose.base` · `desglose.total` · `desglose.minimo` | Base · Total · Golpe mínimo |
+| Fuentes del desglose | `desglose.fuente.combo` · `.afinidad` · `.encono` · `.cobardia` | Cadena · Afinidad · Encono · Cobardía |
+| Pantalla de resultado | `resultado.titulo` · `.rondas` · `.lealtad` · `.volver` | Fin del combate · Rondas · Lealtad · Volver |
+| Desenlace | `resultado.desenlace.victoria` · `.derrota_por_caida` | Victoria · Caíste |
+| Estado de la unidad | `estado.suelta` · `.guardada` · `.caida` · `.fuera` · `.muerta` | Suelta · Guardada · Caída · Se fue · Muerta (en masculino para el Surcón, el Zancajunco y el Tasajero; `estado.caida.maestro`: Caído) |
+| Motivos de lealtad | `lealtad.motivo.<evento>` | `victoria`: *Pelearon juntos y ganaron* · `muerte_en_el_grupo`: *Murió alguien de la tribu* · `muerte_en_el_grupo_afines`: *Murió alguien con quien se llevaba bien* · `rescate`: *Te llevó a casa* · `perdon_a_leales`: *Perdonaste a quien te atacó* · `comer_atacante`: *Te comiste a quien te atacó* |
+| Hambre y lealtad en masculino | `hambre.estado.<estado>.<especie>` · `lealtad.estado.dudosa.<especie>` | Saciado · Hambriento · Famélico · Dudoso (Surcón y Zancajunco; el Tasajero solo en el hambre) |
+
+> **Cadena** y no *combo*: castellano evocador (1.1), y es la palabra de sus eslabones (`combo.eslabon`). La clave sigue diciendo `combo`: las claves no se leen.
+> **"Se fue"** sirve para la salvaje que dejó el tablero: huida o sellada. Sin culpa y sin juicio, como su línea de huida.
 
 ## 2. La magia y los Nueve
 
@@ -196,7 +232,7 @@ No es un círculo con símbolos. Son **líneas de carbón paralelas, como un tel
 
 #### Línea según quién da la prenda
 
-Sin diferencia mecánica en el MVP.
+Sin diferencia mecánica en el MVP: la prenda no tiene consecuencias (Visión 6.7 y 11 v1.2). El epílogo que nombra quién dio cada prenda queda en Ideas en espera (8).
 
 | Prenda de | Qué da | Línea |
 | --- | --- | --- |
@@ -569,6 +605,14 @@ Sin fuego: *"No encendiste fuego. Por eso no ves a [criatura] hasta que la tené
 
 > Texto fijo, sin hueco: con `{criatura}` saldría "la Ocarra" y no se distinguiría de la atacante cuando las dos son Ocarras.
 
+**Las que miran** — `PROPUESTA` (v1.1). Solo las leales defienden; las demás miran (`Sistema.md` 9.2). Estos complementos ya estaban en `es.json` y no figuraban en este documento; cierran el pedido de `Sistema.md` 15.
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Hay sueltas que no defienden | `nocturno.miran` | *"No todos vienen. En la oscuridad hay ojos abiertos que no se mueven."* |
+| Ninguna lo defiende | `nocturno.miran.ninguna` | *"Nadie se levanta a ayudarte. En la oscuridad hay ojos abiertos que no se mueven. Esta pelea es tuya."* |
+| La Centinela no es leal | `nocturno.centinela.mira` | *"Después se queda donde está, con el cuello estirado. Ya te avisó: el resto no es asunto suyo."* |
+
 #### La atacante caída — `DECIDIDO` (escenario G, T30)
 
 Las tres salidas de la Visión 6.4. Sirven en el Molino y al raso. Las líneas del epílogo de cada salida ya existen (4.11).
@@ -587,6 +631,19 @@ Las tres salidas de la Visión 6.4. Sirven en el Molino y al raso. Las líneas d
 | Comer: con Zancajunco suelto (solo texto) | `nocturno.comer.zancajunco_suelto` | *"El Zancajunco se acerca a comer con vos. Es el único."* |
 
 > La clemencia, el nuevo sello y la comida se leen distinto por cómo reacciona la tribu, no por cómo se describe a la atacante. Comerla se elide (1.3).
+
+#### La atacante que se va — `PROPUESTA` (v1.1; Visión 6.4 v1.2, `Sistema.md` 9.2, paso 6)
+
+Si el Maestro cae antes de decidir, la atacante, caída o de pie, **se va**: su pergamino arde y vuelve a ser salvaje. Nadie la ve irse (Visión 7): el jugador se entera al despertar, por la ceniza. La tribu no reacciona, porque nadie decidió nada.
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Primera mañana de la recuperación | `nocturno.atacante.se_fue` | *"De la noche del ataque te acordás a pedazos. Cuando podés contar a los tuyos, falta [Criatura]. En la bolsa, su pergamino es ceniza, y no sabés para qué lado se fue."* |
+| Epílogo | `epilogo.perdida.abandono.atacante` | Ver 4.11 |
+
+- Se muestra **antes** de las líneas de abandono de la recuperación (4.13): primero la que se fue por la noche del ataque, después las que se fueron mientras el Maestro se reponía.
+- Sin rescatista (permadeath) no hay mañana: la línea no aparece.
+- *"No sabés para qué lado se fue"* hace eco con la línea Desleal del epílogo (*"no sabés para qué lado iría"*): lo que era una duda se cumplió.
 
 ### 4.7 Noches al raso — `DECIDIDO`
 
@@ -607,7 +664,7 @@ Nombres finales (reemplazan a los provisorios de `Sistema.md` 9.4) y texto de la
 | --- | --- | --- |
 | Huertos | *"En la guardia de [guardiana], algo cruza la hierba a los graznidos. Te despierta a tiempo."* | *"Te despierta un picotazo. Una Ocarra se plantó en medio del campamento como si fuera su corral."* |
 | Vado | *"[Guardiana] ve moverse el juncal donde no hay viento. Te despierta antes de que el primer junco dé un paso."* | *"Anoche el juncal estaba más lejos. Cuando abrís los ojos, ya está entre vos y el fuego."* |
-| Robledal | *"[Guardiana] se queda mirando las ramas de arriba. Algo te estaba contando mientras dormías."* | *"No hubo ningún ruido. Cuando abrís los ojos, el Tasajero ya está entre las sueltas, mirando a una sola."* |
+| Robledal | *"[Guardiana] se queda mirando las ramas de arriba. Algo te estaba contando mientras dormías."* | *"No hubo ningún ruido. Cuando abrís los ojos, el Tasajero ya está entre las sueltas. Mira a dos a la vez."* (v1.1: en Caza reparte los golpes, no ejecuta) |
 
 | Variante | Texto |
 | --- | --- |
@@ -704,6 +761,7 @@ Sale del lore del pergamino (2.5): adentro no pasa el tiempo. Necesita el día e
 | Comida, compañera inicial | *"Día [N]. La Rodauva del Molino, la que estaba antes que vos. Te dio de comer. No fue su decisión."* |
 | Comida, tras atacarte (variante opcional) | *"Día [N]. [Criatura] te atacó una noche, y te la comiste. Nadie dijo nada."* |
 | Abandono | *"Día [N]. [Criatura] se fue de noche. Su pergamino ardió solo. Ahora vive en algún lugar del valle, y no te conoce."* |
+| Abandono, tras atacarte (la atacante que se fue, 4.6; flag "fue atacante", `Sistema.md` 13) — `PROPUESTA` | *"Día [N]. [Criatura] te atacó una noche y se fue mientras no podías mirar. Su pergamino ardió solo."* |
 | Muerte en combate | *"Día [N]. [Criatura] cayó peleando y quedó atrás. Contaste su ceniza."* |
 | Hambre | *"Día [N]. [Criatura] se murió de hambre. El valle tenía comida; no alcanzó para todos."* |
 | Hambre, Surcón | *"Día [N]. El Surcón se enterró a dormir el hambre y no despertó."* |
@@ -731,7 +789,7 @@ Si el Maestro muere de hambre (`DECIDIDO`; es permadeath directo, sin rescate, `
 
 ### 4.12 Comerse una criatura — `DECIDIDO`
 
-**Cuándo:** solo en el **reparto de la noche, junto al fuego**, con la tribu mirando (Visión 6.5). La decisión se toma junto al fuego; el acto se elide ("lo hacés lejos del fuego"). La única otra salida es comer a la atacante nocturna (4.6). Una caída de un combate ganado se levanta y nunca se ofrece como carne.
+**Cuándo:** solo en el **reparto de la noche, junto al fuego**, con la tribu mirando (Visión 6.5), y solo a una criatura **suelta** (`Sistema.md` 7.7, v1.4). La decisión se toma junto al fuego; el acto se elide ("lo hacés lejos del fuego"). La única otra salida es comer a la atacante nocturna (4.6). Una caída de un combate ganado se levanta y nunca se ofrece como carne.
 
 **Criterio:** la tribu es la cámara (1.3). El acto nunca se describe y la criatura comida casi no aparece. Las guardadas no lo ven: el pergamino las deja fuera del tiempo (2.5), y ese es el contraste más duro. Reglas en `Sistema.md` 5.2 y 7.7.
 
@@ -745,7 +803,6 @@ Si el Maestro muere de hambre (`DECIDIDO`; es permadeath directo, sin rescate, `
 | Aviso de rescatista perdida | *"Si lo hacés, [Criatura] ya no te va a poder llevar a casa."* (mismo patrón que la subida de nivel, 2.9) |
 | Botones | **Hacerlo** · **Todavía no** |
 | Cancelar | *"Esta noche no. El hambre sigue ahí."* |
-| Sacar a una guardada (si Sistemas lo permite) | *"Desenrollás su pergamino. [Criatura] sale parpadeando: para ella, no pasó el tiempo."* |
 
 #### El momento
 
@@ -941,14 +998,14 @@ Cada ficha incluye la **prenda** que da para el ritual (2.6) y su **defecto de n
 - **Hábitat:** tierra blanda de la orilla del río, en el Vado de los Juncos. Avistamiento: **el surco que ronca** (4.5).
 - **Comportamiento y temperamento:** plácido y terco, le cuesta arrancar. No pelea salvo acorralado. Duerme mucho, a veces medio enterrado.
 - **Dieta:** Favorita: **raíces** · Acepta: bichos, hongos, grano · Rechaza: carne, pescado, fruta. Come mucho.
-- **Rol:** trabajo (en combate, muro lento: aguanta, pega poco).
-- **Rasgo de combate:** **Lomo de tierra** (pasiva). Duerme medio enterrado y la tierra se le apelmaza en el lomo como una costra.
+- **Rol:** trabajo. En combate pega poco y aguanta mucho, pero su valor es **cerrar el paso**: se planta detrás de sus surcos y obliga al enemigo a dar la vuelta.
+- **Rasgo de combate:** **Arar** *(nombre `PROPUESTA`, 1.2.1; provisorio: el surco)* (activa). Hunde la reja del hocico y abre un surco en la casilla de al lado. La tierra removida es su casa: solo un Surcón, de cualquier bando, puede pisarla; para las demás patas es un pozo blando que hay que rodear. No tapa la vista: se puede pegar por encima. Arar le lleva el turno entero. Reemplaza a Lomo de tierra (v1.1).
 - **Se lleva bien con:** Ocarra, Rodauva · **Se lleva mal con:** nadie. Con otro Surcón, sin relación: no busca compañía.
 - **Qué hace fuera del combate:** desentierra raíces en nodos de tierra.
-- **Cómo se consigue mejor:** domesticación. En combate aguanta tanto que debilitarlo es un desgaste.
+- **Cómo se consigue mejor:** domesticación. En combate aguanta tanto que debilitarlo es un desgaste, y salvaje ara hacia vos para cerrarte el paso. Sellarlo deshace sus surcos.
 - **Prenda:** un puñado de pelo color tierra.
 - **Defecto de naturaleza:** el letargo.
-- **Descripción visual:** cuerpo bajo y ancho como un tonel echado; pelaje corto color tierra mojada; patas delanteras cortas y anchas; hocico de hueso pálido en punta de reja; ojitos casi cerrados; siempre con terrones pegados.
+- **Descripción visual:** cuerpo bajo y ancho como un tonel echado; pelaje corto color tierra mojada; patas delanteras cortas y anchas; hocico de hueso pálido en punta de reja; ojitos casi cerrados; siempre con terrones pegados. **Arando:** hocico hundido hasta los ojos, lomo arqueado, terrones saltando a los dos lados. **El surco** (casilla): tierra oscura recién removida, con un lomo de terrones a cada costado y el fondo húmedo; simétrico y sin brillo, que se lea como pozo y no como muro.
 - **Momento oscuro posible:** con hambre se entierra y entra en letargo. Si el letargo dura demasiado, no despierta: es la **cara narrativa de la muerte por hambre**.
 
 ### Ocarra
@@ -976,13 +1033,13 @@ Cada ficha incluye la **prenda** que da para el ritual (2.6) y su **defecto de n
 - **Comportamiento y temperamento:** paciente, solitario y arisco. Prefiere huir; si ataca, lo hace primero y rápido. Tolera al Maestro, nunca del todo.
 - **Dieta:** Favorita: **pescado** · Acepta: bichos, **carne** · Rechaza: fruta, raíces, grano, hongos. Apetito medio.
 - **Rol:** mixto (pesca + emboscada).
-- **Rasgo de combate:** **Hacerse junco** (pasiva). Tooltip: *"Su primer golpe sale de la quietud."*
+- **Rasgo de combate:** **Hacerse junco** (activa desde la v1.1). Se queda tan quieto que el ojo lo cuenta como un junco más: queda **hecho junco** *(estado `PROPUESTA`, 1.2.1; provisorio: oculto)* y nadie puede elegirlo como blanco, aunque se lo vea en el tablero. Su próximo golpe sale de la quietud: la **embestida** *(`PROPUESTA`, 1.2.1)*. Se destapa si se mueve, si ataca o si alguien se le planta al lado. Su paciencia no da para dos turnos seguidos.
 - **Se lleva bien con:** Tasajero (cazadores silenciosos que comen lo mismo y se respetan) · **Se lleva mal con:** Ocarra. Con otro Zancajunco, sin relación: cada uno tiene su vado.
 - **Qué hace fuera del combate:** pesca en nodos de agua.
-- **Cómo se consigue mejor:** combate, si lográs sorprenderlo. La domesticación es posible pero lenta.
+- **Cómo se consigue mejor:** combate, si lográs sorprenderlo: hecho junco, el hilo no lo encuentra, y hay que destaparlo antes de sellarlo. La domesticación es posible pero lenta.
 - **Prenda:** una hoja de junco.
 - **Defecto de naturaleza:** la ariscura.
-- **Descripción visual:** alto y flaco, patas larguísimas, cuerpo cubierto de hojas de junco verdes y ocres como un fardo, cuello en S, mandíbula larga y fina. Ojo: por su altura puede tapar casillas en isométrico.
+- **Descripción visual:** alto y flaco, patas larguísimas, cuerpo cubierto de hojas de junco verdes y ocres como un fardo, cuello en S, mandíbula larga y fina. Ojo: por su altura puede tapar casillas en isométrico. **Hecho junco:** cuello recogido en vertical, patas juntas, hojas del lomo erguidas: la silueta de una mata de juncos, con el ojo apenas visible. **Con la embestida pendiente:** cuello en S tenso, como una rama doblada antes de soltarse. Las tres posturas se distinguen por la silueta, no solo por el color.
 - **Momento oscuro posible:** con hambre se va de noche a pescar y no siempre vuelve: es la **cara narrativa del abandono nocturno**. Si el Maestro se come a una criatura, el Zancajunco es **el único que puede compartir esa carne sin estar famélico**. Lo hace sin dudar, y el resto de la tribu lo ve.
 
 ### Tasajero
@@ -993,12 +1050,12 @@ Cada ficha incluye la **prenda** que da para el ritual (2.6) y su **defecto de n
 - **Comportamiento y temperamento:** calculador, previsor, silencioso. No caza por hambre sino para guardar. Es quien mejor sobrevive a una hambruna, porque siempre tiene algo guardado.
 - **Dieta:** Favorita y única: **carne** · Rechaza: todo lo demás. Come mucho.
 - **Rol:** combate.
-- **Rasgo de combate:** **Caza y cuenta**. Dos turnos por ronda: primero caza (rápido) y después se detiene a contar lo que queda (lento). En la barra de iniciativa, sus marcas se llaman **Caza** y **Cuenta**.
+- **Rasgo de combate:** **Caza y cuenta** (reescrito en la v1.1). Un turno por ronda, en dos modos. Empieza **cazando**: se expone, reparte dos zarpazos (a una presa o a dos) y recibe más daño. Cuando la cuenta ya no le cierra (herido hasta la mitad), deja de cazar y **cuenta**: pica una vez, más flojo, y se aparta a cuidar lo que le queda. No vuelve a cazar en ese combate. En la cola y en su ficha, el modo se lee **Caza** o **Cuenta**. *El Tasajero desgasta, no ejecuta* (Visión 6.2): por eso prefiere dos presas a una.
 - **Se lleva bien con:** Zancajunco · **Se lleva mal con:** Rodauva (su presa), Ocarra.
 - **Qué hace fuera del combate:** en el MVP, nada (no es reclutable). La despensa queda en Ideas en espera.
 - **Cómo se consigue mejor:** **en el MVP no se sella ni se domestica.** Es el encuentro de combate del Robledal y se lo **apacigua** con ofrendas en el colgadero. Meta aspiracional para capas futuras.
 - **Prenda y defecto de naturaleza:** se definen cuando sea reclutable.
-- **Descripción visual:** marta del tamaño de un lobo chico, cuerpo largo y bajo, pelaje castaño oscuro con antifaz claro, collar de pelo erizado, cola gruesa, garras curvas como ganchos de carnicero. Silueta horizontal.
+- **Descripción visual:** marta del tamaño de un lobo chico, cuerpo largo y bajo, pelaje castaño oscuro con antifaz claro, collar de pelo erizado, cola gruesa, garras curvas como ganchos de carnicero. Silueta horizontal. **Caza:** pegado al suelo, cuello estirado, collar erizado, cola recta: la silueta más larga del juego. **Cuenta:** más alto y recogido, collar plano, cola enroscada alrededor de las patas, la cabeza girando: una silueta corta. Los dos modos se distinguen por la silueta, como la Rodauva erizada y la acobardada.
 - **Momento oscuro posible:** en el MVP, ninguno propio: es el peligro, no el compañero. Su colgadero lleno es la imagen de lo que el jugador no tiene, una despensa que solo se toca pagando. (La despensa famélica pasa a Ideas en espera, sección 8.)
 
 ### Reacciones de Encono y cobardía — `DECIDIDO`
@@ -1014,6 +1071,8 @@ Las criaturas de **combate** y **mixtas** se enconan ante una rival enemiga; las
 | Rodauva | Tasajero | **Cobardía** | Se enrolla y tiembla; no se acerca a su rival. Si su obediencia la sostiene, se desenrolla y se queda |
 
 > Reemplaza al "encono de presa" de la v0.2.
+>
+> Un Zancajunco **hecho junco** no cuenta como rival a su alcance: no dispara Encono ni cobardía hasta que se destapa (`Sistema.md` 10.5). En el mundo, nadie se ensaña con un junco.
 
 ### Incidentes entre rivales aliadas — `DECIDIDO`
 
@@ -1033,10 +1092,10 @@ Nombres y rasgos aprobados (Visión 6.2; reglas en `Sistema.md` 11.2).
 | Criatura | Nombre provisorio | Nombre final | Por qué |
 | --- | --- | --- | --- |
 | Rodauva | Enrollarse | **Erizarse** | "Enrollarse" ya es la imagen de la cobardía. La defensa elegida y el miedo no pueden verse igual |
-| Surcón | Lomo de tierra | **Lomo de tierra** | Ya es castellano evocador |
+| Surcón | Lomo de tierra → el surco | **Arar** *(`PROPUESTA`, 1.2.1)* | Lomo de tierra sale en la v1.1 (Visión 6.2): era pasiva y no se notaba. La activa nueva nombra lo que hace, como un botón |
 | Ocarra | Pico-alabarda | **Alabarda** | Más corto para la interfaz; la alabarda es un arma de alcance |
-| Zancajunco | Emboscada | **Hacerse junco** | El golpe sale de la quietud; conecta con su texto de Encono |
-| Tasajero | Dos turnos por ronda | **Caza y cuenta** | Le dice al jugador que el segundo turno es más lento |
+| Zancajunco | Emboscada | **Hacerse junco** | El golpe sale de la quietud; conecta con su texto de Encono. Desde la v1.1 es activa y deja al Zancajunco **hecho junco** |
+| Tasajero | Dos turnos por ronda | **Caza y cuenta** | Desde la v1.1 nombra dos modos y no dos turnos: primero caza, después cuenta, y no vuelve |
 
 ### Huida, caída y rescate — `DECIDIDO`
 
@@ -1142,15 +1201,38 @@ Las reacciones por par de rivales (tabla de Encono y cobardía) sirven como lín
 | Resiste por una afín adyacente (toggle del escenario E) | `cobardia.resiste.afin` | *"Se queda porque [afín] está al lado."* |
 | Resiste con el Maestro adyacente | `cobardia.resiste.maestro` | *"Se queda porque estás al lado."* |
 
-#### Tooltips de los rasgos (T08, T09, T13)
+#### Tooltips de los rasgos (T08, T09, T13; reescritos en la v1.1)
+
+Los de Arar, Hacerse junco y Caza y cuenta son `PROPUESTA` (v1.1). Se retiran `rasgo.lomo_de_tierra.nombre` y `rasgo.lomo_de_tierra.tooltip`: un texto equivocado engaña más que un `[FALTA]`.
 
 | Rasgo | Clave | Tooltip |
 | --- | --- | --- |
 | Erizarse | `rasgo.erizarse.tooltip` | *"Hecha bola, los golpes le entran a medias. Hasta su próximo turno, no se mueve."* |
-| Lomo de tierra | `rasgo.lomo_de_tierra.tooltip` | *"La tierra apelmazada le come un poco a cada golpe."* |
+| Arar | `rasgo.surco.nombre` · `rasgo.surco.tooltip` | *"Abre un surco en una casilla de al lado. Solo un Surcón pisa la tierra removida: para las demás es un pozo que hay que rodear. No tapa la vista. Arar le lleva el turno entero; si abre uno de más, se cierra el más viejo."* |
 | Alabarda | `rasgo.alabarda.tooltip` | *"El gancho del pico llega a dos casillas."* |
-| Hacerse junco | `rasgo.hacerse_junco.tooltip` | *"Su primer golpe sale de la quietud."* (ya existía) |
-| Caza y cuenta | `rasgo.caza_y_cuenta.tooltip` | *"Actúa dos veces por ronda: primero caza, rápido. Después cuenta, despacio."* |
+| Hacerse junco | `rasgo.hacerse_junco.tooltip` | *"Quieto, es un junco más: nadie puede elegirlo como blanco, y su próximo golpe pega más fuerte. Se destapa si se mueve, si ataca o si alguien se le planta al lado. No dos turnos seguidos."* |
+| Caza y cuenta | `rasgo.caza_y_cuenta.tooltip` | *"Empieza cazando: dos zarpazos por turno, a una presa o a dos, y recibe más daño. Herido, pasa a contar: pica una vez, más flojo, y se aparta. No vuelve a cazar."* |
+
+#### Rasgos en acción: sucesos, marcas y avisos (hito 0a.1b, T37 a T40) — `PROPUESTA`
+
+"Un rasgo que no se ve no existe" (Visión 6.2). Claves confirmadas por el Arquitecto (`Arquitectura.md` 10.5), salvo `suceso.oculto`, que se propone. Los sucesos de un solo dueño posible (el Surcón, el Zancajunco, el Tasajero) van **sin hueco**: con dos de la misma especie, la ficha marcada en el tablero dice cuál fue (mismo criterio que la Centinela, 4.6).
+
+| Momento | Clave | Texto |
+| --- | --- | --- |
+| Botón de la activa del Surcón | `accion.cavar` | Arar |
+| Un surco nuevo | `suceso.surco.cavar` | *"El Surcón hunde la reja y abre un surco."* |
+| Un surco que se cierra | `suceso.surco.cerrar` | *"Un surco se desmorona. La tierra vuelve a asentarse."* |
+| El Zancajunco se oculta (clave propuesta) | `suceso.oculto` | *"El Zancajunco se queda quieto. Ya no se lo distingue de los juncos."* |
+| Marcas sobre el Zancajunco | `marca.oculto` · `marca.bono` | Hecho junco · Embestida |
+| Se destapa al moverse (conserva el bono) | `suceso.destape.mover` | *"El Zancajunco deja de ser junco y avanza. La embestida sigue en pie."* |
+| Se destapa al atacar | `suceso.destape.atacar` | *"El junco era el Zancajunco. El golpe sale de la quietud."* |
+| Se destapa por contacto | `suceso.destape.contacto` | *"Alguien se le plantó al lado. El Zancajunco deja de fingir que es junco."* |
+| Pierde el bono | `suceso.pierde_bono` | *"Le pegaron antes de embestir. El Zancajunco pierde el impulso."* |
+| Aviso al mover junto a uno oculto | `aviso.destapar` | *"Pararse acá destapa al Zancajunco, y queda a tiro de su embestida."* |
+| Umbral del Tasajero (sobre la unidad) | `aviso.cuenta.umbral` | *"Con {n} de vida o menos, pasa a Cuenta."* |
+| El Tasajero pasa a Cuenta | `suceso.cuenta.cambio` | *"El Tasajero deja de cazar. Ahora cuenta lo que le queda."* |
+
+> El destape al atacar no avisa del bono cobrado: ya se ve en el desglose (T40).
 
 #### Secundar, combos, invocar y guardar (T16, T17, T26)
 
@@ -1228,44 +1310,52 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 | **El Surcón cava bajo las reservas** del campamento cuando está famélico | Regla propia de criatura; el MVP usa reglas generales |
 | **Reencontrar a una criatura que se fue** en su hábitat, ya salvaje | El MVP no guarda individuos |
 | **El santuario de escribas:** pergaminos a cambio de monedas | Depende de la economía (Capa 5) |
+| **La prenda en el epílogo:** el epílogo nombra quién dio la prenda de cada pergamino. Solo narrativa (Visión 10 v1.2) | Una consecuencia mecánica volvería al ritual una optimización: el ritual duele por la sangre |
 
 ## 9. Pendientes
 
-**Los textos del MVP (0a y 0b) están completos, aprobados y entregados** en `juego/datos/textos/es.json` (03/10/2026). **El Worldbuilder no tiene pendientes que bloqueen la 0a ni la 0b.** Lo que queda abajo son respuestas de otras áreas y capas futuras.
+**v1.1:** los textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 están en `es.json` (sección 5 y 1.5). Los nombres nuevos esperan al Director (1.2.1), pero ya tienen texto: **el Worldbuilder no tiene pendientes que bloqueen el hito 0a.1b ni la 0b.**
 
 ### 9.1 Preguntas abiertas de reglas
 
-- [ ] **PARA SISTEMAS:** ¿se puede comer a una guardada? A — sí, sacándola del pergamino (texto listo: `comer.sacar_guardada`) · B — no (se borra esa clave).
-- [ ] **PARA SISTEMAS / UI:** aviso de rescatistas perdidas antes de confirmar que se come a una criatura. Recomendado: sí, por la Visión 8 (las apuestas se muestran antes). Texto listo: `comer.aviso_rescatista`.
-- [ ] **PARA SISTEMAS:** si la confianza se completa y no hay pergamino en blanco, ¿corre el olvido? Recomendado: sí, porque empuja a hacer el ritual.
-- [ ] **PARA SISTEMAS:** cortes de las etapas de confianza (4.14). `PROPUESTA`: "a mitad de camino" con la confianza en la mitad o más de la necesaria (redondeando hacia arriba); "falta poco" cuando una ración favorita la completa. Se muestra la etapa más alta alcanzada, aunque se salte una.
-- [ ] **PARA SISTEMAS:** cortes de las golondrinas. `PROPUESTA`: cuartos de la duración de la partida.
+Todas cerradas.
+
+- [x] ~~¿Se puede comer a una guardada?~~ → No: solo se come a una suelta (`Sistema.md` 7.7, v1.4, opción B). Se retira `comer.sacar_guardada` (4.12).
+- [x] ~~Aviso de rescatistas perdidas antes de comer~~ → Sí (`Sistema.md` 7.7). Texto: `comer.aviso_rescatista`.
+- [x] ~~¿Corre el olvido si la confianza se completa sin pergamino en blanco?~~ → Sí (`Sistema.md` 4.5).
+- [x] ~~Cortes de las etapas de confianza~~ → Aprobados tal cual (`Sistema.md` 4.5).
+- [x] ~~Cortes de las golondrinas~~ → Cuartos de la duración (`Sistema.md` 13).
+- [x] ~~¿Las guardadas pierden lealtad cuando se come a una compañera?~~ → No: los eventos de lealtad alcanzan solo a las sueltas (`Sistema.md` 5.2).
+- [x] ~~¿Qué pasa con la atacante si el Maestro cae antes de decidir?~~ → Se va, sin cambio de lealtad (Visión 6.4 v1.2). Textos en 4.6 y 4.11.
 - [x] ~~¿Cuándo se puede comer a una criatura?~~ → Solo en el reparto de la noche, junto al fuego (Visión v1.0, 6.5; 4.12).
 - [x] ~~¿Qué pasa si el Maestro muere de hambre?~~ → Permadeath directo (`Sistema.md` 7.6). Pantalla propia `DECIDIDO` (4.11).
-- [x] ~~¿Las guardadas pierden lealtad cuando se come a una compañera?~~ → No (Visión 6.4). **PARA SISTEMAS:** cambiar "a todas" por "a todas las sueltas" en 5.2.
 
 ### 9.2 Derivaciones
 
 **PARA DIRECTOR CREATIVO:**
 
-- [x] ~~Aprobar el ritmo del día (4.15) y los textos nuevos de la entrega JSON (1.5)~~ → Aprobados con los textos del MVP (Visión v1.0).
+- [ ] Aprobar los nombres de 1.2.1: **Arar** (el surco), **Hecho junco** (oculto) y **Embestida** (el bono). Ya están en `es.json`. Al aprobarlos, cierran la pregunta "Nombre final del surco del Surcón" de la Visión 11 y sacan el *(provisorio)* de la Visión 6.2 y de `Sistema.md` 11.2.1 y 11.2.2.
+- [ ] Decidir si la hostilidad **Cazando** pasa a **Rastreando** (1.2.1). Es 0b: no bloquea.
+- [ ] Aprobar los textos nuevos de la v1.1: pantalla de T13 (1.5), las que miran y la atacante que se va (4.6, 4.11), la emboscada del Robledal (4.7) y los rasgos en acción (sección 5).
+- [ ] Registrar en `Decisiones.md` que las etiquetas de estado concuerdan con el género de la especie (1.5).
 
 **PARA SISTEMAS:**
 
-- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder ya entregados en la v0.8: quebranto, orden del epílogo, variante "Solo", golondrinas sin mecánica, línea de "solo guardadas", incidentes y baño en la Poza.
-- [ ] Poner al día `Sistema.md` 15: la pregunta de las guardadas al comer ya está cerrada en este documento desde la v0.9 (9.1), y "qué pasa si el Maestro muere de hambre" ya está resuelto en `Sistema.md` 7.6.
-- [ ] Responder las preguntas de 0b de 9.1: comer a una guardada, aviso de rescatistas, olvido sin pergamino en blanco y cortes de confianza y golondrinas.
+- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder entregados en la v1.1: tooltips nuevos y retiro de Lomo de tierra; textos de las claves de la v1.3; fichas de la sección 5; preguntas de 9.1 y retiro de `comer.sacar_guardada`; la atacante que se va; las que miran y la Centinela no leal; claves de pantalla de T13. Queda abierto solo el de los nombres, que espera al Director.
+- [ ] Si el Director aprueba **Rastreando**, cambiar el nombre del estado en 12.10.
 
 **PARA ARQUITECTO:**
 
-- [ ] Aprobar los huecos gramaticales y la regla de mayúsculas (1.5). **Prioridad durante la 0a:** los textos de combate usan `{criatura}`, y sin los huecos se arma "la Surcón".
-- [ ] Esquema `textos`: el mapa de claves libres necesita `additionalProperties` como esquema (texto o lista de textos), no `false`. Confirmar que el validador de T03 acepta `type` con varios tipos.
-- [ ] Claves de condición adoptadas: `sellar.fallo.erizada` (T24) y `nocturno.comer.zancajunco_suelto` en lugar de `g.salida.*` (T30), porque la 0b también la usa.
-- [ ] G-03: sumar la variante "solo guardadas" (`epilogo.cierre.solo_guardadas`) junto a la variante "Solo".
-- [x] ~~Quién edita `textos/es.json`~~ → A.2.1. ~~Contagio en C-07~~ → quitado. ~~Malherido~~ → quebranto en la v0.6. ~~Pedidos de texto como datos (rotativos, testigos, hambre, Enfermo, confianza, plazo, escenario G, registro del epílogo)~~ → registrados en G-03 y en el Anexo 11.
+- [ ] Copiar `es.json` v1.1 a `juego/datos/textos/` antes de la prueba manual de T40 (Claude Code no edita `datos/textos/`). Claves: 496 → 568.
+- [ ] **Claves retiradas:** `rasgo.lomo_de_tierra.nombre`, `rasgo.lomo_de_tierra.tooltip` y `comer.sacar_guardada`. Si algún fixture de `pruebas/` las copia, se retiran en la tarea que toque esos datos (T35 retira Lomo de tierra).
+- [ ] **Concordancia de las etiquetas** (1.5): pedir con la especie como sujeto `lealtad.estado.*`, `estado.*` y `marca.caida`, como ya se hace con `hambre.estado.*`. El Maestro usa `estado.caida.maestro`.
+- [ ] **Claves nuevas propuestas** (no estaban en `Arquitectura.md` 10.5): `suceso.oculto` (el Zancajunco se oculta; si la pantalla prefiere armar "nombre · rasgo", como con Erizarse, se borra), `nocturno.atacante.se_fue` (T30 y 0b.3) y `epilogo.perdida.abandono.atacante` (G-03, con el flag "fue atacante").
+- [ ] Desglose de 0a.1b: si las fuentes nuevas (Caza, Cuenta, la embestida) se nombran con `iniciativa.caza`, `iniciativa.cuenta` y `rasgo.hacerse_junco.nombre`, ya tienen texto. Si necesitan clave propia, pedirla.
+- [x] ~~Huecos gramaticales y mayúsculas~~ → `DECIDIDO` (A.2.1, T34). ~~Esquema `textos` con `additionalProperties` como esquema~~ → A.2. ~~Claves de condición~~ → A.2.1. ~~Variante "solo guardadas" en G-03~~ → registrada.
 
-**PARA ARTE / UI:** (sin cambios desde la v0.8)
+**PARA ARTE / UI:**
 
+- [ ] **v1.1, rasgos:** el surco (tierra removida con un lomo de terrones a cada lado, simétrico, que se lea como pozo), con el color del bando de su dueño; el Surcón arando; el Zancajunco **hecho junco** (silueta de mata de juncos) y con la **embestida** pendiente (cuello en S tenso); el Tasajero en **Caza** (largo y pegado al suelo) y en **Cuenta** (recogido, cola enroscada). Todo se distingue por la silueta (sección 5). Reemplaza al pedido "marcas Caza y Cuenta en la barra de iniciativa": ahora el modo se ve también en su ficha.
 - [ ] Pantalla de comer a una criatura: aviso de rescatistas perdidas, botones "Hacerlo" / "Todavía no", la tribu alrededor del fuego sin mostrar a la comida y su pergamino ardiendo.
 - [ ] Rastro del abandono donde dormía la criatura: hojas, surco o huellas, según la especie.
 - [ ] Un solo ícono de Enfermo, con la causa y los días restantes en el tooltip; una sola postura de enferma, simétrica.
@@ -1273,8 +1363,7 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 - [ ] Líneas de Encono, cobardía y resistencia en el registro, cerca de la criatura.
 - [ ] Al invocar, la criatura sale parpadeando: un gesto chico, igual en las cuatro especies.
 - [ ] Siluetas distintas para la Rodauva erizada y la acobardada.
-- [ ] Barra de iniciativa con las marcas "Caza" y "Cuenta" del Tasajero.
-- [ ] Ceniza sobre la piedra del fuego al despertar tras un rescate con bajas.
+- [ ] Ceniza sobre la piedra del fuego al despertar tras un rescate con bajas (y tras la atacante que se fue).
 - [ ] La línea *"Si la cuidás, te va a salvar. Todavía no."* junto al umbral de rescate del día 1, y su cierre *"Ahora sí."*
 - [ ] Hojarasca junto a la piedra del fuego del Molino: la cama de la compañera.
 - [ ] El Molino de agua con la rueda quieta y la acequia seca (para que la Capa 1 tenga qué reparar).
@@ -1288,7 +1377,7 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 - [ ] Animaciones de Encono (cresta erizada, cuello en ristre, ruptura de la quietud) y de cobardía (Rodauva enrollada).
 - [ ] Despertar de las habilidades de campamento: ramitas en las púas de la Rodauva, Ocarra de pie con un ojo abierto, hondonada del Surcón, Zancajunco inmóvil al borde.
 - [ ] La Poza Tibia: agua que humea apenas entre piedras de orilla, sin brillos mágicos.
-- [ ] Controlar la altura del Zancajunco en el tablero isométrico.
+- [ ] Controlar la altura del Zancajunco en el tablero isométrico (también hecho junco, que es su postura más alta).
 - [ ] Frutas intercambiables en el sprite de Rodauva.
 - [ ] El Maestro de polo Soplo, levemente desvaído en la ficha o el retrato.
 
@@ -1310,6 +1399,7 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 
 | Versión | Fecha | Cambio |
 | --- | --- | --- |
+| v1.1 | 05/10/2026 | **Sincronización con la Visión v1.2 y `Sistema.md` v1.5 (rasgos reescritos tras el playtest 0a.1).** Nueva 1.2.1: nombres en `PROPUESTA` (Arar, Hecho junco, Embestida; Rastreando para la hostilidad). 1.5: huecos `DECIDIDO`, hueco `{n}`, concordancia de las etiquetas de estado con la especie y textos de la pantalla de T13. 2.6: la prenda sin consecuencias. 4.6: las que miran (ya estaban en `es.json`) y la atacante que se va. 4.7: emboscada del Robledal sin "mirando a una sola". 4.11: perdida por abandono tras atacarte. 4.12: solo se come a una suelta; sale "sacar a una guardada". Sección 5: Surcón con Arar (sale Lomo de tierra), Zancajunco con Hacerse junco activo, Tasajero con Caza y cuenta en dos modos; posturas nuevas para arte; nota del Encono con un Zancajunco hecho junco; tooltips nuevos y rasgos en acción. 8: la prenda en el epílogo. Sección 9 reescrita: 9.1 cerrada; derivaciones al Director, Sistemas, Arquitecto y Arte. `es.json`: 496 → 568 claves |
 | v1.0 | 03/10/2026 | **Sincronización con la Visión v1.0. El Worldbuilder no tiene pendientes que bloqueen el MVP.** Pasan a `DECIDIDO` el ritmo del día (4.15) y los textos nuevos de la entrega (1.5). 4.12: cuándo se come a una criatura (solo en el reparto de la noche, junto al fuego). Centinela unificado entre 1.5 y 4.6, sin hueco (actualizar `nocturno.centinela` en `es.json`). Sección 9: se cierra la pregunta de cuándo comer; pedidos a Sistemas para poner al día `Sistema.md` 15; prioridad de los huecos gramaticales para el Arquitecto |
 | v0.9 | 03/10/2026 | **Textos entregados en JSON** (`juego/datos/textos/es.json`, 493 claves). Nueva 1.5: notación, huecos gramaticales (`PROPUESTA` al Arquitecto), reglas de armado y textos nuevos de la entrega (`PROPUESTA` al Director). Claves de la sección 5 y 4.6 alineadas con el JSON (`sellar.fallo.erizada`, `nocturno.comer.zancajunco_suelto`, `rasgo.<id>.tooltip`). 4.11: muerte de hambre del Maestro `DECIDIDO` (`Sistema.md` 7.6). Sección 9 reescrita: se cierran los pedidos ya registrados en `Arquitectura.md` v0.6; las guardadas no pierden lealtad al comer a una compañera (Visión 6.4); nuevos pedidos sobre el esquema de textos y la variante "solo guardadas" |
 | v0.8 | 02/10/2026 | **Textos del MVP completos.** Pasan a `DECIDIDO`: textos de combate de la 0a, atacante caída (4.6), variante "solo guardadas" (4.11) y el criterio de 1.3, que pasa a "la tribu es la cámara". Nuevas 3.5 (hambre) y 3.6 (Enfermo). Evento completo del juncal (4.5). Nuevas 4.12 (comerse una criatura), 4.13 (abandono), 4.14 (camino de confianza y Leal por primera vez, con el payoff de la compañera) y 4.15 (ritmo del día, `PROPUESTA`). Pantalla de muerte por hambre del Maestro (4.11, `PROPUESTA`). Sección 9 reescrita: preguntas de reglas para Sistemas y Director, y pedidos acumulados |

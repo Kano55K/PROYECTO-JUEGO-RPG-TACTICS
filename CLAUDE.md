@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Revisado por última vez contra `docs/Arquitectura.md` v0.20 (04/10/2026). Dueño: Arquitecto Técnico.
+> Revisado por última vez contra `docs/Arquitectura.md` v0.23 (06/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -15,7 +15,7 @@ Tactics RPG 2D isométrico de captura de criaturas y supervivencia medieval. Est
 | `docs/Sistema.md` | Reglas y números |
 | `docs/Mundo.md` | Nombres y textos |
 | `docs/Arquitectura.md` | Cómo se construye: estructura, datos, tareas (B.2 a B.4) |
-| Brief de la prueba 0a (en `docs/`) | Contexto de la 0a. **Si contradice a `Sistema.md`, manda `Sistema.md`**: anotá la contradicción en `PREGUNTAS.md` y seguí con `Sistema.md` |
+| Brief de la prueba 0a (en `docs/`) | **Histórico** desde el 06/10/2026 (`Sistema.md` 11.9): no lo uses para decidir y no anotes sus contradicciones. Manda `Sistema.md` |
 | `docs/PREGUNTAS.md` | Dudas abiertas con el staff y sus respuestas |
 
 `docs/RESUMENES.md` es el historial de las sesiones de programación: **no manda sobre nada**. Si contradice a otro documento o al código, mandan ellos.
@@ -200,6 +200,17 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 
 Si la tarea sigue en otra sesión: al empezar la siguiente, leé la última entrada de esa tarea en `docs/RESUMENES.md` antes de proponer el plan de la sesión.
 
+## Hito 0a.1b — "Rasgos" (T35 a T40)
+
+Reglas completas en `docs/Arquitectura.md` B.2.1. Las que más se olvidan:
+
+- **Tests que contradicen la v1.3 de `Sistema.md`:** se reescriben, nunca se borran sin reemplazo. El resumen de la sesión y el PR los listan uno por uno, con la sección de `Sistema.md` que los cambia. Un test viejo cambiado sin esa referencia es un error de revisión.
+- **Rasgo = efecto + parámetros.** El código reconoce un rasgo por su `efecto`, nunca por el `id` de la especie o del rasgo.
+- **Consulta única de objetivo** (desde T38): toda elección de objetivo pasa por una sola función. Ninguna clase vuelve a mirar por su cuenta si una unidad está caída, fuera, guardada u oculta.
+- **Estado intermedio:** entre T35 y T38, las activas nuevas existen en los datos y todavía no tienen acción. Es lo esperado.
+- **Grabaciones del playtest 0a.1:** cambian de huella; el aviso del reproductor es lo esperado. No se arreglan.
+- Las lecturas S-21 a S-26 están confirmadas por `Sistema.md` v1.4: no hace falta preguntarlas.
+
 ## Estado actual
 
 - **Terminadas y mergeadas a `develop`:** T01 (proyecto), T02 (azar con semilla), T03 (validador y cargador), T04 (esquemas y datos de 0a; test permanente `pruebas/datos/test_datos_completos.gd`), T05 (modelo de unidades en `nucleo/unidades/`: `Especie`, `TablaBalanza`, `Criatura`, `Maestro`, `Pergamino`, `Plantel`).
@@ -222,6 +233,6 @@ Si la tarea sigue en otra sesión: al empezar la siguiente, leé la última entr
 - **Abrir el juego:** F5 en el editor, o `& $env:GODOT_BIN --path .` (PowerShell). Con otra carpeta de datos, agregar `-- --datos=<carpeta>`.
 - **Reproducir una grabación por consola** (escribe `registros/<nombre>.jsonl`, o `<nombre>_hasta_N.jsonl`; con los datos de `datos/`): `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- <grabacion.json> [N]`
 - Tests de reglas con fixtures vía `pruebas/unidades/lector_fixture.gd`, y los datos completos de prueba con `pruebas/combate/datos_fixture.gd` (`DatosFixture.cargar()`, mismas claves que el `Cargador`). Con `datos/` real, además del permanente: `test_plantel_escenarios.gd` el test (9) de `test_combate.gd`, y en `pruebas/pantalla/` `test_principal.gd` (2, 10 sobre una copia temporal de `datos/`, y el clic real) y `test_vista_combate.gd`. 219 tests. Los `Control` que tapan el tablero llevan `mouse_filter` IGNORE: si no, el clic no llega a `_unhandled_input`.
-- `docs/PREGUNTAS.md`: P-024 `ABIERTA` (SISTEMAS, es la S-20: destino de la atacante nocturna caída en una derrota; programada con la lectura literal, no bloquea, hace falta antes de T30). Siguen `RESPONDIDA` y se cierran en su tarea: P-003 en T14, P-008 en T19, P-002 en T30. P-011 a P-023, `CERRADA` en T12.
+- `docs/PREGUNTAS.md`: P-024 `RESPONDIDA` (opción B: en una derrota, la atacante se va; se aplica en T30). Siguen `RESPONDIDA` y se cierran en su tarea: P-003 en T14, P-008 en T19, P-002 y P-024 en T30. P-011 a P-023, `CERRADA` en T12.
 - Al agregar un `class_name` nuevo, la caché de clases de Godot hay que refrescarla (abrir el editor o `--import`) antes de correr los tests: `runtest.cmd` no escanea. `runtest.cmd` corta en el primer test que falla.
-- Siguiente: el usuario hace la lista de prueba manual de T13 (en `docs/RESUMENES.md`), abre el PR de `tarea/T13-pantalla` y cierra el hito 0a.1 (merge de `develop` a `main`, etiqueta `0a.1`). Ninguna tarea está bloqueada.
+- Siguiente: **T35** (hito 0a.1b, `docs/Arquitectura.md` B.2.1), después del cierre del hito 0a.1 (etiqueta `0a.1`) y de la sincronización del 06/10/2026 (documentos, este archivo y `datos/textos/es.json` v1.1). Ninguna tarea está bloqueada.
