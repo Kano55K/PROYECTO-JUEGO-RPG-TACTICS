@@ -24,6 +24,12 @@ enum Motivo {
 	# Sistema.md 11.2.3 (S-23): sin movimiento partido y con mas de un ataque, no
 	# se mueve entre el primero y el ultimo.
 	MOVER_ENTRE_ATAQUES,
+	# Sistema.md 11.2.1, Costo: se cava sin haberse movido en el turno.
+	YA_SE_MOVIO,
+	# Sistema.md 11.2.1, Donde: ortogonalmente adyacente.
+	CASILLA_NO_ADYACENTE,
+	# Sistema.md 11.3, Casilla libre: fuera del tablero, con unidad o con surco (S-25).
+	CASILLA_NO_LIBRE,
 	# Sistema.md 11.5: con el combate terminado no se acepta ninguna accion.
 	COMBATE_TERMINADO,
 	# Combate.aplicar: no es el turno de una unidad del jugador (o el combate se

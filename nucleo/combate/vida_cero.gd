@@ -9,8 +9,9 @@ extends RefCounted
 #   Maestro -> caido: el combate termina (FinCombate).
 #   Tribu -> caida: queda en su casilla y la ocupa.
 #   Atacante nocturna -> caida, hasta que se decida su destino (9.3, T30).
-#   Salvaje -> huye del tablero: fuera, sin posicion.
-static func resolver(unidad_id: String, plantel: Plantel) -> void:
+#   Salvaje -> huye del tablero: fuera, sin posicion. Sus surcos se cierran (11.2.1).
+# surcos: los del combate; null solo donde no puede haber (tests de 11.5).
+static func resolver(unidad_id: String, plantel: Plantel, surcos: Surcos = null) -> void:
 	if unidad_id == Maestro.ID:
 		if plantel.maestro.vida == 0:
 			plantel.maestro.caido = true
@@ -21,5 +22,7 @@ static func resolver(unidad_id: String, plantel: Plantel) -> void:
 	if criatura.comportamiento == Criatura.Comportamiento.SALVAJE:
 		criatura.estado = Criatura.Estado.FUERA
 		criatura.posicion = Criatura.SIN_POSICION
+		if surcos != null:
+			surcos.cerrar_de(unidad_id)
 	else:
 		criatura.estado = Criatura.Estado.CAIDA

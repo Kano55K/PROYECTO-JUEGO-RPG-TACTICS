@@ -25,6 +25,8 @@ var accion_usada: bool = false
 var terminado: bool = false
 # Sistema.md 11.2.3: {de, a} si el inicio de este turno le cambio el modo; si no, {}.
 var cambio_modo: Dictionary = {}
+# true desde su primer `mover` aplicado (cavar exige no haberse movido, 11.2.1).
+var se_movio: bool = false
 
 var _ataques_hechos: int = 0
 var _movimiento_partido: bool = false
@@ -32,19 +34,24 @@ var _movimiento_partido: bool = false
 var _plantel: Plantel
 var _tablero: Tablero
 var _danio: Danio
+# Los del combate (los guarda el Combate, T37).
+var _surcos: Surcos
 
 
-func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio) -> void:
+func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
 	_tablero = tablero
 	_danio = danio
+	_surcos = surcos
 
 
-# Crea el turno de la entrada y corre el inicio del turno.
-static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio)
+# Crea el turno de la entrada y corre el inicio del turno. surcos: los del
+# combate; sin ellos, ninguno (un turno suelto de los tests).
+static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
+		surcos: Surcos = null) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos if surcos != null else Surcos.new())
 	turno._inicio_del_turno()
 	turno._preparar()
 	return turno
@@ -62,7 +69,8 @@ func aplicar(accion: Accion) -> ResultadoAccion:
 # Para la pantalla y la IA: lo que la unidad puede hacer ahora, sin modificar nada.
 func casillas_para_mover() -> Array[Vector2i]:
 	var resultado: Array[Vector2i] = []
-	for casilla in _tablero.alcanzables(_posicion(unidad_id), pasos_restantes, _bando(unidad_id), _plantel):
+	for casilla in _tablero.alcanzables(_posicion(unidad_id), pasos_restantes, _bando(unidad_id), _plantel,
+			_surcos, Surcos.es_surcon(unidad_id, _plantel)):
 		if validar(Accion.mover(casilla)).valida:
 			resultado.append(casilla)
 	return resultado
@@ -84,7 +92,7 @@ func objetivos_para_atacar() -> Array[String]:
 # menos movimiento"). Los pasos son los del camino que da Tablero.
 func pasos_para_mover() -> Dictionary:
 	var desde: Vector2i = _posicion(unidad_id)
-	var pasos: Dictionary = _tablero.pasos_hasta(desde, pasos_restantes, _bando(unidad_id), _plantel)
+	var pasos: Dictionary = _pasos_desde(desde)
 	var resultado: Dictionary = {desde: 0}
 	for casilla in casillas_para_mover():
 		resultado[casilla] = pasos[casilla]
@@ -165,6 +173,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _atacar_desde(_posicion(unidad_id), accion.objetivo_id, aplica)
 		Accion.Tipo.ERIZARSE:
 			resultado = _erizarse(aplica)
+		Accion.Tipo.CAVAR:
+			resultado = _cavar(accion.casilla, aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -189,18 +199,26 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 	var desde: Vector2i = _posicion(unidad_id)
 	if destino == desde:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.MISMA_CASILLA)
-	var pasos: Dictionary = _tablero.pasos_hasta(desde, pasos_restantes, _bando(unidad_id), _plantel)
+	var pasos: Dictionary = _pasos_desde(desde)
 	if not pasos.has(destino):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.CASILLA_NO_ALCANZABLE)
 	if aplica:
 		_poner_posicion(unidad_id, destino)
 		_gastar_pasos(pasos[destino] if _movimiento_partido else pasos_restantes)
+		se_movio = true
 	return ResultadoAccion.aceptada()
 
 
 func _gastar_pasos(cantidad: int) -> void:
 	pasos_restantes -= cantidad
 	movimiento_usado = pasos_restantes == 0
+
+
+# Los caminos de Tablero con los pasos que quedan, los surcos del combate y si
+# la unidad los pisa (11.2.1, Transito: un Surcon de cualquier bando).
+func _pasos_desde(desde: Vector2i) -> Dictionary:
+	return _tablero.pasos_hasta(desde, pasos_restantes, _bando(unidad_id), _plantel,
+			_surcos, Surcos.es_surcon(unidad_id, _plantel))
 
 
 # Sistema.md 11.3: atacar gasta uno de los ataques del turno (dos en Caza,
@@ -238,7 +256,7 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	resultado.danio = resultado.desglose.total
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
-		VidaCero.resolver(objetivo_id, _plantel)
+		VidaCero.resolver(objetivo_id, _plantel, _surcos)
 		ataques_restantes -= 1
 		_ataques_hechos += 1
 		accion_usada = true
@@ -270,6 +288,31 @@ func _erizarse(aplica: bool) -> ResultadoAccion:
 		ataques_restantes = 0
 		if _inmovil(unidad_id):
 			_gastar_pasos(pasos_restantes)
+	return ResultadoAccion.aceptada()
+
+
+# Sistema.md 11.2.1, El surco: solo con el efecto surco de la ficha, sin haberse
+# movido ni usado la accion, en una casilla ortogonalmente adyacente y libre
+# (11.3, S-25). Puede estar junto a enemigas. Gasta el turno completo: despues
+# solo vale terminar. Si el Surcon pasa su tope, se cierra su surco mas viejo.
+func _cavar(casilla: Vector2i, aplica: bool) -> ResultadoAccion:
+	if terminado:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
+	if not Surcos.es_surcon(unidad_id, _plantel):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_RASGO)
+	if accion_usada:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
+	if se_movio:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.YA_SE_MOVIO)
+	if not _tablero.adyacentes(_posicion(unidad_id), casilla):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.CASILLA_NO_ADYACENTE)
+	if not _tablero.es_casilla_libre(casilla, _plantel, _surcos):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.CASILLA_NO_LIBRE)
+	if aplica:
+		_surcos.cavar(casilla, unidad_id, _plantel.criatura(unidad_id).especie.rasgo()["tope"])
+		accion_usada = true
+		ataques_restantes = 0
+		_gastar_pasos(pasos_restantes)
 	return ResultadoAccion.aceptada()
 
 
