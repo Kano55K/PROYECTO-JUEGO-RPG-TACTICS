@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Valida: erizarse con sus tres parametros y velocidad en la ficha (Arquitectura.md A.2.2, T35)",
+  "id": "erizarse_valida", "rol": "trabajo", "rango": 1, "sellable": true,
+  "vida": 8, "danio": 2, "movimiento": 4, "alcance": 1,
+  "velocidad": 6,
+  "rasgo": { "id": "erizarse", "efecto": "erizarse", "danio_recibido_pct": -50, "inmovil": true, "umbral_vida_pct": 50 },
+  "huida_pct": 50
+}

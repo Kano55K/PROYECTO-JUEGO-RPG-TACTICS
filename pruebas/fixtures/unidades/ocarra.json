@@ -9,15 +9,11 @@
   "danio": 4,
   "movimiento": 3,
   "alcance": 2,
-  "turnos": [
-    {
-      "velocidad": 7
-    }
-  ],
+  "velocidad": 7,
   "rasgo": {
-    "_nota": "Sistema.md 11.2: Alabarda. Su alcance 2 es el rasgo; no tiene efecto aparte",
+    "_nota": "Sistema.md 11.2: Alabarda. Su alcance 2 es el rasgo: efecto sin parametros",
     "id": "alabarda",
-    "efecto": "ninguno"
+    "efecto": "alabarda"
   },
   "huida_pct": 0
 }

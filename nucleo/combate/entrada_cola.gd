@@ -3,7 +3,8 @@ class_name EntradaCola
 extends RefCounted
 
 var unidad_id: String
-# "" = sin marca; "caza" / "cuenta" tal cual vienen de los turnos de la ficha.
+# "" = sin marca; si no, el id del modo de la criatura al armar la ronda
+# ("caza" / "cuenta", Sistema.md 11.2.3).
 var marca: String
 var velocidad: int
 var actuo: bool = false

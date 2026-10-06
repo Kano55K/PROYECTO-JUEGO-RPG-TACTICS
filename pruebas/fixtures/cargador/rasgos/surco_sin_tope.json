@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Error: surco sin su parametro tope (Arquitectura.md A.2.2, T35)",
+  "id": "surco_sin_tope", "rol": "trabajo", "rango": 1, "sellable": true,
+  "vida": 8, "danio": 2, "movimiento": 4, "alcance": 1,
+  "velocidad": 2,
+  "rasgo": { "id": "surco", "efecto": "surco" },
+  "huida_pct": 25
+}

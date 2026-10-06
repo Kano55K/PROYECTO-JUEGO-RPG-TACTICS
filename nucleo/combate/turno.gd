@@ -6,7 +6,7 @@ class_name Turno
 extends RefCounted
 
 # Sistema.md 11.2: el efecto de rasgo que habilita Erizarse. Nunca se mira el id.
-const _EFECTO_ACCION_DEFENSA: String = "accion_defensa"
+const _EFECTO_ERIZARSE: String = "erizarse"
 
 var unidad_id: String
 # La de la entrada: "caza", "cuenta" o "".
@@ -78,8 +78,8 @@ func pasos_para_mover() -> Dictionary:
 
 # Sistema.md 11.8, "puede tumbar" y "puede alcanzar" (S-8): el ataque como si la
 # unidad se hubiera movido a `desde`, sin modificar nada. Pasa por la misma
-# funcion que el ataque real (mismas comprobaciones, mismo danio y aportes), y
-# no gasta Hacerse junco. Si no puede llegar a `desde`, se rechaza con el motivo
+# funcion que el ataque real (mismas comprobaciones, mismo danio y aportes) y no
+# cambia el estado de nadie. Si no puede llegar a `desde`, se rechaza con el motivo
 # del movimiento.
 func previsualizar_ataque(desde: Vector2i, objetivo_id: String) -> ResultadoAccion:
 	if desde != _posicion(unidad_id):
@@ -199,7 +199,6 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
 		VidaCero.resolver(objetivo_id, _plantel)
-		_danio.registrar_ataque(unidad_id, _plantel)
 		accion_usada = true
 	return resultado
 
@@ -221,7 +220,7 @@ func _erizarse(aplica: bool) -> ResultadoAccion:
 	if accion_usada:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
 	var criatura: Criatura = _plantel.criatura(unidad_id)
-	if criatura == null or criatura.especie.rasgo()["efecto"] != _EFECTO_ACCION_DEFENSA:
+	if criatura == null or criatura.especie.rasgo()["efecto"] != _EFECTO_ERIZARSE:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_RASGO)
 	if aplica:
 		criatura.erizada = true

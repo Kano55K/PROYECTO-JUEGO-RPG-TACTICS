@@ -101,7 +101,6 @@ func instantanea() -> Dictionary:
 			"lealtad": c.lealtad,
 			"posicion": casilla_a_lista(c.posicion),
 			"erizada": c.erizada,
-			"ya_ataco": c.ya_ataco,
 			"pergamino": c.pergamino_id,
 		})
 	var lista_pergaminos: Array = []

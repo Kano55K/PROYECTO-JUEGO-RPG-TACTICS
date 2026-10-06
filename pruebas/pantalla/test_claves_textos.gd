@@ -15,8 +15,10 @@ func test_claves_usadas() -> void:
 			"lealtad.estado.neutral", "lealtad.estado.leal"])
 	for especie in ["ocarra", "rodauva", "surcon", "tasajero", "zancajunco"]:
 		assert_array(claves).contains(["especie.%s.nombre" % especie])
-	for rasgo in ["erizarse", "lomo_de_tierra", "hacerse_junco"]:
+	# Rasgos de la v1.3 (Sistema.md 11.2, 11.2.1): el surco reemplaza a Lomo de tierra.
+	for rasgo in ["erizarse", "alabarda", "surco", "hacerse_junco", "caza_y_cuenta"]:
 		assert_array(claves).contains(["rasgo.%s.nombre" % rasgo, "rasgo.%s.tooltip" % rasgo])
+	assert_array(claves).not_contains(["rasgo.lomo_de_tierra.nombre"])
 	for estado in ["suelta", "guardada", "caida", "fuera", "muerta"]:
 		assert_array(claves).contains(["estado.%s" % estado])
 	# Sesion 2: un motivo por evento de lealtad.json (P-019), sin la _nota.

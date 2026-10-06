@@ -12,7 +12,7 @@
     { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
       "vida": null, "posicion": [2, 6],
-      "_nota": "Rival del Tasajero: chequea cobardía (40%, 30% con el Maestro al lado). Actúa antes de la Cuenta del Tasajero: su suerte en la ronda 1 es decisión del jugador" },
+      "_nota": "Rival del Tasajero: chequea cobardía (40%, 30% con el Maestro al lado). Actúa después del Tasajero en Caza: sola en su zona de Caza recibe 5 + 5 y cae; erizada, 2 + 2 (Sistema.md 11.2.3)" },
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
       "vida": null, "posicion": [3, 7],
@@ -24,8 +24,8 @@
   ],
   "enemigas": [
     { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
-      "vida": null, "posicion": [3, 0],
-      "_nota": "Dos turnos completos por ronda (Caza 8, Cuenta 3); huida y Encono se chequean al inicio de cada uno, contador de Encono único. Llega a pegar en la Cuenta de la ronda 1" }
+      "vida": null, "posicion": [3, 1],
+      "_nota": "Un solo turno por ronda, en Caza (Vel 8) hasta que su vida baja a 50% o menos; después en Cuenta (Vel 3), sin vuelta (Sistema.md 11.2.3). En [3,1] desde el 05/10/2026: desde [3,0] no alcanzaba a nadie en la ronda 1 (11.9)" }
   ],
   "pergaminos_en_blanco": 1,
   "golpe_inicial": null,

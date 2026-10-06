@@ -1,7 +1,7 @@
 {
   "$schema": "../../../datos/_esquemas/escenario.schema.json",
   "id": "c_tasajero",
-  "_nota": "Copia de datos/escenarios/c_tasajero.json para los tests de reglas (Arquitectura.md A.6). Prueba C (Sistema.md 11.6 y 11.9). Iniciativa (Sistema.md 11.2 y 11.3): Zancajunco 8, Tasajero Caza 8, Ocarra 7, Rodauva 6, Maestro 5, Tasajero Cuenta 3; el empate en 8 lo gana el bando del jugador. La tribu va en otro orden (Rodauva, Ocarra, Zancajunco): el orden de la cola no sale de la lista.",
+  "_nota": "Copia de datos/escenarios/c_tasajero.json para los tests de reglas (Arquitectura.md A.6). Prueba C (Sistema.md 11.6 y 11.9). Iniciativa (Sistema.md 11.2.3 y 11.3): Zancajunco 8, Tasajero en Caza 8, Ocarra 7, Rodauva 6, Maestro 5; el empate en 8 lo gana el bando del jugador. La tribu va en otro orden (Rodauva, Ocarra, Zancajunco): el orden de la cola no sale de la lista.",
   "tipo": "test",
   "semilla": 33001,
   "tablero": { "ancho": 8, "alto": 8 },
@@ -21,8 +21,8 @@
   ],
   "enemigas": [
     { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
-      "vida": null, "posicion": [3, 0],
-      "_nota": "Dos turnos completos por ronda: Caza (8) y Cuenta (3), Sistema.md 11.2" }
+      "vida": null, "posicion": [3, 1],
+      "_nota": "Un turno por ronda, en Caza (8) o en Cuenta (3), Sistema.md 11.2.3. En [3,1] como en datos/ (Sistema.md 11.9, 05/10/2026)" }
   ],
   "pergaminos_en_blanco": 1,
   "golpe_inicial": null,

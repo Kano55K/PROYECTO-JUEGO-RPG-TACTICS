@@ -5,6 +5,8 @@
 class_name Danio
 extends RefCounted
 
+const _EFECTO_ERIZARSE: String = "erizarse"
+
 var danio_minimo: int
 var _enfermedad_pct: int
 # Estados de tablas/hambre.json.
@@ -31,16 +33,15 @@ func calcular(atacante_id: String, objetivo_id: String, plantel: Plantel,
 		aportes: Array[ModificadorDanio] = []) -> DesgloseDanio:
 	var desglose: DesgloseDanio = DesgloseDanio.new()
 	desglose.base = _base(atacante_id, plantel)
-	var atacante: Criatura = plantel.criatura(atacante_id)
 	var objetivo: Criatura = plantel.criatura(objetivo_id)
 
 	var porcentajes: Array[ModificadorDanio] = []
 	var planos: Array[ModificadorDanio] = []
 	_hambre_y_enfermedades(atacante_id, plantel, porcentajes)
 	if objetivo != null:
-		_rasgo_objetivo(objetivo, porcentajes, planos)
-	if atacante != null:
-		_rasgo_atacante(atacante, planos)
+		_rasgo_objetivo(objetivo, porcentajes)
+	# Aca se enchufan los rasgos de la atacante: el plano del modo (T36) y el
+	# bono de Hacerse junco (T38).
 	for aporte in aportes:
 		if aporte.tipo == ModificadorDanio.Tipo.PORCENTAJE:
 			porcentajes.append(aporte)
@@ -62,14 +63,6 @@ func calcular(atacante_id: String, objetivo_id: String, plantel: Plantel,
 	desglose.modificadores.append_array(porcentajes)
 	desglose.modificadores.append_array(planos)
 	return desglose
-
-
-# Sistema.md 11.2, Hacerse junco: el bono es del primer ataque del combate. Lo
-# llama Turno solo al aplicar un ataque valido, nunca al validar.
-func registrar_ataque(atacante_id: String, plantel: Plantel) -> void:
-	var atacante: Criatura = plantel.criatura(atacante_id)
-	if atacante != null:
-		atacante.ya_ataco = true
 
 
 # Sistema.md 11.2: el Maestro pega el de su balanza (1.2); una criatura, el de su ficha.
@@ -103,24 +96,11 @@ func _hambre_y_enfermedades(atacante_id: String, plantel: Plantel, porcentajes: 
 				ModificadorDanio.Tipo.PORCENTAJE, _enfermedad_pct))
 
 
-# Sistema.md 11.2: rasgos de la objetivo, por su efecto en la ficha. Erizarse
-# (-50% mientras esta erizada) y Lomo de tierra (-1 a cada golpe).
-func _rasgo_objetivo(objetivo: Criatura, porcentajes: Array[ModificadorDanio], planos: Array[ModificadorDanio]) -> void:
+# Sistema.md 11.2: rasgos de la objetivo, por su efecto en la ficha. Erizarse:
+# -50% mientras esta erizada. Desde la v1.3 ningun rasgo da un plano pasivo (el
+# surco reemplaza a Lomo de tierra, 11.2.1); el % recibido por modo es de T36.
+func _rasgo_objetivo(objetivo: Criatura, porcentajes: Array[ModificadorDanio]) -> void:
 	var rasgo: Dictionary = objetivo.especie.rasgo()
-	match rasgo["efecto"]:
-		"accion_defensa":
-			if objetivo.erizada:
-				porcentajes.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_OBJETIVO,
-						ModificadorDanio.Tipo.PORCENTAJE, rasgo["danio_recibido_pct"], rasgo["id"]))
-		"reduccion_plana":
-			planos.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_OBJETIVO,
-					ModificadorDanio.Tipo.PLANO, rasgo["danio_recibido_plano"], rasgo["id"]))
-
-
-# Sistema.md 11.2: rasgos de la atacante, por su efecto. Hacerse junco: +2 si
-# todavia no aplico ningun ataque en este combate.
-func _rasgo_atacante(atacante: Criatura, planos: Array[ModificadorDanio]) -> void:
-	var rasgo: Dictionary = atacante.especie.rasgo()
-	if rasgo["efecto"] == "primer_ataque" and not atacante.ya_ataco:
-		planos.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_ATACANTE,
-				ModificadorDanio.Tipo.PLANO, rasgo["danio_plano"], rasgo["id"]))
+	if rasgo["efecto"] == _EFECTO_ERIZARSE and objetivo.erizada:
+		porcentajes.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_OBJETIVO,
+				ModificadorDanio.Tipo.PORCENTAJE, rasgo["danio_recibido_pct"], rasgo["id"]))

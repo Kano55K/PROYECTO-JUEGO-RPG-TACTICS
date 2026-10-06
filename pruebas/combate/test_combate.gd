@@ -271,20 +271,20 @@ func _jugar_ronda_c() -> Combate:
 	return combate
 
 
-# (7) Registro de una ronda de C: orden de los eventos, Tasajero con caza y
-# cuenta, fin_turno con la posicion, sin float. La tirada queda justo antes de
-# la accion que siguio.
+# (7) Registro de una ronda de C: orden de los eventos, Tasajero con caza, fin_turno
+# con la posicion, sin float. La tirada queda justo antes de la accion que siguio.
+# Reescrito por Sistema.md 11.2.3 v1.3: un solo turno del Tasajero por ronda (en
+# Caza), y 11.9: desde [3,1] alcanza al Maestro en la ronda 1 (antes pegaba en la Cuenta).
 func test_registro_de_una_ronda_de_c() -> void:
 	var combate: Combate = _jugar_ronda_c()
 	assert_str(combate.turno_actual().unidad_id).is_equal("zancajunco_1")
 	assert_array(_tipos(combate)).is_equal([
 		"inicio", "ronda",
 		"turno", "accion", "fin_turno",
-		"turno", "accion", "movimiento", "accion", "fin_turno",
+		"turno", "accion", "movimiento", "accion", "ataque", "accion", "fin_turno",
 		"turno", "tirada", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
-		"turno", "accion", "movimiento", "accion", "ataque", "accion", "fin_turno",
 		"fin_ronda", "ronda", "turno",
 	])
 	var turnos: Array[Dictionary] = _de_tipo(combate, "turno")
@@ -293,8 +293,8 @@ func test_registro_de_una_ronda_de_c() -> void:
 	for turno in turnos:
 		unidades.append(turno["unidad"])
 		marcas.append(turno["marca"])
-	assert_array(unidades).is_equal(["zancajunco_1", "tasajero_s1", "ocarra_1", "rodauva_1", Maestro.ID, "tasajero_s1", "zancajunco_1"])
-	assert_array(marcas).is_equal([null, "caza", null, null, null, "cuenta", null])
+	assert_array(unidades).is_equal(["zancajunco_1", "tasajero_s1", "ocarra_1", "rodauva_1", Maestro.ID, "zancajunco_1"])
+	assert_array(marcas).is_equal([null, "caza", null, null, null, null])
 
 	var lineas: Array[Dictionary] = combate.registro().lineas()
 	for i in range(lineas.size()):
@@ -304,9 +304,9 @@ func test_registro_de_una_ronda_de_c() -> void:
 	assert_dict(fines[0]).contains_key_value("unidad", "zancajunco_1")
 	assert_array(fines[0]["posicion"]).is_equal([4, 6])
 	var tasajero: Criatura = combate.contexto().plantel.criatura("tasajero_s1")
-	assert_array(fines[5]["posicion"]).is_equal([tasajero.posicion.x, tasajero.posicion.y])
+	assert_array(fines[1]["posicion"]).is_equal([tasajero.posicion.x, tasajero.posicion.y])
 	var movimiento: Dictionary = _de_tipo(combate, "movimiento")[0]
-	assert_array(movimiento["desde"]).is_equal([3, 0])
+	assert_array(movimiento["desde"]).is_equal([3, 1])
 
 	var tirada: Dictionary = _de_tipo(combate, "tirada")[0]
 	assert_int(tirada["indice"] as int).is_equal(0)
@@ -402,6 +402,7 @@ func test_registro_rechaza_float() -> void:
 
 # T13: la cola que muestra la pantalla sale del combate, no se rearma afuera.
 # Prueba C (Sistema.md 11.3): el primer turno del jugador es el del Zancajunco.
+# Sin la entrada de la Cuenta: reescrito por Sistema.md 11.2.3 v1.3 (un turno por ronda).
 func test_cola_y_entrada_actual_para_la_pantalla() -> void:
 	var combate: Combate = _combate(_escenario(_CARPETA + "escenario_c.json"))
 	var unidades: Array[String] = []
@@ -409,8 +410,8 @@ func test_cola_y_entrada_actual_para_la_pantalla() -> void:
 	for entrada in combate.cola():
 		unidades.append(entrada.unidad_id)
 		marcas.append(entrada.marca)
-	assert_array(unidades).is_equal(["zancajunco_1", "tasajero_s1", "ocarra_1", "rodauva_1", Maestro.ID, "tasajero_s1"])
-	assert_array(marcas).is_equal(["", "caza", "", "", "", "cuenta"])
+	assert_array(unidades).is_equal(["zancajunco_1", "tasajero_s1", "ocarra_1", "rodauva_1", Maestro.ID])
+	assert_array(marcas).is_equal(["", "caza", "", "", ""])
 	assert_int(combate.entrada_actual()).is_equal(0)
 	_aplicar_valida(combate, Accion.terminar())
 	# Despues de terminar, juega el Tasajero (Caza) y el combate se detiene en la

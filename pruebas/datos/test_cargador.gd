@@ -190,3 +190,54 @@ func test_carpeta_valida_no_tiene_errores_ni_avisos() -> void:
 	var escenario: Dictionary = datos["escenarios/a_dia_1.json"]
 	var tablero: Dictionary = escenario["tablero"]
 	assert_int(tablero["ancho"] as int).is_equal(8)
+
+
+# Arquitectura.md B.2.1 (T35, criterio 2) y A.2.2 (Rasgos y modos): el cargador
+# revisa los parametros de cada efecto, velocidad contra modos y el modo inicial.
+# Cada caso copia los esquemas reales y una ficha de fixtures/cargador/rasgos/
+# a una carpeta temporal, como especies/<id>.json.
+const _CARPETA_RASGOS: String = "res://pruebas/fixtures/cargador/rasgos/"
+const _CARPETA_ESQUEMAS: String = "res://datos/_esquemas/"
+
+
+func _cargar_ficha_rasgo(nombre: String) -> Dictionary:
+	var carpeta: String = create_temp_dir("t35_rasgos/" + nombre)
+	DirAccess.make_dir_recursive_absolute(carpeta.path_join("_esquemas"))
+	DirAccess.make_dir_recursive_absolute(carpeta.path_join("especies"))
+	for archivo in DirAccess.get_files_at(_CARPETA_ESQUEMAS):
+		if archivo.ends_with(".json"):
+			_copiar_archivo(_CARPETA_ESQUEMAS + archivo, carpeta.path_join("_esquemas").path_join(archivo))
+	_copiar_archivo(_CARPETA_RASGOS + nombre + ".json", carpeta.path_join("especies").path_join(nombre + ".json"))
+	return Cargador.new().cargar_carpeta(carpeta)
+
+
+func _copiar_archivo(origen: String, destino: String) -> void:
+	var archivo: FileAccess = FileAccess.open(destino, FileAccess.WRITE)
+	archivo.store_string(FileAccess.get_file_as_string(origen))
+	archivo.close()
+
+
+func _assert_un_error(nombre: String, campo: String) -> void:
+	var resultado: Dictionary = _cargar_ficha_rasgo(nombre)
+	var errores: Array[Dictionary] = resultado["errores"]
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("especies/%s.json" % nombre)
+	assert_str(errores[0]["campo"] as String).is_equal(campo)
+	assert_bool(resultado["datos"] == null).is_true()
+
+
+func test_rasgos_v13() -> void:
+	# Efecto sin su parametro.
+	_assert_un_error("surco_sin_tope", "rasgo.tope")
+	# Parametro de otro efecto.
+	_assert_un_error("ocultarse_con_tope", "rasgo.tope")
+	# velocidad junto con modos, y sin modos ni velocidad.
+	_assert_un_error("velocidad_con_modos", "velocidad")
+	_assert_un_error("sin_velocidad", "velocidad")
+	# Modo inicial inexistente, y modos repetidos.
+	_assert_un_error("modo_inicial_inexistente", "rasgo.modo_inicial")
+	_assert_un_error("modos_repetidos", "rasgo.modos[1].id")
+	# Fichas correctas, con y sin modos.
+	for nombre in ["con_modos_valida", "erizarse_valida"]:
+		var errores: Array[Dictionary] = _cargar_ficha_rasgo(nombre)["errores"]
+		assert_array(errores).override_failure_message(str(errores)).is_empty()
