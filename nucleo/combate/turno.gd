@@ -7,7 +7,7 @@ class_name Turno
 extends RefCounted
 
 # Sistema.md 11.2: el efecto de rasgo que habilita Erizarse. Nunca se mira el id.
-const _EFECTO_ERIZARSE: String = "erizarse"
+const EFECTO_ERIZARSE: String = "erizarse"
 
 var unidad_id: String
 # La de la entrada: "caza", "cuenta" o "". Es el modo al armar la ronda; el
@@ -333,7 +333,7 @@ func _erizarse(aplica: bool) -> ResultadoAccion:
 	if accion_usada:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
 	var criatura: Criatura = _plantel.criatura(unidad_id)
-	if criatura == null or criatura.especie.rasgo()["efecto"] != _EFECTO_ERIZARSE:
+	if criatura == null or criatura.especie.rasgo()["efecto"] != EFECTO_ERIZARSE:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_RASGO)
 	if aplica:
 		criatura.erizada = true

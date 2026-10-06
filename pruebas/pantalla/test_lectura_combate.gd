@@ -144,3 +144,126 @@ func test_resultado() -> void:
 			"[FALTA: resultado.lealtad]",
 			"Rodauva: 8 → 9",
 			"  [FALTA: lealtad.motivo.victoria]: +1"])
+
+
+# --- T40: rasgos visibles (Arquitectura.md B.2.1) -----------------------------
+
+const _CARPETA_COMBATE: String = "res://pruebas/fixtures/combate/"
+const _TEXTOS_RASGOS: String = "res://pruebas/fixtures/pantalla/es_rasgos.json"
+
+
+# Un combate de fixtures con los textos de es_rasgos.json. cambios: tribu id ->
+# {campo: valor} sobre el escenario antes de armarlo.
+func _lectura_rasgos(nombre: String, cambios: Dictionary = {}) -> LecturaCombate:
+	var datos_fixture: Dictionary = DatosFixture.cargar()
+	assert_array(datos_fixture["errores"]).is_empty()
+	var datos: Dictionary = datos_fixture["datos"]
+	var escenario: Dictionary = LectorFixture.leer(_CARPETA_COMBATE + nombre + ".json", "escenario")["datos"]
+	for unidad in escenario["tribu"]:
+		if cambios.has(unidad["id"]):
+			(unidad as Dictionary).merge(cambios[unidad["id"]], true)
+	var textos: Dictionary = LectorFixture.leer(_TEXTOS_RASGOS, "textos")
+	assert_array(textos["errores"]).is_empty()
+	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
+	_combate = Combate.empezar(contexto)
+	assert_str(_combate.error()).is_empty()
+	var armador: ArmadorTextos = ArmadorTextos.desde_datos(textos["datos"], contexto.azar_textos)
+	var estados: EstadosUnidad = EstadosUnidad.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"])
+	return LecturaCombate.new(_combate, armador, estados)
+
+
+func _ficha_de(lectura: LecturaCombate, id_unidad: String) -> Dictionary:
+	for ficha in lectura.fichas():
+		if ficha["id"] == id_unidad:
+			return ficha
+	return {}
+
+
+# (4) Cada evento nuevo de A.7 da su linea de sucesos; el destape, segun su
+# motivo, y el cambio de modo, segun el modo al que pasa.
+func test_t40_sucesos_de_los_rasgos() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_c")
+	assert_array(lectura.suceso({"tipo": "surco", "casilla": [2, 1], "duenio": "surcon_s1"})) \
+			.is_equal(["El Surcón hunde la reja y abre un surco."])
+	assert_array(lectura.suceso({"tipo": "surco_cerrado", "casilla": [2, 1], "duenio": "surcon_s1", "motivo": "tope"})) \
+			.is_equal(["Un surco se desmorona. La tierra vuelve a asentarse."])
+	assert_array(lectura.suceso({"tipo": "oculto", "unidad": "zancajunco_1"})) \
+			.is_equal(["El Zancajunco se queda quieto. Ya no se lo distingue de los juncos."])
+	assert_array(lectura.suceso({"tipo": "destape", "unidad": "zancajunco_1", "motivo": "mover", "por": null})) \
+			.is_equal(["El Zancajunco deja de ser junco y avanza. La embestida sigue en pie."])
+	assert_array(lectura.suceso({"tipo": "destape", "unidad": "zancajunco_1", "motivo": "atacar", "por": null})) \
+			.is_equal(["El junco era el Zancajunco. El golpe sale de la quietud."])
+	assert_array(lectura.suceso({"tipo": "destape", "unidad": "zancajunco_1", "motivo": "contacto",
+			"por": "tasajero_s1"})) \
+			.is_equal(["Alguien se le plantó al lado. El Zancajunco deja de fingir que es junco."])
+	assert_array(lectura.suceso({"tipo": "bono_perdido", "unidad": "zancajunco_1", "atacante": "tasajero_s1"})) \
+			.is_equal(["Le pegaron antes de embestir. El Zancajunco pierde el impulso."])
+	assert_array(lectura.suceso({"tipo": "cambio_modo", "unidad": "tasajero_s1", "de": "caza", "a": "cuenta"})) \
+			.is_equal(["El Tasajero deja de cazar. Ahora cuenta lo que le queda."])
+	# La accion de cavar o de ocultarse no da linea propia: la da su evento.
+	assert_array(lectura.suceso({"tipo": "accion", "unidad": "zancajunco_1", "origen": "jugador",
+			"accion": {"tipo": "hacerse_junco"}, "paso": null})).is_empty()
+
+
+# (5) El tooltip de una enemiga muestra su rasgo y su estado: el Tasajero de C
+# en Caza con el umbral de vida_de_cambio (30 x 50% = 15); el Zancajunco
+# salvaje oculto con el bono; los Surcones con sus surcos contra el tope (2).
+func test_t40_tooltip_de_una_enemiga() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_c")
+	assert_array(lectura.tooltip_unidad("tasajero_s1")).is_equal(["Tasajero", "Vida: 30/30", "Caza y cuenta",
+			"Empieza cazando: dos zarpazos por turno, a una presa o a dos, y recibe más daño. Herido, pasa a contar: pica una vez, más flojo, y se aparta. No vuelve a cazar.",
+			"Caza", "Con 15 de vida o menos, pasa a Cuenta."])
+	assert_str(lectura.tooltip_unidad(Maestro.ID)[0]).is_equal("Maestro")
+
+	lectura = _lectura_rasgos("escenario_junco_salvaje")
+	var zancajunco: Criatura = _combate.contexto().plantel.criatura("zancajunco_s1")
+	zancajunco.oculta = true
+	zancajunco.bono_junco = true
+	var tooltip: Array[String] = lectura.tooltip_unidad("zancajunco_s1")
+	assert_array(tooltip).contains(["Zancajunco", "Hacerse junco", "Hecho junco", "Embestida"])
+	assert_bool(_ficha_de(lectura, "zancajunco_s1")["oculta"]).is_true()
+	assert_array(_ficha_de(lectura, "zancajunco_s1")["marcas"]).is_equal(["Hecho junco", "Embestida"])
+
+	# escenario_surco_tribu: el Maestro juega primero; despues el Surcon de la tribu cava.
+	lectura = _lectura_rasgos("escenario_surco_tribu")
+	assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	assert_str(_combate.turno_actual().unidad_id).is_equal("surcon_1")
+	assert_bool(_combate.aplicar(Accion.cavar(Vector2i(3, 5))).valida).is_true()
+	assert_str(lectura.tooltip_unidad("surcon_1").back()).is_equal("Arar: 1/2")
+	assert_str(lectura.tooltip_unidad("surcon_s1").back()).is_equal("Arar: 0/2")
+
+
+# (8) Concordancia (A.2.1): con las variantes de es_rasgos.json, el Surcon con
+# hambre 0 se ve "Saciado" y caido "Caido"; la Rodauva, "Saciada" y "Caida".
+func test_t40_etiquetas_con_concordancia() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_surco_tribu", {"surcon_1": {"hambre": 0}})
+	assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	assert_array(lectura.panel_turno()).contains(["Hambre: 0 (Saciado)"])
+	_combate.contexto().plantel.criatura("surcon_1").estado = Criatura.Estado.CAIDA
+	assert_array(_ficha_de(lectura, "surcon_1")["marcas"]).contains(["Caído"])
+	var resultado: Dictionary = {"desenlace": "victoria", "rondas": 1, "maestro_caido": false,
+			"maestro": {"vida": 20}, "unidades": [{"id": "surcon_1", "especie": "surcon", "estado": "caida", "vida": 0}],
+			"lealtad_cambios": []}
+	assert_str(lectura.resultado(resultado)[4]).contains("Caído")
+
+	lectura = _lectura_rasgos("escenario_c", {"rodauva_1": {"hambre": 0}})
+	while _combate.turno_actual().unidad_id != "rodauva_1":
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	assert_array(lectura.panel_turno()).contains(["Hambre: 0 (Saciada)"])
+	_combate.contexto().plantel.criatura("rodauva_1").estado = Criatura.Estado.CAIDA
+	assert_array(_ficha_de(lectura, "rodauva_1")["marcas"]).contains(["Caída"])
+
+
+# (9) El desglose de un golpe al Tasajero en Caza (escenario_caza: la Ocarra
+# [4,3] le pega desde su casilla) nombra la fuente modo con iniciativa.caza:
+# +25% recibido (Sistema.md 11.2.3, 11.4 paso 1). Sin [FALTA: desglose.fuente.modo].
+func test_t40_desglose_nombra_el_modo() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_caza")
+	var turno: Turno = _combate.turno_actual()
+	assert_str(turno.unidad_id).is_equal("ocarra_1")
+	var vista_previa: ResultadoAccion = turno.previsualizar_ataque(Vector2i(4, 3), "tasajero_s1")
+	assert_bool(vista_previa.valida).is_true()
+	var lineas: Array[String] = lectura.desglose(vista_previa.desglose.a_diccionario(), "ocarra_1")
+	assert_array(lineas).contains(["Caza: +25%"])
+	for linea in lineas:
+		assert_str(linea).not_contains("desglose.fuente.modo")

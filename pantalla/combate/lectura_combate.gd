@@ -16,6 +16,10 @@ const _MAESTRO_CAIDO: String = "caido"
 const _DESENLACE_VICTORIA: String = "victoria"
 const _TIPO_PORCENTAJE: String = "porcentaje"
 const _SEPARADOR: String = " · "
+# T40: los tipos de boton de activa (botones_activas).
+const ACTIVA_ERIZARSE: String = "erizarse"
+const ACTIVA_HACERSE_JUNCO: String = "hacerse_junco"
+const ACTIVA_CAVAR: String = "cavar"
 
 var _combate: Combate
 var _plantel: Plantel
@@ -31,8 +35,9 @@ func _init(combate: Combate, armador: ArmadorTextos, estados: EstadosUnidad) -> 
 
 
 # Una ficha por unidad en el tablero (de pie o caida), el Maestro primero:
-# {id, casilla: Vector2i, tribu: bool, maestro: bool, caida: bool, nombre, vida,
-# vida_max, marcas: Array[String]}.
+# {id, casilla: Vector2i, tribu: bool, maestro: bool, caida: bool, oculta: bool,
+# nombre, vida, vida_max, marcas: Array[String]}. T40: las marcas suman el modo,
+# oculta y el bono pendiente; las etiquetas concuerdan con la especie (A.2.1).
 func fichas() -> Array[Dictionary]:
 	var lista: Array[Dictionary] = []
 	var foto: Dictionary = _combate.instantanea()
@@ -40,9 +45,10 @@ func fichas() -> Array[Dictionary]:
 	if foto_maestro["posicion"] != null:
 		var marcas_maestro: Array[String] = []
 		if foto_maestro["caido"]:
-			marcas_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA))
-		lista.append(_ficha(Maestro.ID, foto_maestro["posicion"], true, true, foto_maestro["caido"],
-				foto_maestro["vida"], _plantel.maestro.vida_max_real(), marcas_maestro))
+			marcas_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, Maestro.ID))
+		var ficha_maestro: Dictionary = _ficha(Maestro.ID, foto_maestro["posicion"], true, true, foto_maestro["caido"],
+				foto_maestro["vida"], _plantel.maestro.vida_max_real(), marcas_maestro)
+		lista.append(ficha_maestro)
 	for foto_criatura in foto["criaturas"]:
 		var estado: String = foto_criatura["estado"]
 		if foto_criatura["posicion"] == null or not estado in [_ESTADO_SUELTA, _ESTADO_CAIDA]:
@@ -50,12 +56,28 @@ func fichas() -> Array[Dictionary]:
 		var criatura: Criatura = _plantel.criatura(foto_criatura["id"])
 		var marcas: Array[String] = []
 		if estado == _ESTADO_CAIDA:
-			marcas.append(_armador.armar(ClavesTextos.MARCA_CAIDA))
-		if foto_criatura["erizada"]:
-			marcas.append(_armador.armar(ClavesTextos.MARCA_ERIZADA))
-		lista.append(_ficha(criatura.id, foto_criatura["posicion"], criatura.bando == Criatura.Bando.TRIBU,
-				false, estado == _ESTADO_CAIDA, foto_criatura["vida"], criatura.vida_max_real(), marcas))
+			marcas.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, criatura.especie.id()))
+		marcas.append_array(_marcas_rasgo(foto_criatura))
+		var ficha: Dictionary = _ficha(criatura.id, foto_criatura["posicion"], criatura.bando == Criatura.Bando.TRIBU,
+				false, estado == _ESTADO_CAIDA, foto_criatura["vida"], criatura.vida_max_real(), marcas)
+		ficha["oculta"] = foto_criatura["oculta"]
+		lista.append(ficha)
 	return lista
+
+
+# T40: lo que el rasgo deja a la vista (Sistema.md 11.2.2, 11.2.3): el modo,
+# erizada, oculta y el bono pendiente, tal como vienen en la instantanea.
+func _marcas_rasgo(foto_criatura: Dictionary) -> Array[String]:
+	var marcas: Array[String] = []
+	if foto_criatura["modo"] != null:
+		marcas.append(_armador.armar(ClavesTextos.modo(foto_criatura["modo"])))
+	if foto_criatura["erizada"]:
+		marcas.append(_armador.armar(ClavesTextos.MARCA_ERIZADA))
+	if foto_criatura["oculta"]:
+		marcas.append(_armador.armar(ClavesTextos.MARCA_OCULTO))
+	if foto_criatura["bono_junco"]:
+		marcas.append(_armador.armar(ClavesTextos.MARCA_BONO))
+	return marcas
 
 
 # Una fila por entrada de la cola de la ronda, en orden:
@@ -105,7 +127,7 @@ func panel_turno() -> Array[String]:
 		var umbral: int = _plantel.maestro.fila_balanza()["umbral_rescate"]
 		var estado_lealtad: String = _estados.lealtad(criatura.lealtad, umbral)
 		lineas.append("%s: %d (%s)" % [_armador.armar(ClavesTextos.PANEL_LEALTAD), criatura.lealtad,
-				_armador.armar(ClavesTextos.estado_lealtad(estado_lealtad))])
+				_armador.armar(ClavesTextos.estado_lealtad(estado_lealtad), {}, criatura.especie.id())])
 		lineas.append(_linea_hambre(etiqueta_hambre, criatura.hambre, criatura.especie.id()))
 	return lineas
 
@@ -125,8 +147,8 @@ func _linea_hambre(etiqueta: String, valor: int, sujeto: String) -> String:
 func _ficha(id_unidad: String, posicion: Array, tribu: bool, es_maestro: bool, caida: bool, vida: int,
 		vida_max: int, marcas: Array[String]) -> Dictionary:
 	return {"id": id_unidad, "casilla": Vector2i(posicion[0], posicion[1]), "tribu": tribu,
-			"maestro": es_maestro, "caida": caida, "nombre": nombre(id_unidad), "vida": vida, "vida_max": vida_max,
-			"marcas": marcas}
+			"maestro": es_maestro, "caida": caida, "oculta": false, "nombre": nombre(id_unidad), "vida": vida,
+			"vida_max": vida_max, "marcas": marcas}
 
 
 # T13, sesion 2: las lineas de lo nuevo del registro, desde la linea `desde`.
@@ -161,8 +183,22 @@ func suceso(evento: Dictionary) -> Array[String]:
 			for id_unidad in evento["levantadas"]:
 				lineas.append(_armador.armar(ClavesTextos.CAIDA_LEVANTARSE, _hueco(id_unidad), _sujeto(id_unidad)))
 			for id_unidad in evento["muertas"]:
-				lineas.append(_SEPARADOR.join([nombre(id_unidad), _armador.armar(ClavesTextos.estado_unidad(_ESTADO_MUERTA))]))
+				lineas.append(_SEPARADOR.join([nombre(id_unidad),
+						_armador.armar(ClavesTextos.estado_unidad(_ESTADO_MUERTA), {}, _sujeto(id_unidad))]))
 			return lineas
+		# T40: los eventos de los rasgos de la v1.3 (A.7), una linea cada uno.
+		"surco":
+			return [_armador.armar(ClavesTextos.SUCESO_SURCO_CAVAR)]
+		"surco_cerrado":
+			return [_armador.armar(ClavesTextos.SUCESO_SURCO_CERRAR)]
+		"oculto":
+			return [_armador.armar(ClavesTextos.SUCESO_OCULTO)]
+		"destape":
+			return [_armador.armar(ClavesTextos.suceso_destape(evento["motivo"]))]
+		"bono_perdido":
+			return [_armador.armar(ClavesTextos.SUCESO_PIERDE_BONO)]
+		"cambio_modo":
+			return [_armador.armar(ClavesTextos.suceso_cambio(evento["a"]))]
 	return []
 
 
@@ -193,11 +229,11 @@ func resultado(datos: Dictionary) -> Array[String]:
 	]
 	var linea_maestro: Array[String] = [nombre(Maestro.ID), "%s: %d" % [etiqueta_vida, datos["maestro"]["vida"]]]
 	if datos["maestro_caido"]:
-		linea_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA))
+		linea_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, Maestro.ID))
 	lineas.append(_SEPARADOR.join(linea_maestro))
 	for unidad in datos["unidades"]:
 		lineas.append(_SEPARADOR.join([_armador.armar(ClavesTextos.nombre_especie(unidad["especie"])),
-				_armador.armar(ClavesTextos.estado_unidad(unidad["estado"])),
+				_armador.armar(ClavesTextos.estado_unidad(unidad["estado"]), {}, unidad["especie"]),
 				"%s: %d" % [etiqueta_vida, unidad["vida"]]]))
 	if not (datos["lealtad_cambios"] as Array).is_empty():
 		lineas.append(_armador.armar(ClavesTextos.RESULTADO_LEALTAD))
@@ -217,14 +253,67 @@ func texto_terminar() -> String:
 	return _armador.armar(ClavesTextos.ACCION_ESPERAR)
 
 
-# Nombre y tooltip del rasgo de la unidad del turno (el boton de Erizarse).
-# ["", ""] si no hay turno o es el Maestro.
-func boton_rasgo() -> Array[String]:
+# T40: los botones de las activas de la unidad del turno, [{tipo, texto,
+# tooltip, habilitado}]. Que botones hay lo dice el efecto del rasgo de la ficha
+# (nunca el id); si se pueden usar ahora, las consultas del Turno. Vacio si no
+# hay turno o es el Maestro.
+func botones_activas() -> Array[Dictionary]:
+	var botones: Array[Dictionary] = []
 	var turno: Turno = _combate.turno_actual()
 	if turno == null or turno.unidad_id == Maestro.ID:
-		return ["", ""]
-	var rasgo_id: String = _plantel.criatura(turno.unidad_id).especie.rasgo()["id"]
-	return [_armador.armar(ClavesTextos.nombre_rasgo(rasgo_id)), _armador.armar(ClavesTextos.tooltip_rasgo(rasgo_id))]
+		return botones
+	var rasgo: Dictionary = _plantel.criatura(turno.unidad_id).especie.rasgo()
+	var nombre_rasgo: String = _armador.armar(ClavesTextos.nombre_rasgo(rasgo["id"]))
+	var tooltip: String = _armador.armar(ClavesTextos.tooltip_rasgo(rasgo["id"]))
+	match rasgo["efecto"]:
+		Turno.EFECTO_ERIZARSE:
+			botones.append(_boton(ACTIVA_ERIZARSE, nombre_rasgo, tooltip, turno.puede_erizarse()))
+		Junco.EFECTO:
+			botones.append(_boton(ACTIVA_HACERSE_JUNCO, nombre_rasgo, tooltip,
+					turno.validar(Accion.hacerse_junco()).valida))
+		Surcos.EFECTO:
+			# Arquitectura.md 10.5: el boton de cavar tiene su clave propia.
+			botones.append(_boton(ACTIVA_CAVAR, _armador.armar(ClavesTextos.ACCION_CAVAR), tooltip,
+					not turno.casillas_para_cavar().is_empty()))
+	return botones
+
+
+func _boton(tipo: String, texto: String, tooltip: String, habilitado: bool) -> Dictionary:
+	return {"tipo": tipo, "texto": texto, "tooltip": tooltip, "habilitado": habilitado}
+
+
+# T40: el tooltip de cualquier unidad en el tablero, propia o enemiga: nombre,
+# vida, rasgo (nombre y texto) y el estado del rasgo (Vision 6.2, Sistema.md
+# 11.2.1 a 11.2.3). Todo sale de la instantanea y de consultas del nucleo.
+func tooltip_unidad(id_unidad: String) -> Array[String]:
+	var foto: Dictionary = _combate.instantanea()
+	var etiqueta_vida: String = _armador.armar(ClavesTextos.PANEL_VIDA)
+	if id_unidad == Maestro.ID:
+		return [nombre(Maestro.ID), "%s: %d/%d" % [etiqueta_vida, foto["maestro"]["vida"],
+				_plantel.maestro.vida_max_real()]]
+	var criatura: Criatura = _plantel.criatura(id_unidad)
+	var foto_criatura: Dictionary = {}
+	for entrada in foto["criaturas"]:
+		if entrada["id"] == id_unidad:
+			foto_criatura = entrada
+	var rasgo: Dictionary = criatura.especie.rasgo()
+	var lineas: Array[String] = [nombre(id_unidad),
+			"%s: %d/%d" % [etiqueta_vida, foto_criatura["vida"], criatura.vida_max_real()],
+			_armador.armar(ClavesTextos.nombre_rasgo(rasgo["id"])),
+			_armador.armar(ClavesTextos.tooltip_rasgo(rasgo["id"]))]
+	lineas.append_array(_marcas_rasgo(foto_criatura))
+	# Sistema.md 11.2.3: "el umbral se muestra sobre la unidad".
+	var vida_de_cambio: Variant = _combate.vida_de_cambio(id_unidad)
+	if vida_de_cambio != null:
+		lineas.append(_armador.armar(ClavesTextos.AVISO_CUENTA_UMBRAL, {"n": vida_de_cambio}))
+	# Sistema.md 11.2.1, Tope: sus surcos contra el tope de la ficha.
+	if Surcos.es_surcon(id_unidad, _plantel):
+		var propios: int = 0
+		for surco in foto["surcos"]:
+			if surco["duenio"] == id_unidad:
+				propios += 1
+		lineas.append("%s: %d/%d" % [_armador.armar(ClavesTextos.nombre_rasgo(rasgo["id"])), propios, rasgo["tope"]])
+	return lineas
 
 
 func _suceso_estado(id_unidad: String, estado: String) -> Array[String]:
@@ -250,6 +339,9 @@ func _fuente(modificador: Dictionary, atacante_id: String) -> String:
 			return _armador.armar(ClavesTextos.ENFERMO)
 		"rasgo_atacante", "rasgo_objetivo":
 			return _armador.armar(ClavesTextos.nombre_rasgo(modificador["detalle"]))
+		# T40 (Arquitectura.md 10.5): el modo se nombra como en la cola.
+		"modo":
+			return _armador.armar(ClavesTextos.modo(modificador["detalle"]))
 	return _armador.armar(ClavesTextos.fuente_desglose(modificador["fuente"]))
 
 

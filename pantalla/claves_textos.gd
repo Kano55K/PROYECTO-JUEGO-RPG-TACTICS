@@ -1,7 +1,7 @@
 # Arquitectura.md A.2.1 y B.2 (T13): las claves de texto que usa la pantalla,
 # para el chequeo del Cargador (avisa de las que faltan en textos/es.json).
 # Constantes mas las que se arman desde los datos: por especie, por estado de
-# hambre, por rasgo y por evento de lealtad. Las variantes (.maestro,
+# hambre, por rasgo, por modo y por evento de lealtad. Las variantes (.maestro,
 # .<especie>) y los complementos (caida.<especie>) los resuelve el armador.
 class_name ClavesTextos
 extends RefCounted
@@ -34,6 +34,16 @@ const RESULTADO_TITULO: String = "resultado.titulo"
 const RESULTADO_RONDAS: String = "resultado.rondas"
 const RESULTADO_LEALTAD: String = "resultado.lealtad"
 const RESULTADO_VOLVER: String = "resultado.volver"
+# T40: rasgos de la v1.3 (Arquitectura.md 10.5, claves confirmadas).
+const ACCION_CAVAR: String = "accion.cavar"
+const MARCA_OCULTO: String = "marca.oculto"
+const MARCA_BONO: String = "marca.bono"
+const SUCESO_SURCO_CAVAR: String = "suceso.surco.cavar"
+const SUCESO_SURCO_CERRAR: String = "suceso.surco.cerrar"
+const SUCESO_OCULTO: String = "suceso.oculto"
+const SUCESO_PIERDE_BONO: String = "suceso.pierde_bono"
+const AVISO_CUENTA_UMBRAL: String = "aviso.cuenta.umbral"
+const AVISO_DESTAPAR: String = "aviso.destapar"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -42,6 +52,8 @@ const FIJAS: Array[String] = [
 	CAIDA, CAIDA_LEVANTARSE, MAESTRO_CAIDA, COMBATE_VICTORIA, MARCA_FUERA,
 	DESGLOSE_BASE, DESGLOSE_TOTAL, DESGLOSE_MINIMO, ENFERMO,
 	RESULTADO_TITULO, RESULTADO_RONDAS, RESULTADO_LEALTAD, RESULTADO_VOLVER,
+	ACCION_CAVAR, MARCA_OCULTO, MARCA_BONO, SUCESO_SURCO_CAVAR, SUCESO_SURCO_CERRAR,
+	SUCESO_OCULTO, SUCESO_PIERDE_BONO, AVISO_CUENTA_UMBRAL, AVISO_DESTAPAR,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -50,14 +62,15 @@ const _ESTADOS_LEALTAD: Array[String] = [
 ]
 # FinCombate: los desenlaces que hoy pueden pasar (huida es de T26).
 const _DESENLACES: Array[String] = ["victoria", "derrota_por_caida"]
-# ModificadorDanio.Fuente sin texto propio en es.json (hambre y rasgos lo tienen).
+# ModificadorDanio.Fuente sin texto propio en es.json (hambre, rasgos y modo lo tienen).
 const _FUENTES_DESGLOSE: Array[String] = ["combo", "afinidad", "encono", "cobardia"]
+# Arquitectura.md A.7: motivos del evento destape.
+const _MOTIVOS_DESTAPE: Array[String] = [Junco.MOTIVO_MOVER, Junco.MOTIVO_ATACAR, Junco.MOTIVO_CONTACTO]
 
 const _PREFIJO_ESPECIES: String = "especies/"
+const _PREFIJO_TEXTOS: String = "textos/"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
-# Marca de la cola (EntradaCola.marca) -> clave.
-const _MARCAS: Dictionary = {"caza": MARCA_CAZA, "cuenta": MARCA_CUENTA}
 
 
 static func nombre_especie(especie_id: String) -> String:
@@ -98,9 +111,25 @@ static func fuente_desglose(fuente: String) -> String:
 	return "desglose.fuente.%s" % fuente
 
 
-# "" si la entrada no tiene marca o la marca no tiene clave.
+# T40: el nombre de un modo (rasgo.modos[].id) en la cola, la ficha y el desglose
+# (Arquitectura.md 10.5: iniciativa.caza e iniciativa.cuenta).
+static func modo(modo_id: String) -> String:
+	return "iniciativa.%s" % modo_id
+
+
+# "" si la entrada no tiene marca.
 static func marca_cola(marca: String) -> String:
-	return _MARCAS.get(marca, "")
+	return "" if marca.is_empty() else modo(marca)
+
+
+# motivo: Junco.MOTIVO_* (A.7).
+static func suceso_destape(motivo: String) -> String:
+	return "suceso.destape.%s" % motivo
+
+
+# a: el modo al que pasa (evento cambio_modo, A.7).
+static func suceso_cambio(a: String) -> String:
+	return "suceso.%s.cambio" % a
 
 
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
@@ -116,15 +145,26 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		_sumar(claves, desenlace(nombre))
 	for fuente in _FUENTES_DESGLOSE:
 		_sumar(claves, fuente_desglose(fuente))
+	for motivo in _MOTIVOS_DESTAPE:
+		_sumar(claves, suceso_destape(motivo))
 	var rutas: Array = datos.keys()
 	rutas.sort()
+	var especies: Array[String] = []
 	for ruta in rutas:
 		var ruta_str: String = ruta as String
 		if ruta_str.begins_with(_PREFIJO_ESPECIES):
 			var especie: Dictionary = datos[ruta]
+			var rasgo: Dictionary = especie["rasgo"]
+			especies.append(especie["id"])
 			_sumar(claves, nombre_especie(especie["id"]))
-			_sumar(claves, nombre_rasgo(especie["rasgo"]["id"]))
-			_sumar(claves, tooltip_rasgo(especie["rasgo"]["id"]))
+			_sumar(claves, nombre_rasgo(rasgo["id"]))
+			_sumar(claves, tooltip_rasgo(rasgo["id"]))
+			var modos: Array = rasgo.get("modos", [])
+			for datos_modo in modos:
+				_sumar(claves, modo(datos_modo["id"]))
+				# Sistema.md 11.2.3: se pasa a los modos que no son el inicial.
+				if datos_modo["id"] != rasgo["modo_inicial"]:
+					_sumar(claves, suceso_cambio(datos_modo["id"]))
 	if datos.has(_TABLA_HAMBRE):
 		for estado in (datos[_TABLA_HAMBRE] as Dictionary)["estados"]:
 			_sumar(claves, estado_hambre(estado["id"]))
@@ -132,7 +172,34 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		for evento in ((datos[_TABLA_LEALTAD] as Dictionary)["eventos"] as Dictionary).keys():
 			if not (evento as String).begins_with("_"):
 				_sumar(claves, motivo_lealtad(evento))
+	_sumar_variantes(claves, datos, especies)
 	return claves
+
+
+# Arquitectura.md A.2.1, concordancia de las etiquetas: hambre.estado.*,
+# lealtad.estado.*, estado.* y marca.caida se piden con la especie (o maestro)
+# como sujeto. Una variante es opcional (sin ella sale la base): solo se suman
+# las que estan en algun archivo de textos, asi no aparecen como faltantes.
+static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies: Array[String]) -> void:
+	var existentes: Dictionary = {}
+	for ruta in datos.keys():
+		if (ruta as String).begins_with(_PREFIJO_TEXTOS):
+			for clave in (datos[ruta] as Dictionary).keys():
+				existentes[clave] = true
+	var sujetos: Array[String] = [Maestro.ID]
+	sujetos.append_array(especies)
+	for base in claves.duplicate():
+		if not _es_etiqueta(base):
+			continue
+		for sujeto in sujetos:
+			var variante: String = "%s.%s" % [base, sujeto]
+			if existentes.has(variante):
+				_sumar(claves, variante)
+
+
+static func _es_etiqueta(clave: String) -> bool:
+	return clave == MARCA_CAIDA or clave.begins_with("hambre.estado.") \
+			or clave.begins_with("lealtad.estado.") or clave.begins_with("estado.")
 
 
 static func _sumar(claves: Array[String], clave: String) -> void:

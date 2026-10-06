@@ -9,6 +9,8 @@ const _COLOR_ENEMIGA: Color = Color(0.9, 0.35, 0.3)
 const _COLOR_CAIDA: Color = Color(0.5, 0.5, 0.5)
 
 var unidad_id: String = ""
+# La vida maxima que se mostro, para mostrar_vida.
+var _vida_max: int = 0
 
 @onready var _figura: Sprite2D = $Figura
 @onready var _aro: Sprite2D = $Aro
@@ -27,5 +29,15 @@ func mostrar(ficha: Dictionary) -> void:
 		_figura.modulate = _COLOR_CAIDA
 	_aro.visible = ficha["maestro"]
 	_nombre.text = ficha["nombre"]
-	_vida.text = "%d/%d" % [ficha["vida"], ficha["vida_max"]]
+	_vida_max = ficha["vida_max"]
+	mostrar_vida(ficha["vida"])
 	_marcas.text = " · ".join(marcas)
+
+
+# T40 (ritmo de la IA): la vida que deja un ataque, leida del registro.
+func mostrar_vida(vida: int) -> void:
+	_vida.text = "%d/%d" % [vida, _vida_max]
+
+
+func texto_vida() -> String:
+	return _vida.text

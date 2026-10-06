@@ -43,14 +43,23 @@ static func destapar(criatura: Criatura, motivo: String, por_id: String = "") ->
 # si esta de pie, en el orden del Plantel. Por donde paso no importa.
 static func revisar_contacto(movida_id: String, plantel: Plantel) -> Array[Dictionary]:
 	var eventos: Array[Dictionary] = []
-	if not Objetivos.de_pie(movida_id, plantel):
-		return eventos
-	var bando: Criatura.Bando = _bando(movida_id, plantel)
-	var posicion: Vector2i = _posicion(movida_id, plantel)
-	for criatura in plantel.criaturas():
-		if criatura.oculta and criatura.bando != bando and Tablero.distancia(criatura.posicion, posicion) == 1:
-			eventos.append_array(destapar(criatura, MOTIVO_CONTACTO, movida_id))
+	for id_oculta in destaparia(movida_id, _posicion(movida_id, plantel), plantel):
+		eventos.append_array(destapar(plantel.criatura(id_oculta), MOTIVO_CONTACTO, movida_id))
 	return eventos
+
+
+# La misma regla sin aplicar (T40, aviso de la pantalla): los ids de las ocultas
+# del otro bando que `movida_id` destaparia si terminara su movimiento en
+# `casilla`, en el orden del Plantel. No modifica nada.
+static func destaparia(movida_id: String, casilla: Vector2i, plantel: Plantel) -> Array[String]:
+	var ids: Array[String] = []
+	if not Objetivos.de_pie(movida_id, plantel):
+		return ids
+	var bando: Criatura.Bando = _bando(movida_id, plantel)
+	for criatura in plantel.criaturas():
+		if criatura.oculta and criatura.bando != bando and Tablero.distancia(criatura.posicion, casilla) == 1:
+			ids.append(criatura.id)
+	return ids
 
 
 # Sistema.md 11.2.2, Bono y Se destapa: la atacante ataco. Se destapa y el bono

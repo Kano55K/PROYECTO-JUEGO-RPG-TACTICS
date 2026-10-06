@@ -123,6 +123,42 @@ func vida_de_cambio(unidad_id: String) -> Variant:
 	return null if criatura == null else CambioModo.vida_de_cambio(criatura)
 
 
+# T40, zona de Caza (Sistema.md 11.2.3 y 15): las casillas donde la unidad puede
+# golpear en su proximo turno con las posiciones de ahora. Es lo que golpea
+# (Tablero.golpeables) desde cada casilla a la que llega (Tablero.alcanzables),
+# sin la suya, en orden de lectura. Vacio si no esta de pie en el tablero. No
+# modifica nada.
+func zona_amenaza(unidad_id: String) -> Array[Vector2i]:
+	var resultado: Array[Vector2i] = []
+	if not Objetivos.de_pie(unidad_id, _plantel):
+		return resultado
+	var tablero: Tablero = _contexto.tablero
+	var desde: Vector2i = _posicion(unidad_id)
+	var bando: Criatura.Bando = Criatura.Bando.TRIBU
+	var movimiento: int = _plantel.maestro.movimiento
+	var alcance: int = _plantel.maestro.alcance
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura != null:
+		bando = criatura.bando
+		movimiento = criatura.especie.movimiento()
+		alcance = criatura.especie.alcance()
+	var vistas: Dictionary = {}
+	for casilla in tablero.alcanzables(desde, movimiento, bando, _plantel, _surcos,
+			Surcos.es_surcon(unidad_id, _plantel)):
+		for golpeada in tablero.golpeables(casilla, alcance, bando, _plantel):
+			if golpeada != desde and not vistas.has(golpeada):
+				vistas[golpeada] = true
+				resultado.append(golpeada)
+	resultado.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	return resultado
+
+
+# T40, aviso al mover junto a una oculta (Sistema.md 11.2.2): las ocultas que la
+# unidad destaparia si terminara su movimiento en `casilla` (Junco.destaparia).
+func destaparia(unidad_id: String, casilla: Vector2i) -> Array[String]:
+	return Junco.destaparia(unidad_id, casilla, _plantel)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
