@@ -336,3 +336,16 @@
 - **Bloquea:** no (se necesita antes de T30)
 - **Mientras tanto:** programado con A en `nucleo/combate/resultado_combate.gd`, `ResultadoCombate.armar`: toma la criatura `ATACANTE_NOCTURNA` en estado `CAIDA` sin mirar `cierre.fin`, con un comentario que remite a esta pregunta y a S-20. Test: `pruebas/combate/test_contrato.gd`, `test_resultados_validan_contra_el_esquema` (test 11 de T12, caso G con la atacante en 0: `atacante_pendiente = "ocarra_1"`). Ese test cubre la atacante caída en una victoria. Ningún test arma una derrota con la atacante caída. Si Sistemas elige B, cambia una condición de `armar` y se suma ese caso al test 11.
 - **Respuesta:** `Sistema.md` 9.2, paso 6 (v1.4 y v1.5) y Visión 6.4 v1.2: opción B. Si el combate nocturno termina en derrota, la atacante se va, también si ya estaba caída: su pergamino arde, vuelve a ser salvaje y no hay `atacante_pendiente`. Su ida no cambia la lealtad de nadie. Cambia una condición de `ResultadoCombate.armar` y se suma la derrota al test 11 de T12. Se aplica en T30.
+
+## P-025 — Guardar a una caída y la consulta única de objetivo
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T38
+- **Fecha:** 06/10/2026
+- **Fuente:** `Arquitectura.md` B.2.1, fila T38 ("Aliada: la oculta sí vale") y regla "Consulta única de objetivo"; `Sistema.md` 1.6 (Remiendo: "no afecta a las caídas"), 3.1 y 11.5 (el Maestro puede guardar a una caída propia)
+- **Duda:** ¿cómo admite la consulta única a una caída propia para guardar, si el Remiendo, que también es aliado, no la admite?
+- **Caso que la dispara:** la Rodauva de la tribu cae. Para el Remiendo (T22) no es objetivo; para guardar a una caída (T26) sí. Con dos clases (hostil y aliada) la consulta no puede dar las dos respuestas.
+- **Opciones:** A) una tercera clase, "aliada que admite caída", solo para guardar. B) la consulta recibe el tipo de acción (ataque, Martillazo, Lanzadera, sellar, Encono, Remiendo, guardar) y de ahí saca qué estados deja pasar. — Recomendación técnica: B (cada acción dice una sola vez qué admite, y la próxima diferencia no pide otra clase).
+- **Bloquea:** no (se necesita antes de T26)
+- **Mientras tanto:** `nucleo/combate/objetivos.gd` (`Objetivos.Clase`) tiene `HOSTIL` y `ALIADA`, y `ALIADA` deja afuera a la caída, que es lo que pide el Remiendo. Test: `pruebas/combate/test_junco.gd`, `test_aliada_vale_sobre_oculta` (una caída da `OBJETIVO_CAIDO` como aliada). Ninguna acción aliada existe todavía.
+- **Respuesta:** _(la completa el staff)_

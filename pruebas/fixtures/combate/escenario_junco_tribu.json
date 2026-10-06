@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "junco_tribu",
+  "_nota": "Sistema.md 11.2.2 y Arquitectura.md A.7 (registro y grabacion de T38). Cola: Zancajunco de la tribu [3,5] (8), Ocarra salvaje [3,2] (7), Maestro [3,7] (5). Ronda 1: el Zancajunco se oculta; la Ocarra no alcanza a nadie (el Zancajunco oculto no es objetivo y le cierra el paso al Maestro) y se acerca al Maestro hasta [3,4], junto al Zancajunco: lo destapa. Ronda 2: el Zancajunco espera con el bono; la Ocarra lo ataca (4) y el bono se pierde",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 5] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

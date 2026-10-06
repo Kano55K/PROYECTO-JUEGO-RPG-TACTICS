@@ -508,3 +508,86 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** ninguna.
 - **Preguntas:** ninguna nueva; cerradas: ninguna. P-002, P-003, P-008 y P-024 siguen `RESPONDIDA` (son de T14, T19 y T30).
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T38.
+
+## T38 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T38-junco
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Consulta única de objetivo** (`Objetivos`, nueva, en `nucleo/combate/`; `Arquitectura.md` B.2.1):
+    - `motivo(objetivo, clase, plantel)` es la única función que mira si una unidad está caída, fuera, guardada u oculta. Devuelve `OBJETIVO_INEXISTENTE`, `OBJETIVO_FUERA_DEL_TABLERO`, `OBJETIVO_CAIDO`, `OBJETIVO_OCULTO` (motivo nuevo) o `NINGUNO`.
+    - Clases: `HOSTIL` (ataque, Martillazo, Lanzadera, sellar, Encono) deja afuera a la oculta (S-21). `ALIADA` (Remiendo, guardar) la acepta (S-22).
+    - `puede_ser_objetivo`, y `de_pie` para las reglas que no eligen objetivo ("enemiga de pie adyacente").
+    - `cuenta_como_rival_a_su_alcance(unidad, rival, plantel)`, para T19 (10.5): la oculta no cuenta.
+    - La usan el ataque del `Turno`, y por él `objetivos_para_atacar`, `previsualizar_ataque` y las opciones de la IA. La IA también la usa al acercarse y al erizarse: sale `_enemigas_de_pie`, que miraba los estados por su cuenta. Los motivos del ataque salen en el mismo orden que antes.
+  - **Hacerse junco** (`Sistema.md` 11.2.2 v1.4):
+    - `Criatura` suma `oculta`, `bono_junco` y `junco_turno_anterior` (lo escribe `Turno._fin_del_turno`).
+    - Acción `Accion.hacerse_junco()`: solo con el efecto `ocultarse`, sin haberse movido, sin enemiga de pie adyacente y no dos turnos seguidos. Motivos nuevos: `ENEMIGA_ADYACENTE` y `JUNCO_TURNO_ANTERIOR`. Gasta la acción y cierra el movimiento (S-26). No es esperar.
+    - **Bono:** `Danio` suma un plano `RASGO_ATACANTE` (`bono_plano` de la ficha, detalle `hacerse_junco`) si la atacante tiene el bono. Se cobra solo al aplicar el ataque: validar y previsualizar no lo gastan. Es un sí/no, así que ocultarse otra vez con el bono no lo suma dos veces.
+    - **Destapes** (`Junco`, nueva, en `nucleo/combate/`, sin estado):
+      - Al aplicar su `mover` (conserva el bono) y su `atacar` (cobra el bono).
+      - Por contacto, con una sola función, `Junco.revisar_contacto(movida_id, plantel)`, que el `Turno` llama después de cada `mover` aplicado (en Cuenta, después de cada tramo). Mira dónde terminó la unidad, nunca el camino (S-24). La Lanzadera (T22) e invocar (T26) van a llamar a la misma.
+      - Destapar y pegar no tiene código propio: sale de que la consulta se hace en el momento del ataque.
+    - **Pierde el bono** si recibe un ataque aplicado ya destapada (`Junco.recibir_ataque`).
+    - **Fin del combate:** `Cierre.cerrar` borra el estado oculto y el bono (`Junco.limpiar`), sin evento.
+  - **Registro, instantánea y grabación** (A.7):
+    - Eventos `oculto` (unidad), `destape` (unidad, motivo `mover` / `atacar` / `contacto`, `por`: la unidad que lo destapó, o `null` si no es por contacto) y `bono_perdido` (unidad, atacante).
+    - Las reglas los devuelven, el `Turno` los junta en `eventos()` y el `Combate` los vuelca después del evento de la acción, antes de `estado` y `surco`.
+    - La `instantanea` suma `oculta` y `bono_junco` por criatura. El esquema `grabacion` acepta el tipo `hacerse_junco`. `Grabacion.FORMATO` sigue en 1.
+  - **Deuda de T37** (cambian las firmas, no las reglas):
+    - `Tablero.alcanzables` y `pasos_hasta` piden `surcos` y `pisa_surcos`.
+    - `Turno.empezar` y `VidaCero.resolver` piden `surcos`. Salen el `Surcos.new()` de reemplazo y el `if surcos != null`.
+- **Archivos:**
+  - **Creados:**
+    - Núcleo: `nucleo/combate/objetivos.gd`, `nucleo/combate/junco.gd`.
+    - Tests: `pruebas/combate/test_junco.gd`.
+    - Fixtures: `pruebas/fixtures/combate/escenario_junco.json`, `escenario_junco_salvaje.json` y `escenario_junco_tribu.json`.
+  - **Modificados:**
+    - Núcleo: `nucleo/combate/turno.gd`, `accion.gd`, `resultado_accion.gd`, `danio.gd`, `combate.gd`, `cierre.gd`, `vida_cero.gd`, `tablero.gd` e `ia/ia_salvaje.gd`; `nucleo/unidades/criatura.gd` y `plantel.gd`.
+    - Esquema: `datos/_esquemas/grabacion.schema.json`.
+    - Tests: los de la deuda (lista abajo).
+- **Tests:** 13 nuevos, total 254, todos pasan (sí).
+  - **Reescritos por la v1.3:** ninguno.
+  - **Cambio de firma por la deuda de T37** (se agrega `Surcos.new()`, o `false` en `pisa_surcos`; ninguna aserción cambia):
+    - `pruebas/combate/test_turno.gd`: `Turno.empezar` ×3.
+    - `pruebas/combate/test_vida_cero.gd`: `Turno.empezar` ×2.
+    - `pruebas/combate/test_danio.gd`: `Turno.empezar` ×1.
+    - `pruebas/combate/test_caza_y_cuenta.gd`: `Turno.empezar` ×2.
+    - `pruebas/combate/ia/test_ia_salvaje.gd`: `Turno.empezar` ×3.
+    - `pruebas/pantalla/test_interprete_clic.gd`: `Turno.empezar` ×1.
+    - `pruebas/combate/test_cierre.gd`: `VidaCero.resolver` ×1.
+    - `pruebas/combate/test_tablero.gd`: `alcanzables` / `pasos_hasta` ×11.
+    - `pruebas/combate/test_surco.gd`: `pasos_hasta` ×3.
+- **Criterio de terminado:** cumplido punto por punto (`test_junco.gd`):
+  1. `test_activar`: después de mover da `YA_SE_MOVIO`. Con una enemiga de pie adyacente da `ENEMIGA_ADYACENTE`; si está caída, vale. Con una aliada adyacente vale. Después de ocultarse, mover da `MOVIMIENTO_USADO`, atacar y ocultarse dan `ACCION_USADA`, y terminar no es esperar. En el turno siguiente da `JUNCO_TURNO_ANTERIOR`, y en el otro vale. Sin el efecto da `SIN_RASGO`.
+  2. `test_no_es_objetivo_hostil`: sin ocultarse, la IA de la Ocarra y la de la Rodauva salvajes eligen al Zancajunco. Oculto: atacarlo da `OBJETIVO_OCULTO`, no está en `objetivos_para_atacar`, la previsualización lo rechaza, la Ocarra ataca a la Rodauva de la tribu y la Rodauva salvaje se acerca a ella.
+  3. `test_ocupa_su_casilla`: la Rodauva salvaje no termina en su casilla ni la atraviesa (`Tablero` y `Turno`).
+  4. `test_bono`: pega 7 (plano `rasgo_atacante` +3 `hacerse_junco`), y 4 en el ataque siguiente. Oculto → se mueve → se oculta otra vez con el bono → pega 7, no 10.
+  5. `test_mover_destapa_y_conserva`: evento `oculto`; al moverse, `destape` `mover`, y conserva el bono.
+  6. `test_atacar_destapa_y_cobra`: validar y previsualizar (desde su casilla y desde otra) dan 7 y no cambian nada. Al aplicar pega 7, se destapa (`atacar`) y el bono queda cobrado.
+  7. `test_contacto`: la Rodauva salvaje pasa por [4,4], al lado, y termina en [4,5]: no lo destapa. La Ocarra termina en [4,4]: `destape` `contacto` por `ocarra_s1`.
+  8. `test_pierde_el_bono`: destapado y con el bono, validar el ataque de la Rodauva salvaje no lo quita. Al aplicarlo, recibe 2 y pierde el bono (`bono_perdido`).
+  9. `test_aliada_vale_sobre_oculta`: `ALIADA` vale y `HOSTIL` da `OBJETIVO_OCULTO`. Como aliada, una caída da `OBJETIVO_CAIDO` (P-025) y un id que no existe da `OBJETIVO_INEXISTENTE`.
+  10. `test_rival_oculta`: la Ocarra (3 + 2) tiene al Zancajunco a 3. Destapado cuenta; oculto, no; destapado otra vez, sí; a distancia 8, no.
+  11. `test_registro_instantanea_y_grabacion`: con `Combate.aplicar` en `escenario_junco_tribu`:
+      - el Zancajunco se oculta, la IA de la Ocarra se acerca al Maestro y lo destapa, y en la ronda 2 le pega y le quita el bono;
+      - el registro trae `oculto` (detrás de su `accion`), `destape` (detrás del `movimiento`) y `bono_perdido` (detrás del `ataque`);
+      - la `instantanea` trae `oculta` y `bono_junco`;
+      - la grabación valida contra el esquema y se reproduce con el mismo registro y la misma `instantanea`;
+      - `Accion.hacerse_junco` va y vuelve por diccionario;
+      - el `Cierre` borra el estado oculto y el bono.
+  12. `test_destapar_y_pegar`: con el Zancajunco salvaje oculto, atacarlo da `OBJETIVO_OCULTO`. La Rodauva se mueve al lado (`destape` `contacto`), lo ataca en el mismo turno y vale (2), y el bono se pierde.
+  13. `test_cuenta_destapa_en_el_primer_tramo`: el Tasajero en Cuenta termina su primer tramo al lado. El `destape` está en sus eventos antes de cualquier ataque. Después pega 4 y se retira con los 2 pasos que le quedan.
+- **Lecturas declaradas:** ninguna. Decisiones técnicas del plan aprobado:
+  - El bando no está en la consulta: la Lanzadera es hostil y también vale sobre aliadas (1.6).
+  - `ALIADA` deja afuera a la caída mientras siga abierta P-025.
+  - Orden de las comprobaciones de `hacerse_junco`: turno terminado, rasgo, acción usada, se movió, enemiga adyacente, turno anterior.
+  - Orden de los eventos: el de la acción, los de `Junco`, `estado` y `surco`. Al atacar: primero el destape o el bono de la atacante, después el `bono_perdido` de la objetivo, y al final `VidaCero`.
+  - `por` es `null` salvo en el contacto.
+  - En el plan figuraba `Junco.cobrar_bono`. Quedó como `Junco.atacar`, que también destapa a la atacante.
+- **Estado intermedio:**
+  - La IA no se oculta, y el Zancajunco con el bono no avanza (pasos 7 y 8, T39).
+  - La pantalla no tiene el botón Hacerse junco, no marca a la oculta y no muestra los eventos nuevos (T40). `LecturaCombate` los ignora.
+  - La pantalla ya no deja atacar a una oculta, porque usa `objetivos_para_atacar`.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nueva P-025 (ARQUITECTO, no bloquea, se necesita antes de T26). Cerradas: ninguna. P-002, P-003, P-008 y P-024 siguen `RESPONDIDA` (son de T14, T19 y T30).
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T39.

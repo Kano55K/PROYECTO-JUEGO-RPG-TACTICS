@@ -37,6 +37,15 @@ var erizada: bool = false
 # en el modo inicial; la cola lee de aca la Velocidad al armar cada ronda (11.3).
 # Estado del combate: no viene del escenario.
 var modo: String = ""
+# Sistema.md 11.2.2, Hacerse junco. Estado del combate: no viene del escenario.
+# Oculta: no es objetivo de acciones hostiles (Objetivos); sigue en su casilla.
+var oculta: bool = false
+# Su proximo ataque aplicado suma el bono_plano de la ficha. Es un si/no: volver
+# a ocultarse con el bono no lo suma dos veces.
+var bono_junco: bool = false
+# Si se oculto en su turno anterior (no puede dos turnos seguidos). Lo escribe
+# el fin de cada turno suyo.
+var junco_turno_anterior: bool = false
 
 
 func _init(id_criatura: String, especie_criatura: Especie, bando_criatura: Bando) -> void:

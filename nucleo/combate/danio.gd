@@ -44,7 +44,7 @@ func calcular(atacante_id: String, objetivo_id: String, plantel: Plantel,
 	var atacante: Criatura = plantel.criatura(atacante_id)
 	if atacante != null:
 		_modo(atacante, atacante.especie.danio_plano(atacante.modo), ModificadorDanio.Tipo.PLANO, planos)
-	# Aca se enchufa el bono de Hacerse junco de la atacante (T38).
+		_rasgo_atacante(atacante, planos)
 	for aporte in aportes:
 		if aporte.tipo == ModificadorDanio.Tipo.PORCENTAJE:
 			porcentajes.append(aporte)
@@ -107,6 +107,16 @@ func _rasgo_objetivo(objetivo: Criatura, porcentajes: Array[ModificadorDanio]) -
 	if rasgo["efecto"] == _EFECTO_ERIZARSE and objetivo.erizada:
 		porcentajes.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_OBJETIVO,
 				ModificadorDanio.Tipo.PORCENTAJE, rasgo["danio_recibido_pct"], rasgo["id"]))
+
+
+# Sistema.md 11.2.2 y 11.4 paso 3: el bono de Hacerse junco de la atacante, por
+# su efecto en la ficha, con el id del rasgo como detalle. Aca solo se suma: se
+# cobra al aplicar el ataque (Turno, Junco), asi validar y previsualizar no lo gastan.
+func _rasgo_atacante(atacante: Criatura, planos: Array[ModificadorDanio]) -> void:
+	var rasgo: Dictionary = atacante.especie.rasgo()
+	if rasgo["efecto"] == Junco.EFECTO and atacante.bono_junco:
+		planos.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_ATACANTE,
+				ModificadorDanio.Tipo.PLANO, rasgo["bono_plano"], rasgo["id"]))
 
 
 # Sistema.md 11.2.3 y 11.4: el del modo actual, con el id del modo como detalle.

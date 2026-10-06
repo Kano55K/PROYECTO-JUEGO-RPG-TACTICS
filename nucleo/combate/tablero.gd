@@ -54,7 +54,7 @@ func adyacentes(a: Vector2i, b: Vector2i) -> bool:
 # Sistema.md 11.2.1, Transito: un surco solo lo pisa un Surcon (`pisa_surcos`,
 # de cualquier bando); para el resto no se pasa ni se termina ahi.
 func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel,
-		surcos: Surcos = null, pisa_surcos: bool = false) -> Array[Vector2i]:
+		surcos: Surcos, pisa_surcos: bool) -> Array[Vector2i]:
 	var resultado: Array[Vector2i] = []
 	resultado.assign(pasos_hasta(desde, movimiento, bando, plantel, surcos, pisa_surcos).keys())
 	return _en_orden_de_lectura(resultado)
@@ -63,7 +63,7 @@ func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plante
 # Las mismas casillas que `alcanzables`, cada una con los pasos del camino mas
 # corto (`desde` vale 0). La IA la usa para "la de menos movimiento" (11.8).
 func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel,
-		surcos: Surcos = null, pisa_surcos: bool = false) -> Dictionary:
+		surcos: Surcos, pisa_surcos: bool) -> Dictionary:
 	var ocupantes: Dictionary = _ocupantes(plantel)
 	var pasos: Dictionary = {desde: 0}
 	var frontera: Array[Vector2i] = [desde]
@@ -76,7 +76,7 @@ func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plante
 				continue
 			if ocupantes.has(vecina) and ocupantes[vecina] != bando:
 				continue
-			if surcos != null and not pisa_surcos and surcos.hay_en(vecina):
+			if not pisa_surcos and surcos.hay_en(vecina):
 				continue
 			pasos[vecina] = pasos[actual] + 1
 			frontera.append(vecina)

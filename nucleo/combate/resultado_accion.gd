@@ -30,6 +30,12 @@ enum Motivo {
 	CASILLA_NO_ADYACENTE,
 	# Sistema.md 11.3, Casilla libre: fuera del tablero, con unidad o con surco (S-25).
 	CASILLA_NO_LIBRE,
+	# Sistema.md 11.2.2, Oculto: no es objetivo de una accion hostil (Objetivos).
+	OBJETIVO_OCULTO,
+	# Sistema.md 11.2.2, Activar: con una enemiga de pie adyacente no se oculta.
+	ENEMIGA_ADYACENTE,
+	# Sistema.md 11.2.2, Limite: no se oculta dos turnos seguidos.
+	JUNCO_TURNO_ANTERIOR,
 	# Sistema.md 11.5: con el combate terminado no se acepta ninguna accion.
 	COMBATE_TERMINADO,
 	# Combate.aplicar: no es el turno de una unidad del jugador (o el combate se

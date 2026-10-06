@@ -38,7 +38,7 @@ func _tumbar(plantel: Plantel, ids: Array[String]) -> void:
 			plantel.maestro.vida = 0
 		else:
 			plantel.criatura(unidad_id).vida = 0
-		VidaCero.resolver(unidad_id, plantel)
+		VidaCero.resolver(unidad_id, plantel, Surcos.new())
 
 
 func _victoria(plantel: Plantel) -> void:

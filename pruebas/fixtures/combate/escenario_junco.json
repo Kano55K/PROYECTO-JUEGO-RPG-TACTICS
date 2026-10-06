@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "junco",
+  "_nota": "Sistema.md 11.2.2 (tests de T38, con Turno). Zancajunco de la tribu [3,4] (danio 4) con la Rodauva de la tribu [3,5] adyacente (aliada). La Rodauva salvaje [3,1] (danio 2, Movimiento 4) y la Ocarra salvaje [6,4] (danio 4, Movimiento 3, Alcance 2) estan a 3 del Zancajunco: ninguna enemiga adyacente. El Maestro [0,7] queda lejos",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 4] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 5] }
+  ],
+  "enemigas": [
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [3, 1] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [6, 4] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

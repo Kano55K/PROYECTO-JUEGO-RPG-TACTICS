@@ -52,7 +52,7 @@ func _cola(plantel: Plantel) -> ColaIniciativa:
 
 # Turno suelto de la salvaje, con la cola de la ronda para los desempates.
 func _decidir(plantel: Plantel, unidad_id: String) -> Dictionary:
-	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio)
+	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
 	return {"turno": turno, "decision": IASalvaje.decidir(turno, plantel, _cola(plantel))}
 
 
@@ -251,7 +251,7 @@ func test_tasajero_decide_en_cada_turno() -> void:
 		cola.empezar_ronda(plantel)
 		var entrada: EntradaCola = cola.siguiente(plantel)
 		while entrada != null:
-			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio)
+			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new())
 			if entrada.unidad_id == "tasajero_s1":
 				assert_str(entrada.marca).is_equal("caza")
 				var decision: DecisionIA = IASalvaje.decidir(turno, plantel, cola)
@@ -306,7 +306,7 @@ func test_escenario_a_la_ocarra_va_por_la_rodauva() -> void:
 		cola.empezar_ronda(plantel)
 		var entrada: EntradaCola = cola.siguiente(plantel)
 		while entrada != null:
-			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio)
+			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new())
 			if entrada.unidad_id == "ocarra_s1":
 				var decision: DecisionIA = IASalvaje.decidir(turno, plantel, cola)
 				decisiones.append(decision)

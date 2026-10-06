@@ -28,7 +28,7 @@ func before_test() -> void:
 	var tabla: TablaBalanza = TablaBalanza.new(_leer(_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"))
 	_plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_turno.json", "escenario"), especies, tabla,
 			_leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
-	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, danio)
+	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, danio, Surcos.new())
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:

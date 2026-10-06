@@ -169,7 +169,7 @@ func test_duracion() -> void:
 	assert_int(surcon.estado).is_equal(Criatura.Estado.CAIDA)
 	assert_array(surcos.de(_SURCON)).is_equal([Vector2i(2, 4)])
 	plantel.criatura("rodauva_1").posicion = Vector2i(1, 4)
-	var pasos: Dictionary = _tablero.pasos_hasta(Vector2i(1, 4), 4, Criatura.Bando.TRIBU, plantel, surcos)
+	var pasos: Dictionary = _tablero.pasos_hasta(Vector2i(1, 4), 4, Criatura.Bando.TRIBU, plantel, surcos, false)
 	assert_bool(pasos.has(Vector2i(2, 4))).is_false()
 
 	# Un Surcon salvaje que sale del tablero (vida 0, fuera) los cierra.
@@ -195,9 +195,9 @@ func test_transito() -> void:
 	var plantel: Plantel = _plantel()
 	var surcos: Surcos = Surcos.new()
 	var desde: Vector2i = Vector2i(1, 2)
-	assert_int(_tablero.pasos_hasta(desde, 4, Criatura.Bando.TRIBU, plantel, surcos)[Vector2i(3, 2)]).is_equal(2)
+	assert_int(_tablero.pasos_hasta(desde, 4, Criatura.Bando.TRIBU, plantel, surcos, false)[Vector2i(3, 2)]).is_equal(2)
 	surcos.cavar(Vector2i(2, 2), _SURCON, 2)
-	var pasos: Dictionary = _tablero.pasos_hasta(desde, 4, Criatura.Bando.TRIBU, plantel, surcos)
+	var pasos: Dictionary = _tablero.pasos_hasta(desde, 4, Criatura.Bando.TRIBU, plantel, surcos, false)
 	assert_bool(pasos.has(Vector2i(2, 2))).is_false()
 	assert_int(pasos[Vector2i(3, 2)]).is_equal(4)
 	var turno_rodauva: Turno = _turno(plantel, "rodauva_1", surcos)

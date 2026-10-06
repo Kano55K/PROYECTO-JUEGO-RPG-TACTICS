@@ -30,6 +30,10 @@ var se_movio: bool = false
 
 var _ataques_hechos: int = 0
 var _movimiento_partido: bool = false
+# Sistema.md 11.2.2, Limite: si se oculto en este turno (lo guarda el fin del turno).
+var _se_oculto: bool = false
+# Arquitectura.md A.7: los eventos de Junco de las acciones aplicadas, en orden.
+var _eventos: Array[Dictionary] = []
 
 var _plantel: Plantel
 var _tablero: Tablero
@@ -48,10 +52,10 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 
 
 # Crea el turno de la entrada y corre el inicio del turno. surcos: los del
-# combate; sin ellos, ninguno (un turno suelto de los tests).
+# combate (un turno suelto de los tests pasa unos vacios).
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
-		surcos: Surcos = null) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos if surcos != null else Surcos.new())
+		surcos: Surcos) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos)
 	turno._inicio_del_turno()
 	turno._preparar()
 	return turno
@@ -121,6 +125,12 @@ func puede_erizarse() -> bool:
 	return validar(Accion.erizarse()).valida
 
 
+# Copia de los eventos de Junco (oculto, destape, bono_perdido) de las acciones
+# aplicadas en este turno, para que el Combate registre los nuevos.
+func eventos() -> Array[Dictionary]:
+	return _eventos.duplicate(true)
+
+
 func puede_terminar() -> bool:
 	return validar(Accion.terminar()).valida
 
@@ -151,10 +161,13 @@ func _preparar() -> void:
 		_movimiento_partido = criatura.especie.movimiento_partido(criatura.modo)
 
 
-# Punto de fin del turno, sin efectos por ahora: aca se enchufan T16 (cadena de
-# combos y registro de "esperar") y T23.
+# Punto de fin del turno: aca se enchufan T16 (cadena de combos y registro de
+# "esperar") y T23. Sistema.md 11.2.2, Limite: queda anotado si se oculto en
+# este turno, para el proximo.
 func _fin_del_turno() -> void:
-	pass
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura != null:
+		criatura.junco_turno_anterior = _se_oculto
 
 
 # Sistema.md 11.5: con el combate terminado se rechaza todo. Despues de cada
@@ -175,6 +188,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _erizarse(aplica)
 		Accion.Tipo.CAVAR:
 			resultado = _cavar(accion.casilla, aplica)
+		Accion.Tipo.HACERSE_JUNCO:
+			resultado = _hacerse_junco(aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -206,6 +221,12 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 		_poner_posicion(unidad_id, destino)
 		_gastar_pasos(pasos[destino] if _movimiento_partido else pasos_restantes)
 		se_movio = true
+		# Sistema.md 11.2.2: moverse destapa (conserva el bono). Despues, el
+		# contacto: este movimiento termino aca (en Cuenta, cada tramo).
+		var criatura: Criatura = _plantel.criatura(unidad_id)
+		if criatura != null:
+			_eventos.append_array(Junco.destapar(criatura, Junco.MOTIVO_MOVER))
+		_eventos.append_array(Junco.revisar_contacto(unidad_id, _plantel))
 	return ResultadoAccion.aceptada()
 
 
@@ -222,28 +243,26 @@ func _pasos_desde(desde: Vector2i) -> Dictionary:
 
 
 # Sistema.md 11.3: atacar gasta uno de los ataques del turno (dos en Caza,
-# 11.2.3: separados, a una o a dos presas). La objetivo es una enemiga de pie en
-# una casilla que la unidad golpea desde donde esta. La vida no baja de 0, y en
-# 0 se resuelve en el acto, solo al aplicar (11.5, VidaCero): la caida y la que
-# salio del tablero dejan de ser objetivo. `desde` es la casilla de la unidad;
-# otra solo para previsualizar (nunca se aplica desde otra casilla).
+# 11.2.3: separados, a una o a dos presas). La objetivo es una enemiga que la
+# consulta unica acepta para una accion hostil (Objetivos: no caida, fuera,
+# guardada ni oculta), en una casilla que la unidad golpea desde donde esta. La
+# consulta se hace en el momento del ataque: la que se destapo al moverse en
+# este turno ya vale (destapar y pegar, 11.2.2 v1.4). La vida no baja de 0, y
+# en 0 se resuelve en el acto, solo al aplicar (11.5, VidaCero). `desde` es la
+# casilla de la unidad; otra solo para previsualizar (nunca se aplica desde otra).
 func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
 	if ataques_restantes == 0:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
-	if objetivo_id != Maestro.ID and _plantel.criatura(objetivo_id) == null:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE)
+	var motivo: ResultadoAccion.Motivo = Objetivos.motivo(objetivo_id, Objetivos.Clase.HOSTIL, _plantel)
+	if motivo == ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE:
+		return ResultadoAccion.rechazada(motivo)
 	if _bando(objetivo_id) == _bando(unidad_id):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_ALIADO)
-	# El Maestro como objetivo esta siempre de pie: si cae, el combate termina (11.5).
-	var objetivo: Criatura = _plantel.criatura(objetivo_id)
-	if objetivo != null and objetivo.estado == Criatura.Estado.CAIDA:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_CAIDO)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
 	var hasta: Vector2i = _posicion(objetivo_id)
-	if (objetivo != null and objetivo.estado in [Criatura.Estado.GUARDADA, Criatura.Estado.FUERA]) \
-			or hasta == Criatura.SIN_POSICION:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_FUERA_DEL_TABLERO)
 	var bando: Criatura.Bando = _bando(unidad_id)
 	if not _tablero.golpeables(desde, _alcance(), bando, _plantel).has(hasta):
 		if _tablero.en_linea(desde, hasta) and Tablero.distancia(desde, hasta) <= _alcance() \
@@ -256,6 +275,10 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	resultado.danio = resultado.desglose.total
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
+		# Sistema.md 11.2.2: la atacante se destapa y cobra su bono; la objetivo
+		# destapada pierde el suyo.
+		_eventos.append_array(Junco.atacar(unidad_id, _plantel))
+		_eventos.append_array(Junco.recibir_ataque(objetivo_id, unidad_id, _plantel))
 		VidaCero.resolver(objetivo_id, _plantel, _surcos)
 		ataques_restantes -= 1
 		_ataques_hechos += 1
@@ -314,6 +337,45 @@ func _cavar(casilla: Vector2i, aplica: bool) -> ResultadoAccion:
 		ataques_restantes = 0
 		_gastar_pasos(pasos_restantes)
 	return ResultadoAccion.aceptada()
+
+
+# Sistema.md 11.2.2, Hacerse junco: solo con el efecto ocultarse de la ficha;
+# gasta la accion. Sin haberse movido en el turno, sin ninguna enemiga de pie
+# adyacente y no si se oculto en su turno anterior. Cierra el movimiento que
+# quede, como Erizarse (S-26). Queda oculta y con el bono (Junco).
+func _hacerse_junco(aplica: bool) -> ResultadoAccion:
+	if terminado:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
+	if not Junco.es_junco(unidad_id, _plantel):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_RASGO)
+	if accion_usada:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
+	if se_movio:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.YA_SE_MOVIO)
+	if _enemiga_de_pie_adyacente():
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ENEMIGA_ADYACENTE)
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura.junco_turno_anterior:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.JUNCO_TURNO_ANTERIOR)
+	if aplica:
+		_eventos.append_array(Junco.ocultar(criatura))
+		_se_oculto = true
+		accion_usada = true
+		ataques_restantes = 0
+		_gastar_pasos(pasos_restantes)
+	return ResultadoAccion.aceptada()
+
+
+func _enemiga_de_pie_adyacente() -> bool:
+	var posicion: Vector2i = _posicion(unidad_id)
+	var ids: Array[String] = [Maestro.ID]
+	for otra in _plantel.criaturas():
+		ids.append(otra.id)
+	for id_otra in ids:
+		if _bando(id_otra) != _bando(unidad_id) and Objetivos.de_pie(id_otra, _plantel) \
+				and Tablero.distancia(_posicion(id_otra), posicion) == 1:
+			return true
+	return false
 
 
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es

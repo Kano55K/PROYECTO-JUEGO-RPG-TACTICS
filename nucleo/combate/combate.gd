@@ -29,6 +29,8 @@ var _tiradas_volcadas: int = 0
 var _surcos: Surcos = Surcos.new()
 # Eventos del historial de los surcos ya volcados al registro.
 var _surcos_volcados: int = 0
+# Eventos de Junco del turno en curso ya volcados al registro (vuelve a 0 con cada turno).
+var _junco_volcados: int = 0
 
 
 func _init(contexto_combate: ContextoCombate) -> void:
@@ -191,6 +193,7 @@ func _avanzar() -> void:
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
 		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos)
+		_junco_volcados = 0
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
 		if not _turno.cambio_modo.is_empty():
 			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
@@ -241,6 +244,7 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 			_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": accion.objetivo_id,
 					"desglose": resultado.desglose.a_diccionario(),
 					"vida_antes": vida_antes, "vida_despues": _vida(accion.objetivo_id)})
+	_registrar_junco()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
 
@@ -314,6 +318,15 @@ func _registrar_surcos() -> void:
 	for indice in range(_surcos_volcados, historial.size()):
 		_registrar(historial[indice])
 	_surcos_volcados = historial.size()
+
+
+# Arquitectura.md A.7 (B.2.1): los eventos `oculto`, `destape` y `bono_perdido`
+# nuevos del turno, en el orden en que pasaron, despues del evento de la accion.
+func _registrar_junco() -> void:
+	var eventos: Array[Dictionary] = _turno.eventos()
+	for indice in range(_junco_volcados, eventos.size()):
+		_registrar(eventos[indice])
+	_junco_volcados = eventos.size()
 
 
 func _pergaminos_ardidos() -> Array[String]:

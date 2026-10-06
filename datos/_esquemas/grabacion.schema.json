@@ -43,7 +43,7 @@
             "$ref": "comunes.schema.json#/$defs/id"
           },
           "accion": {
-            "description": "Accion.a_diccionario(). casilla: la de mover y la de cavar (Sistema.md 11.2.1, T37). Los tipos de T22 a T28 se suman a este enum",
+            "description": "Accion.a_diccionario(). casilla: la de mover y la de cavar (Sistema.md 11.2.1, T37). hacerse_junco, sin campos (Sistema.md 11.2.2, T38). Los tipos de T22 a T28 se suman a este enum",
             "type": "object",
             "required": [
               "tipo"
@@ -56,7 +56,8 @@
                   "atacar",
                   "erizarse",
                   "terminar",
-                  "cavar"
+                  "cavar",
+                  "hacerse_junco"
                 ]
               },
               "casilla": {

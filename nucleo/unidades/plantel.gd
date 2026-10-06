@@ -103,6 +103,9 @@ func instantanea() -> Dictionary:
 			"erizada": c.erizada,
 			# Arquitectura.md A.7 (B.2.1): el modo actual, o null sin modos.
 			"modo": null if c.modo.is_empty() else c.modo,
+			# Arquitectura.md A.7 (B.2.1): Hacerse junco (Sistema.md 11.2.2).
+			"oculta": c.oculta,
+			"bono_junco": c.bono_junco,
 			"pergamino": c.pergamino_id,
 		})
 	var lista_pergaminos: Array = []
