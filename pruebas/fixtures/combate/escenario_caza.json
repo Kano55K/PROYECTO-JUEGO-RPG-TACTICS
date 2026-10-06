@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "caza",
+  "_nota": "Sistema.md 11.2.3, Caza y cuenta (tests de T36). El Tasajero salvaje [3,3] esta en una esquina concava: la Rodauva [3,4] y la Ocarra [4,3] de la tribu le son adyacentes y estan en diagonal entre si; el Maestro [2,3] tambien es adyacente. Arriba queda lugar libre para los tramos de la Cuenta. Cola en Caza: Tasajero (8), Ocarra (7), Rodauva (6), Maestro (5)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 3] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 4] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 3] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 3] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

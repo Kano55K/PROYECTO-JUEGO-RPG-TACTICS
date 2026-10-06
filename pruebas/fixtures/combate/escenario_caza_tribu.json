@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "caza_tribu",
+  "_nota": "Sistema.md 11.2.3 (registro de T36). Un Tasajero de la tribu, para jugar sus dos ataques con Combate.aplicar: la regla sale del efecto de la ficha, no del bando. En [3,3], adyacente a la Rodauva salvaje [3,2] y a la Ocarra salvaje [4,3], que estan en diagonal entre si. Juega primero (Caza 8). El Maestro [0,7] queda lejos",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "tasajero_1", "especie": "tasajero", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 3] }
+  ],
+  "enemigas": [
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [3, 2] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [4, 3] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

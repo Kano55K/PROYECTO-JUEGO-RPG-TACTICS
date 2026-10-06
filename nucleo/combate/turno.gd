@@ -1,7 +1,8 @@
 # Sistema.md 11.3, Turno de una unidad: el turno de una entrada de la cola (T07).
-# 1 movimiento y 1 accion, en cualquier orden, sin partir el movimiento. Toda
-# accion se valida con la misma funcion que la aplica, sin modificar nada; una
-# accion invalida no cambia nada. El Tasajero juega un Turno por cada entrada.
+# 1 movimiento y 1 accion, en cualquier orden, sin partir el movimiento, salvo
+# lo que diga el modo de la unidad (11.2.3): los pasos y los ataques del turno
+# salen de ahi. Toda accion se valida con la misma funcion que la aplica, sin
+# modificar nada; una accion invalida no cambia nada.
 class_name Turno
 extends RefCounted
 
@@ -9,11 +10,24 @@ extends RefCounted
 const _EFECTO_ERIZARSE: String = "erizarse"
 
 var unidad_id: String
-# La de la entrada: "caza", "cuenta" o "".
+# La de la entrada: "caza", "cuenta" o "". Es el modo al armar la ronda; el
+# turno juega con el modo actual de la criatura (puede cambiar al empezar).
 var marca: String
+# Los pasos que le quedan: el Movimiento de la ficha o de maestro.json. Sin
+# movimiento partido, el primer `mover` los gasta todos (11.3).
+var pasos_restantes: int = 0
+# Los ataques que le quedan: los del modo (1 por defecto, 11.2.3).
+var ataques_restantes: int = 0
+# true cuando ya no le quedan pasos (los gasto o un rasgo cerro el movimiento).
 var movimiento_usado: bool = false
+# true cuando ya uso alguna accion (en Caza, desde el primer ataque).
 var accion_usada: bool = false
 var terminado: bool = false
+# Sistema.md 11.2.3: {de, a} si el inicio de este turno le cambio el modo; si no, {}.
+var cambio_modo: Dictionary = {}
+
+var _ataques_hechos: int = 0
+var _movimiento_partido: bool = false
 
 var _plantel: Plantel
 var _tablero: Tablero
@@ -32,6 +46,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio) -> Turno:
 	var turno: Turno = Turno.new(entrada, plantel, tablero, danio)
 	turno._inicio_del_turno()
+	turno._preparar()
 	return turno
 
 
@@ -47,7 +62,7 @@ func aplicar(accion: Accion) -> ResultadoAccion:
 # Para la pantalla y la IA: lo que la unidad puede hacer ahora, sin modificar nada.
 func casillas_para_mover() -> Array[Vector2i]:
 	var resultado: Array[Vector2i] = []
-	for casilla in _tablero.alcanzables(_posicion(unidad_id), _movimiento(), _bando(unidad_id), _plantel):
+	for casilla in _tablero.alcanzables(_posicion(unidad_id), pasos_restantes, _bando(unidad_id), _plantel):
 		if validar(Accion.mover(casilla)).valida:
 			resultado.append(casilla)
 	return resultado
@@ -69,7 +84,7 @@ func objetivos_para_atacar() -> Array[String]:
 # menos movimiento"). Los pasos son los del camino que da Tablero.
 func pasos_para_mover() -> Dictionary:
 	var desde: Vector2i = _posicion(unidad_id)
-	var pasos: Dictionary = _tablero.pasos_hasta(desde, _movimiento(), _bando(unidad_id), _plantel)
+	var pasos: Dictionary = _tablero.pasos_hasta(desde, pasos_restantes, _bando(unidad_id), _plantel)
 	var resultado: Dictionary = {desde: 0}
 	for casilla in casillas_para_mover():
 		resultado[casilla] = pasos[casilla]
@@ -107,12 +122,25 @@ func puede_terminar() -> bool:
 # 11.3, en este orden:
 #   1. Regeneracion de mana del Maestro (2.1): T21.
 #   2. Huida de las salvajes con vida <= 25% (11.7): T25. Si sale, el turno termina ahi.
+#   Cambio de modo (11.2.3, 11.8 paso 2): una regla, no una decision de la IA.
 #   3. Rival enemiga a su alcance: Encono (10.5) o cobardia (10.6): T19.
 #   4. Incidente con rival aliada (10.4), solo si no quedo enconada: T18.
 func _inicio_del_turno() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
 	if criatura != null:
 		criatura.erizada = false
+		cambio_modo = CambioModo.aplicar(criatura)
+
+
+# Despues del inicio: el turno se juega con el modo que quedo (11.2.3, "juega
+# ese turno en Cuenta").
+func _preparar() -> void:
+	pasos_restantes = _movimiento()
+	ataques_restantes = 1
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura != null:
+		ataques_restantes = criatura.especie.ataques_por_turno(criatura.modo)
+		_movimiento_partido = criatura.especie.movimiento_partido(criatura.modo)
 
 
 # Punto de fin del turno, sin efectos por ahora: aca se enchufan T16 (cadena de
@@ -144,8 +172,11 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 	return resultado
 
 
-# Sistema.md 11.3, Movimiento: a una casilla alcanzable (Tablero), de una vez;
-# se gasta entero aunque sobren pasos.
+# Sistema.md 11.3, Movimiento: a una casilla alcanzable (Tablero) con los pasos
+# que quedan. Sin movimiento partido se gasta entero aunque sobren pasos; con
+# movimiento partido (Cuenta, 11.2.3) gasta los del camino mas corto y puede
+# volver a moverse, antes y despues de atacar. Sin partir y con mas de un
+# ataque (Caza), no se mueve entre el primero y el ultimo (S-23).
 func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
@@ -153,18 +184,27 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ERIZADA)
 	if movimiento_usado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.MOVIMIENTO_USADO)
+	if not _movimiento_partido and _ataques_hechos > 0 and ataques_restantes > 0:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.MOVER_ENTRE_ATAQUES)
 	var desde: Vector2i = _posicion(unidad_id)
 	if destino == desde:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.MISMA_CASILLA)
-	if not _tablero.alcanzables(desde, _movimiento(), _bando(unidad_id), _plantel).has(destino):
+	var pasos: Dictionary = _tablero.pasos_hasta(desde, pasos_restantes, _bando(unidad_id), _plantel)
+	if not pasos.has(destino):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.CASILLA_NO_ALCANZABLE)
 	if aplica:
 		_poner_posicion(unidad_id, destino)
-		movimiento_usado = true
+		_gastar_pasos(pasos[destino] if _movimiento_partido else pasos_restantes)
 	return ResultadoAccion.aceptada()
 
 
-# Sistema.md 11.3: atacar gasta la accion. La objetivo es una enemiga de pie en
+func _gastar_pasos(cantidad: int) -> void:
+	pasos_restantes -= cantidad
+	movimiento_usado = pasos_restantes == 0
+
+
+# Sistema.md 11.3: atacar gasta uno de los ataques del turno (dos en Caza,
+# 11.2.3: separados, a una o a dos presas). La objetivo es una enemiga de pie en
 # una casilla que la unidad golpea desde donde esta. La vida no baja de 0, y en
 # 0 se resuelve en el acto, solo al aplicar (11.5, VidaCero): la caida y la que
 # salio del tablero dejan de ser objetivo. `desde` es la casilla de la unidad;
@@ -172,7 +212,7 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
-	if accion_usada:
+	if ataques_restantes == 0:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
 	if objetivo_id != Maestro.ID and _plantel.criatura(objetivo_id) == null:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE)
@@ -199,6 +239,8 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
 		VidaCero.resolver(objetivo_id, _plantel)
+		ataques_restantes -= 1
+		_ataques_hechos += 1
 		accion_usada = true
 	return resultado
 
@@ -225,8 +267,9 @@ func _erizarse(aplica: bool) -> ResultadoAccion:
 	if aplica:
 		criatura.erizada = true
 		accion_usada = true
+		ataques_restantes = 0
 		if _inmovil(unidad_id):
-			movimiento_usado = true
+			_gastar_pasos(pasos_restantes)
 	return ResultadoAccion.aceptada()
 
 

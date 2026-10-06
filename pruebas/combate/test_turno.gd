@@ -255,9 +255,10 @@ func test_sin_rasgo_no_se_eriza() -> void:
 
 
 # (9) Prueba C: el Tasajero tiene un solo turno por ronda, en Caza; mueve y
-# ataca, y en la ronda siguiente vuelve con movimiento y accion renovados.
-# Reescrito por Sistema.md 11.2.3 v1.3 (antes: Caza y Cuenta, dos turnos por
-# ronda) y 11.2 (Danio 5). Hasta T36 juega su turno con un solo ataque.
+# ataca dos veces, y en la ronda siguiente vuelve con movimiento y ataques
+# renovados. Reescrito por Sistema.md 11.2.3 v1.3 (antes: Caza y Cuenta, dos
+# turnos por ronda) y 11.2 (Danio 5). Reescrito otra vez en T36 por 11.2.3
+# ("2 ataques separados de 5"): el segundo ataque vale y el tercero no.
 func test_tasajero_un_turno_por_ronda() -> void:
 	var plantel: Plantel = _plantel(_escenario("escenario_c.json"))
 	var zancajunco: Criatura = plantel.criatura("zancajunco_1")
@@ -274,8 +275,11 @@ func test_tasajero_un_turno_por_ronda() -> void:
 	_assert_valida(turno.aplicar(Accion.mover(Vector2i(3, 2))))
 	_assert_valida(turno.aplicar(Accion.atacar("zancajunco_1")))
 	assert_int(zancajunco.vida).is_equal(12 - 5)
-	assert_bool(turno.validar(Accion.atacar("zancajunco_1")).valida).is_false()
+	_assert_valida(turno.aplicar(Accion.atacar("zancajunco_1")))
+	assert_int(zancajunco.vida).is_equal(12 - 5 - 5)
+	_assert_rechazada(turno.validar(Accion.atacar("zancajunco_1")), ResultadoAccion.Motivo.ACCION_USADA)
 	turno.aplicar(Accion.terminar())
+	zancajunco.vida = 12
 
 	for unidad_id in ["ocarra_1", "rodauva_1", Maestro.ID]:
 		turno = _siguiente_turno(cola, plantel)
@@ -291,9 +295,10 @@ func test_tasajero_un_turno_por_ronda() -> void:
 	assert_str(turno.marca).is_equal("caza")
 	assert_bool(turno.movimiento_usado).is_false()
 	assert_bool(turno.accion_usada).is_false()
+	assert_int(turno.ataques_restantes).is_equal(2)
 	_assert_valida(turno.aplicar(Accion.mover(Vector2i(4, 3))))
 	_assert_valida(turno.aplicar(Accion.atacar("zancajunco_1")))
-	assert_int(zancajunco.vida).is_equal(12 - 5 - 5)
+	assert_int(zancajunco.vida).is_equal(12 - 5)
 
 
 # (10) Esperar: terminar sin usar la accion cierra el turno (P-015) y la cola

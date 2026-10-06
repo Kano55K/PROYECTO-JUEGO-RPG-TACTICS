@@ -167,8 +167,12 @@ func test_surcon_no_reduce_el_danio() -> void:
 # combate), retirado por Sistema.md 11.2.2 v1.3: ahora es una activa (+3 despues
 # de ocultarse, T38). Sin ocultarse, el Zancajunco pega 4 en su primer ataque y
 # en el segundo, y aplicar un ataque no deja ninguna marca en la criatura.
+# Reescrito en T36 por Sistema.md 11.2.3: en Caza el Tasajero recibe +25% (el
+# golpe seria 5), asi que la objetivo va en Cuenta, con danio recibido normal.
+# El caso de Caza esta en test_caza_y_cuenta.gd (5).
 func test_zancajunco_sin_bono_pasivo() -> void:
 	var plantel: Plantel = _plantel()
+	plantel.criatura("tasajero_s1").modo = "cuenta"
 	assert_int(_total("zancajunco_1", "tasajero_s1", plantel)).is_equal(4)
 
 	var turno: Turno = _turno(plantel, "zancajunco_1")

@@ -4,7 +4,8 @@
 class_name ModificadorDanio
 extends RefCounted
 
-enum Fuente { HAMBRE, ENFERMEDAD, RASGO_ATACANTE, RASGO_OBJETIVO, COMBO, AFINIDAD, ENCONO, COBARDIA }
+# MODO: el % recibido de la objetivo o el plano de la atacante, del modo actual (11.2.3).
+enum Fuente { HAMBRE, ENFERMEDAD, RASGO_ATACANTE, RASGO_OBJETIVO, COMBO, AFINIDAD, ENCONO, COBARDIA, MODO }
 # PORCENTAJE: paso 1 de 11.4, en puntos (+25 = +25%). PLANO: paso 3.
 enum Tipo { PORCENTAJE, PLANO }
 

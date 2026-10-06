@@ -57,6 +57,17 @@ func modo_inicial() -> String:
 	return (_ficha["rasgo"] as Dictionary).get("modo_inicial", "")
 
 
+# Sistema.md 11.2.3: el ultimo modo de la lista, al que se pasa sin vuelta; "" sin modos.
+func modo_final() -> String:
+	var modos: Array = (_ficha["rasgo"] as Dictionary).get("modos", [])
+	return "" if modos.is_empty() else (modos[modos.size() - 1] as Dictionary)["id"]
+
+
+# Sistema.md 11.2.3, Cambio a Cuenta: el % de la vida maxima; 0 sin modos.
+func umbral_cambio_pct() -> int:
+	return (_ficha["rasgo"] as Dictionary).get("umbral_cambio_pct", 0)
+
+
 # Sistema.md 11.2 y 11.2.3: los valores del modo dado (Criatura.modo). Sin
 # modos, la Velocidad de la ficha y los valores neutros: un ataque, sin partir
 # el movimiento, sin porcentaje ni plano.
