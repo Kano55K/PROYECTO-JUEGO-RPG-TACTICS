@@ -18,11 +18,20 @@ const _CASILLA_OSCURA: Vector2i = Vector2i(1, 0)
 const _FUENTE_MARCAS: int = 1
 const _MARCA_MOVER: Vector2i = Vector2i(0, 0)
 const _MARCA_OBJETIVO: Vector2i = Vector2i(1, 0)
+# T40: surcos con el color del bando de su duenio, zona de Caza y casillas para cavar.
+const _MARCA_SURCO_TRIBU: Vector2i = Vector2i(2, 0)
+const _MARCA_SURCO_ENEMIGA: Vector2i = Vector2i(3, 0)
+const _MARCA_ZONA: Vector2i = Vector2i(4, 0)
+const _MARCA_CAVAR: Vector2i = Vector2i(5, 0)
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
 const _ACCION_DEPURACION: String = "depuracion"
 const _ACCION_SELECCIONAR: String = "seleccionar"
+const _ACCION_ZONA: String = "zona"
+const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
+# Presentacion: la oculta sigue visible para el jugador, a media transparencia.
+const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
 # Presentacion: cuantas lineas de sucesos se ven a la vez.
 const _SUCESOS_VISIBLES: int = 12
@@ -44,8 +53,16 @@ var _guardado: String = ""
 var _desglose_mostrado: Dictionary = {}
 # La casilla bajo el mouse la ultima vez, para no rearmar el desglose en cada pixel.
 var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
+# T40, estado de la interfaz (no de reglas): el modo "elegir casilla" de Cavar,
+# si la zona de Caza se ve, y el tooltip y el aviso que se muestran.
+var _eligiendo_cavar: bool = false
+var _zona_visible: bool = true
+var _tooltip_mostrado: Array[String] = []
+var _aviso_mostrado: String = ""
 
 @onready var _tablero: TileMapLayer = $Tablero
+@onready var _capa_surcos: TileMapLayer = $Tablero/Surcos
+@onready var _capa_zona: TileMapLayer = $Tablero/Zona
 @onready var _marcas: TileMapLayer = $Tablero/Marcas
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
@@ -56,8 +73,9 @@ var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
 @onready var _panel_desglose: Label = $Interfaz/PanelDesglose
 @onready var _texto_sucesos: Label = $Interfaz/Sucesos
 @onready var _botones: HBoxContainer = $Interfaz/Botones
-@onready var _boton_erizarse: Button = $Interfaz/Botones/BotonErizarse
 @onready var _boton_terminar: Button = $Interfaz/Botones/BotonTerminar
+@onready var _panel_unidad: Label = $Interfaz/PanelUnidad
+@onready var _aviso: Label = $Interfaz/Aviso
 @onready var _pantalla_resultado: Control = $Interfaz/PantallaResultado
 @onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/TextoResultado
 @onready var _boton_volver: Button = $Interfaz/PantallaResultado/Contenido/BotonVolver
@@ -65,7 +83,6 @@ var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
 
 
 func _ready() -> void:
-	_boton_erizarse.pressed.connect(pulsar_erizarse)
 	_boton_terminar.pressed.connect(pulsar_terminar)
 	_boton_volver.pressed.connect(volver.emit)
 
@@ -122,34 +139,84 @@ func filas_cola() -> Array[Label]:
 func clic_casilla(casilla: Vector2i) -> bool:
 	if _combate == null or not _combate.esperando_jugador():
 		return false
-	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla)
+	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar)
 	if accion == null:
 		return false
 	return _aplicar(accion)
 
 
 # El mouse sobre una casilla: con una objetivo atacable, el desglose de
-# previsualizar_ataque desde donde esta la unidad; si no, nada.
+# previsualizar_ataque desde donde esta la unidad. T40: con una unidad, su
+# tooltip; en una casilla para moverse que la dejaria junto a una oculta
+# enemiga, el aviso (Combate.destaparia).
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
-	if _combate != null and _combate.esperando_jugador():
+	_tooltip_mostrado = []
+	_aviso_mostrado = ""
+	if _combate == null:
+		return
+	var foto: Dictionary = _combate.instantanea()
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	var unidad: String = _unidad_en(foto, casilla)
+	if not unidad.is_empty():
+		_tooltip_mostrado = lectura.tooltip_unidad(unidad)
+	if _combate.esperando_jugador():
 		var turno: Turno = _combate.turno_actual()
-		var foto: Dictionary = _combate.instantanea()
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
 		if not objetivo.is_empty():
 			var vista_previa: ResultadoAccion = turno.previsualizar_ataque(_casilla_de(foto, turno.unidad_id), objetivo)
 			if vista_previa.valida:
 				_desglose_mostrado = vista_previa.desglose.a_diccionario()
+		elif not _eligiendo_cavar and turno.casillas_para_mover().has(casilla) \
+				and not _combate.destaparia(turno.unidad_id, casilla).is_empty():
+			_aviso_mostrado = _armador.armar(ClavesTextos.AVISO_DESTAPAR)
 	_dibujar_desglose()
+	_dibujar_tooltip()
+
+
+# Las lineas del tooltip que se ve ahora, o [].
+func tooltip_mostrado() -> Array[String]:
+	return _tooltip_mostrado.duplicate()
+
+
+# El aviso de destapar que se ve ahora, o "".
+func aviso_mostrado() -> String:
+	return _aviso_mostrado
+
+
+# T40: el boton de una activa (LecturaCombate.ACTIVA_*). Cavar no aplica nada:
+# entra (o sale) del modo "elegir casilla". Devuelve true si hizo algo.
+func pulsar_activa(tipo: String) -> bool:
+	if _combate == null or not _combate.esperando_jugador():
+		return false
+	match tipo:
+		LecturaCombate.ACTIVA_ERIZARSE:
+			return _aplicar(Accion.erizarse())
+		LecturaCombate.ACTIVA_HACERSE_JUNCO:
+			return _aplicar(Accion.hacerse_junco())
+		LecturaCombate.ACTIVA_CAVAR:
+			_eligiendo_cavar = not _eligiendo_cavar
+			redibujar()
+			return true
+	return false
+
+
+func eligiendo_cavar() -> bool:
+	return _eligiendo_cavar
+
+
+func zona_visible() -> bool:
+	return _zona_visible
+
+
+# Las casillas marcadas como zona de Caza ahora.
+func casillas_zona() -> Array[Vector2i]:
+	return _capa_zona.get_used_cells()
 
 
 # El desglose que se ve ahora (DesgloseDanio.a_diccionario()), o {}.
 func desglose_mostrado() -> Dictionary:
 	return _desglose_mostrado.duplicate(true)
-
-
-func pulsar_erizarse() -> bool:
-	return _combate != null and _aplicar(Accion.erizarse())
 
 
 func pulsar_terminar() -> bool:
@@ -159,6 +226,8 @@ func pulsar_terminar() -> bool:
 func redibujar() -> void:
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
 	_dibujar_tablero()
+	_dibujar_surcos()
+	_dibujar_zona()
 	_dibujar_marcas()
 	_dibujar_fichas(lectura)
 	_dibujar_interfaz(lectura)
@@ -174,6 +243,9 @@ func redibujar() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(_ACCION_DEPURACION):
 		_depuracion.visible = not _depuracion.visible
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_ZONA):
+		alternar_zona()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(_ACCION_SELECCIONAR):
 		clic_casilla(_casilla_del_mouse())
@@ -194,6 +266,9 @@ func _aplicar(accion: Accion) -> bool:
 	if not _combate.aplicar(accion).valida:
 		return false
 	_desglose_mostrado = {}
+	_tooltip_mostrado = []
+	_aviso_mostrado = ""
+	_eligiendo_cavar = false
 	_casilla_mouse = Criatura.SIN_POSICION
 	_despues_de_un_cambio()
 	return true
@@ -228,16 +303,62 @@ func _dibujar_tablero() -> void:
 
 
 # Solo en el turno del jugador: a donde puede moverse y a quien puede atacar.
+# T40: eligiendo donde cavar, solo las casillas de casillas_para_cavar.
 func _dibujar_marcas() -> void:
 	_marcas.clear()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()
+	if _eligiendo_cavar:
+		for casilla in turno.casillas_para_cavar():
+			_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_CAVAR)
+		return
 	for casilla in turno.casillas_para_mover():
 		_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_MOVER)
 	var foto: Dictionary = _combate.instantanea()
 	for objetivo in turno.objetivos_para_atacar():
 		_marcas.set_cell(_casilla_de(foto, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO)
+
+
+# T40 (Sistema.md 11.2.1): cada surco con el color del bando de su duenio.
+func _dibujar_surcos() -> void:
+	_capa_surcos.clear()
+	var plantel: Plantel = _combate.contexto().plantel
+	for surco in _combate.instantanea()["surcos"]:
+		var duenio: String = surco["duenio"]
+		var de_la_tribu: bool = duenio == Maestro.ID or plantel.criatura(duenio).bando == Criatura.Bando.TRIBU
+		_capa_surcos.set_cell(Vector2i(surco["casilla"][0], surco["casilla"][1]), _FUENTE_MARCAS,
+				_MARCA_SURCO_TRIBU if de_la_tribu else _MARCA_SURCO_ENEMIGA)
+
+
+# T40, zona de Caza (Sistema.md 11.2.3 y 15): en el turno del jugador, lo que
+# amenaza cada enemiga de pie que todavia puede cambiar de modo (vida_de_cambio
+# no es null: tiene modos y no paso al final, o sea, esta en Caza). La calcula
+# el nucleo (zona_amenaza); la accion `zona` la oculta y la muestra.
+func _dibujar_zona() -> void:
+	_capa_zona.clear()
+	if not _zona_visible or not _combate.esperando_jugador():
+		return
+	var plantel: Plantel = _combate.contexto().plantel
+	for criatura in plantel.criaturas():
+		if criatura.bando == Criatura.Bando.TRIBU or not Objetivos.de_pie(criatura.id, plantel) \
+				or _combate.vida_de_cambio(criatura.id) == null:
+			continue
+		for casilla in _combate.zona_amenaza(criatura.id):
+			_capa_zona.set_cell(casilla, _FUENTE_MARCAS, _MARCA_ZONA)
+
+
+func alternar_zona() -> void:
+	_zona_visible = not _zona_visible
+	if _combate != null:
+		_dibujar_zona()
+
+
+func _dibujar_tooltip() -> void:
+	_panel_unidad.visible = not _tooltip_mostrado.is_empty()
+	_panel_unidad.text = "\n".join(_tooltip_mostrado)
+	_aviso.visible = not _aviso_mostrado.is_empty()
+	_aviso.text = _aviso_mostrado
 
 
 func _dibujar_fichas(lectura: LecturaCombate) -> void:
@@ -249,6 +370,7 @@ func _dibujar_fichas(lectura: LecturaCombate) -> void:
 		_unidades.add_child(ficha)
 		ficha.mostrar(datos_ficha)
 		ficha.position = _tablero.map_to_local(datos_ficha["casilla"])
+		ficha.modulate.a = _ALFA_OCULTA if datos_ficha["oculta"] else 1.0
 
 
 func _dibujar_interfaz(lectura: LecturaCombate) -> void:
@@ -277,10 +399,23 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 	if not esperando:
 		return
 	_boton_terminar.text = lectura.texto_terminar()
-	_boton_erizarse.visible = _combate.turno_actual().puede_erizarse()
-	var rasgo: Array[String] = lectura.boton_rasgo()
-	_boton_erizarse.text = rasgo[0]
-	_boton_erizarse.tooltip_text = rasgo[1]
+	# T40: un boton por activa, armados desde el efecto (LecturaCombate).
+	for hijo in _botones.get_children():
+		if hijo != _boton_terminar:
+			_botones.remove_child(hijo)
+			hijo.queue_free()
+	for datos_boton in lectura.botones_activas():
+		var boton: Button = Button.new()
+		var tipo: String = datos_boton["tipo"]
+		boton.name = _PREFIJO_BOTON_ACTIVA + tipo
+		boton.text = datos_boton["texto"]
+		boton.tooltip_text = datos_boton["tooltip"]
+		boton.disabled = not datos_boton["habilitado"]
+		boton.toggle_mode = tipo == LecturaCombate.ACTIVA_CAVAR
+		boton.button_pressed = boton.toggle_mode and _eligiendo_cavar
+		boton.pressed.connect(pulsar_activa.bind(tipo))
+		_botones.add_child(boton)
+		_botones.move_child(boton, _boton_terminar.get_index())
 
 
 func _dibujar_desglose() -> void:
@@ -321,6 +456,17 @@ func _avisos_armador() -> Array[String]:
 		if not vistos.has(texto):
 			vistos.append(texto)
 	return vistos
+
+
+# La unidad en el tablero (de pie o caida) que ocupa la casilla, o "".
+func _unidad_en(foto: Dictionary, casilla: Vector2i) -> String:
+	var lista: Array = [casilla.x, casilla.y]
+	if foto["maestro"]["posicion"] == lista:
+		return Maestro.ID
+	for criatura in foto["criaturas"]:
+		if criatura["posicion"] == lista and criatura["estado"] in ["suelta", "caida"]:
+			return criatura["id"]
+	return ""
 
 
 # La casilla de una unidad segun instantanea().

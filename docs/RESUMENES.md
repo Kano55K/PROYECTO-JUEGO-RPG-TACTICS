@@ -686,3 +686,54 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   - P-002, P-003, P-008 y P-024 siguen `RESPONDIDA`; son de T14, T19 y T30.
   - Nota sin pregunta: la tabla de desempates de 11.8 todavía dice "remate (paso 4)" y "sin remate (paso 5)", con la numeración vieja.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T40.
+
+## T40 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T40-pantalla-rasgos
+- **Estado:** EN CURSO (sigue en la sesión 2: ritmo de la IA)
+- **Hecho:**
+  - Núcleo, dos consultas nuevas (las únicas de la tarea):
+    - `Combate.zona_amenaza(id)`: lo que golpea (`Tablero.golpeables`) desde cada casilla a la que llega (`Tablero.alcanzables`, con los surcos), sin la suya, en orden de lectura.
+    - `Combate.destaparia(id, casilla)`: las ocultas del otro bando que destaparía al terminar ahí. La regla vive en `Junco.destaparia`, que ahora usa `Junco.revisar_contacto`: un solo lugar para 11.2.2 / S-24.
+  - Núcleo, ajuste chico: `Turno.EFECTO_ERIZARSE` pasa a público para armar el botón por efecto.
+  - `LecturaCombate`:
+    - `botones_activas()`: el efecto decide qué botón hay y las consultas del turno si está habilitado. Reemplaza a `boton_rasgo`.
+    - `tooltip_unidad(id)`, para cualquier unidad: nombre, vida, rasgo y estado. El estado incluye erizada, oculta, bono, modo, el umbral de `vida_de_cambio` y los surcos contra el tope.
+    - Una línea de sucesos por evento nuevo de A.7.
+    - La fuente `modo` se nombra con `iniciativa.<modo>`.
+    - Las fichas suman modo, oculta y bono.
+    - Concordancia (A.2.1) en `marca.caida`, `lealtad.estado.*`, `estado.*` y `hambre.estado.*`.
+  - `ClavesTextos`: `modo`, `suceso_destape` y `suceso_cambio`, y las constantes de la v1.3. `usadas` suma los modos y sus cambios desde los datos, y solo las variantes de concordancia que existen en el archivo.
+  - `InterpreteClic.accion(..., modo_cavar)`.
+  - `VistaCombate`:
+    - Botones `Activa_<tipo>` y `pulsar_activa(tipo)` (sale `pulsar_erizarse`). Cavar entra en el modo "elegir casilla", que marca `casillas_para_cavar`.
+    - Capas `Surcos` (color del bando del dueño) y `Zona` (zona de Caza de las enemigas con `vida_de_cambio` no null). La acción nueva `zona` (Z) la oculta y la muestra.
+    - `PanelUnidad` con el tooltip y `Aviso` con `aviso.destapar`. La oculta se ve semitransparente.
+  - Tileset: 5 marcas placeholder nuevas (surco tribu y enemiga, zona, cavar, destino para la sesión 2).
+- **Archivos:**
+  - Creados: `pruebas/combate/test_zona_y_destape.gd`, `pruebas/pantalla/test_botones_activas.gd`, `pruebas/pantalla/test_vista_rasgos.gd`.
+  - Fixtures creadas: `pruebas/fixtures/pantalla/es_rasgos.json`, `especie_prueba.json` y `escenario_especie_prueba.json`.
+  - Modificados: `nucleo/combate/combate.gd`, `junco.gd`, `turno.gd`; `pantalla/claves_textos.gd`; `pantalla/combate/lectura_combate.gd`, `interprete_clic.gd`, `vista_combate.gd`, `vista_combate.tscn`, `casillas_cenital.tres`, `marcas_placeholder.svg`; `project.godot`; `pruebas/pantalla/test_claves_textos.gd`, `test_interprete_clic.gd`, `test_lectura_combate.gd`; `CLAUDE.md` (Estado actual).
+- **Tests:** 14 nuevos, total 279, todos pasan (sí).
+- **Criterio de terminado:** parcial. Cumplidos en esta sesión:
+  - 1: `test_zona_amenaza` y `test_destaparia`. El caso del surco en la zona no tiene un test propio: lo cubren los tests de T37 de `Tablero.alcanzables` con surcos, que `zona_amenaza` usa tal cual.
+  - 2: `test_botones_salen_del_efecto` y `test_vista_pulsa_la_activa_del_efecto`, con `especie_prueba` y el rasgo `rasgo_prueba`.
+  - 3: `test_modo_cavar` y `test_modo_cavar_en_la_vista`.
+  - 4: `test_t40_sucesos_de_los_rasgos`.
+  - 5: `test_t40_tooltip_de_una_enemiga` y `test_tooltip_de_una_enemiga` (vista).
+  - 8: `test_t40_etiquetas_con_concordancia` y `test_claves_de_rasgos_y_variantes`.
+  - 9: `test_t40_desglose_nombra_el_modo` y `test_claves_de_rasgos_y_variantes`.
+  - Además: `test_aviso_al_mover_junto_a_una_oculta` y `test_zona_de_caza`.
+  - Faltan: 6 y 7 (sesión 2).
+- **Tests de tareas anteriores reescritos:** ninguno.
+- **Lecturas declaradas:** ninguna. Decisiones técnicas del plan aprobado:
+  - Variantes en `usadas`: solo las que existen, porque A.2.1 las hace opcionales.
+  - Surcos en el tooltip: `rasgo.surco.nombre: n/tope` ("Arar: 1/2"), sin clave nueva.
+  - Zona: la dibujan las enemigas de pie con `vida_de_cambio` no null.
+  - `iniciativa.caza` e `iniciativa.cuenta` siguen en `FIJAS`: el fixture de `test_principal` (5) no trae especies.
+- **Claves de texto nuevas sin texto:** ninguna. Con `datos/` real, las 108 claves de `ClavesTextos.usadas` están todas en `es.json` v1.1. `desglose.fuente.modo` ya no se usa.
+- **Preguntas:** ninguna nueva; cerradas: ninguna.
+- **Para la próxima sesión:**
+  - `SecuenciaIA` (`pantalla/combate/secuencia_ia.gd`).
+  - La animación en la vista, con `pausa_ia` exportada, `en_secuencia()`, la entrada bloqueada y la acción `saltar` (Espacio).
+  - Test 6 (pausa 0 y `saltar` dan el dibujo del núcleo) y test 7 (C jugado por la vista con activas se reproduce igual).
+  - Correr la suite completa, el cierre de la tarea y la lista de prueba manual.

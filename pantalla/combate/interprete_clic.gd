@@ -7,7 +7,11 @@ extends RefCounted
 
 
 # foto: Combate.instantanea() (o Plantel.instantanea()). null si no hay accion.
-static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i) -> Accion:
+# T40: con modo_cavar (el jugador pulso Cavar), solo una casilla donde `cavar`
+# vale (Turno.casillas_para_cavar) da la accion; cualquier otra, null.
+static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i, modo_cavar: bool = false) -> Accion:
+	if modo_cavar:
+		return Accion.cavar(casilla) if turno.casillas_para_cavar().has(casilla) else null
 	var objetivo: String = objetivo_en(turno, foto, casilla)
 	if not objetivo.is_empty():
 		return Accion.atacar(objetivo)

@@ -73,3 +73,31 @@ func test_con_el_movimiento_gastado_una_casilla_vacia_da_nada() -> void:
 	assert_object(_clic(_LIBRE_VECINA)).is_null()
 	# La accion sigue disponible: la Ocarra salvaje sigue siendo atacable.
 	assert_int(_clic(_OCARRA_SALVAJE).tipo).is_equal(Accion.Tipo.ATACAR)
+
+
+# T40 (test 3): en el modo "elegir casilla" de Cavar, una casilla donde `cavar`
+# vale da la accion y cualquier otra no da nada. Sin el modo, lo de siempre.
+# escenario_surco_tribu.json: el Surcon de la tribu [3,6] con sus cuatro vecinas libres.
+func test_modo_cavar() -> void:
+	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
+	var tablero: Tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
+	var danio: Danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
+	var especies: Dictionary = {}
+	for id_especie in _ESPECIES:
+		especies[id_especie] = Especie.new(_leer(_CARPETA_UNIDADES + id_especie + ".json", "especie"))
+	var tabla: TablaBalanza = TablaBalanza.new(_leer(_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"))
+	var plantel: Plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_surco_tribu.json", "escenario"),
+			especies, tabla, _leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
+	var turno: Turno = Turno.empezar(EntradaCola.new("surcon_1", "", 0), plantel, tablero, danio, Surcos.new())
+	var foto: Dictionary = plantel.instantanea()
+
+	var accion: Accion = InterpreteClic.accion(turno, foto, Vector2i(3, 5), true)
+	assert_object(accion).is_not_null()
+	assert_int(accion.tipo).is_equal(Accion.Tipo.CAVAR)
+	assert_vector(accion.casilla).is_equal(Vector2i(3, 5))
+	# Diagonal, a dos casillas o fuera del tablero: nada.
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(2, 5), true)).is_null()
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), true)).is_null()
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 8), true)).is_null()
+	# Sin el modo, la misma casilla es un movimiento.
+	assert_int(InterpreteClic.accion(turno, foto, Vector2i(3, 5)).tipo).is_equal(Accion.Tipo.MOVER)

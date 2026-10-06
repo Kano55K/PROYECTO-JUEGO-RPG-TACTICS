@@ -34,3 +34,33 @@ func test_claves_usadas() -> void:
 		assert_object(patron.search(clave)).override_failure_message(clave).is_not_null()
 		assert_bool(vistas.has(clave)).override_failure_message("repetida: " + clave).is_false()
 		vistas[clave] = true
+
+
+# T40 (tests 8 y 9): las claves de los rasgos de la v1.3, los modos y sus
+# cambios desde los datos, y las variantes de concordancia de A.2.1 que estan
+# en el archivo de textos (las que faltan son opcionales: no se piden). La
+# clave de paso desglose.fuente.modo ya no se pide.
+func test_claves_de_rasgos_y_variantes() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	var textos: Dictionary = LectorFixture.leer("res://pruebas/fixtures/pantalla/es_rasgos.json", "textos")
+	assert_array(textos["errores"]).is_empty()
+	datos["textos/es.json"] = textos["datos"]
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+
+	assert_array(claves).contains(["accion.cavar", "marca.oculto", "marca.bono", "suceso.surco.cavar",
+			"suceso.surco.cerrar", "suceso.oculto", "suceso.destape.mover", "suceso.destape.atacar",
+			"suceso.destape.contacto", "suceso.pierde_bono", "aviso.cuenta.umbral", "aviso.destapar"])
+	assert_array(claves).contains(["iniciativa.caza", "iniciativa.cuenta", "suceso.cuenta.cambio"])
+	assert_array(claves).not_contains(["suceso.caza.cambio", "desglose.fuente.modo"])
+	# Variantes que estan en el archivo.
+	assert_array(claves).contains(["hambre.estado.saciado.surcon", "hambre.estado.saciado.maestro",
+			"estado.caida.surcon", "marca.caida.surcon"])
+	# Variantes que no estan: no se piden.
+	assert_array(claves).not_contains(["hambre.estado.saciado.rodauva", "lealtad.estado.dudosa.surcon",
+			"marca.caida.rodauva"])
+	var vistas: Dictionary = {}
+	for clave in claves:
+		assert_bool(vistas.has(clave)).override_failure_message("repetida: " + clave).is_false()
+		vistas[clave] = true

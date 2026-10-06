@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Arquitectura.md B.2.1 (T40, test 2): una especie inventada con el efecto ocultarse y otros ids (especie y rasgo). Los numeros son los del Zancajunco de la fixture (Sistema.md 11.2, 11.2.2): el test solo mira que el boton salga del efecto",
+  "id": "especie_prueba",
+  "rol": "mixto",
+  "rango": 2,
+  "sellable": true,
+  "vida": 12,
+  "danio": 4,
+  "movimiento": 4,
+  "alcance": 1,
+  "velocidad": 8,
+  "rasgo": {
+    "id": "rasgo_prueba",
+    "efecto": "ocultarse",
+    "bono_plano": 3
+  },
+  "huida_pct": 50
+}
