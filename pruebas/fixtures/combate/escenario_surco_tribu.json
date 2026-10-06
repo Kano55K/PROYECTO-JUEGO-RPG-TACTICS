@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "surco_tribu",
+  "_nota": "Sistema.md 11.2.1 (registro y grabacion de T37). Un Surcon de la tribu [3,6] con sus cuatro vecinas libres cava con Combate.aplicar. El Surcon salvaje [7,0] (Movimiento 2) queda a 9 pasos de la vecina mas cercana: en dos rondas no llega. Cola: Maestro (5), Surcon de la tribu (2, el bando del jugador antes en el empate), Surcon salvaje (2)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 6] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [7, 0] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

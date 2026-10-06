@@ -4,10 +4,10 @@ class_name Accion
 extends RefCounted
 
 # Hechizo, sellar, guardar, invocar y huir son tipos nuevos en T22, T24 y T26 a T28.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR }
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR }
 
 var tipo: Tipo
-# Solo para MOVER: la casilla de destino.
+# Para MOVER, la casilla de destino; para CAVAR, la del surco.
 var casilla: Vector2i = Criatura.SIN_POSICION
 # Solo para ATACAR: el id de la unidad objetivo.
 var objetivo_id: String = ""
@@ -33,6 +33,13 @@ static func erizarse() -> Accion:
 	return Accion.new(Tipo.ERIZARSE)
 
 
+# Sistema.md 11.2.1: cavar un surco en `casilla` (solo con el efecto surco).
+static func cavar(casilla_surco: Vector2i) -> Accion:
+	var accion: Accion = Accion.new(Tipo.CAVAR)
+	accion.casilla = casilla_surco
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -43,7 +50,7 @@ static func terminar() -> Accion:
 func a_diccionario() -> Dictionary:
 	var resultado: Dictionary = {"tipo": (Tipo.keys()[tipo] as String).to_lower()}
 	match tipo:
-		Tipo.MOVER:
+		Tipo.MOVER, Tipo.CAVAR:
 			resultado["casilla"] = [casilla.x, casilla.y]
 		Tipo.ATACAR:
 			resultado["objetivo"] = objetivo_id
@@ -60,11 +67,13 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 		return null
 	var tipo_accion: Tipo = Tipo[nombre]
 	match tipo_accion:
-		Tipo.MOVER:
+		Tipo.MOVER, Tipo.CAVAR:
 			if datos.size() != 2 or not _es_casilla(datos.get("casilla")):
 				return null
 			var par: Array = datos["casilla"]
-			return mover(Vector2i(int(par[0]), int(par[1])))
+			var con_casilla: Accion = Accion.new(tipo_accion)
+			con_casilla.casilla = Vector2i(int(par[0]), int(par[1]))
+			return con_casilla
 		Tipo.ATACAR:
 			if datos.size() != 2 or not datos.get("objetivo") is String:
 				return null
@@ -84,7 +93,7 @@ static func _es_casilla(valor: Variant) -> bool:
 	return true
 
 
-# Sistema.md 11.3: invocar y huir gastan el turno completo. Ningun tipo de hoy
-# lo hace; los de T26 a T28 devolveran true aca.
+# Sistema.md 11.3: invocar, huir y cavar un surco gastan el turno completo. Los
+# tipos de T26 a T28 se suman aca.
 func gasta_turno_completo() -> bool:
-	return false
+	return tipo == Tipo.CAVAR

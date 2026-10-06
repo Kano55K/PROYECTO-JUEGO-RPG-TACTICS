@@ -51,15 +51,19 @@ func adyacentes(a: Vector2i, b: Vector2i) -> bool:
 # Sistema.md 11.3, Movimiento: camino ortogonal de hasta `movimiento` pasos (BFS).
 # Se pasa por aliadas y caidas propias, nunca por enemigas; no se termina en una
 # casilla ocupada. Incluye `desde` (quedarse quieto). Orden de lectura.
-func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel) -> Array[Vector2i]:
+# Sistema.md 11.2.1, Transito: un surco solo lo pisa un Surcon (`pisa_surcos`,
+# de cualquier bando); para el resto no se pasa ni se termina ahi.
+func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel,
+		surcos: Surcos = null, pisa_surcos: bool = false) -> Array[Vector2i]:
 	var resultado: Array[Vector2i] = []
-	resultado.assign(pasos_hasta(desde, movimiento, bando, plantel).keys())
+	resultado.assign(pasos_hasta(desde, movimiento, bando, plantel, surcos, pisa_surcos).keys())
 	return _en_orden_de_lectura(resultado)
 
 
 # Las mismas casillas que `alcanzables`, cada una con los pasos del camino mas
 # corto (`desde` vale 0). La IA la usa para "la de menos movimiento" (11.8).
-func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel) -> Dictionary:
+func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel,
+		surcos: Surcos = null, pisa_surcos: bool = false) -> Dictionary:
 	var ocupantes: Dictionary = _ocupantes(plantel)
 	var pasos: Dictionary = {desde: 0}
 	var frontera: Array[Vector2i] = [desde]
@@ -72,6 +76,8 @@ func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plante
 				continue
 			if ocupantes.has(vecina) and ocupantes[vecina] != bando:
 				continue
+			if surcos != null and not pisa_surcos and surcos.hay_en(vecina):
+				continue
 			pasos[vecina] = pasos[actual] + 1
 			frontera.append(vecina)
 
@@ -80,6 +86,22 @@ func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plante
 		if casilla == desde or not ocupantes.has(casilla):
 			resultado[casilla] = pasos[casilla]
 	return resultado
+
+
+# Sistema.md 11.3, Casilla libre: dentro del tablero, sin unidad (de pie o
+# caida) y sin surco, para cualquier unidad, incluido un Surcon (S-25). La usan
+# cavar, invocar (T26) y el encierro de la metrica 14.
+func es_casilla_libre(casilla: Vector2i, plantel: Plantel, surcos: Surcos) -> bool:
+	return dentro(casilla) and not _ocupantes(plantel).has(casilla) and not surcos.hay_en(casilla)
+
+
+# Sistema.md 1.6, Lanzadera (T22): si el destino esta fuera del tablero u
+# ocupado, la unidad no se mueve. Un surco cuenta como ocupada, salvo para un
+# Surcon (11.2.1).
+func bloquea_desplazamiento(casilla: Vector2i, unidad_id: String, plantel: Plantel, surcos: Surcos) -> bool:
+	if not dentro(casilla) or _ocupantes(plantel).has(casilla):
+		return true
+	return surcos.hay_en(casilla) and not Surcos.es_surcon(unidad_id, plantel)
 
 
 # Misma fila o misma columna (y casillas distintas).
@@ -101,7 +123,8 @@ func casillas_entre(a: Vector2i, b: Vector2i) -> Array[Vector2i]:
 
 
 # Sistema.md 11.3, Alcance 2 (y la Lanzadera en T22): la linea la bloquea una
-# enemiga en una casilla intermedia; una aliada no.
+# enemiga en una casilla intermedia; una aliada no. Un surco tampoco: es un
+# pozo, no un muro (11.2.1).
 func linea_bloqueada(a: Vector2i, b: Vector2i, bando: Criatura.Bando, plantel: Plantel) -> bool:
 	var ocupantes: Dictionary = _ocupantes(plantel)
 	for casilla in casillas_entre(a, b):

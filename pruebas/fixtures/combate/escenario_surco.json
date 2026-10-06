@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "surco",
+  "_nota": "Sistema.md 11.2.1 (El surco), 11.3 (Movimiento, Casilla libre, Alcance 2) y 1.6 (Lanzadera, destino en un surco): tests de T37 con Turno suelto. Surcon de la tribu [3,4] con sus cuatro vecinas libres; Rodauva de la tribu [1,2] con [2,1], [2,2] y [2,3] libres para el rodeo; Ocarra de la tribu [6,6] en linea con la Rodauva salvaje [6,4]; Surcon salvaje [5,1] con [5,2] y [5,3] libres. Cada test mueve las unidades que necesita",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 4] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 2] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 6] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [5, 1] },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [6, 4] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

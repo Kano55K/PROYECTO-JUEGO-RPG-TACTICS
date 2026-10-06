@@ -454,3 +454,57 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** `desglose.fuente.modo`. La pantalla nombra así la fuente nueva hasta T40, que pasa a usar `iniciativa.<modo>`, así que hasta entonces se ve `[FALTA: desglose.fuente.modo]` en el desglose de un golpe al Tasajero o del Tasajero en Cuenta.
 - **Preguntas:** ninguna nueva; cerradas: ninguna. P-002, P-003, P-008 y P-024 siguen `RESPONDIDA` (son de T14, T19 y T30).
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T37.
+
+## T37 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T37-surco
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Estado de los surcos** (`Surcos`, nuevo, en `nucleo/combate/`; `Sistema.md` 11.2.1):
+    - El dueño es el `Combate`, que se lo pasa al `Turno`. El `Tablero` lo recibe por parámetro y no guarda nada.
+    - Cada surco es `{casilla, duenio_id, orden}`, y apunta al Surcón por id.
+    - Quién cava y pisa sale del efecto `surco` de la ficha (`Surcos.es_surcon`), nunca del id.
+  - **Tope:** al cavar el tercero, se cierra el más viejo **de ese Surcón**. Cada Surcón tiene su tope (el de su ficha).
+  - **Cierre:** una sola función, `Surcos.cerrar_de(duenio_id)`.
+    - Hoy la llama `VidaCero` cuando una salvaje queda `fuera`. Guardar, huir y sellar (T24 a T28) van a llamar a la misma.
+    - Un Surcón caído conserva sus surcos.
+    - Al terminar el combate, los surcos desaparecen con él, sin evento.
+  - **Tablero** (11.2.1, 11.3, 1.6):
+    - `pasos_hasta` y `alcanzables`: un surco es intransitable, ni se pasa ni se termina ahí, salvo para un Surcón de cualquier bando.
+    - La línea del Alcance 2 no mira surcos.
+    - `es_casilla_libre`: dentro del tablero, sin unidad (de pie o caída) y sin surco, para cualquiera (S-25).
+    - `bloquea_desplazamiento`, para la Lanzadera de T22: fuera del tablero u ocupada bloquea; un surco también, salvo para un Surcón.
+  - **Acción `cavar`** (`Accion.cavar(casilla)`):
+    - Solo con el efecto `surco`, sin haberse movido ni usado la acción, en una casilla ortogonalmente adyacente y libre. Puede estar junto a enemigas.
+    - Gasta el turno completo: después solo vale `terminar`, y no es "esperar".
+    - `Turno.se_movio` (nuevo; también le sirve a T38). Motivos nuevos: `YA_SE_MOVIO`, `CASILLA_NO_ADYACENTE` y `CASILLA_NO_LIBRE`.
+  - **Registro e `instantanea`** (A.7):
+    - `Surcos` lleva un historial de eventos que el `Combate` vuelca después de los eventos `estado` de cada acción, como las tiradas: las reglas no escriben el registro.
+    - Eventos: `surco` (unidad, casilla) y `surco_cerrado` (casilla, dueño, motivo `tope` / `duenio_fuera`).
+    - La `instantanea` suma `surcos`: `[{casilla, duenio, orden}]`.
+  - **Grabación:** el esquema `grabacion` acepta el tipo `cavar` (con `casilla`). `Grabacion.FORMATO` sigue en 1, porque el cambio solo agrega.
+- **Archivos:**
+  - **Creados:** `nucleo/combate/surcos.gd`; `pruebas/combate/test_surco.gd`; `pruebas/fixtures/combate/escenario_surco.json` y `escenario_surco_tribu.json`.
+  - **Modificados:**
+    - Núcleo: `nucleo/combate/tablero.gd`, `turno.gd`, `accion.gd`, `resultado_accion.gd`, `vida_cero.gd` y `combate.gd`.
+    - Esquema: `datos/_esquemas/grabacion.schema.json`.
+- **Tests:** 8 nuevos, total 241, todos pasan (sí). **Tests reescritos:** ninguno. Las firmas nuevas de `Tablero`, `Turno.empezar` y `VidaCero.resolver` son parámetros opcionales al final.
+- **Criterio de terminado:** cumplido punto por punto (`test_surco.gd`):
+  1. `test_donde_cavar`: adyacente y libre, sí. Diagonal y a distancia 2 dan `CASILLA_NO_ADYACENTE`. Con una de pie, con una caída, con un surco o fuera del tablero dan `CASILLA_NO_LIBRE`. Junto a una enemiga, sí.
+  2. `test_costo_turno_completo`: mover y después cavar da `YA_SE_MOVIO`. Después de cavar: mover da `MOVIMIENTO_USADO`, atacar y cavar dan `ACCION_USADA`, y terminar vale con `espero = false`. Sin el efecto da `SIN_RASGO`. Validar no cambia nada.
+  3. `test_tope`: el tercero cierra el más viejo (`surco` y después `surco_cerrado` `tope`). Dos Surcones, cuatro surcos: el tercero de uno cierra solo el suyo.
+  4. `test_duracion`: el Surcón de la tribu caído conserva su surco, que sigue cerrando el paso. El Surcón salvaje que sale del tablero cierra los dos suyos (`duenio_fuera`).
+  5. `test_transito`: la Rodauva no pasa ni termina en el surco, y el rodeo le cuesta 4 pasos en vez de 2 (`Tablero` y `Turno`). El Surcón salvaje atraviesa el surco del de la tribu y termina en él.
+  6. `test_linea_por_encima_del_surco`: la Ocarra pega 4 a distancia 2 con un surco en el medio.
+  7. `test_casilla_libre_y_desplazamiento`: cada caso de `es_casilla_libre` (incluido que un surco no es libre para un Surcón) y de `bloquea_desplazamiento` (surco: bloquea a la Rodauva y al Maestro, no a los dos Surcones).
+  8. `test_registro_instantanea_y_grabacion`: el Surcón de la tribu cava tres veces con `Combate.aplicar`. Cada `accion` cavar va seguida de su `surco`, y el tercero, de `surco_cerrado` `tope`. La `instantanea` trae los dos que quedan. La grabación valida contra el esquema (también tras pasar por JSON) y se reproduce con el mismo registro y la misma `instantanea`. `Accion.cavar` va y vuelve por diccionario.
+- **Lecturas declaradas:** ninguna. Decisiones técnicas del plan aprobado:
+  - Al pasar el tope, primero `surco` (el nuevo) y después `surco_cerrado` (el viejo).
+  - Al terminar el combate no hay evento de cierre: A.7 solo da `tope` y `duenio_fuera`.
+  - Orden de las comprobaciones de `cavar`: turno terminado, rasgo, acción usada, se movió, adyacencia, casilla libre.
+- **Estado intermedio:**
+  - El Surcón salvaje no cava (paso 7 de la IA, T39).
+  - La pantalla no dibuja surcos, no tiene botón Cavar y no muestra los eventos nuevos (T40). `LecturaCombate` los ignora.
+  - La IA y la pantalla ya respetan los surcos al mover, porque usan las consultas del `Turno`.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** ninguna nueva; cerradas: ninguna. P-002, P-003, P-008 y P-024 siguen `RESPONDIDA` (son de T14, T19 y T30).
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T38.

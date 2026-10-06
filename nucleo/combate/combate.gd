@@ -25,6 +25,10 @@ var _error: String = ""
 var _acciones_jugador: Array[Dictionary] = []
 # Tiradas del generador de combate ya volcadas al registro.
 var _tiradas_volcadas: int = 0
+# Sistema.md 11.2.1: los surcos son del combate y desaparecen con el (B.2.1, T37).
+var _surcos: Surcos = Surcos.new()
+# Eventos del historial de los surcos ya volcados al registro.
+var _surcos_volcados: int = 0
 
 
 func _init(contexto_combate: ContextoCombate) -> void:
@@ -134,6 +138,8 @@ func instantanea() -> Dictionary:
 			"accion_usada": _turno.accion_usada,
 			"terminado": _turno.terminado,
 		}
+	# Arquitectura.md A.7 (B.2.1): los surcos del combate.
+	foto["surcos"] = _surcos.instantanea()
 	return foto
 
 
@@ -146,11 +152,12 @@ func _arrancar() -> void:
 	var antes: Dictionary = _estados()
 	# Sistema.md 11.5, en el orden del Plantel. Solo las del tablero: una
 	# guardada no esta en juego y el cierre tampoco la toca.
-	VidaCero.resolver(Maestro.ID, _plantel)
+	VidaCero.resolver(Maestro.ID, _plantel, _surcos)
 	for criatura in _plantel.criaturas():
 		if criatura.estado == Criatura.Estado.SUELTA and criatura.vida == 0:
-			VidaCero.resolver(criatura.id, _plantel)
+			VidaCero.resolver(criatura.id, _plantel, _surcos)
 	_registrar_estados(antes)
+	_registrar_surcos()
 	_fin = FinCombate.evaluar(_plantel)
 	if _fin != FinCombate.Fin.EN_CURSO:
 		_terminar()
@@ -183,7 +190,7 @@ func _avanzar() -> void:
 		# Antes de empezar el turno: las tiradas de su inicio (T18 a T25) van despues.
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
-		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio)
+		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos)
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
 		if not _turno.cambio_modo.is_empty():
 			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
@@ -235,6 +242,7 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 					"desglose": resultado.desglose.a_diccionario(),
 					"vida_antes": vida_antes, "vida_despues": _vida(accion.objetivo_id)})
 	_registrar_estados(estados_antes)
+	_registrar_surcos()
 
 	_fin = resultado.fin
 	if _fin != FinCombate.Fin.EN_CURSO:
@@ -297,6 +305,15 @@ func _registrar_estados(antes: Dictionary) -> void:
 	for id_unidad in antes.keys():
 		if antes[id_unidad] != ahora[id_unidad]:
 			_registrar({"tipo": "estado", "unidad": id_unidad, "de": antes[id_unidad], "a": ahora[id_unidad]})
+
+
+# Arquitectura.md A.7: los eventos `surco` y `surco_cerrado` nuevos, en el orden
+# en que pasaron (al cavar, el nuevo antes que el cerrado por el tope).
+func _registrar_surcos() -> void:
+	var historial: Array[Dictionary] = _surcos.historial()
+	for indice in range(_surcos_volcados, historial.size()):
+		_registrar(historial[indice])
+	_surcos_volcados = historial.size()
 
 
 func _pergaminos_ardidos() -> Array[String]:
