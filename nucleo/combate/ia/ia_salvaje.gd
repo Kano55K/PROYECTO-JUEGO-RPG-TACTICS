@@ -1,8 +1,8 @@
 # Sistema.md 11.8: la IA de las salvajes; la atacante nocturna usa la misma
 # (9.2, punto 3). Para el turno de la unidad devuelve las acciones que va a
 # jugar, sin aplicar nada y sin azar. Recorre la lista de 11.8 en orden, un paso
-# por funcion; el primero que decide, gana. El Tasajero la recorre en cada uno
-# de sus dos turnos (Caza y Cuenta), con el tablero de ese momento.
+# por funcion; el primero que decide, gana. El Tasajero la recorre en su unico
+# turno de la ronda (Sistema.md 11.2.3), con el tablero de ese momento.
 class_name IASalvaje
 extends RefCounted
 
@@ -13,7 +13,7 @@ const _DESEMPATE_REMATE: Array[Criterio] = [Criterio.MENOS_VIDA, Criterio.MAS_CE
 # Cercana y acercarse: mas cercana -> menos vida -> antes en la cola (paso 5, S-19, P-020).
 const _DESEMPATE_CERCANA: Array[Criterio] = [Criterio.MAS_CERCANA, Criterio.MENOS_VIDA, Criterio.ANTES_EN_COLA]
 
-const _EFECTO_ACCION_DEFENSA: String = "accion_defensa"
+const _EFECTO_ERIZARSE: String = "erizarse"
 
 
 # cola: la de la ronda en curso, para "la que actua antes en la cola" (P-021).
@@ -52,7 +52,7 @@ static func _paso_encono(_turno: Turno, _plantel: Plantel) -> DecisionIA:
 static func _paso_erizarse(turno: Turno, plantel: Plantel) -> DecisionIA:
 	var unidad: Criatura = plantel.criatura(turno.unidad_id)
 	var rasgo: Dictionary = unidad.especie.rasgo()
-	if rasgo["efecto"] != _EFECTO_ACCION_DEFENSA or not turno.puede_erizarse():
+	if rasgo["efecto"] != _EFECTO_ERIZARSE or not turno.puede_erizarse():
 		return null
 	if unidad.vida * 100 > unidad.vida_max_real() * int(rasgo["umbral_vida_pct"]):
 		return null

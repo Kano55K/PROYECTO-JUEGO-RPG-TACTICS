@@ -94,7 +94,7 @@ func _assert_decision(decision: DecisionIA, paso: DecisionIA.Paso, acciones: Arr
 func _foto(plantel: Plantel) -> String:
 	var foto: Array = [plantel.maestro.vida, plantel.maestro.posicion, plantel.maestro.caido]
 	for criatura in plantel.criaturas():
-		foto.append([criatura.id, criatura.vida, criatura.posicion, criatura.estado, criatura.erizada, criatura.ya_ataco])
+		foto.append([criatura.id, criatura.vida, criatura.posicion, criatura.estado, criatura.erizada, criatura.modo])
 	return str(foto)
 
 
@@ -239,50 +239,55 @@ func test_nadie_apunta_a_una_caida() -> void:
 	_assert_decision(decision, DecisionIA.Paso.CERCANA, ["ATACAR rodauva_2", "TERMINAR"])
 
 
-# (10) El Tasajero recorre la lista en Caza y otra vez en Cuenta, con el tablero
-# de ese momento: en Caza tumba a la Rodauva; en Cuenta va por el Maestro.
+# (10) El Tasajero decide una vez por ronda, en Caza, con el tablero de ese
+# momento: en la ronda 1 tumba a la Rodauva; en la 2 va por el Maestro.
+# Reescrito por Sistema.md 11.2.3 v1.3 (antes: decidia en Caza y otra vez en
+# Cuenta en la misma ronda) y 11.2 (Danio 5).
 func test_tasajero_decide_en_cada_turno() -> void:
 	var plantel: Plantel = _plantel_ia("ia_tasajero")
-	var cola: ColaIniciativa = _cola(plantel)
+	var cola: ColaIniciativa = ColaIniciativa.new()
 	var decisiones: Array[DecisionIA] = []
-	var entrada: EntradaCola = cola.siguiente(plantel)
-	while entrada != null:
-		var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio)
-		if entrada.unidad_id == "tasajero_s1":
-			var decision: DecisionIA = IASalvaje.decidir(turno, plantel, cola)
-			decisiones.append(decision)
-			_jugar(turno, decision)
-		else:
-			assert_bool(turno.aplicar(Accion.terminar()).valida).is_true()
-		entrada = cola.siguiente(plantel)
+	for ronda in range(2):
+		cola.empezar_ronda(plantel)
+		var entrada: EntradaCola = cola.siguiente(plantel)
+		while entrada != null:
+			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio)
+			if entrada.unidad_id == "tasajero_s1":
+				assert_str(entrada.marca).is_equal("caza")
+				var decision: DecisionIA = IASalvaje.decidir(turno, plantel, cola)
+				decisiones.append(decision)
+				_jugar(turno, decision)
+			else:
+				assert_bool(turno.aplicar(Accion.terminar()).valida).is_true()
+			entrada = cola.siguiente(plantel)
+		cola.terminar_ronda()
 
 	assert_int(decisiones.size()).is_equal(2)
 	_assert_decision(decisiones[0], DecisionIA.Paso.REMATE, ["MOVER (3, 3)", "ATACAR rodauva_1", "TERMINAR"])
 	_assert_decision(decisiones[1], DecisionIA.Paso.CERCANA, ["MOVER (6, 3)", "ATACAR " + Maestro.ID, "TERMINAR"])
 	assert_int(plantel.criatura("rodauva_1").estado).is_equal(Criatura.Estado.CAIDA)
-	assert_int(plantel.maestro.vida).is_equal(plantel.maestro.vida_max_real() - 6)
+	assert_int(plantel.maestro.vida).is_equal(plantel.maestro.vida_max_real() - 5)
 
 
-# (11) Previsualizar y decidir no cambian el Plantel ni gastan Hacerse junco;
-# misma situacion, mismas acciones; sin el generador de azar.
+# (11) Previsualizar y decidir no cambian el Plantel; misma situacion, mismas
+# acciones; sin el generador de azar. Reescrito por Sistema.md 11.2.2 v1.3: sin
+# el +2 de primer ataque, la IA ve 4, el mismo danio que el ataque real (el
+# bono de Hacerse junco y su gasto se prueban en T38).
 func test_decidir_no_cambia_nada_y_es_determinista() -> void:
 	var plantel: Plantel = _plantel_ia("ia_junco")
 	var antes: String = _foto(plantel)
 	var primera: DecisionIA = _decidir(plantel, "zancajunco_s1")["decision"]
-	var segunda: DecisionIA = _decidir(plantel, "zancajunco_s1")["decision"]
-	# Tumba a la Rodauva (6) solo con el +2 de su primer ataque: 4 + 2.
+	var jugada: Dictionary = _decidir(plantel, "zancajunco_s1")
+	var segunda: DecisionIA = jugada["decision"]
+	# Tumba a la Rodauva (4) con su danio de ficha.
 	_assert_decision(primera, DecisionIA.Paso.REMATE, ["MOVER (3, 3)", "ATACAR rodauva_1", "TERMINAR"])
-	assert_int(primera.danio_previsto).is_equal(6)
-	assert_bool(plantel.criatura("zancajunco_s1").ya_ataco).is_false()
+	assert_int(primera.danio_previsto).is_equal(4)
 	assert_str(_foto(plantel)).is_equal(antes)
 	assert_array(_textos(segunda)).is_equal(_textos(primera))
 	assert_str(segunda.describir()).is_equal(primera.describir())
 
-	# Si ya ataco, pega 4 y no la tumba: la IA ve el mismo danio que el ataque real.
-	plantel.criatura("zancajunco_s1").ya_ataco = true
-	var sin_junco: DecisionIA = _decidir(plantel, "zancajunco_s1")["decision"]
-	_assert_decision(sin_junco, DecisionIA.Paso.CERCANA, ["MOVER (3, 3)", "ATACAR rodauva_1", "TERMINAR"])
-	assert_int(sin_junco.danio_previsto).is_equal(4)
+	var ataque: ResultadoAccion = _jugar(jugada["turno"], segunda)
+	assert_int(ataque.danio).is_equal(primera.danio_previsto)
 
 	for ruta in _FUENTES:
 		var codigo: String = FileAccess.get_file_as_string(ruta)

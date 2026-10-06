@@ -291,3 +291,116 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
      - `fc` dice que no encontró diferencias.
      - La copia hace falta porque la herramienta escribe `registros/<nombre>.jsonl` y pisaría el registro que guardó la pantalla.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan la prueba manual del usuario, el PR y el cierre del hito 0a.1.
+
+## T35 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T35-datos-v13
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Esquema `especie`** (A.2.2):
+    - Sale `turnos` y entra `velocidad` (opcional en el esquema).
+    - El rasgo pasa a `{id, efecto, parámetros}`, con el `enum` `erizarse`, `alabarda`, `surco`, `ocultarse` y `caza_y_cuenta`. Salen `ninguno`, `accion_defensa` (ahora `erizarse`), `reduccion_plana` y `primer_ataque`.
+    - Parámetros: `erizarse` (`danio_recibido_pct`, `inmovil`, `umbral_vida_pct`), `surco` (`tope`), `ocultarse` (`bono_plano`) y `caza_y_cuenta` (`modo_inicial`, `umbral_cambio_pct`, `modos`).
+    - `modos` es una lista en orden, de 2 o más elementos. Cada modo lleva `id`, `velocidad`, `ataques_por_turno`, `movimiento_partido`, `recibido_pct` y `danio_plano`.
+  - **Cargador:** chequeo cruzado nuevo, `_chequear_rasgos`:
+    - cada efecto trae sus parámetros y ninguno ajeno;
+    - `velocidad` está si y solo si no hay `modos`;
+    - el `modo_inicial` existe;
+    - los ids de modo no se repiten.
+    
+    Las fichas sin `rasgo` (fixtures mínimas de T03) no se revisan.
+  - **Datos v1.3:**
+    - Surcón: vida 24, rasgo `surco` con tope 2.
+    - Zancajunco: `ocultarse` +3.
+    - Tasajero: daño 5, Caza y Cuenta.
+    - Ocarra: `alabarda`.
+    - Rodauva: `erizarse`.
+    - Escenarios C y H: Tasajero en [3,1], y `_nota` del Tasajero y de la Rodauva al día con 11.2.3.
+    - F: `_nota` según 11.9.
+  - **Modelo:**
+    - `Especie`: sale `turnos()`. Entran `modo_inicial()` y, por modo, `velocidad`, `ataques_por_turno`, `movimiento_partido`, `recibido_pct` y `danio_plano`. Sin modos responde la ficha y los valores neutros (1, false, 0, 0).
+    - `Criatura.modo` arranca en el modo inicial (o `""`).
+    - Sale `Criatura.ya_ataco`, también de la `instantanea`.
+  - **Cola:** una entrada por unidad. La Velocidad y la marca salen de `criatura.modo` al armar la ronda, así que un cambio rige desde la ronda siguiente.
+  - **`Danio`:**
+    - Salen Lomo de tierra, el +2 de primer ataque y `registrar_ataque`.
+    - Erizarse se reconoce por el efecto `erizarse`, igual que en `Turno` y en `IASalvaje`.
+    - Queda el lugar comentado para los rasgos de la atacante (T36 y T38).
+  - **Hasta T36**, el Tasajero juega su único turno con un ataque (`Turno` sin cambios).
+- **Archivos:**
+  - **Creados:** `pruebas/fixtures/cargador/rasgos/` (6 fichas con error y 2 válidas).
+  - **Modificados:**
+    - Datos: `datos/_esquemas/especie.schema.json`; `datos/especies/*.json` (las 5); `datos/escenarios/c_tasajero.json`, `h_soplo.json` y `f_rescate.json`.
+    - Núcleo: `nucleo/datos/cargador.gd`; `nucleo/unidades/especie.gd`, `criatura.gd` y `plantel.gd`; `nucleo/combate/cola_iniciativa.gd`, `entrada_cola.gd`, `danio.gd`, `turno.gd` e `ia/ia_salvaje.gd`.
+    - Fixtures: `pruebas/fixtures/unidades/` (las 5 especies); `pruebas/fixtures/combate/rodauva_velocidad_5.json`, `escenario_c.json`, `ia/ia_tasajero.json` e `ia/ia_junco.json`.
+    - Tests: los de la lista "Tests reescritos o retirados".
+- **Tests:** 5 nuevos, total 224, todos pasan (sí).
+  - Nuevos: `test_cargador.gd` `test_rasgos_v13`; `test_cola_iniciativa.gd` `test_tasajero_en_cuenta_va_ultimo` y `test_cambio_de_modo_rige_desde_la_ronda_siguiente`; `test_especie.gd` `test_sin_modos_responde_la_ficha_y_valores_neutros` y `test_criatura_arranca_en_el_modo_inicial`.
+- **Tests reescritos o retirados** (con la sección de `Sistema.md` v1.3 que los cambia):
+  - `unidades/test_especie.gd`: `test_tasajero_tiene_dos_turnos` → `test_tasajero_responde_por_modo`. Los valores de Caza y Cuenta salen del modo (11.2.3).
+  - `combate/test_cola_iniciativa.gd`:
+    - (2) `test_prueba_c`: 5 entradas, sin la Cuenta (11.2.3, 11.3 Velocidad por modo).
+    - (3) `test_maestro_empatado_va_antes_que_su_criatura`: solo cambia la API (`turnos()[0]` pasa a `velocidad("")`), sin cambio de regla.
+    - (4) `test_rodauvas_de_e_siguen_el_orden_de_la_tribu` y (6a) `test_guardada_no_entra`: sale la entrada `tasajero_s1:cuenta` (11.2.3).
+    - (6b) `test_fuera_del_tablero_se_saltea`: el Tasajero que sale antes de su turno pierde su único turno de la ronda (11.3, fila "Unidad que deja de actuar a mitad de ronda"; el ejemplo de P-012 ya no aplica).
+    - (7) `test_tasajero_dos_entradas_y_fin_de_ronda` → `test_tasajero_una_entrada_y_fin_de_ronda` (11.2.3).
+  - `combate/test_turno.gd` (9): `test_tasajero_caza_y_cuenta` → `test_tasajero_un_turno_por_ronda`. Un turno por ronda en Caza, un ataque de 5, y en la ronda siguiente movimiento y acción renovados (11.2.3, 11.2 Danio 5).
+  - `combate/test_danio.gd`:
+    - (5) `test_contra_erizada`: el Tasajero hace 2, no 3 (11.2 Danio 5; 11.2.3, "erizada recibe 2 + 2").
+    - (6) `test_contra_lomo_de_tierra`: **retirado**, reemplazado por `test_surcon_no_reduce_el_danio`. El Maestro le hace 4 y la Rodauva 2, sin modificador (11.2, 11.2.1).
+    - (7) `test_hacerse_junco`: **retirado**, reemplazado por `test_zancajunco_sin_bono_pasivo`, que pega 4 en el primer ataque y en el segundo (11.2.2: el +3 activo es de T38).
+    - (9) `test_desglose`: sin el modificador `hacerse_junco`; 5 modificadores y total 5 (11.2.2).
+    - `test_calcular_no_modifica`: compara la `instantanea` en lugar de `ya_ataco` (11.2.2).
+  - `combate/ia/test_ia_salvaje.gd`:
+    - (10) `test_tasajero_decide_en_cada_turno`: una decisión por ronda en Caza, dos rondas, daño 5. La fixture `ia_tasajero.json` pasa la Rodauva a vida 5 (11.2.3, 11.2).
+    - (11) `test_decidir_no_cambia_nada_y_es_determinista`: sin el +2; el daño previsto es 4 y coincide con el ataque real. La fixture `ia_junco.json` pasa la Rodauva a vida 4 y sale la parte de `ya_ataco` (11.2.2).
+    - `_foto` mira `modo` en lugar de `ya_ataco`.
+  - `combate/test_combate.gd`:
+    - (7) `test_registro_de_una_ronda_de_c`: un solo turno del Tasajero, que desde [3,1] ataca al Maestro en la ronda 1 (11.2.3, 11.9).
+    - `test_cola_y_entrada_actual_para_la_pantalla`: 5 entradas, sin `cuenta` (11.2.3).
+  - `pantalla/test_lectura_combate.gd` `test_filas_cola`: sin "Tasajero · Cuenta" (11.2.3).
+  - `pantalla/test_vista_combate.gd` (6) `test_cola_mostrada_es_la_del_combate`: solo la marca `caza` (11.2.3).
+  - `pantalla/test_claves_textos.gd` `test_claves_usadas`: rasgos `erizarse`, `alabarda`, `surco`, `hacerse_junco` y `caza_y_cuenta`; ya no está `rasgo.lomo_de_tierra` (11.2.1).
+- **Corrige el plan aprobado:** la fixture `pruebas/fixtures/combate/escenario_c.json` también pasa el Tasajero a [3,1]. El plan decía que las posiciones de las fixtures no cambiaban, pero esta fixture es una copia declarada de `c_tasajero.json`, y el test (7) de `test_combate.gd` necesita que el Tasajero alcance a alguien en la ronda 1, que es justamente el motivo del cambio de 11.9.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. `test_datos_completos.gd` carga `datos/` sin errores. La tabla de cotejo, debajo, la revisa el usuario.
+  2. `test_rasgos_v13`: efecto sin su parámetro, parámetro de otro efecto, `velocidad` junto con `modos` (y sin ninguna de las dos), modo inicial inexistente y modos repetidos, cada uno con archivo y campo.
+  3. `test_prueba_c`: cinco entradas.
+  4. `test_tasajero_en_cuenta_va_ultimo`.
+  5. `test_cambio_de_modo_rige_desde_la_ronda_siguiente`.
+  6. `test_surcon_no_reduce_el_danio`, con el test de Lomo de tierra retirado y listado.
+  7. `test_combate.gd` (9) con `datos/` real: los 11 escenarios llegan al primer turno del jugador.
+  8. 224/224, con la lista de reescritos.
+- **Tabla de cotejo v1.3** (A.2.2), para revisar contra `Sistema.md`:
+
+  | Valor | Archivo y campo | Sección |
+  |---|---|---|
+  | 24 | `especies/surcon.json` `vida` | 11.2 |
+  | `surco`, tope 2 | `especies/surcon.json` `rasgo.efecto`, `rasgo.tope` | 11.2.1 (Tope) |
+  | `ocultarse`, +3 | `especies/zancajunco.json` `rasgo.efecto`, `rasgo.bono_plano` | 11.2.2 (Bono) |
+  | 5 | `especies/tasajero.json` `danio` | 11.2 |
+  | `caza` | `especies/tasajero.json` `rasgo.modo_inicial` | 11.2.3 (empieza en Caza) |
+  | 50 | `especies/tasajero.json` `rasgo.umbral_cambio_pct` | 11.2.3 (Cambio a Cuenta) |
+  | Caza: Vel 8, 2 ataques, sin partir, +25, plano 0 | `especies/tasajero.json` `rasgo.modos[0]` | 11.2.3 |
+  | Cuenta: Vel 3, 1 ataque, partido, 0, plano −1 | `especies/tasajero.json` `rasgo.modos[1]` | 11.2.3 |
+  | Vel 7, `alabarda` | `especies/ocarra.json` `velocidad`, `rasgo.efecto` | 11.2 |
+  | Vel 6, `erizarse` −50, inmóvil, umbral 50 | `especies/rodauva.json` | 11.2, 11.8 |
+  | Vel 2 / Vel 8 | `especies/surcon.json` / `zancajunco.json` `velocidad` | 11.2 |
+  | [3,1] | `escenarios/c_tasajero.json` y `h_soplo.json` `enemigas.tasajero_s1.posicion` | 11.9 (Tasajero en C y H) |
+
+  - **Sin cambios:** el movimiento del Tasajero (4, total también en Cuenta), su vida (30) y su `huida_pct` (25).
+  - **Derivadas que reproducen los datos:**
+    - Rodauva sola en la zona de Caza: 5 + 5 = 10 ≥ 8; erizada, 2 + 2 (11.2.3).
+    - Cuenta: 5 − 1 = 4.
+    - El Maestro necesita 6 golpes para debilitar al Surcón: 24 ÷ 4 (11.2, motivos).
+  - **Números leídos que no se guardan:** "4 + 3 = 7" del Zancajunco con el bono (11.2.2, 11.9 F). Es la suma de `danio` y `bono_plano`.
+  - **Se retiran:** `danio_recibido_plano` −1 (Lomo de tierra) y `danio_plano` +2 (primer ataque).
+- **Lecturas declaradas:** ninguna nueva. Decisiones técnicas del plan aprobado:
+  - `ninguno` sale del `enum` (la Ocarra usa `alabarda`, sin parámetros) y `accion_defensa` pasa a llamarse `erizarse`.
+  - `modos` es una lista en orden, dentro del rasgo.
+- **Claves de texto nuevas sin texto:** ninguna.
+  - `ClavesTextos.usadas` ya pide `rasgo.surco.*`, `rasgo.alabarda.*` y `rasgo.caza_y_cuenta.*`, que existen en `es.json` v1.1. Desaparece el aviso de las claves de Lomo de tierra.
+  - Las grabaciones del playtest 0a.1 cambian de huella: el aviso del reproductor es lo esperado.
+- **Preguntas:** ninguna nueva; cerradas: ninguna.
+  - P-024 figura `RESPONDIDA` en `CLAUDE.md` y en `Arquitectura.md` B.2.1, pero en `docs/PREGUNTAS.md` sigue `ABIERTA` y sin respuesta: falta pegarla (no afecta a T35, es de T30).
+  - P-002, P-003 y P-008 siguen `RESPONDIDA` (son de T30, T14 y T19).
+- **Para la próxima sesión:** nada: tarea terminada. Faltan la revisión de la tabla de cotejo, el commit y el PR. Sigue T36.

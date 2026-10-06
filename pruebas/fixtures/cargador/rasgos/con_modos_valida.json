@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Valida: caza_y_cuenta con sus tres parametros y sin velocidad en la ficha (Arquitectura.md A.2.2, T35)",
+  "id": "con_modos_valida", "rol": "trabajo", "rango": 1, "sellable": true,
+  "vida": 8, "danio": 2, "movimiento": 4, "alcance": 1,
+  "rasgo": { "id": "caza_y_cuenta", "efecto": "caza_y_cuenta", "modo_inicial": "caza", "umbral_cambio_pct": 50,
+    "modos": [
+      { "id": "caza", "velocidad": 8, "ataques_por_turno": 2, "movimiento_partido": false, "recibido_pct": 25, "danio_plano": 0 },
+      { "id": "cuenta", "velocidad": 3, "ataques_por_turno": 1, "movimiento_partido": true, "recibido_pct": 0, "danio_plano": -1 }
+    ] },
+  "huida_pct": 25
+}

@@ -1,6 +1,6 @@
 {
   "title": "Ficha de especie",
-  "description": "Sistema.md 11.2, 4.3 y 11.7. Una ficha por archivo en datos/especies/. Lo de 0b (apetito, preferencias, habilidades) entra como campos nuevos.",
+  "description": "Sistema.md 11.2, 11.2.1 a 11.2.3, 4.3 y 11.7. Una ficha por archivo en datos/especies/. Lo de 0b (apetito, preferencias, habilidades) entra como campos nuevos. Que parametros pide cada efecto, y velocidad solo sin modos, lo revisa el cargador (Arquitectura.md A.2.2).",
   "type": "object",
   "required": [
     "id",
@@ -11,7 +11,6 @@
     "danio",
     "movimiento",
     "alcance",
-    "turnos",
     "rasgo",
     "huida_pct"
   ],
@@ -59,31 +58,10 @@
       "minimum": 1,
       "maximum": 2
     },
-    "turnos": {
-      "description": "Una entrada por turno en la ronda. El Tasajero tiene dos (Caza y Cuenta).",
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 2,
-      "items": {
-        "type": "object",
-        "required": [
-          "velocidad"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "velocidad": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "marca": {
-            "description": "Clave de texto de la marca en la cola (ej.: caza, cuenta)",
-            "$ref": "comunes.schema.json#/$defs/id"
-          },
-          "_nota": {
-            "$ref": "comunes.schema.json#/$defs/nota"
-          }
-        }
-      }
+    "velocidad": {
+      "description": "Sistema.md 11.2. Obligatoria sin modos; con modos (caza_y_cuenta) no va: vive en cada modo (A.2.2). Lo revisa el cargador",
+      "type": "integer",
+      "minimum": 0
     },
     "rasgo": {
       "$ref": "#/$defs/rasgo"
@@ -94,7 +72,7 @@
   },
   "$defs": {
     "rasgo": {
-      "description": "id = nombre (clave de texto rasgo.<id>). efecto = comportamiento programado; sus números van acá.",
+      "description": "id = nombre (clave de texto rasgo.<id>). efecto = comportamiento programado; sus parametros (los numeros) van aca. El cargador exige los parametros del efecto y rechaza los ajenos (A.2.2).",
       "type": "object",
       "required": [
         "id",
@@ -107,31 +85,93 @@
         },
         "efecto": {
           "enum": [
-            "ninguno",
-            "accion_defensa",
-            "reduccion_plana",
-            "primer_ataque"
+            "erizarse",
+            "alabarda",
+            "surco",
+            "ocultarse",
+            "caza_y_cuenta"
           ]
         },
         "danio_recibido_pct": {
+          "description": "erizarse: % de danio recibido mientras esta erizada (11.4 paso 1)",
           "type": "integer",
           "minimum": -100,
           "maximum": 0
         },
         "inmovil": {
+          "description": "erizarse: no se mueve mientras esta erizada",
           "type": "boolean"
         },
         "umbral_vida_pct": {
-          "description": "Sistema.md 11.8, paso 3: la IA de las salvajes usa el rasgo con vida <= este % de la maxima",
+          "description": "erizarse: Sistema.md 11.8, paso 3: la IA de las salvajes usa el rasgo con vida <= este % de la maxima",
           "$ref": "comunes.schema.json#/$defs/pct"
         },
-        "danio_recibido_plano": {
+        "tope": {
+          "description": "surco: surcos abiertos por Surcon; con uno mas se cierra el mas viejo (11.2.1)",
           "type": "integer",
-          "maximum": 0
+          "minimum": 1
         },
-        "danio_plano": {
+        "bono_plano": {
+          "description": "ocultarse: plano que suma su proximo ataque (11.2.2, 11.4 paso 3)",
           "type": "integer",
           "minimum": 0
+        },
+        "modo_inicial": {
+          "description": "caza_y_cuenta: id del modo con el que empieza el combate (11.2.3)",
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "umbral_cambio_pct": {
+          "description": "caza_y_cuenta: al inicio de su turno, con vida <= este % de la maxima pasa al otro modo (11.2.3)",
+          "$ref": "comunes.schema.json#/$defs/pct"
+        },
+        "modos": {
+          "description": "caza_y_cuenta: los modos, en orden (11.2.3)",
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/modo"
+          }
+        },
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        }
+      }
+    },
+    "modo": {
+      "description": "Sistema.md 11.2.3: un modo de Caza y cuenta. id = marca de la cola (clave de texto iniciativa.<id>).",
+      "type": "object",
+      "required": [
+        "id",
+        "velocidad",
+        "ataques_por_turno",
+        "movimiento_partido",
+        "recibido_pct",
+        "danio_plano"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "velocidad": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ataques_por_turno": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "movimiento_partido": {
+          "type": "boolean"
+        },
+        "recibido_pct": {
+          "description": "% que se suma al danio que recibe (11.4 paso 1)",
+          "type": "integer",
+          "minimum": -100
+        },
+        "danio_plano": {
+          "description": "plano que se suma a cada ataque suyo (11.4 paso 3)",
+          "type": "integer"
         },
         "_nota": {
           "$ref": "comunes.schema.json#/$defs/nota"

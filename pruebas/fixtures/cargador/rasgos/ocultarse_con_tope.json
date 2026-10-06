@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Error: ocultarse con tope, parametro de surco (Arquitectura.md A.2.2, T35)",
+  "id": "ocultarse_con_tope", "rol": "trabajo", "rango": 1, "sellable": true,
+  "vida": 8, "danio": 2, "movimiento": 4, "alcance": 1,
+  "velocidad": 8,
+  "rasgo": { "id": "hacerse_junco", "efecto": "ocultarse", "bono_plano": 3, "tope": 2 },
+  "huida_pct": 50
+}

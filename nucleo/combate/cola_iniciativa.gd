@@ -53,21 +53,20 @@ func entradas() -> Array[EntradaCola]:
 # Sistema.md 11.3, Orden y Empates: mayor Velocidad primero; empates: bando del
 # jugador antes que el enemigo, el Maestro antes que sus criaturas, y despues el
 # orden del Plantel (tribu en su orden; enemigas en el orden de la lista
-# `enemigas`, P-011). Una entrada por cada turno de la ficha (Tasajero: dos).
+# `enemigas`, P-011). Una entrada por unidad (11.2.3: el Tasajero tambien), con
+# la Velocidad y la marca de su modo de este momento: un cambio de modo rige
+# desde la ronda siguiente (11.3, Velocidad por modo).
 func _armar(plantel: Plantel) -> Array[EntradaCola]:
 	var candidatas: Array[Dictionary] = []
 	if _puede_actuar(Maestro.ID, plantel):
-		candidatas.append(_candidata(EntradaCola.new(Maestro.ID, "", plantel.maestro.velocidad), Criatura.Bando.TRIBU, true, 0, 0))
+		candidatas.append(_candidata(EntradaCola.new(Maestro.ID, "", plantel.maestro.velocidad), Criatura.Bando.TRIBU, true, 0))
 	var criaturas: Array[Criatura] = plantel.criaturas()
 	for indice in range(criaturas.size()):
 		var criatura: Criatura = criaturas[indice]
 		if not _puede_actuar(criatura.id, plantel):
 			continue
-		var turnos: Array[Dictionary] = criatura.especie.turnos()
-		for indice_turno in range(turnos.size()):
-			var turno: Dictionary = turnos[indice_turno]
-			var entrada: EntradaCola = EntradaCola.new(criatura.id, turno.get("marca", ""), turno["velocidad"])
-			candidatas.append(_candidata(entrada, criatura.bando, false, indice, indice_turno))
+		var entrada: EntradaCola = EntradaCola.new(criatura.id, criatura.modo, criatura.especie.velocidad(criatura.modo))
+		candidatas.append(_candidata(entrada, criatura.bando, false, indice))
 	candidatas.sort_custom(_va_antes)
 
 	var resultado: Array[EntradaCola] = []
@@ -76,8 +75,8 @@ func _armar(plantel: Plantel) -> Array[EntradaCola]:
 	return resultado
 
 
-func _candidata(entrada: EntradaCola, bando: Criatura.Bando, es_maestro: bool, indice: int, indice_turno: int) -> Dictionary:
-	return {"entrada": entrada, "bando": bando, "maestro": es_maestro, "indice": indice, "turno": indice_turno}
+func _candidata(entrada: EntradaCola, bando: Criatura.Bando, es_maestro: bool, indice: int) -> Dictionary:
+	return {"entrada": entrada, "bando": bando, "maestro": es_maestro, "indice": indice}
 
 
 # Orden total: no depende de que el ordenamiento sea estable.
@@ -90,9 +89,7 @@ func _va_antes(a: Dictionary, b: Dictionary) -> bool:
 		return a["bando"] == Criatura.Bando.TRIBU
 	if a["maestro"] != b["maestro"]:
 		return a["maestro"]
-	if a["indice"] != b["indice"]:
-		return a["indice"] < b["indice"]
-	return a["turno"] < b["turno"]
+	return a["indice"] < b["indice"]
 
 
 # En la cola entran y actuan solo las unidades de pie en el tablero: no las

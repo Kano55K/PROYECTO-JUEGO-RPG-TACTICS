@@ -1,24 +1,20 @@
 {
   "$schema": "../../../datos/_esquemas/especie.schema.json",
-  "_nota": "Copia para los tests de reglas (Arquitectura.md A.6). Sistema.md 4.3 (rol, rango, sellable), 11.2 (vida, danio, movimiento, alcance, velocidad), 11.7 (huida_pct: 25%, terco)",
+  "_nota": "Copia para los tests de reglas (Arquitectura.md A.6). Sistema.md 4.3 (rol, rango, sellable), 11.2 v1.3 (vida 24, danio, movimiento, alcance, velocidad), 11.7 (huida_pct: 25%, terco)",
   "id": "surcon",
   "rol": "trabajo",
   "rango": 2,
   "sellable": true,
-  "vida": 18,
+  "vida": 24,
   "danio": 3,
   "movimiento": 2,
   "alcance": 1,
-  "turnos": [
-    {
-      "velocidad": 2
-    }
-  ],
+  "velocidad": 2,
   "rasgo": {
-    "_nota": "Sistema.md 11.2: Lomo de tierra (pasiva), -1 a cada golpe recibido. Bono plano de 11.4 paso 3; el minimo 1 es el general de 11.4 paso 4",
-    "id": "lomo_de_tierra",
-    "efecto": "reduccion_plana",
-    "danio_recibido_plano": -1
+    "_nota": "Sistema.md 11.2.1: El surco (provisorio, activa). Cava un surco en una casilla adyacente libre; gasta el turno completo. Tope: 2 surcos por Surcon. Reemplaza a Lomo de tierra",
+    "id": "surco",
+    "efecto": "surco",
+    "tope": 2
   },
   "huida_pct": 25
 }

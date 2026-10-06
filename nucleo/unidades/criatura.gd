@@ -33,9 +33,10 @@ var pergamino_id: String = ""
 # Sistema.md 11.2, Erizarse: hasta el inicio de su proximo turno (T08). Estado
 # del combate: no viene del escenario.
 var erizada: bool = false
-# Sistema.md 11.2, Hacerse junco: true desde que aplico su primer ataque del
-# combate (T09). Estado del combate: no viene del escenario.
-var ya_ataco: bool = false
+# Sistema.md 11.2.3, Caza y cuenta: id del modo actual ("" sin modos). Arranca
+# en el modo inicial; la cola lee de aca la Velocidad al armar cada ronda (11.3).
+# Estado del combate: no viene del escenario.
+var modo: String = ""
 
 
 func _init(id_criatura: String, especie_criatura: Especie, bando_criatura: Bando) -> void:
@@ -43,6 +44,7 @@ func _init(id_criatura: String, especie_criatura: Especie, bando_criatura: Bando
 	especie = especie_criatura
 	bando = bando_criatura
 	vida = vida_max_real()
+	modo = especie.modo_inicial()
 
 
 # Sistema.md 7.8: la vida maxima real de una criatura es la de su ficha.

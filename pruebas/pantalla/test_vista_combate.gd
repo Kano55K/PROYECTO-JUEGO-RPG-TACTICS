@@ -64,7 +64,8 @@ func test_once_escenarios_se_dibujan_en_su_casilla() -> void:
 
 
 # (6) La cola que se muestra coincide, entrada por entrada, con la de la
-# ColaIniciativa del combate, con Caza y Cuenta y la entrada actual resaltada.
+# ColaIniciativa del combate, con la marca de Caza y la entrada actual
+# resaltada. Sin la Cuenta en la ronda: reescrito por Sistema.md 11.2.3 v1.3.
 func test_cola_mostrada_es_la_del_combate() -> void:
 	var datos: Dictionary = _datos()
 	var runner: GdUnitSceneRunner = _vista(datos["escenarios/c_tasajero.json"], datos)
@@ -79,9 +80,9 @@ func test_cola_mostrada_es_la_del_combate() -> void:
 		assert_str(filas[i].get_meta("marca")).is_equal(entradas[i].marca)
 		assert_bool(filas[i].get_meta("actual")).is_equal(i == vista.combate().entrada_actual())
 		marcas.append(entradas[i].marca)
-	assert_array(marcas).contains(["caza", "cuenta"])
+	assert_array(marcas).contains(["caza"])
+	assert_array(marcas).not_contains(["cuenta"])
 	assert_str(filas[marcas.find("caza")].text).contains("Caza")
-	assert_str(filas[marcas.find("cuenta")].text).contains("Cuenta")
 
 
 # id -> casilla de las unidades que se dibujan: con posicion, de pie o caidas.

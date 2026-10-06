@@ -9,16 +9,12 @@
   "danio": 4,
   "movimiento": 4,
   "alcance": 1,
-  "turnos": [
-    {
-      "velocidad": 8
-    }
-  ],
+  "velocidad": 8,
   "rasgo": {
-    "_nota": "Sistema.md 11.2: Hacerse junco (pasiva), +2 de danio en su primer ataque del combate. Bono plano de 11.4 paso 3",
+    "_nota": "Sistema.md 11.2.2: Hacerse junco (activa). Queda oculto y su proximo ataque suma +3 (plano, 11.4 paso 3). Reemplaza a la pasiva de primer ataque",
     "id": "hacerse_junco",
-    "efecto": "primer_ataque",
-    "danio_plano": 2
+    "efecto": "ocultarse",
+    "bono_plano": 3
   },
   "huida_pct": 50
 }

@@ -1,30 +1,40 @@
 {
   "$schema": "../_esquemas/especie.schema.json",
-  "_nota": "Sistema.md 4.3 (rol, rango; en el MVP no se sella ni se domestica, sin importar la balanza), 11.2 (vida, danio, movimiento, alcance, velocidades 8 y 3), 11.7 (huida_pct: 25% al inicio de cada uno de sus dos turnos)",
+  "_nota": "Sistema.md 4.3 (rol, rango; en el MVP no se sella ni se domestica, sin importar la balanza), 11.2 v1.3 (vida, danio 5, movimiento, alcance; la velocidad vive en cada modo), 11.7 (huida_pct)",
   "id": "tasajero",
   "rol": "combate",
   "rango": 3,
   "sellable": false,
   "vida": 30,
-  "danio": 6,
+  "danio": 5,
   "movimiento": 4,
   "alcance": 1,
-  "turnos": [
-    {
-      "_nota": "Sistema.md 11.2: turno Caza",
-      "velocidad": 8,
-      "marca": "caza"
-    },
-    {
-      "_nota": "Sistema.md 11.2: turno Cuenta",
-      "velocidad": 3,
-      "marca": "cuenta"
-    }
-  ],
   "rasgo": {
-    "_nota": "Sistema.md 11.2: Caza y cuenta, dos turnos completos por ronda. Se expresa con la lista turnos; no tiene efecto aparte",
+    "_nota": "Sistema.md 11.2.3: Caza y cuenta, un solo turno por ronda en dos modos. Empieza en Caza; al inicio de su turno, con vida <= 50% pasa a Cuenta, sin vuelta",
     "id": "caza_y_cuenta",
-    "efecto": "ninguno"
+    "efecto": "caza_y_cuenta",
+    "modo_inicial": "caza",
+    "umbral_cambio_pct": 50,
+    "modos": [
+      {
+        "_nota": "Sistema.md 11.2.3: Caza. Vel 8; dos ataques separados de 5; movimiento normal, sin partir; recibe +25% (paso 1 de 11.4)",
+        "id": "caza",
+        "velocidad": 8,
+        "ataques_por_turno": 2,
+        "movimiento_partido": false,
+        "recibido_pct": 25,
+        "danio_plano": 0
+      },
+      {
+        "_nota": "Sistema.md 11.2.3: Cuenta. Vel 3; un ataque de 4 (-1 plano, paso 3 de 11.4); movimiento partido con 4 en total; danio recibido normal",
+        "id": "cuenta",
+        "velocidad": 3,
+        "ataques_por_turno": 1,
+        "movimiento_partido": true,
+        "recibido_pct": 0,
+        "danio_plano": -1
+      }
+    ]
   },
   "huida_pct": 25
 }

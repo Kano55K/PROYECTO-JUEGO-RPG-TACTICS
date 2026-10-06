@@ -2,8 +2,9 @@ extends GdUnitTestSuite
 
 # Arquitectura.md B.2 (T09): formula de danio completa, con fixtures (A.6).
 # Sistema.md 11.4 (orden del calculo), 7.1 (Saciado), 8.2 y 8.4 (enfermedades y
-# combinacion) y 11.2 (Erizarse, Lomo de tierra, Hacerse junco). Los numeros son
-# la comprobacion: el codigo los lee de las fichas, la balanza, combate.json y hambre.json.
+# combinacion) y 11.2 (Erizarse; desde la v1.3 el Surcon y el Zancajunco no
+# tienen modificador pasivo, T35). Los numeros son la comprobacion: el codigo
+# los lee de las fichas, la balanza, combate.json y hambre.json.
 const _CARPETA: String = "res://pruebas/fixtures/combate/"
 const _CARPETA_UNIDADES: String = "res://pruebas/fixtures/unidades/"
 const _ESPECIES: Array[String] = ["ocarra", "rodauva", "surcon", "tasajero", "zancajunco"]
@@ -133,50 +134,55 @@ func test_tres_enfermedades() -> void:
 
 
 # (5) 11.2, Erizarse: -50% al danio recibido. Contra una Rodauva erizada, la
-# Ocarra hace 2 y el Tasajero 3.
+# Ocarra hace 2 y el Tasajero 2 (5 x 0,5 = 2,5 -> 2). Reescrito por Sistema.md
+# 11.2 v1.3 (Tasajero con Danio 5; antes 6, que daba 3) y 11.2.3 ("erizada
+# recibe 2 + 2").
 func test_contra_erizada() -> void:
 	var plantel: Plantel = _plantel()
 	plantel.criatura("rodauva_s1").erizada = true
 	assert_int(_total("ocarra_1", "rodauva_s1", plantel)).is_equal(2)
 	plantel.criatura("rodauva_1").erizada = true
-	assert_int(_total("tasajero_s1", "rodauva_1", plantel)).is_equal(3)
+	assert_int(_total("tasajero_s1", "rodauva_1", plantel)).is_equal(2)
 	# Sin erizarse, el rasgo no actua.
 	plantel.criatura("rodauva_s1").erizada = false
 	assert_int(_total("ocarra_1", "rodauva_s1", plantel)).is_equal(4)
 
 
-# (6) 11.2, Lomo de tierra: -1 a cada golpe recibido, minimo 1. Contra el
-# Surcon, el Maestro hace 3 y la Rodauva 1.
-func test_contra_lomo_de_tierra() -> void:
+# (6) T35 (criterio 6). Reemplaza al test de Lomo de tierra (-1 a cada golpe),
+# retirado por Sistema.md 11.2 y 11.2.1 v1.3: el surco reemplaza a Lomo de
+# tierra y no reduce el danio. Contra el Surcon, el Maestro hace 4 y la Rodauva
+# 2, sin ningun modificador de rasgo.
+func test_surcon_no_reduce_el_danio() -> void:
 	var plantel: Plantel = _plantel()
-	assert_int(_total(Maestro.ID, "surcon_s1", plantel)).is_equal(3)
-	var desglose: DesgloseDanio = _danio.calcular("rodauva_1", "surcon_s1", plantel)
-	assert_int(desglose.total).is_equal(1)
-	assert_int(desglose.planos_total).is_equal(-1)
+	var desglose: DesgloseDanio = _danio.calcular(Maestro.ID, "surcon_s1", plantel)
+	assert_int(desglose.total).is_equal(4)
+	assert_array(desglose.modificadores).is_empty()
+	desglose = _danio.calcular("rodauva_1", "surcon_s1", plantel)
+	assert_int(desglose.total).is_equal(2)
+	assert_int(desglose.planos_total).is_equal(0)
+	assert_array(desglose.modificadores).is_empty()
 
 
-# (7) 11.2, Hacerse junco: +2 en el primer ataque del combate (6), despues 4.
-# Validar y un ataque rechazado no gastan el bono; tampoco calcular suelto.
-func test_hacerse_junco() -> void:
+# (7) Reemplaza al test de Hacerse junco pasivo (+2 en el primer ataque del
+# combate), retirado por Sistema.md 11.2.2 v1.3: ahora es una activa (+3 despues
+# de ocultarse, T38). Sin ocultarse, el Zancajunco pega 4 en su primer ataque y
+# en el segundo, y aplicar un ataque no deja ninguna marca en la criatura.
+func test_zancajunco_sin_bono_pasivo() -> void:
 	var plantel: Plantel = _plantel()
-	var zancajunco: Criatura = plantel.criatura("zancajunco_1")
-	assert_int(_total("zancajunco_1", "tasajero_s1", plantel)).is_equal(6)
-	assert_bool(zancajunco.ya_ataco).is_false()
+	assert_int(_total("zancajunco_1", "tasajero_s1", plantel)).is_equal(4)
 
 	var turno: Turno = _turno(plantel, "zancajunco_1")
-	assert_int(turno.validar(Accion.atacar("tasajero_s1")).danio).is_equal(6)
-	assert_int(turno.validar(Accion.atacar("tasajero_s1")).danio).is_equal(6)
-	assert_bool(turno.aplicar(Accion.atacar("ocarra_1")).valida).is_false()
-	assert_bool(zancajunco.ya_ataco).is_false()
-	assert_int(turno.aplicar(Accion.atacar("tasajero_s1")).danio).is_equal(6)
-	assert_int(plantel.criatura("tasajero_s1").vida).is_equal(30 - 6)
-	assert_bool(zancajunco.ya_ataco).is_true()
+	assert_int(turno.validar(Accion.atacar("tasajero_s1")).danio).is_equal(4)
+	assert_int(turno.aplicar(Accion.atacar("tasajero_s1")).danio).is_equal(4)
+	assert_int(plantel.criatura("tasajero_s1").vida).is_equal(30 - 4)
 	turno.aplicar(Accion.terminar())
 
 	turno = _turno(plantel, "zancajunco_1")
+	var antes: Dictionary = plantel.instantanea()
 	assert_int(turno.validar(Accion.atacar("tasajero_s1")).danio).is_equal(4)
+	assert_dict(plantel.instantanea()).is_equal(antes)
 	assert_int(turno.aplicar(Accion.atacar("tasajero_s1")).danio).is_equal(4)
-	assert_int(plantel.criatura("tasajero_s1").vida).is_equal(30 - 6 - 4)
+	assert_int(plantel.criatura("tasajero_s1").vida).is_equal(30 - 4 - 4)
 
 
 # (8) Porcentajes por debajo de -100%: la Rodauva con 3 enfermedades (-75%)
@@ -195,7 +201,9 @@ func test_porcentajes_bajo_menos_cien() -> void:
 
 # (9) El desglose: cada modificador con su fuente, tipo y valor, y el total
 # se rearma desde la lista. Zancajunco saciada (+25) con 1 enfermedad (-25) contra
-# una Rodauva erizada (-50), con combo +50 y afinidad +1: 0% -> 4, +2 +1 = 7.
+# una Rodauva erizada (-50), con combo +50 y afinidad +1: 0% -> 4, +1 = 5.
+# Reescrito por Sistema.md 11.2.2 v1.3: sale el +2 pasivo de Hacerse junco
+# (antes 6 modificadores y total 7).
 func test_desglose() -> void:
 	var plantel: Plantel = _plantel()
 	var zancajunco: Criatura = plantel.criatura("zancajunco_1")
@@ -207,19 +215,18 @@ func test_desglose() -> void:
 
 	assert_int(desglose.base).is_equal(4)
 	var modificadores: Array[ModificadorDanio] = desglose.modificadores
-	assert_int(modificadores.size()).is_equal(6)
+	assert_int(modificadores.size()).is_equal(5)
 	var pct: ModificadorDanio.Tipo = ModificadorDanio.Tipo.PORCENTAJE
 	var plano: ModificadorDanio.Tipo = ModificadorDanio.Tipo.PLANO
 	_assert_modificador(modificadores[0], ModificadorDanio.Fuente.HAMBRE, pct, 25, "saciado")
 	_assert_modificador(modificadores[1], ModificadorDanio.Fuente.ENFERMEDAD, pct, -25, "")
 	_assert_modificador(modificadores[2], ModificadorDanio.Fuente.RASGO_OBJETIVO, pct, -50, "erizarse")
 	_assert_modificador(modificadores[3], ModificadorDanio.Fuente.COMBO, pct, 50, "")
-	_assert_modificador(modificadores[4], ModificadorDanio.Fuente.RASGO_ATACANTE, plano, 2, "hacerse_junco")
-	_assert_modificador(modificadores[5], ModificadorDanio.Fuente.AFINIDAD, plano, 1, "")
+	_assert_modificador(modificadores[4], ModificadorDanio.Fuente.AFINIDAD, plano, 1, "")
 	assert_int(desglose.porcentaje_total).is_equal(0)
 	assert_int(desglose.tras_porcentajes).is_equal(4)
-	assert_int(desglose.planos_total).is_equal(3)
-	assert_int(desglose.total).is_equal(7)
+	assert_int(desglose.planos_total).is_equal(1)
+	assert_int(desglose.total).is_equal(5)
 	assert_bool(desglose.minimo_aplicado).is_false()
 	_assert_reconstruye(desglose)
 
@@ -255,8 +262,10 @@ func test_enemiga_sin_saciado_ni_enfermedades() -> void:
 
 
 # calcular no modifica el Plantel: sirve para validar (calcular sin aplicar).
+# Compara la instantanea entera: ya_ataco salio con el +2 pasivo (Sistema.md 11.2.2 v1.3).
 func test_calcular_no_modifica() -> void:
 	var plantel: Plantel = _plantel()
+	var antes: Dictionary = plantel.instantanea()
 	_danio.calcular("zancajunco_1", "tasajero_s1", plantel)
-	assert_bool(plantel.criatura("zancajunco_1").ya_ataco).is_false()
+	assert_dict(plantel.instantanea()).is_equal(antes)
 	assert_int(plantel.criatura("tasajero_s1").vida).is_equal(30)

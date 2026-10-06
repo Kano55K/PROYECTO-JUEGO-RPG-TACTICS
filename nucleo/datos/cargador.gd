@@ -6,6 +6,16 @@ class_name Cargador
 extends RefCounted
 
 const _PATRON_CLAVE_TEXTO: String = "^[a-z0-9_]+(\\.[a-z0-9_]+)*$"
+# Arquitectura.md A.2.2 (Rasgos y modos): el validador no tiene oneOf, asi que
+# los parametros de cada efecto los revisa el cargador. Sistema.md 11.2, 11.2.1 a 11.2.3.
+const _PARAMETROS_EFECTO: Dictionary = {
+	"erizarse": ["danio_recibido_pct", "inmovil", "umbral_vida_pct"],
+	"alabarda": [],
+	"surco": ["tope"],
+	"ocultarse": ["bono_plano"],
+	"caza_y_cuenta": ["modo_inicial", "umbral_cambio_pct", "modos"],
+}
+const _CAMPOS_RASGO_COMUNES: Array[String] = ["id", "efecto", "_nota"]
 
 
 # Devuelve {"errores": Array[Dictionary], "avisos": Array[Dictionary], "datos": Variant}.
@@ -200,6 +210,45 @@ func _chequear_cruzados(datos_por_archivo: Dictionary, errores: Array[Dictionary
 	_chequear_hambre(datos_por_archivo, errores)
 	_chequear_ids_escenario(datos_por_archivo, errores)
 	_chequear_posiciones_en_tablero(datos_por_archivo, errores)
+	_chequear_rasgos(datos_por_archivo, errores)
+
+
+# Arquitectura.md A.2.2 (Rasgos y modos). Cada efecto trae sus parametros y ninguno ajeno; la ficha lleva velocidad si
+# y solo si no hay modos; el modo inicial existe y los modos no se repiten.
+# Las fichas sin rasgo (fixtures minimas de T03) no se revisan.
+func _chequear_rasgos(datos_por_archivo: Dictionary, errores: Array[Dictionary]) -> void:
+	for ruta in datos_por_archivo.keys():
+		var ruta_str: String = ruta as String
+		var ficha: Dictionary = datos_por_archivo[ruta]
+		if not ruta_str.begins_with("especies/") or not ficha.has("rasgo"):
+			continue
+		var rasgo: Dictionary = ficha["rasgo"]
+		var efecto: String = rasgo["efecto"]
+		var propios: Array = _PARAMETROS_EFECTO[efecto]
+		for parametro in propios:
+			if not rasgo.has(parametro):
+				errores.append(_error(ruta_str, "rasgo.%s" % parametro, "presente (parametro de %s)" % efecto, null))
+		for clave in rasgo.keys():
+			if not _CAMPOS_RASGO_COMUNES.has(clave) and not propios.has(clave):
+				errores.append(_error(ruta_str, "rasgo.%s" % clave, "solo parametros de %s" % efecto, clave))
+
+		var con_modos: bool = rasgo.has("modos")
+		if con_modos and ficha.has("velocidad"):
+			errores.append(_error(ruta_str, "velocidad", "ausente: con modos, la velocidad vive en cada modo", ficha["velocidad"]))
+		elif not con_modos and not ficha.has("velocidad"):
+			errores.append(_error(ruta_str, "velocidad", "presente (la ficha no tiene modos)", null))
+		if not con_modos:
+			continue
+
+		var ids_modos: Dictionary = {}
+		var modos: Array = rasgo["modos"]
+		for i in range(modos.size()):
+			var id_modo: String = (modos[i] as Dictionary)["id"]
+			if ids_modos.has(id_modo):
+				errores.append(_error(ruta_str, "rasgo.modos[%d].id" % i, "un id de modo sin repetir", id_modo))
+			ids_modos[id_modo] = true
+		if rasgo.has("modo_inicial") and not ids_modos.has(rasgo["modo_inicial"]):
+			errores.append(_error(ruta_str, "rasgo.modo_inicial", "un id de rasgo.modos", rasgo["modo_inicial"]))
 
 
 func _chequear_id_coincide_con_archivo(datos_por_archivo: Dictionary, errores: Array[Dictionary]) -> void:

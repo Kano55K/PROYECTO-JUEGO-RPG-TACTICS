@@ -254,9 +254,11 @@ func test_sin_rasgo_no_se_eriza() -> void:
 	assert_str(_foto(plantel)).is_equal(antes)
 
 
-# (9) Prueba C: el Tasajero mueve y ataca en Caza y otra vez en Cuenta, con
-# movimiento y accion renovados (Sistema.md 11.2, Caza y cuenta).
-func test_tasajero_caza_y_cuenta() -> void:
+# (9) Prueba C: el Tasajero tiene un solo turno por ronda, en Caza; mueve y
+# ataca, y en la ronda siguiente vuelve con movimiento y accion renovados.
+# Reescrito por Sistema.md 11.2.3 v1.3 (antes: Caza y Cuenta, dos turnos por
+# ronda) y 11.2 (Danio 5). Hasta T36 juega su turno con un solo ataque.
+func test_tasajero_un_turno_por_ronda() -> void:
 	var plantel: Plantel = _plantel(_escenario("escenario_c.json"))
 	var zancajunco: Criatura = plantel.criatura("zancajunco_1")
 	var cola: ColaIniciativa = ColaIniciativa.new()
@@ -271,24 +273,27 @@ func test_tasajero_caza_y_cuenta() -> void:
 	assert_str(turno.marca).is_equal("caza")
 	_assert_valida(turno.aplicar(Accion.mover(Vector2i(3, 2))))
 	_assert_valida(turno.aplicar(Accion.atacar("zancajunco_1")))
-	assert_int(zancajunco.vida).is_equal(12 - 6)
+	assert_int(zancajunco.vida).is_equal(12 - 5)
+	assert_bool(turno.validar(Accion.atacar("zancajunco_1")).valida).is_false()
 	turno.aplicar(Accion.terminar())
 
 	for unidad_id in ["ocarra_1", "rodauva_1", Maestro.ID]:
 		turno = _siguiente_turno(cola, plantel)
 		assert_str(turno.unidad_id).is_equal(unidad_id)
 		turno.aplicar(Accion.terminar())
+	assert_bool(cola.ronda_terminada()).is_true()
 
+	cola.terminar_ronda()
+	cola.empezar_ronda(plantel)
+	_siguiente_turno(cola, plantel).aplicar(Accion.terminar())
 	turno = _siguiente_turno(cola, plantel)
 	assert_str(turno.unidad_id).is_equal("tasajero_s1")
-	assert_str(turno.marca).is_equal("cuenta")
+	assert_str(turno.marca).is_equal("caza")
 	assert_bool(turno.movimiento_usado).is_false()
 	assert_bool(turno.accion_usada).is_false()
 	_assert_valida(turno.aplicar(Accion.mover(Vector2i(4, 3))))
 	_assert_valida(turno.aplicar(Accion.atacar("zancajunco_1")))
-	assert_int(zancajunco.vida).is_equal(6 - 6)
-	turno.aplicar(Accion.terminar())
-	assert_bool(cola.ronda_terminada()).is_true()
+	assert_int(zancajunco.vida).is_equal(12 - 5 - 5)
 
 
 # (10) Esperar: terminar sin usar la accion cierra el turno (P-015) y la cola

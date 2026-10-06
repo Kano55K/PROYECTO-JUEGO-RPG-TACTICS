@@ -35,7 +35,8 @@ func test_nombres() -> void:
 	assert_str(lectura.texto_ronda()).is_equal("[FALTA: combate.ronda]")
 
 
-# La cola de C con Caza y Cuenta, y la entrada actual (el Zancajunco).
+# La cola de C con la marca de Caza y la entrada actual (el Zancajunco). Sin la
+# fila de la Cuenta: reescrito por Sistema.md 11.2.3 v1.3 (un turno por ronda).
 func test_filas_cola() -> void:
 	var lectura: LecturaCombate = _lectura()
 	var textos: Array[String] = []
@@ -44,8 +45,8 @@ func test_filas_cola() -> void:
 		textos.append(fila["texto"])
 		actuales.append(fila["actual"])
 	assert_array(textos).is_equal(["Zancajunco", "Tasajero · Caza", "Ocarra", "Rodauva",
-			"[FALTA: maestro.nombre]", "Tasajero · Cuenta"])
-	assert_array(actuales).is_equal([true, false, false, false, false, false])
+			"[FALTA: maestro.nombre]"])
+	assert_array(actuales).is_equal([true, false, false, false, false])
 
 
 # Panel del turno: lealtad con su estado (balanza 2, umbral de la fixture) y
