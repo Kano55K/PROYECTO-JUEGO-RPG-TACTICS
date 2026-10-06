@@ -325,7 +325,7 @@
 - **Cerrada en:** T12 (sin cambios de código)
 
 ## P-024 — Destino de la atacante nocturna caída si el combate termina en derrota
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T12
 - **Fecha:** 04/10/2026
@@ -335,4 +335,4 @@
 - **Opciones:** A) queda pendiente (`atacante_pendiente` = su id) con cualquier desenlace. B) otra regla (huye, queda libre o muere). — Recomendación técnica: A (lectura literal, ya programada).
 - **Bloquea:** no (se necesita antes de T30)
 - **Mientras tanto:** programado con A en `nucleo/combate/resultado_combate.gd`, `ResultadoCombate.armar`: toma la criatura `ATACANTE_NOCTURNA` en estado `CAIDA` sin mirar `cierre.fin`, con un comentario que remite a esta pregunta y a S-20. Test: `pruebas/combate/test_contrato.gd`, `test_resultados_validan_contra_el_esquema` (test 11 de T12, caso G con la atacante en 0: `atacante_pendiente = "ocarra_1"`). Ese test cubre la atacante caída en una victoria. Ningún test arma una derrota con la atacante caída. Si Sistemas elige B, cambia una condición de `armar` y se suma ese caso al test 11.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** `Sistema.md` 9.2, paso 6 (v1.4 y v1.5) y Visión 6.4 v1.2: opción B. Si el combate nocturno termina en derrota, la atacante se va, también si ya estaba caída: su pergamino arde, vuelve a ser salvaje y no hay `atacante_pendiente`. Su ida no cambia la lealtad de nadie. Cambia una condición de `ResultadoCombate.armar` y se suma la derrota al test 11 de T12. Se aplica en T30.
