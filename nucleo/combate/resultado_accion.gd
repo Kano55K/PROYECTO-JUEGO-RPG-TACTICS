@@ -21,6 +21,9 @@ enum Motivo {
 	LINEA_BLOQUEADA,
 	FUERA_DE_ALCANCE,
 	SIN_RASGO,
+	# Sistema.md 11.2.3 (S-23): sin movimiento partido y con mas de un ataque, no
+	# se mueve entre el primero y el ultimo.
+	MOVER_ENTRE_ATAQUES,
 	# Sistema.md 11.5: con el combate terminado no se acepta ninguna accion.
 	COMBATE_TERMINADO,
 	# Combate.aplicar: no es el turno de una unidad del jugador (o el combate se

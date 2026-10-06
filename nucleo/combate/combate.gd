@@ -110,6 +110,13 @@ func entrada_actual() -> int:
 	return _cola.lugar() - 1
 
 
+# Sistema.md 11.2.3, "el umbral se muestra sobre la unidad": la vida a la que
+# cambia de modo, o null (sin modos, ya en el modo final, o el Maestro).
+func vida_de_cambio(unidad_id: String) -> Variant:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	return null if criatura == null else CambioModo.vida_de_cambio(criatura)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -177,6 +184,10 @@ func _avanzar() -> void:
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
 		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio)
+		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
+		if not _turno.cambio_modo.is_empty():
+			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
+					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]})
 
 
 # Sistema.md 11.8: las acciones de la IA, una por una. Corta si el combate

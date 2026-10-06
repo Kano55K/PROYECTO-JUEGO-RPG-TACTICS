@@ -404,3 +404,53 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   - P-024 figura `RESPONDIDA` en `CLAUDE.md` y en `Arquitectura.md` B.2.1, pero en `docs/PREGUNTAS.md` sigue `ABIERTA` y sin respuesta: falta pegarla (no afecta a T35, es de T30).
   - P-002, P-003 y P-008 siguen `RESPONDIDA` (son de T30, T14 y T19).
 - **Para la próxima sesión:** nada: tarea terminada. Faltan la revisión de la tabla de cotejo, el commit y el PR. Sigue T36.
+
+## T36 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T36-turno-modos
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **`Turno` generalizado** (`Sistema.md` 11.3 y 11.2.3):
+    - El turno lleva `pasos_restantes` (el Movimiento de la ficha o de `maestro.json`) y `ataques_restantes` (los del modo; 1 por defecto). Toman su valor después del inicio del turno, así que el turno se juega con el modo que quedó.
+    - Sin movimiento partido, el primer `mover` gasta todos los pasos (igual que antes).
+    - Con movimiento partido (Cuenta), `mover` gasta los pasos del camino más corto (`Tablero.pasos_hasta`) y se puede volver a mover antes y después de atacar.
+    - `atacar` gasta un ataque. Sin movimiento partido y con más de un ataque (Caza), moverse después del primer ataque se rechaza con el motivo nuevo `MOVER_ENTRE_ATAQUES` hasta usar el último (S-23).
+    - Erizarse gasta la acción y cierra el movimiento como antes.
+    - `movimiento_usado` pasa a querer decir "sin pasos" y `accion_usada` "usó alguna acción": la pantalla y los tests de T08 los leen sin cambios.
+  - **Cambio a Cuenta** (`CambioModo`, nuevo, en `nucleo/combate/`):
+    - Es una regla del inicio del turno, no una decisión de la IA, y está en un solo lugar.
+    - Va después del lugar de la huida (T25) y antes del de Encono (T19), según 11.8 paso 2.
+    - Se compara en enteros: `vida × 100 ≤ vida_max × umbral_cambio_pct`. La criatura pasa al modo final, sin vuelta, y juega ese turno con él.
+    - `Turno.cambio_modo` guarda `{de, a}`; el `Combate` lo registra como evento `cambio_modo` (unidad, de, a) detrás del evento `turno`, que sigue con la marca de la cola.
+    - `Especie.modo_final()` y `umbral_cambio_pct()`.
+  - **Daño** (`Danio`, sin tocar a quien lo llama): el `recibido_pct` del modo de la objetivo entra como porcentaje del paso 1 y el `danio_plano` del modo de la atacante como plano del paso 3 (11.4). Los dos van con la fuente nueva `ModificadorDanio.Fuente.MODO` y el id del modo (`caza` o `cuenta`) como detalle.
+  - **Consulta para la pantalla:** `Combate.vida_de_cambio(unidad_id)` devuelve la vida a la que cambia de modo (15 para el Tasajero), o `null` si no tiene modos, ya está en el final o es el Maestro.
+  - **`instantanea`:** suma `modo` por criatura (`null` si no tiene modos), como pide A.7 para el hito.
+- **Archivos:**
+  - **Creados:** `nucleo/combate/cambio_modo.gd`; `pruebas/combate/test_caza_y_cuenta.gd`; `pruebas/fixtures/combate/escenario_caza.json` y `escenario_caza_tribu.json`.
+  - **Modificados:**
+    - Núcleo: `nucleo/combate/turno.gd`, `danio.gd`, `modificador_danio.gd`, `resultado_accion.gd` y `combate.gd`; `nucleo/unidades/especie.gd` y `plantel.gd`.
+    - Tests: `pruebas/combate/test_turno.gd` y `test_danio.gd` (los de la lista "Tests reescritos").
+- **Tests:** 9 nuevos, total 233, todos pasan (sí).
+- **Tests reescritos** (con la sección de `Sistema.md` que los cambia):
+  - `combate/test_turno.gd` (9) `test_tasajero_un_turno_por_ronda`: el segundo ataque en Caza ahora vale (12 − 5 − 5) y el tercero se rechaza con `ACCION_USADA`. En la ronda siguiente vuelve con dos ataques (11.2.3, "2 ataques separados de 5").
+  - `combate/test_danio.gd` (7) `test_zancajunco_sin_bono_pasivo`: el Tasajero objetivo pasa a `cuenta` para que el golpe siga siendo 4, porque en Caza recibe +25% (11.2.3, 11.4 paso 1). El caso de Caza está en el test nuevo (5).
+  - **Sin tocar** (criterio 8): en `test_turno.gd`, los tests 1 a 8, 10 a 12 y `test_previsualizar_ataque`.
+- **Criterio de terminado:** cumplido punto por punto (`test_caza_y_cuenta.gd`, salvo el 8):
+  1. `test_caza_dos_ataques`: dos ataques a la misma presa o a dos presas. La Rodauva (8) recibe 5 + 5 y cae en el segundo; erizada, recibe 2 + 2. Si la primera presa cae, el segundo ataque a la otra vale.
+  2. `test_caza_no_hay_tercer_ataque`.
+  3. `test_caza_orden_mover_y_atacar`: mover → atacar → atacar vale; atacar → mover se rechaza con `MOVER_ENTRE_ATAQUES` y sin cambios; atacar → atacar → mover vale.
+  4. `test_cuenta_movimiento_partido`: mover 2, atacar y mover 2 vale; el tercer tramo se rechaza con `MOVIMIENTO_USADO`; pega 5 − 1 = 4, con `MODO` −1 `cuenta` en el desglose.
+  5. `test_danio_recibido_por_modo`: la Ocarra le pega 5 en Caza (`MODO` +25 `caza`) y 4 en Cuenta; el Maestro con un combo de +50% le pega 4 × 1,75 = 7.
+  6. `test_cambio_a_cuenta`: con 15 de 30 pasa a Cuenta y juega ese turno con 1 ataque y movimiento partido; con 16, no; con la vida otra vez en 30 sigue en Cuenta; `vida_de_cambio` da 15 en Caza y `null` en Cuenta.
+  7. `test_ronda_siguiente_con_velocidad_de_cuenta`: la ronda en curso no cambia; la siguiente lo trae último, con Velocidad 3 y marca `cuenta`.
+  8. Los tests de T08 de las demás unidades pasan sin cambios (lista de arriba).
+  9. `test_registro_caza_y_cuenta`: `cambio_modo` va detrás de `turno` (con la marca `caza`), y hay un evento `ataque` con su desglose por cada uno de los dos golpes.
+  10. `test_validar_es_aplicar_en_modos`: validar no cambia la foto ni los pasos ni los ataques que quedan, y da lo mismo que aplicar, en ocho casos de Caza y de Cuenta.
+- **Lecturas declaradas:** ninguna nueva (S-23 ya estaba confirmada). Decisiones técnicas del plan aprobado:
+  - "Pasa al otro modo" se programa como "pasa al modo final", el último de `modos`. Con los dos modos de los datos es lo mismo.
+  - El test del registro usa un Tasajero **de la tribu** (`escenario_caza_tribu.json`), porque `Combate.aplicar` solo acepta acciones del jugador y la IA de dos ataques es de T39. La regla sale del efecto de la ficha, no del bando.
+- **Fuera del plan:** el `modo` en la `instantanea`. A.7 lo pide para el hito y el test (9) lo usa.
+- **Estado intermedio:** la IA del Tasajero sigue dando un solo ataque en Caza. El paso 6b es de T39, y terminar después de un ataque es válido.
+- **Claves de texto nuevas sin texto:** `desglose.fuente.modo`. La pantalla nombra así la fuente nueva hasta T40, que pasa a usar `iniciativa.<modo>`, así que hasta entonces se ve `[FALTA: desglose.fuente.modo]` en el desglose de un golpe al Tasajero o del Tasajero en Cuenta.
+- **Preguntas:** ninguna nueva; cerradas: ninguna. P-002, P-003, P-008 y P-024 siguen `RESPONDIDA` (son de T14, T19 y T30).
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit y el PR. Sigue T37.

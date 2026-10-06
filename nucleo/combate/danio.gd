@@ -40,8 +40,11 @@ func calcular(atacante_id: String, objetivo_id: String, plantel: Plantel,
 	_hambre_y_enfermedades(atacante_id, plantel, porcentajes)
 	if objetivo != null:
 		_rasgo_objetivo(objetivo, porcentajes)
-	# Aca se enchufan los rasgos de la atacante: el plano del modo (T36) y el
-	# bono de Hacerse junco (T38).
+		_modo(objetivo, objetivo.especie.recibido_pct(objetivo.modo), ModificadorDanio.Tipo.PORCENTAJE, porcentajes)
+	var atacante: Criatura = plantel.criatura(atacante_id)
+	if atacante != null:
+		_modo(atacante, atacante.especie.danio_plano(atacante.modo), ModificadorDanio.Tipo.PLANO, planos)
+	# Aca se enchufa el bono de Hacerse junco de la atacante (T38).
 	for aporte in aportes:
 		if aporte.tipo == ModificadorDanio.Tipo.PORCENTAJE:
 			porcentajes.append(aporte)
@@ -98,9 +101,17 @@ func _hambre_y_enfermedades(atacante_id: String, plantel: Plantel, porcentajes: 
 
 # Sistema.md 11.2: rasgos de la objetivo, por su efecto en la ficha. Erizarse:
 # -50% mientras esta erizada. Desde la v1.3 ningun rasgo da un plano pasivo (el
-# surco reemplaza a Lomo de tierra, 11.2.1); el % recibido por modo es de T36.
+# surco reemplaza a Lomo de tierra, 11.2.1).
 func _rasgo_objetivo(objetivo: Criatura, porcentajes: Array[ModificadorDanio]) -> void:
 	var rasgo: Dictionary = objetivo.especie.rasgo()
 	if rasgo["efecto"] == _EFECTO_ERIZARSE and objetivo.erizada:
 		porcentajes.append(ModificadorDanio.new(ModificadorDanio.Fuente.RASGO_OBJETIVO,
 				ModificadorDanio.Tipo.PORCENTAJE, rasgo["danio_recibido_pct"], rasgo["id"]))
+
+
+# Sistema.md 11.2.3 y 11.4: el del modo actual, con el id del modo como detalle.
+# El % recibido es de la objetivo (paso 1, +25% en Caza); el plano, de la
+# atacante (paso 3, -1 en Cuenta). Sin modos los dos valen 0 y no se agregan.
+func _modo(criatura: Criatura, valor: int, tipo: ModificadorDanio.Tipo, lista: Array[ModificadorDanio]) -> void:
+	if valor != 0:
+		lista.append(ModificadorDanio.new(ModificadorDanio.Fuente.MODO, tipo, valor, criatura.modo))
