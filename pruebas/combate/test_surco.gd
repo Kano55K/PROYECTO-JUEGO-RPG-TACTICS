@@ -262,8 +262,49 @@ func test_casilla_libre_y_desplazamiento() -> void:
 	assert_bool(_tablero.bloquea_desplazamiento(Vector2i(2, 2), _SURCON_SALVAJE, plantel, surcos)).is_false()
 
 
+# T39: las consultas casillas_para_cavar y surcos_propios del Turno (para la IA
+# del paso 7 de 11.8 y la pantalla de T40). Las casillas son las que `cavar`
+# acepta (11.2.1, Donde), en orden de lectura; validar no cambia nada.
+func test_casillas_para_cavar_y_surcos_propios() -> void:
+	var plantel: Plantel = _plantel()
+	var surcos: Surcos = Surcos.new()
+	var turno: Turno = _turno(plantel, _SURCON, surcos)
+	var antes: String = _foto(plantel, surcos, turno)
+	assert_array(turno.casillas_para_cavar()).is_equal([Vector2i(3, 3), Vector2i(2, 4), Vector2i(4, 4), Vector2i(3, 5)])
+	assert_str(_foto(plantel, surcos, turno)).is_equal(antes)
+	assert_array(turno.surcos_propios()).is_empty()
+
+	# Sin la ocupada [4,4] ni la que tiene surco [2,4] (de otro Surcon).
+	plantel.criatura("rodauva_1").posicion = Vector2i(4, 4)
+	surcos.cavar(Vector2i(2, 4), _SURCON_SALVAJE, 2)
+	turno = _turno(plantel, _SURCON, surcos)
+	assert_array(turno.casillas_para_cavar()).is_equal([Vector2i(3, 3), Vector2i(3, 5)])
+	assert_array(turno.surcos_propios()).is_empty()
+	_assert_valida(turno.aplicar(Accion.cavar(Vector2i(3, 5))))
+	assert_array(turno.surcos_propios()).is_equal([Vector2i(3, 5)])
+	# Despues de cavar (turno completo) no queda ninguna.
+	assert_array(turno.casillas_para_cavar()).is_empty()
+
+	# En la esquina: solo las vecinas dentro del tablero.
+	plantel = _plantel()
+	plantel.criatura(_SURCON).posicion = Vector2i(0, 0)
+	turno = _turno(plantel, _SURCON, Surcos.new())
+	assert_array(turno.casillas_para_cavar()).is_equal([Vector2i(1, 0), Vector2i(0, 1)])
+
+	# Despues de moverse, ninguna; sin el efecto surco, ninguna.
+	plantel = _plantel()
+	turno = _turno(plantel, _SURCON, Surcos.new())
+	_assert_valida(turno.aplicar(Accion.mover(Vector2i(3, 3))))
+	assert_array(turno.casillas_para_cavar()).is_empty()
+	assert_array(_turno(plantel, "rodauva_1", Surcos.new()).casillas_para_cavar()).is_empty()
+
+
 # (8) Registro, instantanea y grabacion (A.7): el Surcon de la tribu cava tres
 # veces con Combate.aplicar; la grabacion valida y se reproduce igual.
+# Reescrito en T39 por Sistema.md 11.8 paso 7: el Surcon salvaje [7,0] ya no
+# solo se acerca; sin nadie a su alcance cava hacia la enemiga mas cercana (el
+# Surcon de la tribu): [6,0] en la ronda 1 y [7,1] en la 2 (orden de lectura);
+# en la 3, con el tope lleno, se acerca. Las cuentas de la tribu se filtran por dueno.
 func test_registro_instantanea_y_grabacion() -> void:
 	var lectura: Dictionary = DatosFixture.cargar()
 	assert_array(lectura["errores"]).is_empty()
@@ -281,26 +322,34 @@ func test_registro_instantanea_y_grabacion() -> void:
 
 	var lineas: Array[Dictionary] = combate.registro().lineas()
 	var surcos_cavados: Array = []
+	var cavados_salvaje: Array = []
 	var cerrados: Array = []
 	for indice in range(lineas.size()):
 		var linea: Dictionary = lineas[indice]
 		if linea["tipo"] == "accion" and linea["accion"]["tipo"] == "cavar":
 			assert_dict(lineas[indice + 1]).contains_key_value("tipo", "surco")
-			assert_dict(lineas[indice + 1]).contains_key_value("unidad", _SURCON)
+			assert_dict(lineas[indice + 1]).contains_key_value("unidad", linea["unidad"])
 			assert_that(lineas[indice + 1]["casilla"]).is_equal(linea["accion"]["casilla"])
-		if linea["tipo"] == "surco":
+		if linea["tipo"] == "surco" and linea["unidad"] == _SURCON:
 			surcos_cavados.append(linea["casilla"])
+		if linea["tipo"] == "surco" and linea["unidad"] == _SURCON_SALVAJE:
+			cavados_salvaje.append(linea["casilla"])
 		if linea["tipo"] == "surco_cerrado":
 			assert_str(lineas[indice - 1]["tipo"]).is_equal("surco")
 			cerrados.append(linea)
 	assert_array(surcos_cavados).is_equal([[3, 5], [2, 6], [4, 6]])
+	assert_array(cavados_salvaje).is_equal([[6, 0], [7, 1]])
 	assert_int(cerrados.size()).is_equal(1)
 	assert_that(cerrados[0]["casilla"]).is_equal([3, 5])
 	assert_str(cerrados[0]["duenio"]).is_equal(_SURCON)
 	assert_str(cerrados[0]["motivo"]).is_equal("tope")
-	assert_array(combate.instantanea()["surcos"]).is_equal([
-		{"casilla": [2, 6], "duenio": _SURCON, "orden": 2},
-		{"casilla": [4, 6], "duenio": _SURCON, "orden": 3},
+	var de_la_tribu: Array = []
+	for surco in combate.instantanea()["surcos"]:
+		if surco["duenio"] == _SURCON:
+			de_la_tribu.append(surco)
+	assert_array(de_la_tribu).is_equal([
+		{"casilla": [2, 6], "duenio": _SURCON, "orden": 3},
+		{"casilla": [4, 6], "duenio": _SURCON, "orden": 5},
 	])
 
 	var grabacion: Grabacion = Grabacion.desde_combate(combate)

@@ -275,13 +275,15 @@ func _jugar_ronda_c() -> Combate:
 # con la posicion, sin float. La tirada queda justo antes de la accion que siguio.
 # Reescrito por Sistema.md 11.2.3 v1.3: un solo turno del Tasajero por ronda (en
 # Caza), y 11.9: desde [3,1] alcanza al Maestro en la ronda 1 (antes pegaba en la Cuenta).
+# Reescrito en T39 por Sistema.md 11.8 paso 6b: desde [3,5], con una sola presa
+# (el Maestro), le da los dos ataques de Caza: dos pares accion/ataque.
 func test_registro_de_una_ronda_de_c() -> void:
 	var combate: Combate = _jugar_ronda_c()
 	assert_str(combate.turno_actual().unidad_id).is_equal("zancajunco_1")
 	assert_array(_tipos(combate)).is_equal([
 		"inicio", "ronda",
 		"turno", "accion", "fin_turno",
-		"turno", "accion", "movimiento", "accion", "ataque", "accion", "fin_turno",
+		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
 		"turno", "tirada", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
@@ -318,6 +320,13 @@ func test_registro_de_una_ronda_de_c() -> void:
 
 	var ataque: Dictionary = _de_tipo(combate, "ataque")[0]
 	assert_int(ataque["vida_antes"] as int - (ataque["vida_despues"] as int)).is_equal((ataque["desglose"] as Dictionary)["total"] as int)
+	# Los dos golpes de Caza van al Maestro, uno detras del otro (11.8 paso 6b).
+	var ataques: Array[Dictionary] = _de_tipo(combate, "ataque")
+	assert_int(ataques.size()).is_equal(2)
+	for golpe in ataques:
+		assert_dict(golpe).contains_key_value("atacante", "tasajero_s1").contains_key_value("objetivo", Maestro.ID)
+	assert_int(ataques[1]["vida_antes"] as int).is_equal(ataques[0]["vida_despues"] as int)
+	assert_array(fines[1]["posicion"]).is_equal([3, 5])
 
 
 # (8) El mismo contexto con las mismas acciones, dos veces, da registros

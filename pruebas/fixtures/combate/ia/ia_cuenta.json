@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../datos/_esquemas/escenario.schema.json",
+  "id": "ia_cuenta",
+  "_nota": "Sistema.md 11.8, Retirada del Tasajero en Cuenta (tests de T39; el test lo pone en Cuenta). El Tasajero salvaje [3,1] (4 de danio en Cuenta, movimiento partido de 4) golpea a la Rodauva [3,4] desde [3,3] (2 pasos, la de menos) y con los 2 que le quedan se retira a la casilla mas lejana de ella: [3,1], [2,2], [4,2], [1,3] y [5,3] quedan a 3; orden de lectura, [3,1], la casilla de la que salio. El Maestro [7,7], la Ocarra [7,0] y el Zancajunco de la tribu [0,7] quedan lejos; los tests los mueven",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [7, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 4] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [7, 0] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 7] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [3, 1] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

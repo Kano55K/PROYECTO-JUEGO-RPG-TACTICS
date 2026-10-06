@@ -236,22 +236,32 @@ Reglas completas en `docs/Arquitectura.md` B.2.1. Las que más se olvidan:
   - `CambioModo` (`nucleo/combate/cambio_modo.gd`): `aplicar(criatura)` y `vida_de_cambio(criatura)`, comparando en enteros. Pasa al `Especie.modo_final()`; `Especie.umbral_cambio_pct()`.
   - `Danio`: `Fuente.MODO`, con el % recibido de la objetivo y el plano de la atacante, y el id del modo como detalle.
   - `Combate`: evento `cambio_modo` detrás de `turno`; `vida_de_cambio(unidad_id)`. La `instantanea` suma `modo` por criatura.
-  - La IA todavía da un solo ataque en Caza (T39). La pantalla muestra la fuente `modo` como `[FALTA: desglose.fuente.modo]` hasta T40.
+  - La pantalla muestra la fuente `modo` como `[FALTA: desglose.fuente.modo]` hasta T40.
 - T37 (el surco) mergeada a `develop`.
   - `Surcos` (`nucleo/combate/surcos.gd`), dueño el `Combate`: `es_surcon(id, plantel)` (por el efecto), `hay_en`, `de(duenio)`, `cavar(casilla, duenio, tope)`, `cerrar_de(duenio)` (la única salida del tablero: hoy la llama `VidaCero` en `fuera`; después guardar, huir y sellar), `historial()` e `instantanea()`.
   - `Tablero`: `pasos_hasta`/`alcanzables(desde, mov, bando, plantel, surcos, pisa_surcos)` (obligatorios desde T38); `es_casilla_libre(casilla, plantel, surcos)`; `bloquea_desplazamiento(casilla, unidad, plantel, surcos)` para T22. La línea no mira surcos.
   - `Turno.empezar(entrada, plantel, tablero, danio, surcos)`, `se_movio`, acción `Accion.cavar(casilla)` (`gasta_turno_completo`). Motivos nuevos: `YA_SE_MOVIO`, `CASILLA_NO_ADYACENTE` y `CASILLA_NO_LIBRE`. `VidaCero.resolver(id, plantel, surcos)`. Los tests sin surcos pasan `Surcos.new()`.
   - `Combate`: vuelca `surco` y `surco_cerrado` después de los eventos `estado`; `instantanea()["surcos"]`. Esquema `grabacion`: tipo `cavar`.
-  - El Surcón salvaje todavía no cava (T39). La pantalla no muestra surcos ni tiene el botón hasta T40.
-- **T38 (Hacerse junco y "oculto") TERMINADA** en la rama `tarea/T38-junco`, pendiente de PR.
+  - La pantalla no muestra surcos ni tiene el botón hasta T40.
+- T38 (Hacerse junco y "oculto") mergeada a `develop`.
   - **Consulta única de objetivo:** `Objetivos` (`nucleo/combate/objetivos.gd`, estática). `motivo(id, Clase.HOSTIL | ALIADA, plantel)` → `INEXISTENTE` / `FUERA_DEL_TABLERO` / `CAIDO` / `OCULTO` (solo hostil) / `NINGUNO`; `puede_ser_objetivo`; `de_pie(id, plantel)`; `cuenta_como_rival_a_su_alcance(unidad, rival, plantel)` para T19. El bando lo revisa cada acción. Usan la consulta el ataque del `Turno` (y por él `objetivos_para_atacar` y la previsualización) y la IA (sale `_enemigas_de_pie`).
   - `Criatura`: `oculta`, `bono_junco` y `junco_turno_anterior` (lo escribe `Turno._fin_del_turno`). Acción `Accion.hacerse_junco()`. Motivos nuevos: `OBJETIVO_OCULTO`, `ENEMIGA_ADYACENTE` y `JUNCO_TURNO_ANTERIOR`.
   - `Junco` (`nucleo/combate/junco.gd`, estática): `ocultar`, `destapar`, `revisar_contacto(movida_id, plantel)` (la única revisión; hoy la llama `mover` y después la van a llamar la Lanzadera e invocar), `atacar`, `recibir_ataque` y `limpiar` (desde `Cierre`). Cada función devuelve sus eventos de A.7, que se juntan en `Turno.eventos()`. El `Combate` los vuelca después del evento de la acción.
   - `Danio`: el bono es un plano `RASGO_ATACANTE` con detalle `hacerse_junco`, y se cobra solo al aplicar. La `instantanea` suma `oculta` y `bono_junco`. Esquema `grabacion`: tipo `hacerse_junco`.
-  - La IA todavía no se oculta (T39). La pantalla no tiene el botón ni muestra los eventos nuevos (T40).
+  - La pantalla no tiene el botón ni muestra los eventos nuevos (T40).
+- **T39 (IA v1.3) TERMINADA** en la rama `tarea/T39-ia-v13`, pendiente de PR.
+  - `IASalvaje`, con los pasos de 11.8 v1.3:
+    - 6b Caza (`DecisionIA.Paso.CAZA`): casilla con 2 presas > 1 → tumba → menos vida sumada → pasos → lectura.
+    - Cuenta: golpea desde la casilla de menos pasos y se retira (`DecisionIA.retirada`).
+    - 7 `PREPARARSE`: el Zancajunco se oculta y el Surcón cava, siempre por efecto.
+    - 8: el Zancajunco con el bono avanza.
+  - Lecturas declaradas P-026 (`_DESEMPATE_PRESAS`) y P-027 (`_enemiga_mas_cercana`).
+  - `DecisionIA`: `objetivos`, `retirada`, `modo`, `cambio_modo`, `sumar_ataque`; `describir()` dice "paso N" de 11.8.
+  - Consultas nuevas: `Turno.casillas_para_cavar()` (también para T40), `surcos_propios()` y `pasos_para_retirarse(desde)`. `Tablero.pasos_hasta(..., dejada)` es opcional.
+  - Fixtures en `pruebas/fixtures/combate/ia/` (`ia_caza*`, `ia_cuenta`, `ia_surcon`, `ia_oculta`) y `escenario_f.json`.
 - **Abrir el juego:** F5 en el editor, o `& $env:GODOT_BIN --path .` (PowerShell). Con otra carpeta de datos, agregar `-- --datos=<carpeta>`.
 - **Reproducir una grabación por consola** (escribe `registros/<nombre>.jsonl`, o `<nombre>_hasta_N.jsonl`; con los datos de `datos/`): `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- <grabacion.json> [N]`
-- Tests de reglas con fixtures vía `pruebas/unidades/lector_fixture.gd`, y los datos completos de prueba con `pruebas/combate/datos_fixture.gd` (`DatosFixture.cargar()`, mismas claves que el `Cargador`). Con `datos/` real, además del permanente: `test_plantel_escenarios.gd` el test (9) de `test_combate.gd`, y en `pruebas/pantalla/` `test_principal.gd` (2, 10 sobre una copia temporal de `datos/`, y el clic real) y `test_vista_combate.gd`. 254 tests. Los `Control` que tapan el tablero llevan `mouse_filter` IGNORE: si no, el clic no llega a `_unhandled_input`.
-- `docs/PREGUNTAS.md`: P-024 `RESPONDIDA` (opción B: en una derrota, la atacante se va; se aplica en T30). Siguen `RESPONDIDA` y se cierran en su tarea: P-003 en T14, P-008 en T19, P-002 y P-024 en T30. P-011 a P-023, `CERRADA` en T12. P-025 `ABIERTA` (ARQUITECTO, no bloquea): cómo admite la consulta única a una caída para guardar; se necesita antes de T26.
+- Tests de reglas con fixtures vía `pruebas/unidades/lector_fixture.gd`, y los datos completos de prueba con `pruebas/combate/datos_fixture.gd` (`DatosFixture.cargar()`, mismas claves que el `Cargador`). Con `datos/` real, además del permanente: `test_plantel_escenarios.gd` el test (9) de `test_combate.gd`, y en `pruebas/pantalla/` `test_principal.gd` (2, 10 sobre una copia temporal de `datos/`, y el clic real) y `test_vista_combate.gd`. 265 tests. Los `Control` que tapan el tablero llevan `mouse_filter` IGNORE: si no, el clic no llega a `_unhandled_input`.
+- `docs/PREGUNTAS.md`: P-024 `RESPONDIDA` (opción B: en una derrota, la atacante se va; se aplica en T30). Siguen `RESPONDIDA` y se cierran en su tarea: P-003 en T14, P-008 en T19, P-002 y P-024 en T30. P-011 a P-023, `CERRADA` en T12. P-025 `ABIERTA` (ARQUITECTO, no bloquea): cómo admite la consulta única a una caída para guardar; se necesita antes de T26. P-026 y P-027 `ABIERTA` (SISTEMAS, no bloquean): desempates de la IA de T39, programados como lecturas declaradas.
 - Al agregar un `class_name` nuevo, la caché de clases de Godot hay que refrescarla (abrir el editor o `--import`) antes de correr los tests: `runtest.cmd` no escanea. `runtest.cmd` corta en el primer test que falla.
-- Siguiente: **T39** (IA v1.3, hito 0a.1b, `docs/Arquitectura.md` B.2.1). Ninguna tarea está bloqueada.
+- Siguiente: **T40** (pantalla de rasgos y ritmo de la IA, dos sesiones, hito 0a.1b, `docs/Arquitectura.md` B.2.1). Ninguna tarea está bloqueada.

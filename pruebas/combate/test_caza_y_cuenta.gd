@@ -171,6 +171,34 @@ func test_cuenta_movimiento_partido() -> void:
 	assert_that(plantel.criatura(_TASAJERO).posicion).is_equal(Vector2i(4, 0))
 
 
+# T39: la consulta pasos_para_retirarse (retirada de la Cuenta, Sistema.md 11.8):
+# las casillas a las que llegaria despues de moverse a [4,2] (2 pasos) y atacar,
+# con los 2 que le quedan. La casilla de la que sale ([3,3]) vale; [7,2], a 3,
+# no. Son las mismas que acepta `mover` despues de hacerlo de verdad. Sin
+# movimiento partido (Caza) solo queda la casilla. No cambia nada.
+func test_pasos_para_retirarse() -> void:
+	var plantel: Plantel = _plantel()
+	plantel.criatura(_TASAJERO).modo = "cuenta"
+	var turno: Turno = _turno(plantel, _TASAJERO)
+	var antes: String = _foto(plantel, turno)
+	var retirada: Dictionary = turno.pasos_para_retirarse(Vector2i(4, 2))
+	assert_str(_foto(plantel, turno)).is_equal(antes)
+	assert_int(retirada[Vector2i(4, 2)]).is_equal(0)
+	assert_int(retirada[Vector2i(3, 3)]).is_equal(2)
+	assert_int(retirada[Vector2i(4, 0)]).is_equal(2)
+	assert_bool(retirada.has(Vector2i(7, 2))).is_false()
+	assert_bool(retirada.has(Vector2i(4, 3))).is_false()
+
+	_assert_valida(turno.aplicar(Accion.mover(Vector2i(4, 2))))
+	_assert_valida(turno.aplicar(Accion.atacar("ocarra_1")))
+	var despues: Array[Vector2i] = turno.casillas_para_mover()
+	despues.append(Vector2i(4, 2))
+	assert_array(despues).contains_exactly_in_any_order(retirada.keys())
+
+	var caza: Plantel = _plantel()
+	assert_dict(_turno(caza, _TASAJERO).pasos_para_retirarse(Vector2i(3, 2))).is_equal({Vector2i(3, 2): 0})
+
+
 # (5) El danio que recibe el Tasajero: +25% en Caza, sumado a los porcentajes del
 # atacante (Sistema.md 11.2.3, 11.4 paso 1).
 func test_danio_recibido_por_modo() -> void:

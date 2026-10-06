@@ -121,6 +121,36 @@ func previsualizar_ataque(desde: Vector2i, objetivo_id: String) -> ResultadoAcci
 	return _atacar_desde(desde, objetivo_id, false)
 
 
+# Sistema.md 11.2.1: las casillas donde `cavar` vale ahora, en orden de lectura
+# (la IA del paso 7 de 11.8 y la pantalla, T40).
+func casillas_para_cavar() -> Array[Vector2i]:
+	var resultado: Array[Vector2i] = []
+	for casilla in _tablero.vecinas(_posicion(unidad_id)):
+		if validar(Accion.cavar(casilla)).valida:
+			resultado.append(casilla)
+	resultado.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	return resultado
+
+
+# Los surcos de la unidad, del mas viejo al mas nuevo (11.2.1, Tope).
+func surcos_propios() -> Array[Vector2i]:
+	return _surcos.de(unidad_id)
+
+
+# Sistema.md 11.8, retirada de la Cuenta: casilla -> pasos a los que llegaria
+# despues de moverse a `desde` y atacar, con los pasos que le quedarian. Sin
+# movimiento partido no le queda ninguno: solo `desde`. La casilla que deja
+# cuenta como vacia. Atacar no cambia quien ocupa casillas (la de la tribu que
+# cae sigue en la suya, 11.5), asi que se puede calcular antes. No modifica nada.
+func pasos_para_retirarse(desde: Vector2i) -> Dictionary:
+	var origen: Vector2i = _posicion(unidad_id)
+	var hasta_desde: Dictionary = _pasos_desde(origen)
+	if not _movimiento_partido or not hasta_desde.has(desde):
+		return {desde: 0}
+	return _tablero.pasos_hasta(desde, pasos_restantes - hasta_desde[desde], _bando(unidad_id), _plantel,
+			_surcos, Surcos.es_surcon(unidad_id, _plantel), origen)
+
+
 func puede_erizarse() -> bool:
 	return validar(Accion.erizarse()).valida
 

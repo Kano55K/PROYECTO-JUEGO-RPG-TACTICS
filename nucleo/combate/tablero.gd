@@ -62,9 +62,12 @@ func alcanzables(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plante
 
 # Las mismas casillas que `alcanzables`, cada una con los pasos del camino mas
 # corto (`desde` vale 0). La IA la usa para "la de menos movimiento" (11.8).
+# dejada: una casilla que cuenta como vacia, la que la unidad deja al moverse
+# (la retirada de la Cuenta se calcula desde otra casilla, 11.8).
 func pasos_hasta(desde: Vector2i, movimiento: int, bando: Criatura.Bando, plantel: Plantel,
-		surcos: Surcos, pisa_surcos: bool) -> Dictionary:
+		surcos: Surcos, pisa_surcos: bool, dejada: Vector2i = Criatura.SIN_POSICION) -> Dictionary:
 	var ocupantes: Dictionary = _ocupantes(plantel)
+	ocupantes.erase(dejada)
 	var pasos: Dictionary = {desde: 0}
 	var frontera: Array[Vector2i] = [desde]
 	while not frontera.is_empty():
