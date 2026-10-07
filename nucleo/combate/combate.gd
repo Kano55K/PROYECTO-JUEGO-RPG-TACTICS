@@ -220,8 +220,7 @@ func _avanzar() -> void:
 		var entrada: EntradaCola = _cola.siguiente(_plantel)
 		if entrada == null:
 			if _cola.ronda > 0:
-				_cola.terminar_ronda()
-				_registrar({"tipo": "fin_ronda"})
+				_cerrar_ronda()
 			_cola.empezar_ronda(_plantel)
 			_registrar({"tipo": "ronda"})
 			continue
@@ -234,6 +233,19 @@ func _avanzar() -> void:
 		if not _turno.cambio_modo.is_empty():
 			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
 					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]})
+
+
+# Fin de ronda (T07): el punto de la cola y, despues del fin_ronda, el hambre de
+# combate (Sistema.md 7.2, T14), con el numero de la ronda que se cierra (A.7).
+# En una ronda que la dispara, el evento va aunque nadie cambie (todas en el
+# tope): lectura tecnica de T14. Un combate que termina a mitad de ronda no
+# llega aca, asi que no suma.
+func _cerrar_ronda() -> void:
+	_cola.terminar_ronda()
+	_registrar({"tipo": "fin_ronda"})
+	var cambios: Variant = _contexto.hambre_combate.cerrar_ronda(_cola.ronda, _plantel)
+	if cambios != null:
+		_registrar({"tipo": "hambre_combate", "cambios": cambios})
 
 
 # Sistema.md 11.8: las acciones de la IA, una por una. Corta si el combate

@@ -128,8 +128,18 @@ func panel_turno() -> Array[String]:
 		var estado_lealtad: String = _estados.lealtad(criatura.lealtad, umbral)
 		lineas.append("%s: %d (%s)" % [_armador.armar(ClavesTextos.PANEL_LEALTAD), criatura.lealtad,
 				_armador.armar(ClavesTextos.estado_lealtad(estado_lealtad), {}, criatura.especie.id())])
+		lineas.append(_linea_obediencia(criatura))
 		lineas.append(_linea_hambre(etiqueta_hambre, criatura.hambre, criatura.especie.id()))
 	return lineas
+
+
+# T14 (Sistema.md 5.4): la obediencia de una criatura de la tribu, numero y
+# tramo, tal como la da el nucleo (Obediencia: se pregunta cada vez).
+func _linea_obediencia(criatura: Criatura) -> String:
+	var obediencia: Obediencia = _combate.contexto().obediencia
+	var tramo: String = obediencia.tramo(criatura, _plantel.maestro)
+	return "%s: %d (%s)" % [_armador.armar(ClavesTextos.PANEL_OBEDIENCIA), obediencia.valor(criatura) as int,
+			_armador.armar(ClavesTextos.tramo_obediencia(tramo))]
 
 
 # El nombre que ve el jugador: el del Maestro o el de la especie.
@@ -199,7 +209,21 @@ func suceso(evento: Dictionary) -> Array[String]:
 			return [_armador.armar(ClavesTextos.SUCESO_PIERDE_BONO)]
 		"cambio_modo":
 			return [_armador.armar(ClavesTextos.suceso_cambio(evento["a"]))]
+		"hambre_combate":
+			return _suceso_hambre_combate(evento["cambios"])
 	return []
+
+
+# T14 (Sistema.md 7.2, A.7): la linea del hambre de combate y, por cada unidad
+# cuyo estado de hambre cambio, su nombre y el estado nuevo (con su sujeto).
+func _suceso_hambre_combate(cambios: Array) -> Array[String]:
+	var lineas: Array[String] = [_armador.armar(ClavesTextos.COMBATE_HAMBRE)]
+	for cambio in cambios:
+		var estado: String = _estados.hambre(cambio["a"])
+		if estado != _estados.hambre(cambio["de"]):
+			lineas.append(_SEPARADOR.join([nombre(cambio["unidad"]),
+					_armador.armar(ClavesTextos.estado_hambre(estado), {}, _sujeto(cambio["unidad"]))]))
+	return lineas
 
 
 # El desglose de Sistema.md 11.4 (DesgloseDanio.a_diccionario()) tal como viene:
@@ -298,9 +322,12 @@ func tooltip_unidad(id_unidad: String) -> Array[String]:
 			foto_criatura = entrada
 	var rasgo: Dictionary = criatura.especie.rasgo()
 	var lineas: Array[String] = [nombre(id_unidad),
-			"%s: %d/%d" % [etiqueta_vida, foto_criatura["vida"], criatura.vida_max_real()],
-			_armador.armar(ClavesTextos.nombre_rasgo(rasgo["id"])),
-			_armador.armar(ClavesTextos.tooltip_rasgo(rasgo["id"]))]
+			"%s: %d/%d" % [etiqueta_vida, foto_criatura["vida"], criatura.vida_max_real()]]
+	# T14: solo la tribu tiene obediencia propia (Sistema.md 5.4 y 10.7).
+	if criatura.bando == Criatura.Bando.TRIBU:
+		lineas.append(_linea_obediencia(criatura))
+	lineas.append(_armador.armar(ClavesTextos.nombre_rasgo(rasgo["id"])))
+	lineas.append(_armador.armar(ClavesTextos.tooltip_rasgo(rasgo["id"])))
 	lineas.append_array(_marcas_rasgo(foto_criatura))
 	# Sistema.md 11.2.3: "el umbral se muestra sobre la unidad".
 	var vida_de_cambio: Variant = _combate.vida_de_cambio(id_unidad)

@@ -267,3 +267,47 @@ func test_t40_desglose_nombra_el_modo() -> void:
 	assert_array(lineas).contains(["Caza: +25%"])
 	for linea in lineas:
 		assert_str(linea).not_contains("desglose.fuente.modo")
+
+
+# T14 (11): el panel de la unidad del turno y el tooltip de una criatura de la
+# tribu muestran la obediencia (numero y tramo) que da el nucleo; el Maestro y
+# las enemigas no tienen. Las claves nuevas no estan en es.json: [FALTA].
+func test_t14_panel_y_tooltip_con_obediencia() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_hambre_combate")
+	while _combate.turno_actual().unidad_id != "rodauva_1":
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	# Lealtad 7 con hambre 5 (Normal), balanza 2 (umbral 7): 7, leal.
+	var linea: String = "[FALTA: panel.obediencia]: 7 ([FALTA: obediencia.tramo.leal])"
+	assert_array(lectura.panel_turno()).contains([linea])
+	assert_str(lectura.tooltip_unidad("rodauva_1")[2]).is_equal(linea)
+	for id_unidad in [Maestro.ID, "ocarra_s1"]:
+		for texto in lectura.tooltip_unidad(id_unidad):
+			assert_str(texto).not_contains("obediencia")
+	while _combate.turno_actual().unidad_id != Maestro.ID:
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	for texto in lectura.panel_turno():
+		assert_str(texto).not_contains("obediencia")
+
+	# Despues de cerrar la ronda 5 (Sistema.md 7.2): hambre 6, Hambrienta, 5 y neutral.
+	while _combate.instantanea()["ronda"] < 6:
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	assert_str(lectura.tooltip_unidad("rodauva_1")[2]) \
+			.is_equal("[FALTA: panel.obediencia]: 5 ([FALTA: obediencia.tramo.neutral])")
+
+
+# T14 (11): el hambre de combate da la linea de combate.hambre y una linea por
+# cada unidad cuyo estado de hambre cambio (con su sujeto, A.2.1). El Maestro y
+# el Surcon caido suben 3 -> 4 sin cambiar de estado: no tienen linea.
+func test_t14_suceso_de_hambre_de_combate() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_hambre_combate")
+	while _combate.instantanea()["ronda"] < 6:
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	var evento: Dictionary = {}
+	for linea in _combate.registro().lineas():
+		if linea["tipo"] == "hambre_combate":
+			evento = linea
+	assert_array(lectura.suceso(evento)).is_equal([
+		"La pelea se alarga. A los tuyos les empieza a pesar el estómago vacío.",
+		"Rodauva · Hambrienta",
+		"Ocarra · Normal",
+	])

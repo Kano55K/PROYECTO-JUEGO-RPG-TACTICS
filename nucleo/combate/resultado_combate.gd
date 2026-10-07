@@ -65,6 +65,8 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 			"estado": Plantel.nombre_estado(criatura.estado),
 			"vida": criatura.vida,
 			"lealtad": criatura.lealtad if es_tribu else null,
+			# Arquitectura.md A.7 (T14): con el hambre de combate (Sistema.md 7.2).
+			"hambre": criatura.hambre if es_tribu else null,
 			"posicion": Plantel.casilla_a_lista(criatura.posicion),
 		})
 	return resultado

@@ -22,7 +22,7 @@ var bando: Bando
 var comportamiento: Comportamiento = Comportamiento.NINGUNO
 var estado: Estado = Estado.SUELTA
 var vida: int
-# Solo tiene sentido en la tribu: la obediencia de las enemigas es de T14 (10.7).
+# Solo tiene sentido en la tribu: las enemigas no tienen obediencia propia (Obediencia, 10.7).
 var lealtad: int = 0
 var hambre: int = 0
 var enfermedades: int = 0

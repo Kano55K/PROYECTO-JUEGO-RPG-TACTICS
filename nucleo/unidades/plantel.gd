@@ -99,6 +99,9 @@ func instantanea() -> Dictionary:
 			"estado": nombre_estado(c.estado),
 			"vida": c.vida,
 			"lealtad": c.lealtad,
+			# Arquitectura.md A.7 (T14): cambia en combate (Sistema.md 7.2). null
+			# en las enemigas, como en el resultado.
+			"hambre": c.hambre if c.bando == Criatura.Bando.TRIBU else null,
 			"posicion": casilla_a_lista(c.posicion),
 			"erizada": c.erizada,
 			# Arquitectura.md A.7 (B.2.1): el modo actual, o null sin modos.
@@ -118,6 +121,7 @@ func instantanea() -> Dictionary:
 	return {
 		"maestro": {
 			"vida": maestro.vida,
+			"hambre": maestro.hambre,
 			"posicion": casilla_a_lista(maestro.posicion),
 			"caido": maestro.caido,
 		},
