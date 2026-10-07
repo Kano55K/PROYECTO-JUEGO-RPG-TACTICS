@@ -34,6 +34,14 @@ const _ACCION_DEPURACION: String = "depuracion"
 const _ACCION_SELECCIONAR: String = "seleccionar"
 const _ACCION_ZONA: String = "zona"
 const _ACCION_SALTAR: String = "saltar"
+# T42: la camara (D-003).
+const _ACCION_CAMARA_ARRIBA: String = "camara_arriba"
+const _ACCION_CAMARA_ABAJO: String = "camara_abajo"
+const _ACCION_CAMARA_IZQUIERDA: String = "camara_izquierda"
+const _ACCION_CAMARA_DERECHA: String = "camara_derecha"
+const _ACCION_CAMARA_ACERCAR: String = "camara_acercar"
+const _ACCION_CAMARA_ALEJAR: String = "camara_alejar"
+const _ACCION_CAMARA_ARRASTRAR: String = "camara_arrastrar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
@@ -48,6 +56,15 @@ const _MARCA_ACTUAL: String = "> "
 # T40, sesion 2: segundos entre los pasos de la IA. Es presentacion, no un dato
 # de balance; con 0 no se anima (los tests la ponen en 0).
 @export var pausa_ia: float = 0.4
+# T42 (D-003): la camara. Es presentacion, no datos de balance. El zoom de
+# Camera2D: mas grande = mas cerca. paso_zoom se suma al acercar y se resta al
+# alejar; velocidad_camara en pixeles de pantalla por segundo; margen en
+# pixeles del lienzo alrededor del tablero.
+@export var zoom_minimo: float = 0.5
+@export var zoom_maximo: float = 2.0
+@export var paso_zoom: float = 0.25
+@export var velocidad_camara: float = 600.0
+@export var margen: float = 64.0
 
 var _combate: Combate = null
 var _armador: ArmadorTextos = null
@@ -72,6 +89,8 @@ var _aviso_mostrado: String = ""
 # una secuencia en curso.
 var _secuencia: Array[Dictionary] = []
 var _en_secuencia: bool = false
+# T42: el rectangulo (en el lienzo) del que no sale lo que se ve.
+var _limites: Rect2 = Rect2()
 
 @onready var _tablero: TileMapLayer = $Tablero
 @onready var _capa_surcos: TileMapLayer = $Tablero/Surcos
@@ -121,6 +140,7 @@ func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dicti
 	_armador = ArmadorTextos.desde_datos(datos[_TEXTOS], contexto.azar_textos)
 	_estados = EstadosUnidad.desde_datos(datos[_TABLA_HAMBRE], datos[_TABLA_LEALTAD])
 	_despues_de_un_cambio()
+	_encuadrar()
 	for aviso in _avisos_armador():
 		print("[textos] ", aviso)
 
@@ -132,6 +152,37 @@ func combate() -> Combate:
 
 func tablero() -> TileMapLayer:
 	return _tablero
+
+
+func camara() -> Camera2D:
+	return _camara
+
+
+# T42: los limites de la camara (las esquinas del tablero mas el margen).
+func limites_camara() -> Rect2:
+	return _limites
+
+
+# T42: la casilla bajo el mouse la ultima vez que se miro (hover).
+func casilla_bajo_mouse() -> Vector2i:
+	return _casilla_mouse
+
+
+# T42: mueve la camara (en pixeles del lienzo), acotada a los limites. Anda
+# tambien durante la secuencia de la IA: solo mira.
+func mover_camara(desplazamiento: Vector2) -> void:
+	if _combate == null:
+		return
+	_camara.global_position += desplazamiento
+	_acotar_camara()
+
+
+func acercar() -> void:
+	_cambiar_zoom(paso_zoom)
+
+
+func alejar() -> void:
+	_cambiar_zoom(-paso_zoom)
 
 
 func fichas() -> Array[FichaUnidad]:
@@ -275,8 +326,28 @@ func redibujar() -> void:
 		_mostrar_mensaje("Error del combate: " + _combate.error())
 
 
+# T42: las direcciones de la camara se miran en cada frame (tecla sostenida).
+func _process(delta: float) -> void:
+	if _combate == null:
+		return
+	var direccion: Vector2 = Input.get_vector(_ACCION_CAMARA_IZQUIERDA, _ACCION_CAMARA_DERECHA,
+			_ACCION_CAMARA_ARRIBA, _ACCION_CAMARA_ABAJO)
+	if direccion != Vector2.ZERO:
+		mover_camara(direccion * velocidad_camara * delta / _camara.zoom.x)
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(_ACCION_DEPURACION):
+	if event.is_action_pressed(_ACCION_CAMARA_ACERCAR):
+		acercar()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_CAMARA_ALEJAR):
+		alejar()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and Input.is_action_pressed(_ACCION_CAMARA_ARRASTRAR):
+		# Arrastrar: el tablero sigue al mouse.
+		mover_camara(-(event as InputEventMouseMotion).relative / _camara.zoom.x)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_DEPURACION):
 		_depuracion.visible = not _depuracion.visible
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(_ACCION_SALTAR) and _en_secuencia:
@@ -297,6 +368,46 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _casilla_del_mouse() -> Vector2i:
 	return _tablero.local_to_map(_tablero.get_local_mouse_position())
+
+
+# T42 (D-003), al abrir: los limites salen de map_to_local de las esquinas del
+# tablero del escenario. Si entra entero con el zoom minimo se encuadra entero;
+# si no, se centra en el Maestro (EncuadreCamara.inicial). Despues, la camara
+# solo la mueve el jugador.
+func _encuadrar() -> void:
+	var tablero_combate: Tablero = _combate.contexto().tablero
+	var esquina_a: Vector2 = _tablero.to_global(_tablero.map_to_local(Vector2i(0, 0)))
+	var esquina_b: Vector2 = _tablero.to_global(_tablero.map_to_local(
+			Vector2i(tablero_combate.ancho - 1, tablero_combate.alto - 1)))
+	_limites = EncuadreCamara.limites(esquina_a, esquina_b, margen)
+	var centro_maestro: Variant = null
+	var casilla_maestro: Vector2i = _casilla_de(_combate.instantanea(), Maestro.ID)
+	if casilla_maestro != Criatura.SIN_POSICION:
+		centro_maestro = _tablero.to_global(_tablero.map_to_local(casilla_maestro))
+	var inicial: Dictionary = EncuadreCamara.inicial(_limites, get_viewport_rect().size, zoom_minimo, zoom_maximo,
+			centro_maestro)
+	_camara.zoom = Vector2.ONE * (inicial["zoom"] as float)
+	_camara.global_position = inicial["centro"]
+	_camara.force_update_scroll()
+
+
+func _cambiar_zoom(cambio: float) -> void:
+	if _combate == null:
+		return
+	_camara.zoom = Vector2.ONE * EncuadreCamara.acotar_zoom(_camara.zoom.x + cambio, zoom_minimo, zoom_maximo)
+	_acotar_camara()
+
+
+# Lo que se ve no sale de los limites. Con la camara movida y el mouse quieto,
+# la casilla bajo el mouse puede cambiar: se rearma el hover.
+func _acotar_camara() -> void:
+	_camara.global_position = EncuadreCamara.acotar_centro(_camara.global_position,
+			get_viewport_rect().size / _camara.zoom.x, _limites)
+	_camara.force_update_scroll()
+	var casilla: Vector2i = _casilla_del_mouse()
+	if casilla != _casilla_mouse:
+		_casilla_mouse = casilla
+		sobre_casilla(casilla)
 
 
 # Una accion del jugador: si el nucleo la acepta, se redibuja todo. T40, sesion
@@ -411,9 +522,6 @@ func _dibujar_tablero() -> void:
 		for x in range(tablero_combate.ancho):
 			var clara: bool = (x + y) % 2 == 0
 			_tablero.set_cell(Vector2i(x, y), _FUENTE_CASILLAS, _CASILLA_CLARA if clara else _CASILLA_OSCURA)
-	var esquina_a: Vector2 = _tablero.map_to_local(Vector2i(0, 0))
-	var esquina_b: Vector2 = _tablero.map_to_local(Vector2i(tablero_combate.ancho - 1, tablero_combate.alto - 1))
-	_camara.global_position = _tablero.to_global((esquina_a + esquina_b) / 2.0)
 
 
 # Solo en el turno del jugador: a donde puede moverse y a quien puede atacar.
