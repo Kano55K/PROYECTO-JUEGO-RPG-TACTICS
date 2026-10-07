@@ -378,7 +378,7 @@
 - **Respuesta:** _(la completa el staff)_
 
 ## P-028 — `dudosa_hasta` repite el piso de Neutral
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** ARQUITECTO
 - **Tarea:** T14
 - **Fecha:** 06/10/2026
@@ -388,4 +388,4 @@
 - **Opciones:** A) quitar `dudosa_hasta` del esquema y del dato (Dudosa = desde `desleal_hasta + 1` hasta `neutral_desde − 1`). B) dejarlo y que el `Cargador` exija `dudosa_hasta + 1 = neutral_desde`. — Recomendación técnica: A (un número, un lugar).
 - **Bloquea:** no
 - **Mientras tanto:** `EstadosUnidad.corte` (`nucleo/unidades/estados_unidad.gd`) usa `desleal_hasta` y `neutral_desde`. `dudosa_hasta` queda en el dato y en el esquema sin leerse. Con los datos de hoy (3 y 4) el resultado es el mismo. Test: `pruebas/unidades/test_obediencia.gd`, `test_cortes_desde_los_datos`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto (06/10/2026): se quita dudosa_hasta de tablas/lealtad.json y de su esquema. Es neutral_desde − 1 y viola "cada número en un solo archivo" (A.2.2). El estado Dudosa queda definido como desleal_hasta + 1 hasta neutral_desde − 1. Orden: esquema → datos → fixtures → código, con su línea en la tabla de cotejo. Se aplica y se cierra al empezar T15, en el mismo PR.
