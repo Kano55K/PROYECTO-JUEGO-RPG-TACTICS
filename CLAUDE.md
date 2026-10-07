@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Revisado por última vez contra `docs/Arquitectura.md` v0.28 (07/10/2026). Dueño: Arquitecto Técnico.
+> Revisado por última vez contra `docs/Arquitectura.md` v0.33 (07/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -227,7 +227,18 @@ Reglas completas en `docs/Sistema.md` 11.3 v1.6 y `docs/Arquitectura.md` B.3.1 y
 - Toda regla de vínculo usa la consulta de vecina en 8 de `Tablero` (T41), y toda regla de cuerpo usa las vecinas ortogonales de T06. Nunca una tercera forma de medir, y ninguna clase calcula distancias por su cuenta.
 - **Tablero de referencia: 12 × 12.** Un escenario puede ser más chico (G es de 8 × 8), nunca más grande. Ningún tamaño de tablero escrito en el código.
 - **Cámara (desde T42):** la pantalla convierte el mouse con `TileMapLayer.get_local_mouse_position()` y `local_to_map`, nunca con la posición en pantalla. La cámara no toca el núcleo.
-- **Test de contacto (desde T43):** si una tarea hace fallar `pruebas/datos/test_contacto.gd` (cambia la ronda del primer ataque de un escenario), no ajustes el test ni las coordenadas: anotalo en `docs/PREGUNTAS.md` y pará.
+- **Test de contacto (desde T43):** si una tarea hace fallar `pruebas/datos/test_contacto.gd` (cambia la ronda del primer ataque de un escenario), no ajustes el test ni las coordenadas: anotalo en `docs/PREGUNTAS.md` y pará. **Única excepción autorizada (T19):** el ayudante del test que juega "esperando" puede jugar lo mínimo que obliga una regla cuando `puede_terminar()` da falso (una enconada que tiene que atacar o acercarse). Nunca se tocan coordenadas ni criterios.
+
+## Relaciones en combate (desde T18)
+
+Reglas completas en `docs/Sistema.md` 10.1 a 10.7 y 11.3, y en `docs/Arquitectura.md` B.3 y 10.5. Las que más se olvidan:
+
+- **Orden del inicio del turno** (11.3): borrar Erizarse → maná (T21) → huida (T25) → cambio de modo → Encono o cobardía (T19) → incidente (T18, solo si no quedó enconada). **Corre una sola vez por ronda** (S-31): nunca con `entrada.vuelve`.
+- **Toda tirada en %** pasa por `Porcentajes.tirar` con el generador de combate que recibe `Turno`. Con 0 % no se tira (el generador no se toca). **Una sola tirada por turno y por regla**, aunque haya varias rivales.
+- **La rama sale del dato:** Encono o cobardía por el `rol` de la ficha; los rasgos, por su `efecto`. Nunca por `id`.
+- **Los estados del turno** (distraída, enconada, acobardada) viven en `Turno` y se ven solo por sus consultas (`casillas_para_mover`, `objetivos_para_atacar`, `puede_terminar`, `puede_secundar` y la previsualización). La pantalla y la IA no los recalculan.
+- **Primero la tribu, después las salvajes:** las reglas nuevas de relación tiran solo para la tribu hasta T20, que suma las salvajes y su IA. Dejá el lugar marcado. Lo que es la misma regla para todos (por ejemplo, el contador del Encono) se programa una sola vez para todos.
+- **Lecturas declaradas abiertas** que ya están programadas o se programan así: S-27 y S-29 a S-37 (`docs/Arquitectura.md` 10.5). No las vuelvas a preguntar.
 
 ## Estado actual
 
