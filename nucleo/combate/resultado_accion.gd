@@ -41,6 +41,15 @@ enum Motivo {
 	# Combate.aplicar: no es el turno de una unidad del jugador (o el combate se
 	# detuvo por un error).
 	FUERA_DE_TURNO,
+	# Sistema.md 10.1, Restricciones: las salvajes no Secundan.
+	SALVAJE_NO_SECUNDA,
+	# Sistema.md 10.1: se Secunda a otra unidad, nunca a si misma.
+	SECUNDAR_A_SI_MISMA,
+	# Sistema.md 10.1: la elegida es una aliada (del mismo bando).
+	ALIADA_DE_OTRO_BANDO,
+	# Sistema.md 10.1: la aliada todavia no actuo en la ronda (ni cayo, ni fue
+	# guardada); asi tampoco se Secunda mas alla del final de la ronda.
+	ALIADA_SIN_ENTRADA_PENDIENTE,
 }
 
 var valida: bool

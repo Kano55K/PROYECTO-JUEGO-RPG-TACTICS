@@ -59,7 +59,7 @@ func _posicion(plantel: Plantel, unidad_id: String) -> Vector2i:
 
 func _turno(plantel: Plantel, unidad_id: String, cadena: Cadena) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), cadena)
+			DatosFixture.afinidad(), cadena, ColaIniciativa.new())
 
 
 # La atacante va a `desde`, valida y aplica el ataque (lo mismo en los dos) y

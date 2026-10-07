@@ -4,13 +4,15 @@ class_name Accion
 extends RefCounted
 
 # Hechizo, sellar, guardar, invocar y huir son tipos nuevos en T22, T24 y T26 a T28.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO }
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco.
 var casilla: Vector2i = Criatura.SIN_POSICION
 # Solo para ATACAR: el id de la unidad objetivo.
 var objetivo_id: String = ""
+# Solo para SECUNDAR: el id de la aliada detras de la que va a actuar.
+var aliado_id: String = ""
 
 
 func _init(tipo_accion: Tipo) -> void:
@@ -45,6 +47,14 @@ static func hacerse_junco() -> Accion:
 	return Accion.new(Tipo.HACERSE_JUNCO)
 
 
+# Sistema.md 10.1: actuar justo despues de la aliada `id_aliado`, que todavia no
+# actuo en la ronda.
+static func secundar(id_aliado: String) -> Accion:
+	var accion: Accion = Accion.new(Tipo.SECUNDAR)
+	accion.aliado_id = id_aliado
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -59,6 +69,8 @@ func a_diccionario() -> Dictionary:
 			resultado["casilla"] = [casilla.x, casilla.y]
 		Tipo.ATACAR:
 			resultado["objetivo"] = objetivo_id
+		Tipo.SECUNDAR:
+			resultado["aliado"] = aliado_id
 	return resultado
 
 
@@ -83,6 +95,10 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 			if datos.size() != 2 or not datos.get("objetivo") is String:
 				return null
 			return atacar(datos["objetivo"])
+		Tipo.SECUNDAR:
+			if datos.size() != 2 or not datos.get("aliado") is String:
+				return null
+			return secundar(datos["aliado"])
 	if datos.size() != 1:
 		return null
 	return Accion.new(tipo_accion)

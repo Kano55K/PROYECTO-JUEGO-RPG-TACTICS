@@ -238,6 +238,15 @@ func _avanzar() -> void:
 			_cola.empezar_ronda(_plantel)
 			_registrar({"tipo": "ronda"})
 			continue
+		# Sistema.md 10.1 (T17): la entrada de la unidad que Secundo vuelve. El
+		# turno sigue sin un inicio nuevo (S-31), asi que no lleva otro `turno`
+		# (A.7: uno por ronda) y la tribu no corta la cadena.
+		if entrada.vuelve:
+			_registrar({"tipo": "turno_vuelve", "unidad": entrada.unidad_id})
+			_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
+					_contexto.afinidad, _cadena, _cola)
+			_junco_volcados = 0
+			continue
 		# Antes de empezar el turno: las tiradas de su inicio (T18 a T25) van despues.
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
@@ -247,7 +256,7 @@ func _avanzar() -> void:
 			_cadena.cortar(Cadena.MOTIVO_ENEMIGA)
 			_registrar_cadena()
 		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-				_contexto.afinidad, _cadena)
+				_contexto.afinidad, _cadena, _cola)
 		_junco_volcados = 0
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
 		if not _turno.cambio_modo.is_empty():
@@ -315,6 +324,11 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 			_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": accion.objetivo_id,
 					"desglose": resultado.desglose.a_diccionario(), "eslabon": resultado.eslabon,
 					"vida_antes": vida_antes, "vida_despues": _vida(accion.objetivo_id)})
+		# Sistema.md 10.1 (T17, A.7): detras de quien y en que lugar de la cola
+		# quedo (desde 0). El turno no termino: no hay fin_turno.
+		Accion.Tipo.SECUNDAR:
+			_registrar({"tipo": "secundar", "unidad": unidad_id, "detras_de": accion.aliado_id,
+					"lugar": _cola.lugar_de(unidad_id)})
 	_registrar_junco()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
