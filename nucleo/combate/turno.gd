@@ -40,22 +40,27 @@ var _tablero: Tablero
 var _danio: Danio
 # Los del combate (los guarda el Combate, T37).
 var _surcos: Surcos
+# La regla de la afinidad (T15), como _danio: no guarda nada del combate.
+var _afinidad: Afinidad
 
 
-func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos) -> void:
+func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
+		afinidad: Afinidad) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
 	_tablero = tablero
 	_danio = danio
 	_surcos = surcos
+	_afinidad = afinidad
 
 
 # Crea el turno de la entrada y corre el inicio del turno. surcos: los del
-# combate (un turno suelto de los tests pasa unos vacios).
+# combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
+# ContextoCombate.
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
-		surcos: Surcos) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos)
+		surcos: Surcos, afinidad: Afinidad) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad)
 	turno._inicio_del_turno()
 	turno._preparar()
 	return turno
@@ -316,11 +321,15 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	return resultado
 
 
-# Punto vacio: los aportes externos del danio (11.4) para un ataque desde
-# `desde`. Aca se enchufan afinidad (T15, depende de la casilla), combo (T16) y
+# Los aportes externos del danio (11.4) para un ataque desde `desde`: la
+# afinidad (10.3, mirada desde `desde`). Aca se enchufan despues combo (T16) y
 # Encono o cobardia (T19); el ataque real y la previsualizacion los ven igual.
-func _aportes(_desde: Vector2i, _objetivo_id: String) -> Array[ModificadorDanio]:
-	return []
+func _aportes(desde: Vector2i, _objetivo_id: String) -> Array[ModificadorDanio]:
+	var aportes: Array[ModificadorDanio] = []
+	var afinidad: ModificadorDanio = _afinidad.aporte(unidad_id, desde, _plantel)
+	if afinidad != null:
+		aportes.append(afinidad)
+	return aportes
 
 
 # Sistema.md 11.2, Erizarse: solo con el rasgo de la ficha; gasta la accion.

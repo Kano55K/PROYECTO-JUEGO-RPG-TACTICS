@@ -1,12 +1,11 @@
 {
   "title": "Lealtad",
-  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1. Los eventos de lealtad del combate y del destino de la atacante (5.2, 9.3) van en eventos, también el +1 de victoria (P-019). Sus claves son los motivos de lealtad del resultado (resultado.schema.json).",
+  "description": "Sistema.md 5.1, 4.2 y 4.4. Leal empieza en el umbral de rescate de la balanza; Neutral va de neutral_desde hasta umbral − 1; Dudosa, de desleal_hasta + 1 hasta neutral_desde − 1 (P-028: no se guarda).Los eventos de lealtad del combate y del destino de la atacante (5.2, 9.3) van en eventos, también el +1 de victoria (P-019). Sus claves son los motivos de lealtad del resultado (resultado.schema.json).",
   "type": "object",
   "required": [
     "minimo",
     "maximo",
     "desleal_hasta",
-    "dudosa_hasta",
     "neutral_desde",
     "inicial_por_camino",
     "resellar",
@@ -27,9 +26,6 @@
       "type": "integer"
     },
     "desleal_hasta": {
-      "type": "integer"
-    },
-    "dudosa_hasta": {
       "type": "integer"
     },
     "neutral_desde": {

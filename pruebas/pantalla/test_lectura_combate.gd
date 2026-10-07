@@ -311,3 +311,27 @@ func test_t14_suceso_de_hambre_de_combate() -> void:
 		"Rodauva · Hambrienta",
 		"Ocarra · Normal",
 	])
+
+
+# T15 (11), Sistema.md 10.3: un ataque con afinidad jugado por el Combate. El
+# desglose del evento `ataque` es el de la previsualizacion (el del mouse), con
+# la fuente afinidad, y la pantalla lo muestra como "Afinidad: +1". La Ocarra
+# [5,4] le pega a la Ocarra salvaje [7,4] con el Surcon [5,5] a su lado.
+func test_t15_desglose_del_registro_y_del_mouse_con_afinidad() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_afinidad",
+			{"ocarra_1": {"posicion": [5, 4]}, "surcon_1": {"posicion": [5, 5]}})
+	while _combate.turno_actual().unidad_id != "ocarra_1":
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	var vista_previa: ResultadoAccion = _combate.turno_actual().previsualizar_ataque(Vector2i(5, 4), "ocarra_s1")
+	assert_bool(vista_previa.valida).is_true()
+	assert_int(vista_previa.danio).is_equal(4 + 1)
+	assert_bool(_combate.aplicar(Accion.atacar("ocarra_s1")).valida).is_true()
+	var evento: Dictionary = {}
+	for linea in _combate.registro().lineas():
+		if linea["tipo"] == "ataque":
+			evento = linea
+	assert_str(evento["atacante"]).is_equal("ocarra_1")
+	assert_dict(evento["desglose"]).is_equal(vista_previa.desglose.a_diccionario())
+	var lineas: Array[String] = lectura.desglose(evento["desglose"], "ocarra_1")
+	assert_array(lineas).is_equal(lectura.desglose(vista_previa.desglose.a_diccionario(), "ocarra_1"))
+	assert_array(lineas).contains(["Afinidad: +1", "Total: 5"])

@@ -1,6 +1,6 @@
 {
   "$schema": "../../../datos/_esquemas/textos.schema.json",
-  "_nota": "Arquitectura.md B.2.1 (T40): copias textuales de datos/textos/es.json v1.1 para los tests de la pantalla de rasgos. Trae las variantes de concordancia de A.2.1 (Surcon en masculino; la Rodauva usa la base) y no trae lealtad.estado.* ni desglose.fuente.modo. T14 suma hambre.estado.hambriento y combate.hambre; no trae panel.obediencia ni obediencia.tramo.* (no existen en es.json)",
+  "_nota": "Arquitectura.md B.2.1 (T40): copias textuales de datos/textos/es.json v1.1 para los tests de la pantalla de rasgos. Trae las variantes de concordancia de A.2.1 (Surcon en masculino; la Rodauva usa la base) y no trae lealtad.estado.* ni desglose.fuente.modo. T14 suma hambre.estado.hambriento y combate.hambre; T15, desglose.fuente.afinidad; no trae panel.obediencia ni obediencia.tramo.* (no existen en es.json)",
   "especie.rodauva.nombre": "Rodauva",
   "especie.rodauva.articulo": "la",
   "especie.surcon.nombre": "Surcón",
@@ -48,5 +48,6 @@
   "aviso.destapar": "Pararse acá destapa al Zancajunco, y queda a tiro de su embestida.",
   "aviso.cuenta.umbral": "Con {n} de vida o menos, pasa a Cuenta.",
   "desglose.base": "Base",
+  "desglose.fuente.afinidad": "Afinidad",
   "desglose.total": "Total"
 }

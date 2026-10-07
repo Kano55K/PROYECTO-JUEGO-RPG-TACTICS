@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../datos/_esquemas/relaciones.schema.json",
+  "_nota": "Solo para el test 6 de T15 (Sistema.md 11.2.2, Relaciones: la oculta da y recibe afinidad). Copia de pruebas/fixtures/unidades/relaciones.json con un par inventado, rodauva-zancajunco bien: en 10.8 el Zancajunco no tiene afines en la tribu",
+  "pares": [
+    { "a": "rodauva", "b": "surcon", "relacion": "bien" },
+    { "a": "surcon", "b": "ocarra", "relacion": "bien" },
+    { "a": "ocarra", "b": "zancajunco", "relacion": "mal" },
+    { "a": "rodauva", "b": "rodauva", "relacion": "bien" },
+    { "a": "ocarra", "b": "ocarra", "relacion": "mal" },
+    { "a": "rodauva", "b": "tasajero", "relacion": "mal" },
+    { "a": "ocarra", "b": "tasajero", "relacion": "mal" },
+    { "a": "zancajunco", "b": "tasajero", "relacion": "bien" },
+    { "_nota": "Inventado para el test: no esta en Sistema.md 10.8", "a": "rodauva", "b": "zancajunco", "relacion": "bien" }
+  ]
+}
