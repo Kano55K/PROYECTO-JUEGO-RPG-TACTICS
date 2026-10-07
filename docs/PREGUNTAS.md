@@ -405,3 +405,32 @@
 - **Mientras tanto:** programada la opción A como lectura técnica: `nucleo/combate/turno.gd` (`_resolver` llama a `Cadena.revisar_objetivo` antes de evaluar el fin) y `nucleo/combate/combate.gd` (`_terminar` corta con `fin_combate` lo que quede). Tests: `pruebas/combate/test_cadena.gd`, `test_registro_instantanea_y_grabacion` (victoria con un solo corte `objetivo_fuera`, y `Cadena.cortar(fin_combate)` sobre una cadena abierta, una sola vez).
 - **Respuesta:** Arquitecto (07/10/2026): opción A. El corte por objetivo se mira después de cada acción aplicada y va antes que el de fin: un golpe que saca a la objetivo y gana el combate deja un solo cadena_cortada, con objetivo_fuera. fin_combate queda para las cadenas que sigan vivas al terminar (desde T18, T25, T26 y T28). Para T23 da igual, porque cuenta eslabones. Ya programado así: no cambia código ni tests. Se cierra al empezar T41.
 - **Cerrada en:** T41
+
+## P-030 — Coordenadas de los escenarios en 12 × 12
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T43
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 11.9 v1.6, "Criterios de despliegue en 12 × 12" y "Cómo se fijan las coordenadas"; 11.3 v1.6, "Contacto en la ronda 2"
+- **Duda:** ¿se aprueban las coordenadas de 12 × 12 de la tabla de abajo (como P-007), verificadas contra la IA real por `pruebas/datos/test_contacto.gd`?
+- **Caso que la dispara:** A a F y H pasan de 8 × 8 a 12 × 12 (G sigue en 8 × 8); `tablas/combate.json` `despliegue_filas` = 3. Coordenadas `[x, y]`, `y = 0` arriba; M = Maestro; entre paréntesis, la distancia Manhattan a la enemiga más cercana (a la unidad de la tribu más cercana, para las enemigas).
+
+  | Escenario | Tribu | Enemigas | Lo que hace la IA con la tribu quieta (verificado) |
+  |---|---|---|---|
+  | A | M [5,10] (9), Rodauva [6,10] (8) | Ocarra [6,2] (8) | Ronda 1: se acerca a [6,5]. Ronda 2: le pega a la Rodauva desde [6,8] |
+  | B | M [4,9] (8), Rodauva [6,10] (8) | Ocarra s1 [4,1] (8), Ocarra s2 [6,2] (8) | s1 va por el Maestro y s2 por la Rodauva. Cierre de la ronda 1: [4,4] y [6,5]. Ronda 2: pegan desde [4,7] y [6,8]. Nunca vecinas en 8 (están a 2) |
+  | C y H | M [5,10] (8), Rodauva [4,10] (9), Ocarra [4,11] (10), Zancajunco [6,10] (9) | Tasajero [5,2] (8) | Ronda 1: se acerca a [5,6]. Ronda 2: Caza desde [4,9] contra la Rodauva (5 + 5) |
+  | D (3) | M [5,10] (8), Ocarra [5,11] (9), Zancajunco [6,11] (10) | Surcón [4,2] (9), Rodauva [5,2] (8) | La Ocarra y el Zancajunco empiezan vecinos. Rodauva salvaje: ronda 1 a [5,6], ronda 2 le pega al Maestro. El Surcón cava en [5,2] y [4,3] |
+  | E (2) | M [4,10] (12), Rodauva leal [6,10] (10), Rodauva Neutral [6,11] (11), Surcón [4,11] (13) | Tasajero [8,2] (10) | Ronda 1: a [6,4] (a 6 y 7 de las Rodauvas: ninguna rival a su alcance en su turno). Ronda 2: a [6,8] (las dos con rival a su alcance). Primer ataque enemigo, en la ronda 3 |
+  | F | M [5,10] vida 6 (8), Rodauva [5,11] (9), Ocarra [6,11] (9) | Zancajunco [5,2] (8), Surcón [6,2] (9) | Zancajunco: se oculta en la 1; en la 2 baja a [5,6], destapado y con el bono; en la 3 le pega 7 al Maestro desde [5,9]. El Surcón cava en [6,3] y [5,2] |
+  | G | Sin cambios (8 × 8) | — | Llega al primer turno del jugador |
+
+  El test comprueba en cada escenario (salvo G) las zonas de despliegue (filas 9 a 11 y 0 a 2), la distancia mínima (8; E, 10) y que ninguna enemiga ataca en la ronda 1, más la fila de cada escenario en la tabla de criterios. Romper una coordenada a mano (el Tasajero de C a [5,5], distancia 5) lo hace fallar.
+
+  **Dos avisos:**
+  1. **B:** con las dos Ocarras a 8, las dos no pueden ir por la Rodauva sin terminar vecinas. Con las filas 0 a 2 y 9 a 11, a distancia 8 las dos quedan a 2 columnas o menos de su objetivo y convergen en diagonal (es lo que pasaba en 8 × 8). Por eso cada una va por la unidad que tiene más cerca, y cambia la línea de referencia de 11.6 B ("las dos van primero por la Rodauva"): el Maestro recibe un golpe de 4 por ronda desde la ronda 2. Para la Lanzadera (T22): con el Maestro en [4,8] (un paso), atraer a la Ocarra s2 a [5,8] la deja en diagonal con la s1.
+  2. **C y H:** la Ocarra de la tribu pasa de detrás del Maestro a detrás de la Rodauva. Si no, empezaría en diagonal con el Zancajunco (rivales), y con las vecinas en 8 (11.3 v1.6) eso es un incidente posible desde el primer turno. La `_nota` vieja buscaba lo contrario ("no son adyacentes al empezar").
+- **Opciones:** A) aprobar las coordenadas tal como están. B) pedir cambios por escenario, que se verifican de nuevo con el test. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** las coordenadas están en `datos/escenarios/` (T43) y el test de contacto queda como regresión permanente.
+- **Respuesta:** _(la completa el staff)_
