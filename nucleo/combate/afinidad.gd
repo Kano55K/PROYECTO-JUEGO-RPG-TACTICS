@@ -36,14 +36,21 @@ func aporte(atacante_id: String, desde: Vector2i, plantel: Plantel) -> Modificad
 	return null
 
 
-# Sistema.md 10.3, 10.7, 10.8, 11.2.2 y 11.5. Mismo bando y las dos de pie (ni
-# caida, ni guardada, ni fuera; una oculta si). Entre criaturas, su par de
-# especies es "bien" (incluida la misma especie). El Maestro y una criatura de
-# la tribu, si su obediencia esta en tramo leal: en los dos sentidos.
+# Sistema.md 10.3, 10.7, 10.8, 11.2.2 y 11.5: la relacion y las dos de pie (ni
+# caida, ni guardada, ni fuera; una oculta si).
 func son_afines(a_id: String, b_id: String, plantel: Plantel) -> bool:
-	if a_id == b_id or _bando(a_id, plantel) != _bando(b_id, plantel):
-		return false
 	if not Objetivos.de_pie(a_id, plantel) or not Objetivos.de_pie(b_id, plantel):
+		return false
+	return relacion_afin(a_id, b_id, plantel)
+
+
+# Que es "afin", sin posicion ni estado: lo usan la afinidad (con de pie) y el
+# combo (10.2, S-28: sin adyacencia ni de pie). Mismo bando; entre criaturas, su
+# par de especies es "bien" (incluida la misma especie). El Maestro y una
+# criatura de la tribu, si su obediencia esta en tramo leal, preguntado ahora:
+# en los dos sentidos.
+func relacion_afin(a_id: String, b_id: String, plantel: Plantel) -> bool:
+	if a_id == b_id or _bando(a_id, plantel) != _bando(b_id, plantel):
 		return false
 	if a_id == Maestro.ID or b_id == Maestro.ID:
 		var criatura: Criatura = plantel.criatura(b_id if a_id == Maestro.ID else a_id)

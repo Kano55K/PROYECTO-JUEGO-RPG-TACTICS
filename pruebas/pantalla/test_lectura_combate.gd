@@ -335,3 +335,31 @@ func test_t15_desglose_del_registro_y_del_mouse_con_afinidad() -> void:
 	var lineas: Array[String] = lectura.desglose(evento["desglose"], "ocarra_1")
 	assert_array(lineas).is_equal(lectura.desglose(vista_previa.desglose.a_diccionario(), "ocarra_1"))
 	assert_array(lineas).contains(["Afinidad: +1", "Total: 5"])
+
+
+# T16 (12), Sistema.md 10.2: con el mouse sobre la objetivo de la cadena, el
+# desglose muestra el bono del eslabon siguiente, y es el del evento `ataque`.
+# El panel de la unidad del turno muestra la cadena en curso (objetivo y eslabon).
+# escenario_cadena_combate: el Zancajunco pega a surcon_s1 y despues la Ocarra,
+# su rival (sin relacion, +50).
+func test_t16_desglose_y_panel_de_la_cadena() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_cadena_combate")
+	assert_str(_combate.turno_actual().unidad_id).is_equal("zancajunco_1")
+	for linea in lectura.panel_turno():
+		assert_str(linea).not_contains("panel.cadena")
+	assert_bool(_combate.aplicar(Accion.atacar("surcon_s1")).valida).is_true()
+	assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+
+	assert_str(_combate.turno_actual().unidad_id).is_equal("ocarra_1")
+	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.cadena]: Surcón (1)"])
+	var vista_previa: ResultadoAccion = _combate.turno_actual().previsualizar_ataque(Vector2i(4, 6), "surcon_s1")
+	assert_bool(vista_previa.valida).is_true()
+	assert_array(lectura.desglose(vista_previa.desglose.a_diccionario(), "ocarra_1")) \
+			.contains(["Cadena: +50%", "Total: 6"])
+	assert_bool(_combate.aplicar(Accion.atacar("surcon_s1")).valida).is_true()
+	var evento: Dictionary = {}
+	for linea in _combate.registro().lineas():
+		if linea["tipo"] == "ataque":
+			evento = linea
+	assert_dict(evento["desglose"]).is_equal(vista_previa.desglose.a_diccionario())
+	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.cadena]: Surcón (2)"])

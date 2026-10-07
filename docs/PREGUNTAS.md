@@ -390,3 +390,15 @@
 - **Mientras tanto:** `EstadosUnidad.corte` (`nucleo/unidades/estados_unidad.gd`) usa `desleal_hasta` y `neutral_desde`. `dudosa_hasta` queda en el dato y en el esquema sin leerse. Con los datos de hoy (3 y 4) el resultado es el mismo. Test: `pruebas/unidades/test_obediencia.gd`, `test_cortes_desde_los_datos`.
 - **Respuesta:** Arquitecto (06/10/2026): se quita dudosa_hasta de tablas/lealtad.json y de su esquema. Es neutral_desde − 1 y viola "cada número en un solo archivo" (A.2.2). El estado Dudosa queda definido como desleal_hasta + 1 hasta neutral_desde − 1. Orden: esquema → datos → fixtures → código, con su línea en la tabla de cotejo. Se aplica y se cierra al empezar T15, en el mismo PR.
 - **Cerrada en:** T15
+## P-029 — Golpe que gana el combate y saca a la objetivo de la cadena: ¿`objetivo_fuera` o `fin_combate`?
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T16
+- **Fecha:** 07/10/2026
+- **Fuente:** `Arquitectura.md` A.7, "Eventos de 0a.2" (motivos de `cadena_cortada`), y B.3, fila T16 (Cortes)
+- **Duda:** cuando un golpe de la tribu saca del tablero a la objetivo de la cadena y con eso gana el combate, ¿el único `cadena_cortada` lleva el motivo `objetivo_fuera` o `fin_combate`?
+- **Caso que la dispara:** `escenario_cadena_combate` sin `rodauva_s1` y con `surcon_s1` en 10 de vida. El Zancajunco pega 4 y la Ocarra 6 (eslabón 2): `surcon_s1` queda fuera y es la victoria. El corte por objetivo se mira después de cada acción aplicada (dentro del `Turno`) y el de fin, al terminar (en `Combate._terminar`), así que gana el primero. Consecuencia: hoy `fin_combate` no se da en ningún combate real, porque una cadena viva necesita una objetivo enemiga que todavía pueda ser objetivo (no hay victoria) y el Maestro no puede caer en un turno de la tribu hasta T18.
+- **Opciones:** A) `objetivo_fuera` (lo que pasó primero en la regla de 10.2); `fin_combate` queda para las cadenas que sigan vivas al terminar (desde T18, T25 y T26). B) `fin_combate` siempre que el combate termine en esa acción. — Recomendación técnica: A (un orden fijo y sin caso especial; para T23 da igual, porque cuenta eslabones).
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A como lectura técnica: `nucleo/combate/turno.gd` (`_resolver` llama a `Cadena.revisar_objetivo` antes de evaluar el fin) y `nucleo/combate/combate.gd` (`_terminar` corta con `fin_combate` lo que quede). Tests: `pruebas/combate/test_cadena.gd`, `test_registro_instantanea_y_grabacion` (victoria con un solo corte `objetivo_fuera`, y `Cadena.cortar(fin_combate)` sobre una cadena abierta, una sola vez).
+- **Respuesta:** _(la completa el staff)_

@@ -42,10 +42,12 @@ var _danio: Danio
 var _surcos: Surcos
 # La regla de la afinidad (T15), como _danio: no guarda nada del combate.
 var _afinidad: Afinidad
+# La del combate (la guarda el Combate, T16): solo un ataque aplicado la avanza.
+var _cadena: Cadena
 
 
 func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
-		afinidad: Afinidad) -> void:
+		afinidad: Afinidad, cadena: Cadena) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
@@ -53,14 +55,15 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 	_danio = danio
 	_surcos = surcos
 	_afinidad = afinidad
+	_cadena = cadena
 
 
 # Crea el turno de la entrada y corre el inicio del turno. surcos: los del
 # combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
-# ContextoCombate.
+# ContextoCombate. cadena: la del combate (un turno suelto, una nueva).
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
-		surcos: Surcos, afinidad: Afinidad) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad)
+		surcos: Surcos, afinidad: Afinidad, cadena: Cadena) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena)
 	turno._inicio_del_turno()
 	turno._preparar()
 	return turno
@@ -196,8 +199,7 @@ func _preparar() -> void:
 		_movimiento_partido = criatura.especie.movimiento_partido(criatura.modo)
 
 
-# Punto de fin del turno: aca se enchufan T16 (cadena de combos y registro de
-# "esperar") y T23. Sistema.md 11.2.2, Limite: queda anotado si se oculto en
+# Punto de fin del turno: aca se enchufa T23 (esperar no corta la cadena, 10.2). Sistema.md 11.2.2, Limite: queda anotado si se oculto en
 # este turno, para el proximo.
 func _fin_del_turno() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
@@ -206,7 +208,8 @@ func _fin_del_turno() -> void:
 
 
 # Sistema.md 11.5: con el combate terminado se rechaza todo. Despues de cada
-# accion aplicada se mira si termino, y el resultado dice como.
+# accion aplicada se mira si la objetivo de la cadena sigue siendo objetivo
+# hostil (10.2) y si el combate termino, y el resultado dice como.
 func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 	var fin: FinCombate.Fin = FinCombate.evaluar(_plantel)
 	if fin != FinCombate.Fin.EN_CURSO:
@@ -228,6 +231,7 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
+		_cadena.revisar_objetivo(_plantel)
 		resultado.fin = FinCombate.evaluar(_plantel)
 	return resultado
 
@@ -308,8 +312,12 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
 	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id))
 	resultado.danio = resultado.desglose.total
+	resultado.eslabon = _cadena.eslabon_para(unidad_id, objetivo_id, _plantel)
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
+		# Sistema.md 10.2: solo el ataque aplicado avanza la cadena (nunca validar
+		# ni previsualizar), antes de resolver la vida en 0.
+		_cadena.atacar(unidad_id, objetivo_id, _plantel)
 		# Sistema.md 11.2.2: la atacante se destapa y cobra su bono; la objetivo
 		# destapada pierde el suyo.
 		_eventos.append_array(Junco.atacar(unidad_id, _plantel))
@@ -322,13 +330,17 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 
 
 # Los aportes externos del danio (11.4) para un ataque desde `desde`: la
-# afinidad (10.3, mirada desde `desde`). Aca se enchufan despues combo (T16) y
-# Encono o cobardia (T19); el ataque real y la previsualizacion los ven igual.
-func _aportes(desde: Vector2i, _objetivo_id: String) -> Array[ModificadorDanio]:
+# afinidad (10.3, mirada desde `desde`) y el combo del eslabon siguiente (10.2).
+# Aca se enchufan despues Encono o cobardia (T19); el ataque real y la
+# previsualizacion los ven igual.
+func _aportes(desde: Vector2i, objetivo_id: String) -> Array[ModificadorDanio]:
 	var aportes: Array[ModificadorDanio] = []
 	var afinidad: ModificadorDanio = _afinidad.aporte(unidad_id, desde, _plantel)
 	if afinidad != null:
 		aportes.append(afinidad)
+	var combo: ModificadorDanio = _cadena.aporte(unidad_id, objetivo_id, _plantel)
+	if combo != null:
+		aportes.append(combo)
 	return aportes
 
 
@@ -418,7 +430,7 @@ func _enemiga_de_pie_adyacente() -> bool:
 
 
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es
-# "esperar" (10.2, P-015): el resultado lo dice para el registro y para T16.
+# "esperar" (10.2, P-015): el resultado lo dice para el registro. No corta la cadena.
 func _terminar(aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)

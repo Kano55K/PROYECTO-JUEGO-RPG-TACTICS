@@ -106,12 +106,26 @@ func texto_ronda() -> String:
 
 
 # Lineas del panel de la unidad del turno: nombre, vida y, si los tiene,
-# lealtad y hambre con su estado. Vacio si no hay turno.
+# lealtad y hambre con su estado; al final, la cadena en curso. Vacio si no hay turno.
 func panel_turno() -> Array[String]:
 	var turno: Turno = _combate.turno_actual()
 	if turno == null:
 		return []
-	var id_unidad: String = turno.unidad_id
+	var lineas: Array[String] = _panel_unidad(turno.unidad_id)
+	var cadena: Variant = _combate.instantanea()["cadena"]
+	if cadena != null:
+		lineas.append(_linea_cadena(cadena))
+	return lineas
+
+
+# T16 (Sistema.md 10.2): la cadena tal como la da el nucleo: la objetivo y el
+# eslabon al que llego (el desglose del mouse muestra el bono del siguiente).
+func _linea_cadena(cadena: Dictionary) -> String:
+	return "%s: %s (%d)" % [_armador.armar(ClavesTextos.PANEL_CADENA), nombre(cadena["objetivo"]),
+			cadena["eslabon"]]
+
+
+func _panel_unidad(id_unidad: String) -> Array[String]:
 	var lineas: Array[String] = [nombre(id_unidad)]
 	var etiqueta_vida: String = _armador.armar(ClavesTextos.PANEL_VIDA)
 	var etiqueta_hambre: String = _armador.armar(ClavesTextos.PANEL_HAMBRE)
