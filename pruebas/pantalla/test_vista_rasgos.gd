@@ -99,3 +99,38 @@ func test_modo_cavar_en_la_vista() -> void:
 	var surcos: TileMapLayer = runner.find_child("Surcos")
 	assert_array(surcos.get_used_cells()).is_equal([Vector2i(3, 5)])
 	assert_vector(surcos.get_cell_atlas_coords(Vector2i(3, 5))).is_equal(Vector2i(2, 0))
+
+
+# T41 (11), Sistema.md 10.3 v1.6 y 15: el Zancajunco de C [4,6] juega primero.
+# Con el mouse sobre [4,5] (alcanzable), el Maestro [3,6] queda en diagonal y es
+# afin (leal): se marca su casilla y el aviso suma afinidad.tooltip. Sobre una
+# casilla alcanzable sin afines, nada. Sobre la propia, el Maestro al lado da.
+func test_marca_y_aviso_de_afinidad() -> void:
+	var runner: GdUnitSceneRunner = _vista("escenario_c")
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = runner.scene()
+	var turno: Turno = vista.combate().turno_actual()
+	assert_str(turno.unidad_id).is_equal("zancajunco_1")
+	var tooltip: String = "Con una afín al lado o en diagonal, pega un poco más fuerte."
+	var maestro: Vector2i = Vector2i(3, 6)
+
+	assert_array(turno.casillas_para_mover()).contains([Vector2i(4, 5)])
+	vista.sobre_casilla(Vector2i(4, 5))
+	assert_array(vista.casillas_afines()).is_equal([maestro])
+	assert_str(vista.aviso_mostrado()).is_equal(tooltip)
+	assert_bool(runner.find_child("Aviso").visible).is_true()
+
+	var sin_afines: Vector2i = Criatura.SIN_POSICION
+	for casilla in turno.casillas_para_mover():
+		if vista.combate().afines_desde("zancajunco_1", casilla).is_empty():
+			sin_afines = casilla
+			break
+	assert_that(sin_afines).is_not_equal(Criatura.SIN_POSICION)
+	vista.sobre_casilla(sin_afines)
+	assert_array(vista.casillas_afines()).is_empty()
+	assert_str(vista.aviso_mostrado()).is_empty()
+	assert_bool(runner.find_child("Aviso").visible).is_false()
+
+	vista.sobre_casilla(Vector2i(4, 6))
+	assert_array(vista.casillas_afines()).is_equal([maestro])
+	assert_str(vista.aviso_mostrado()).is_equal(tooltip)

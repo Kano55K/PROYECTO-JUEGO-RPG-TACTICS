@@ -1060,3 +1060,72 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   3. En el turno siguiente de la tribu (después del Tasajero), el panel ya no muestra la cadena: el turno de la enemiga la cortó.
   4. Elegir A y, si la Rodauva y el Maestro llegan a la Ocarra en la misma ronda, pegarle con los dos: el desglose del Maestro muestra "Cadena: +50%".
 - **Para la próxima sesión:** nada: tarea terminada. Faltan la revisión de P-029, el commit, el PR y la prueba manual.
+
+## T41 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T41-vecinas
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho:**
+  - **Al empezar:** P-026, P-027 y P-029 pasan a `CERRADA` ("Cerrada en: T41"). No cambia código.
+  - **Geometría** (`nucleo/combate/tablero.gd`, D-001): `Tablero.es_vecina_en_8(a, b)`, estática y pura, con distancia de Chebyshev 1 (la misma casilla no cuenta). Es la única consulta de "vecina en 8". `vecinas` y `adyacentes` (el cuerpo, 4 ortogonales) no cambian.
+  - **Afinidad** (`nucleo/combate/afinidad.gd`, `Sistema.md` 10.3 y 10.7 v1.6):
+    - Antes la vecindad se miraba con `Tablero.distancia(pos, desde) == 1` (Manhattan, solo las 4 ortogonales). Ahora se mira con `Tablero.es_vecina_en_8`.
+    - Nueva `afines_vecinas(atacante_id, desde, plantel)`: los ids de las afines de pie en las 8 vecinas de `desde`, en el orden del `Plantel`, sin contar a la atacante.
+    - `aporte` usa `afines_vecinas` y sigue dando como máximo un +1.
+    - El resto de T15 no cambia: mismo bando, de pie, oculta incluida, y el Maestro con una leal preguntado en el momento. Combo y Cadena no se tocaron.
+  - **Combate:** `afines_desde(unidad_id, casilla)` devuelve las unidades que le darían afinidad desde esa casilla. Calcula sin aplicar.
+  - **Pantalla:**
+    - Capa nueva `Tablero/Afines`, encima de las fichas, con la marca placeholder `7:0` (un anillo verde punteado en `marcas_placeholder.svg`, que pasa a 512 px de ancho).
+    - `VistaCombate.sobre_casilla`: en el turno del jugador, sin elegir cavar y sin una objetivo bajo el mouse, si la casilla es de `casillas_para_mover()` o es la de la unidad del turno, se marcan las casillas de `afines_desde` y el aviso suma `afinidad.tooltip`.
+    - Consulta nueva `casillas_afines()`. La capa se limpia en cada hover, en el redibujo (`_dibujar_marcas`) y al empezar la secuencia de la IA, donde el hover ya estaba apagado.
+    - `ClavesTextos.AFINIDAD_TOOLTIP` está en `FIJAS`. La clave existe en `es.json` v1.2: no hay `[FALTA]`.
+  - **Dato** (`Sistema.md` 7.2 v1.6): `datos/tablas/hambre.json` `combate.cada_rondas` pasa de 5 a 6 y la `_nota` cita 7.2 v1.6. El esquema no cambió. **La huella cambia:** al reproducir grabaciones anteriores, el aviso de huella es lo esperado.
+  - **Tabla de cotejo (A.2.2):**
+
+    | Valor | Archivo y campo | Sección |
+    |---|---|---|
+    | Hambre de combate cada 6 rondas (antes 5) | `tablas/hambre.json` `combate.cada_rondas` | 7.2 v1.6 |
+    | +1 de afinidad (sin cambios) | `tablas/combate.json` `afinidad_danio_plano` | 10.3 v1.6 |
+
+  - **Supuesto técnico (presentación, no regla):** si en la misma casilla aplican el aviso de destapar y el de afinidad, se muestran los dos, uno por línea (primero el de destapar).
+- **Archivos:**
+  - Creados:
+    - `pruebas/datos/test_hambre_v16.gd`
+    - `pruebas/fixtures/combate/hambre_cada_6.json`
+  - Modificados:
+    - Datos: `datos/tablas/hambre.json`.
+    - Núcleo: `nucleo/combate/tablero.gd`, `afinidad.gd` y `combate.gd`.
+    - Pantalla: `pantalla/combate/vista_combate.gd`, `vista_combate.tscn`, `casillas_cenital.tres`, `marcas_placeholder.svg` y `pantalla/claves_textos.gd`.
+    - Tests: `pruebas/combate/test_afinidad.gd`, `test_tablero.gd`, `test_hambre_combate.gd`, `test_turno.gd` y `test_cadena.gd`, y `pruebas/pantalla/test_vista_rasgos.gd`.
+    - Fixtures: `pruebas/fixtures/pantalla/es_rasgos.json` (copia textual de `afinidad.tooltip`).
+    - Documentos: `CLAUDE.md` (Estado actual) y `docs/PREGUNTAS.md`.
+- **Tests:** 11 nuevos (7 en `test_afinidad`, 1 en `test_tablero`, 1 en `test_hambre_combate`, 1 en `test_hambre_v16` y 1 en `test_vista_rasgos`). Total 339, todos pasan (sí). En la consola, solo los dos `ERROR` del "Remote Debugger" del runner, que ya salían antes de esta tarea.
+- **Criterio de terminado:** cumplido punto por punto.
+  - 1: `test_afin_en_diagonal` (la Rodauva pega 3 con la afín en diagonal y 2 sin ella).
+  - 2: `test_ortogonal_y_diagonal_dan_uno` (3, una sola fuente `AFINIDAD`; `afines_vecinas` da las dos).
+  - 3: `test_a_distancia_2_no_da` (`[x+2, y]` y `[x+2, y+1]`). Además, `test_tablero.gd::test_vecina_en_8`.
+  - 4: `test_ocarra_a_distancia_2_afin_en_diagonal` (5 con el Surcón en diagonal de ella; 4 con el Surcón en diagonal de la objetivo).
+  - 5: `test_salvajes_en_diagonal_y_bandos`.
+  - 6: `test_junco.gd`, `test_zona_y_destape.gd`, `test_caza_y_cuenta.gd`, `ia/` y los de Erizarse de `test_turno.gd` pasan sin cambios (`git diff` vacío en esos archivos).
+  - 7: `pruebas/datos/test_hambre_v16.gd` (datos reales: `cada_rondas` vale 6), y el permanente `test_datos_completos.gd` pasa.
+  - 8: `test_hambre_combate.gd::test_cada_6_rondas` (cerrar la ronda 5 no suma; cerrar la 6 suma +1). Los tests de T14 siguen con su fixture de 5, sin cambios.
+  - 9: `test_ia_remata_con_afin_en_diagonal` (`REMATE`, previsto 3 = aplicado).
+  - 10: `test_afines_desde` (esquina `[0,0]` y centro `[3,3]`, con el Maestro y la leal en diagonal, en el orden del Plantel; la `instantanea` no cambia).
+  - 11: `test_vista_rasgos.gd::test_marca_y_aviso_de_afinidad` (C: el Zancajunco sobre `[4,5]` marca al Maestro `[3,6]` y muestra el aviso; sobre una casilla alcanzable sin afines, nada; sobre la propia, sí).
+  - 12: `addons/gdUnit4/runtest.cmd -a res://pruebas`: 339/339.
+- **Tests viejos reescritos** (`Sistema.md` 10.3 v1.6: una afín en diagonal ahora da +1). Salieron de la corrida completa con `-c` antes de tocarlos. Ninguno se borró:
+  - `pruebas/combate/test_turno.gd::test_danio_de_balanza_y_de_ficha`: la Rodauva que se mueve a `[2,5]` tiene al Maestro leal `[3,6]` en diagonal. Pega 2 + 1 (antes 2) y la vida de la Ocarra salvaje queda en 12 − 3 (antes 12 − 2).
+  - `pruebas/combate/test_turno.gd::test_previsualizar_ataque`: la Ocarra que previsualiza desde `[2,7]` tiene al Maestro leal `[3,6]` en diagonal. Da 4 + 1 (antes 4).
+  - `pruebas/combate/test_cadena.gd::test_registro_instantanea_y_grabacion`: en `escenario_cadena_combate`, el Zancajunco leal `[4,5]` y el Maestro `[5,4]` están en diagonal. Cada uno pega 4 + 1 (antes 4). La victoria con `surcon_s1` en 10 de vida sigue saliendo en el segundo golpe (5 + 6); solo cambió el comentario.
+  - **Corrige el plan:** había previsto que no cambiaba ninguno de `test_cadena.gd` (solo miré `escenario_cadena.json`, no `escenario_cadena_combate.json`) y que podían cambiar tests con `datos/` reales (`test_combate`, `test_vista_combate`, `test_principal`, `test_lectura_combate`). Esos pasaron sin cambios.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna (`afinidad.tooltip` ya está en `es.json` v1.2).
+- **Preguntas:** ninguna nueva. Cerradas P-026, P-027 y P-029.
+- **Aviso:** cambia el daño de los golpes con una afín en diagonal y cambia la huella (`tablas/hambre.json`). Al reproducir grabaciones anteriores, el aviso de huella es lo esperado.
+- **Lista de prueba manual (usuario):**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. F5 y elegir C. En el turno de la Rodauva, pasar el mouse por casillas en diagonal de la Ocarra o del Maestro. Tienen que aparecer el anillo verde sobre la afín y el aviso "Con una afín al lado o en diagonal, pega un poco más fuerte.". Sobre una casilla sin afines alrededor, no aparece nada.
+  3. Moverse a una de esas casillas y pasar el mouse sobre una enemiga a su alcance: el desglose muestra "Afinidad: +1".
+  4. Jugar C hasta pasar la ronda 6 (con Esperar si hace falta): la línea de hambre de combate tiene que aparecer al cerrar la ronda 6, no la 5.
+  5. Durante la secuencia de la IA, el anillo no aparece.
+  6. Anotar si el panel de la cadena ("Cadena: Tasajero (2)") se lee bien o si el número parece vida.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.

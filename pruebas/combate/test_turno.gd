@@ -177,8 +177,10 @@ func test_danio_de_balanza_y_de_ficha() -> void:
 	plantel = _plantel()
 	var rodauva: Turno = _turno(plantel, "rodauva_1")
 	rodauva.aplicar(Accion.mover(Vector2i(2, 5)))
-	assert_int(rodauva.aplicar(Accion.atacar("ocarra_s1")).danio).is_equal(2)
-	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 2)
+	# Sistema.md 10.3 v1.6 (T41): en [2,5] el Maestro leal [3,6] queda en diagonal
+	# y suma +1 (con vecinas en 4 pegaba 2).
+	assert_int(rodauva.aplicar(Accion.atacar("ocarra_s1")).danio).is_equal(2 + 1)
+	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - (2 + 1))
 
 
 # (6) La vida no baja de 0. La salvaje en 0 sale del tablero (T10, Sistema.md 11.5).
@@ -392,7 +394,9 @@ func test_previsualizar_ataque() -> void:
 	var antes: String = _foto(plantel)
 	var desde_otra: ResultadoAccion = turno.previsualizar_ataque(Vector2i(2, 7), "rodauva_s1")
 	_assert_valida(desde_otra)
-	assert_int(desde_otra.danio).is_equal(4)
+	# Sistema.md 10.3 v1.6 (T41): desde [2,7] el Maestro leal [3,6] queda en
+	# diagonal y suma +1 (con vecinas en 4 eran 4).
+	assert_int(desde_otra.danio).is_equal(4 + 1)
 	_assert_rechazada(turno.previsualizar_ataque(Vector2i(0, 0), "rodauva_s1"), ResultadoAccion.Motivo.CASILLA_NO_ALCANZABLE)
 	_assert_rechazada(turno.previsualizar_ataque(Vector2i(3, 7), "rodauva_1"), ResultadoAccion.Motivo.OBJETIVO_ALIADO)
 	var previsto: ResultadoAccion = turno.previsualizar_ataque(Vector2i(3, 7), "ocarra_s1")

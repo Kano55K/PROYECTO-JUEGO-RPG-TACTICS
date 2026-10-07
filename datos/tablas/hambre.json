@@ -41,8 +41,8 @@
     }
   ],
   "combate": {
-    "_nota": "Sistema.md 7.2: +1 al cerrar las rondas 5, 10, 15...",
-    "cada_rondas": 5,
+    "_nota": "Sistema.md 7.2 v1.6: +1 al cerrar las rondas 6, 12, 18...",
+    "cada_rondas": 6,
     "suma": 1
   }
 }

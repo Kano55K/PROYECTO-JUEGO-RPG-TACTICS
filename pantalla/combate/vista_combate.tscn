@@ -20,6 +20,9 @@ tile_set = ExtResource("2_casillas")
 
 [node name="Unidades" type="Node2D" parent="Tablero"]
 
+[node name="Afines" type="TileMapLayer" parent="Tablero"]
+tile_set = ExtResource("2_casillas")
+
 [node name="PausaIA" type="Timer" parent="."]
 one_shot = true
 

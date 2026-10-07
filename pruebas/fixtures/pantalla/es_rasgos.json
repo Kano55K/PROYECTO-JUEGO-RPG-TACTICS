@@ -1,6 +1,6 @@
 {
   "$schema": "../../../datos/_esquemas/textos.schema.json",
-  "_nota": "Arquitectura.md B.2.1 (T40): copias textuales de datos/textos/es.json v1.1 para los tests de la pantalla de rasgos. Trae las variantes de concordancia de A.2.1 (Surcon en masculino; la Rodauva usa la base) y no trae lealtad.estado.* ni desglose.fuente.modo. T14 suma hambre.estado.hambriento y combate.hambre; T15, desglose.fuente.afinidad; T16, desglose.fuente.combo; no trae panel.obediencia, panel.cadena ni obediencia.tramo.* (no existen en es.json)",
+  "_nota": "Arquitectura.md B.2.1 (T40): copias textuales de datos/textos/es.json v1.1 para los tests de la pantalla de rasgos. Trae las variantes de concordancia de A.2.1 (Surcon en masculino; la Rodauva usa la base) y no trae lealtad.estado.* ni desglose.fuente.modo. T14 suma hambre.estado.hambriento y combate.hambre; T15, desglose.fuente.afinidad; T16, desglose.fuente.combo; T41, afinidad.tooltip (es.json v1.2); no trae panel.obediencia, panel.cadena ni obediencia.tramo.* (no existen en es.json)",
   "especie.rodauva.nombre": "Rodauva",
   "especie.rodauva.articulo": "la",
   "especie.surcon.nombre": "Surcón",
@@ -47,6 +47,7 @@
   "suceso.cuenta.cambio": "El Tasajero deja de cazar. Ahora cuenta lo que le queda.",
   "aviso.destapar": "Pararse acá destapa al Zancajunco, y queda a tiro de su embestida.",
   "aviso.cuenta.umbral": "Con {n} de vida o menos, pasa a Cuenta.",
+  "afinidad.tooltip": "Con una afín al lado o en diagonal, pega un poco más fuerte.",
   "desglose.base": "Base",
   "desglose.fuente.afinidad": "Afinidad",
   "desglose.fuente.combo": "Cadena",

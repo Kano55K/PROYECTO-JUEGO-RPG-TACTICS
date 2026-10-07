@@ -164,6 +164,13 @@ func destaparia(unidad_id: String, casilla: Vector2i) -> Array[String]:
 	return Junco.destaparia(unidad_id, casilla, _plantel)
 
 
+# T41 (Sistema.md 10.3 y 15, v1.6): las unidades que le darian afinidad a la
+# unidad si golpeara desde `casilla` (Afinidad.afines_vecinas, en el orden del
+# Plantel). Calcula sin aplicar.
+func afines_desde(unidad_id: String, casilla: Vector2i) -> Array[String]:
+	return _contexto.afinidad.afines_vecinas(unidad_id, casilla, _plantel)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
