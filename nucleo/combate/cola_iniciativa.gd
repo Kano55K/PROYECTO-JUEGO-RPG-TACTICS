@@ -39,8 +39,9 @@ func ronda_terminada() -> bool:
 	return _cursor >= _entradas.size()
 
 
-# Punto de fin de ronda, sin efectos por ahora: aca se enchufan el hambre de
-# combate (T14) y el corte de cadenas (T16).
+# Punto de fin de ronda, sin efectos por ahora: aca se enchufa el corte de
+# cadenas (T16). El hambre de combate (T14) la aplica Combate._cerrar_ronda,
+# despues de este punto, porque toca el Plantel y va al registro.
 func terminar_ronda() -> void:
 	pass
 

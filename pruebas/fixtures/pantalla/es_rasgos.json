@@ -1,6 +1,6 @@
 {
   "$schema": "../../../datos/_esquemas/textos.schema.json",
-  "_nota": "Arquitectura.md B.2.1 (T40): copias textuales de datos/textos/es.json v1.1 para los tests de la pantalla de rasgos. Trae las variantes de concordancia de A.2.1 (Surcon en masculino; la Rodauva usa la base) y no trae lealtad.estado.* ni desglose.fuente.modo",
+  "_nota": "Arquitectura.md B.2.1 (T40): copias textuales de datos/textos/es.json v1.1 para los tests de la pantalla de rasgos. Trae las variantes de concordancia de A.2.1 (Surcon en masculino; la Rodauva usa la base) y no trae lealtad.estado.* ni desglose.fuente.modo. T14 suma hambre.estado.hambriento y combate.hambre; no trae panel.obediencia ni obediencia.tramo.* (no existen en es.json)",
   "especie.rodauva.nombre": "Rodauva",
   "especie.rodauva.articulo": "la",
   "especie.surcon.nombre": "Surcón",
@@ -18,6 +18,9 @@
   "hambre.estado.saciado.maestro": "Saciado",
   "hambre.estado.saciado.surcon": "Saciado",
   "hambre.estado.normal": "Normal",
+  "hambre.estado.hambriento": "Hambrienta",
+  "hambre.estado.hambriento.maestro": "Hambriento",
+  "combate.hambre": "La pelea se alarga. A los tuyos les empieza a pesar el estómago vacío.",
   "estado.caida": "Caída",
   "estado.caida.surcon": "Caído",
   "marca.caida": "Caída",

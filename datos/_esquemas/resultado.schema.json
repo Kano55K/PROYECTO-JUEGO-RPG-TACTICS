@@ -108,6 +108,7 @@
           "estado",
           "vida",
           "lealtad",
+          "hambre",
           "posicion"
         ],
         "additionalProperties": false,
@@ -139,6 +140,13 @@
           },
           "lealtad": {
             "description": "null en las enemigas",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "hambre": {
+            "description": "Final, con el hambre de combate (Sistema.md 7.2, T14). null en las enemigas",
             "type": [
               "integer",
               "null"

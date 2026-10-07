@@ -35,6 +35,10 @@ var azar_textos: GeneradorAzar
 var danio: Danio
 var cierre: Cierre
 var relaciones: Relaciones
+# Sistema.md 5.4 (T14): se pregunta, nunca se guarda. La leen la pantalla y T15 a T20.
+var obediencia: Obediencia
+# Sistema.md 7.2 (T14): la usa el Combate al cerrar cada ronda.
+var hambre_combate: HambreCombate
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -62,6 +66,8 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	contexto.danio = Danio.desde_datos(tabla_combate, datos["tablas/hambre.json"])
 	contexto.relaciones = Relaciones.new(datos["relaciones.json"])
 	contexto.cierre = Cierre.desde_datos(tabla_combate, datos["tablas/lealtad.json"], contexto.relaciones)
+	contexto.obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"], tabla_combate)
+	contexto.hambre_combate = HambreCombate.desde_datos(datos["tablas/hambre.json"])
 	contexto.valido = true
 	return contexto
 

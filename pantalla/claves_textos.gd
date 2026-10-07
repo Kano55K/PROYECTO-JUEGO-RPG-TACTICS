@@ -44,6 +44,10 @@ const SUCESO_OCULTO: String = "suceso.oculto"
 const SUCESO_PIERDE_BONO: String = "suceso.pierde_bono"
 const AVISO_CUENTA_UMBRAL: String = "aviso.cuenta.umbral"
 const AVISO_DESTAPAR: String = "aviso.destapar"
+# T14: obediencia en el panel (clave propuesta, falta en es.json) y el suceso
+# del hambre de combate (Mundo.md, "Hechizos, hambre y cierre del combate").
+const PANEL_OBEDIENCIA: String = "panel.obediencia"
+const COMBATE_HAMBRE: String = "combate.hambre"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -54,6 +58,7 @@ const FIJAS: Array[String] = [
 	RESULTADO_TITULO, RESULTADO_RONDAS, RESULTADO_LEALTAD, RESULTADO_VOLVER,
 	ACCION_CAVAR, MARCA_OCULTO, MARCA_BONO, SUCESO_SURCO_CAVAR, SUCESO_SURCO_CERRAR,
 	SUCESO_OCULTO, SUCESO_PIERDE_BONO, AVISO_CUENTA_UMBRAL, AVISO_DESTAPAR,
+	PANEL_OBEDIENCIA, COMBATE_HAMBRE,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -83,6 +88,12 @@ static func estado_hambre(estado_id: String) -> String:
 
 static func estado_lealtad(estado_id: String) -> String:
 	return "lealtad.estado.%s" % estado_id
+
+
+# T14: tramo de Obediencia (Obediencia.TRAMOS). Sin concordancia: califica a la
+# obediencia, no a la unidad.
+static func tramo_obediencia(tramo: String) -> String:
+	return "obediencia.tramo.%s" % tramo
 
 
 static func nombre_rasgo(rasgo_id: String) -> String:
@@ -139,6 +150,8 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		_sumar(claves, fija)
 	for estado in _ESTADOS_LEALTAD:
 		_sumar(claves, estado_lealtad(estado))
+	for tramo in Obediencia.TRAMOS:
+		_sumar(claves, tramo_obediencia(tramo))
 	for estado in Criatura.Estado.keys():
 		_sumar(claves, estado_unidad((estado as String).to_lower()))
 	for nombre in _DESENLACES:

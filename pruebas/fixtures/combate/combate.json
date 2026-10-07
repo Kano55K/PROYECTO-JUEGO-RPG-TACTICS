@@ -41,8 +41,7 @@
       "cobardia_pts": -20
     },
     "baja": {
-      "_nota": "Obediencia <= 3",
-      "hasta": 3,
+      "_nota": "Sistema.md 5.4: debajo del piso de Neutral (tablas/lealtad.json neutral_desde; P-003)",
       "encono_pts": 10,
       "cobardia_pts": 20
     }

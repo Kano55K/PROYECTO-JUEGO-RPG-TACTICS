@@ -797,3 +797,84 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   8. Anotar los textos `[FALTA]` y los tooltips desactualizados.
   9. Por escenario, anotar si se usó cada activa disponible (señal temprana de la métrica 14, sin umbral, `Sistema.md` 11.9 v1.5).
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual; después, el cierre del hito 0a.1b.
+
+## T14 · sesión 1 · 06/10/2026
+- **Rama:** tarea/T14-obediencia
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho:**
+  - **Obediencia** (`nucleo/unidades/obediencia.gd`, `Sistema.md` 5.4):
+    - `valor(criatura)` = lealtad + la penalización del estado de hambre (`tablas/hambre.json` `estados[].obediencia`, guardada en negativo). Sin recorte; `null` en las enemigas.
+    - `tramo(criatura, maestro)` → `baja` / `neutral` / `leal`, con `neutral_desde` y el `umbral_rescate` de la fila de la balanza.
+    - Las salvajes y la atacante nocturna dan `salvajes.tramo_obediencia` (`baja`) aunque tengan lealtad (10.7 y 9.2 punto 3). El Maestro no tiene obediencia.
+    - No se guarda nunca. Vive en `ContextoCombate.obediencia`.
+  - **Cortes compartidos** (5.4, P-003): `EstadosUnidad.corte(valor, neutral_desde, umbral)` es la única comparación con los cortes y la usan la lealtad y la obediencia. `EstadosUnidad` ya no lee `dudosa_hasta` (P-028).
+  - **Hambre de combate** (`nucleo/combate/hambre_combate.gd`, 7.2):
+    - Al cerrar una ronda múltiplo de `combate.cada_rondas`, suma `combate.suma` (tope `maximo`) al Maestro y a la tribu en el tablero, de pie o caída.
+    - No alcanza a guardadas, muertas, unidades fuera, salvajes ni a la atacante.
+    - La llama `Combate._cerrar_ronda`. El evento `hambre_combate` (A.7) va justo después del `fin_ronda`, con el número de esa ronda, y lista solo las unidades que cambian.
+    - Un combate que termina a mitad de ronda no suma.
+  - **Arrimo** (`nucleo/combate/arrimo.gd`, 1.3): `Arrimo.pasos(maestro)` lee `pasos_arrimo` de la fila; `ajuste(pasos, Arrimo.Uso)` usa `tablas/arrimo.json` `por_paso`. Hoy no la usa ninguna regla.
+  - **P-003:** salió `obediencia.baja.hasta`, en este orden: esquema `combate`, `datos/tablas/combate.json` y el fixture `combate.json`.
+  - **Resultado e instantánea** (A.7): `unidades[].hambre` en el resultado (esquema incluido) y `hambre` en la `instantanea` (Maestro y criaturas). Es un entero en la tribu y `null` en las enemigas.
+  - **Pantalla:**
+    - `LecturaCombate`: la obediencia (número y tramo) en el panel del turno y en el tooltip de una criatura de la tribu.
+    - El suceso `hambre_combate`: la línea `combate.hambre` y, por cada unidad cuyo estado de hambre cambió, "Nombre · <estado nuevo>" con su sujeto.
+    - `ClavesTextos`: `PANEL_OBEDIENCIA`, `COMBATE_HAMBRE` y `tramo_obediencia(tramo)`.
+- **Tabla de cotejo (A.2.2), para revisar contra `Sistema.md`:**
+
+  | Valor | Archivo y campo | Sección |
+  |---|---|---|
+  | 4 (piso de Neutral) | `tablas/lealtad.json` `neutral_desde` | 5.1, 5.4 |
+  | 6 / 7 / 7 / 8 / 8 | `tablas/balanza.json` `posiciones[].umbral_rescate` | 1.2, 5.4 |
+  | 0 / 0 / −2 / −4 | `tablas/hambre.json` `estados[].obediencia` | 5.4, 7.1 |
+  | −10 / −20 (leal) · +10 / +20 (baja) | `tablas/combate.json` `obediencia.leal` / `.baja` | 5.4 |
+  | `baja` | `tablas/combate.json` `salvajes.tramo_obediencia` | 10.7, 9.2 p.3 |
+  | 5 y 1 | `tablas/hambre.json` `combate.cada_rondas` y `combate.suma` | 7.2 |
+  | 10 | `tablas/hambre.json` `maximo` | 7.1 |
+  | 4 / 3 / 2 / 1 / 0 | `tablas/balanza.json` `posiciones[].pasos_arrimo` | 1.2, 1.3 |
+  | −5 / −5 / −5 / +10 | `tablas/arrimo.json` `por_paso.*` | 1.3 |
+  | ~~3~~ | quitado (`obediencia.baja.hasta`): es `neutral_desde − 1` | 5.4 (P-003) |
+
+  - **Derivada reproducida** (test 9), 1.3 con la balanza 2: incidente 20 − 15 = 5 %; combo 20 + 30 = +50 % y 40 + 30 = +70 %. Con la balanza 1: 0 % y +80 %.
+  - **No guardados:** el "≤ 3" de 5.4 y 10.7 sale de `neutral_desde`; la tabla por posición de 1.3 sale de `pasos_arrimo` × `por_paso`.
+- **Archivos:**
+  - Creados:
+    - Código: `nucleo/unidades/obediencia.gd`, `nucleo/combate/hambre_combate.gd` y `nucleo/combate/arrimo.gd`.
+    - Tests: `pruebas/unidades/test_obediencia.gd`, `pruebas/combate/test_hambre_combate.gd`, `pruebas/combate/test_arrimo.gd` y `pruebas/datos/test_p003.gd`.
+    - Fixtures: `pruebas/fixtures/combate/arrimo.json` y `escenario_hambre_combate.json`.
+  - Modificados:
+    - Datos: `datos/_esquemas/combate.schema.json`, `datos/_esquemas/resultado.schema.json` y `datos/tablas/combate.json`.
+    - Núcleo: `nucleo/unidades/estados_unidad.gd`, `plantel.gd` y `criatura.gd` (comentario); `nucleo/combate/combate.gd`, `contexto_combate.gd`, `resultado_combate.gd` y `cola_iniciativa.gd` (comentario).
+    - Pantalla: `pantalla/claves_textos.gd` y `pantalla/combate/lectura_combate.gd`.
+    - Tests y fixtures: `pruebas/fixtures/combate/combate.json`, `pruebas/fixtures/pantalla/es_rasgos.json` (copias textuales de `es.json`: `hambre.estado.hambriento` y `combate.hambre`) y `pruebas/pantalla/test_lectura_combate.gd`.
+    - Documentos: `CLAUDE.md` (Estado actual) y `docs/PREGUNTAS.md`.
+- **Tests:** 12 nuevos, total 299, todos pasan (sí).
+- **Criterio de terminado:** cumplido punto por punto:
+  - 1: `test_obediencia_con_la_balanza_2`.
+  - 2: `test_cortes_desde_los_datos` (también comprueba que la lealtad usa el mismo corte).
+  - 3: `test_salvaje_y_atacante_son_baja`.
+  - 4: `test_hambre_de_combate_en_rondas_5_y_10`.
+  - 5: `test_recalculo_en_el_acto`.
+  - 6: `test_combate_que_termina_en_la_ronda_5_no_suma`.
+  - 7: `test_registro_del_hambre_de_combate`.
+  - 8: `test_resultado_trae_el_hambre`.
+  - 9: `test_arrimo`.
+  - 10: `test_p003_sin_baja_hasta` (con `datos/` real); el test permanente de datos pasa.
+  - 11: `test_t14_panel_y_tooltip_con_obediencia` y `test_t14_suceso_de_hambre_de_combate`.
+  - 12: `addons/gdUnit4/runtest.cmd -a res://pruebas`: 299/299.
+- **Tests de tareas anteriores reescritos:** ninguno. Ningún test existente cierra la ronda 5 contra una lista fija, y las aserciones de panel y tooltip de la tribu usan `contains` o `.back()`.
+- **Lecturas declaradas:** ninguna de reglas. Lecturas técnicas (en el plan aprobado):
+  - En una ronda que dispara el hambre, el evento `hambre_combate` se registra aunque `cambios` quede vacío (todas en el tope).
+  - El hambre la aplica `Combate._cerrar_ronda` y no `ColaIniciativa.terminar_ronda`, porque toca el Plantel y el registro.
+  - El esquema de escenario no admite lealtad en las enemigas: el test 3 se la pone a la `Criatura`.
+  - Los tests 6 y 8 acomodan la posición y la vida de la salvaje antes del ataque que gana.
+- **Claves de texto nuevas sin texto** (para el Worldbuilder, nombres propuestos): `panel.obediencia` (etiqueta del panel), `obediencia.tramo.baja`, `obediencia.tramo.neutral` y `obediencia.tramo.leal` (el tramo; sin concordancia: califica a la obediencia). `combate.hambre` ya existía en `es.json`.
+- **Preguntas:** nueva P-028 (ARQUITECTO, no bloquea: `dudosa_hasta` repite `neutral_desde − 1`); cerrada P-003.
+- **Aviso:** cambió la huella de los datos (salió un campo de `combate.json`). Las grabaciones anteriores dan el aviso de huella; es lo esperado.
+- **Lista de prueba manual (usuario):**
+  1. Abrir el juego (F5). C y D normal, hasta pasar la ronda 5 (con `terminar` si hace falta).
+  2. El panel de cada criatura de la tribu muestra "[FALTA: panel.obediencia]: N ([FALTA: obediencia.tramo.…])"; el del Maestro, no. Pasar el mouse sobre una criatura de la tribu: el tooltip muestra la misma línea; una enemiga, no.
+  3. Al cerrar la ronda 5: la línea "La pelea se alarga…" y, si una unidad cambió de estado de hambre, su línea (por ejemplo "Rodauva · Hambrienta").
+  4. Después de la ronda 5, el panel muestra el hambre y la obediencia nuevas, y el desglose de una criatura que estaba Saciada ya no suma el +25 %.
+  5. D hambriento: las criaturas con lealtad 5 y hambre 6 se ven con obediencia 3 y tramo baja.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.

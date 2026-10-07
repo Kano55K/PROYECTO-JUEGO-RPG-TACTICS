@@ -26,7 +26,7 @@
 - **Respuesta:** `Sistema.md` 5.2 v1.1 (03/10/2026): opción A. −2 en total a todas las sueltas, incluidas sus afines; reemplaza a la fila de muerte en el grupo y no suma el −3 extra. Se aplica en T30.
 
 ## P-003 — Tramos de obediencia y estados de lealtad
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -37,6 +37,7 @@
 - **Bloquea:** no. Hoy los dos valen 3 y dan el mismo resultado.
 - **Mientras tanto:** `tablas/combate.json` guarda `obediencia.baja.hasta: 3` citando 5.4; no hay código que lo lea todavía.
 - **Respuesta:** `Sistema.md` 5.4 v1.1 (03/10/2026): opción A. Los tramos de obediencia usan los mismos cortes que los estados de lealtad de 5.1 (piso de Neutral y umbral de rescate); cada número en un solo dato. Se aplica en T14, que quita `obediencia.baja.hasta` de `tablas/combate.json`.
+- **Cerrada en:** T14
 
 ## P-004 — Lealtad de "leal" y "Neutral" en los escenarios
 - **Estado:** CERRADA
@@ -374,4 +375,17 @@
 - **Opciones:** A) Más cercana → menos vida → antes en la cola, como el objetivo de "Acercarse". B) Mirar todas las empatadas: la casilla que queda más cerca (en la retirada, más lejos) de cualquiera de ellas. — Recomendación técnica: A. En el caso de F, A y B dan la misma casilla, [3,1].
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A como lectura declarada: `nucleo/combate/ia/ia_salvaje.gd`, `_enemiga_mas_cercana` (usa `_DESEMPATE_CERCANA`). Tests: `pruebas/combate/ia/test_ia_salvaje.gd`, `test_t39_surcon_cava_hacia_la_mas_cercana` (caso con la Rodauva a 6) y `test_t39_f_el_zancajunco_se_oculta_avanza_y_embiste` (el camino de F depende del surco en [3,1]).
+- **Respuesta:** _(la completa el staff)_
+
+## P-028 — `dudosa_hasta` repite el piso de Neutral
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T14
+- **Fecha:** 06/10/2026
+- **Fuente:** `Arquitectura.md` A.2.2, filas "Cada número en un solo archivo" y "Estados de lealtad"; `Sistema.md` 5.1 y 5.4 (Cortes, P-003)
+- **Duda:** desde que la lealtad y la obediencia comparten los cortes (piso de Neutral `neutral_desde`), `tablas/lealtad.json` `dudosa_hasta` (3) es una copia de `neutral_desde − 1` que el código ya no lee. ¿Se quita, o se deja con un chequeo cruzado en el `Cargador`?
+- **Caso que la dispara:** si alguien sube `neutral_desde` a 5 y deja `dudosa_hasta` en 3, la lealtad 4 se ve "Dudosa" (la cuenta sale de `neutral_desde`), y el archivo dice otra cosa.
+- **Opciones:** A) quitar `dudosa_hasta` del esquema y del dato (Dudosa = desde `desleal_hasta + 1` hasta `neutral_desde − 1`). B) dejarlo y que el `Cargador` exija `dudosa_hasta + 1 = neutral_desde`. — Recomendación técnica: A (un número, un lugar).
+- **Bloquea:** no
+- **Mientras tanto:** `EstadosUnidad.corte` (`nucleo/unidades/estados_unidad.gd`) usa `desleal_hasta` y `neutral_desde`. `dudosa_hasta` queda en el dato y en el esquema sin leerse. Con los datos de hoy (3 y 4) el resultado es el mismo. Test: `pruebas/unidades/test_obediencia.gd`, `test_cortes_desde_los_datos`.
 - **Respuesta:** _(la completa el staff)_
