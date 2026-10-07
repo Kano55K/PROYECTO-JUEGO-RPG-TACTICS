@@ -49,6 +49,9 @@ var motivo: Motivo
 var danio: int = 0
 # Solo al atacar: el desglose de 11.4 (danio == desglose.total). Lo lee el registro.
 var desglose: DesgloseDanio = null
+# Solo al atacar (Sistema.md 10.2, T16): el eslabon de la cadena que es (o seria)
+# el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
+var eslabon: Variant = null
 # Solo al terminar: true si el turno se cierra sin haber usado la accion (P-015).
 var espero: bool = false
 # Como esta el combate: despues de aplicar, o el motivo de un rechazo por

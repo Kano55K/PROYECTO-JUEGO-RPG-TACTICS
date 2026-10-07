@@ -172,6 +172,9 @@ func test_jugar_a_guarda_y_se_reproduce_igual() -> void:
 # IA (pausa larga y `saltar` en cada secuencia), guarda una grabacion que se
 # reproduce igual: animar no cambia nada del combate. Politica: atacar si hay
 # objetivo; si no, la primera activa habilitada; si no, acercarse.
+# Cambia de danio en T16 por Sistema.md 10.2: en las rondas 1 y 2 la Ocarra
+# leal y despues el Maestro encadenan sobre el Tasajero (afines, +70: el Maestro
+# pega 8). Ninguna asercion depende del danio, asi que solo cambia este comentario.
 func test_jugar_c_con_activas_se_reproduce_igual() -> void:
 	var datos: Dictionary = _datos()
 	var escenario: Dictionary = datos["escenarios/c_tasajero.json"]

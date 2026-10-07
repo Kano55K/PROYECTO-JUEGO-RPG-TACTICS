@@ -17,6 +17,7 @@ static func cargar() -> Dictionary:
 	var archivos: Dictionary = {
 		"tablas/combate.json": [_CARPETA_COMBATE + "combate.json", "combate"],
 		"tablas/hambre.json": [_CARPETA_COMBATE + "hambre.json", "hambre"],
+		"tablas/arrimo.json": [_CARPETA_COMBATE + "arrimo.json", "arrimo"],
 		"tablas/lealtad.json": [_CARPETA_UNIDADES + "lealtad.json", "lealtad"],
 		"tablas/balanza.json": [_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"],
 		"maestro.json": [_CARPETA_UNIDADES + "maestro.json", "maestro"],
@@ -41,3 +42,18 @@ static func afinidad(relaciones: Dictionary = {}) -> Afinidad:
 			tabla_combate)
 	return Afinidad.desde_datos(tabla_combate,
 			Relaciones.new(datos["relaciones.json"] if relaciones.is_empty() else relaciones), obediencia)
+
+
+# Una Cadena nueva (T16) con el Combo de los fixtures, armada como en
+# ContextoCombate y Combate, para los tests que crean un Turno suelto: como
+# Surcos.new(), un turno suelto no encadena con nada anterior. relaciones: otro
+# fixture de relaciones.json ya leido, o {} para el de siempre.
+static func cadena(relaciones: Dictionary = {}) -> Cadena:
+	return Cadena.new(combo(relaciones))
+
+
+# El Combo de los fixtures (T16), armado como en ContextoCombate.
+static func combo(relaciones: Dictionary = {}) -> Combo:
+	var datos: Dictionary = cargar()["datos"]
+	return Combo.desde_datos(datos["tablas/combate.json"], Arrimo.desde_datos(datos["tablas/arrimo.json"]),
+			afinidad(relaciones))

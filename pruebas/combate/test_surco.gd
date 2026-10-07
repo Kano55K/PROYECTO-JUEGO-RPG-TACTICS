@@ -41,7 +41,7 @@ func _plantel() -> Plantel:
 # Turno suelto, sin cola, con los surcos del combate.
 func _turno(plantel: Plantel, unidad_id: String, surcos: Surcos) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, surcos,
-			DatosFixture.afinidad())
+			DatosFixture.afinidad(), DatosFixture.cadena())
 
 
 # Todo lo que una accion puede cambiar: Plantel, surcos y turno.

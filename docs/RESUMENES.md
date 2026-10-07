@@ -967,3 +967,96 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   3. Atacar junto a una afín: la vida baja lo que dijo el desglose.
   4. Con una Rodauva de la tribu junto a otra (o junto a un Surcón), su desglose también muestra "Afinidad: +1". Junto a una Rodauva salvaje, no.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan la revisión de la tabla de cotejo, el commit, el PR y la prueba manual.
+
+## T16 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T16-cadenas
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho:**
+  - **Relación afín** (`nucleo/combate/afinidad.gd`): `relacion_afin(a, b, plantel)` es lo que `son_afines` hacía sin mirar si están de pie: mismo bando, par de especies `bien` en relaciones, o el Maestro con una criatura en tramo `leal` de `Obediencia`, preguntado en el momento. `son_afines` es ahora "las dos de pie" + `relacion_afin`, y da lo mismo que antes (los 11 tests de T15 no se tocaron).
+  - **Combo** (`nucleo/combate/combo.gd`, `Sistema.md` 10.2 y 1.3): regla sin estado, en `ContextoCombate.combo`.
+    - `bono_par(anterior, atacante, plantel)` = la base del par (`combo.afines_pct` si son afines, si no `combo.sin_relacion_pct`) + `Arrimo.ajuste(Arrimo.pasos(maestro), COMBO)`.
+    - `bono(eslabon, ...)`: el bono del par dividido por `combo.divisor_por_eslabon` en enteros, eslabón − 2 veces (S-27).
+  - **Cadena** (`nucleo/combate/cadena.gd`): es el estado del combate y su dueño es el `Combate`, como `Surcos`. Guarda la objetivo, el eslabón y la lista de participantes en orden (por id, F-02).
+    - `aporte` da el `ModificadorDanio` `COMBO` (`PORCENTAJE`) del eslabón siguiente, solo para la tribu y sobre la objetivo de la cadena.
+    - `eslabon_para` da el eslabón que sería el golpe (`null` en las enemigas). Calcula sin aplicar.
+    - `atacar` avanza la cadena. Solo lo hace la tribu; un golpe a otra objetivo corta con `otro_objetivo` y empieza una cadena nueva en el eslabón 1.
+    - `cortar(motivo)` deja exactamente un `cadena_cortada` por cadena. `revisar_objetivo` corta con `objetivo_fuera` si `Objetivos` ya no la acepta como objetivo hostil.
+    - También tiene `historial` (lo vuelca el `Combate`) e `instantanea`.
+  - **Turno:** `Turno.empezar(..., afinidad, cadena)`, con `cadena` obligatoria.
+    - `_aportes(desde, objetivo_id)` suma el combo junto a la afinidad. `Danio` no cambió.
+    - `_atacar_desde` llena `ResultadoAccion.eslabon` al validar y al aplicar, y solo al aplicar llama a `Cadena.atacar` (antes de `VidaCero`).
+    - `_resolver` llama a `Cadena.revisar_objetivo` después de cada acción aplicada.
+    - Mover, Erizarse, Hacerse junco, cavar y esperar no tocan la cadena: no se programó nada para ellas.
+  - **Combate:** dónde va cada corte.
+    - `enemiga`: al empezar la entrada de una enemiga, detrás del evento `turno` y antes de que juegue.
+    - `fin_ronda`: en `_cerrar_ronda`, detrás del `hambre_combate`.
+    - `otro_objetivo` y `objetivo_fuera`: se vuelcan detrás de los eventos de la acción (después de los surcos).
+    - `fin_combate`: al principio de `_terminar`, antes de `fin`.
+    - El evento `ataque` suma `eslabon` (entero en la tribu, `null` en las enemigas). La `instantanea` suma `cadena` (`null`, o `{objetivo, eslabon, ultimo_atacante, participantes}`).
+  - **Pantalla:**
+    - `LecturaCombate.panel_turno()` suma al final la línea de la cadena en curso: `<panel.cadena>: <objetivo> (<eslabón>)`, con la clave nueva `ClavesTextos.PANEL_CADENA`.
+    - El desglose del mouse ya mostraba el bono del eslabón siguiente ("Cadena: +50%"), porque la previsualización pasa por `_aportes`.
+  - **Tabla de cotejo (A.2.2):** no hay números nuevos. Se usan los que ya existían:
+
+    | Valor | Archivo y campo | Sección |
+    |---|---|---|
+    | +20 / +40 | `tablas/combate.json` `combo.sin_relacion_pct` / `afines_pct` | 10.2 |
+    | ÷ 2 por eslabón | `tablas/combate.json` `combo.divisor_por_eslabon` | 10.2 |
+    | +10 por paso | `tablas/arrimo.json` `por_paso.combo_pts` | 1.3 |
+    | Pasos de Arrimo (3 en la balanza 2) | `tablas/balanza.json` `pasos_arrimo` | 1.2 |
+
+    - **Derivadas reproducidas:** 10.2 da +70 / +35 / +17 / +8 (test 3); 1.3 da +20 / +40 en la balanza 5 y +60 / +80 en la 1 (test 4); 11.6, Prueba A, da +50 y 4 × 1,5 = 6 (test 1); 11.4 con afines da 6 + 1 = 7 (test 2).
+    - Los datos no cambiaron, así que la huella tampoco.
+- **Archivos:**
+  - Creados:
+    - `nucleo/combate/cadena.gd` y `combo.gd`
+    - `pruebas/combate/test_cadena.gd`
+    - `pruebas/fixtures/combate/escenario_cadena.json` y `escenario_cadena_combate.json`
+  - Modificados:
+    - Núcleo: `nucleo/combate/afinidad.gd`, `turno.gd`, `combate.gd`, `contexto_combate.gd` y `resultado_accion.gd`.
+    - Pantalla: `pantalla/combate/lectura_combate.gd` y `pantalla/claves_textos.gd`.
+    - Tests y fixtures:
+      - `pruebas/combate/datos_fixture.gd`: `tablas/arrimo.json`, `DatosFixture.combo()` y `DatosFixture.cadena()`.
+      - Solo la firma de los 16 llamados a `Turno.empezar` en `test_turno`, `test_vida_cero`, `test_danio`, `test_junco`, `test_surco`, `test_caza_y_cuenta`, `test_afinidad`, `ia/test_ia_salvaje` y `pantalla/test_interprete_clic`: pasan una `Cadena` nueva cada vez, así que ningún turno suelto encadena con otro.
+      - `pruebas/pantalla/test_lectura_combate.gd` y `test_vista_combate.gd` (un comentario).
+      - `pruebas/fixtures/pantalla/es_rasgos.json` (copia textual de `desglose.fuente.combo`).
+    - Documentos: `CLAUDE.md` (Estado actual) y `docs/PREGUNTAS.md` (P-029).
+- **Tests:** 16 nuevos: 15 en `test_cadena`, incluido `test_sin_azar`, y 1 en `test_lectura_combate`. Total 328, todos pasan (sí). Antes de cerrar, comprobé que los tests detectan una falla: con el aporte del combo anulado a propósito, fallan 9 de los 15 de `test_cadena`.
+- **Criterio de terminado:** cumplido punto por punto.
+  - 1: `test_prueba_a`.
+  - 2: `test_afines_y_ejemplo_11_4`.
+  - 3: `test_eslabones_sin_tope` (el quinto bono, eslabón 6, da +4).
+  - 4: `test_arrimo_por_balanza`.
+  - 5: `test_s27_pares_mixtos`.
+  - 6: cuatro tests:
+    - `test_corta_el_turno_enemigo_aunque_espere`: `rodauva_s1` está encerrada por dos caídas y solo termina; el corte va justo detrás de su `turno`.
+    - `test_corta_al_cerrar_la_ronda`.
+    - `test_otro_objetivo_empieza_en_1`.
+    - `test_objetivo_que_sale_del_tablero`.
+  - 7: `test_no_cortan_las_acciones_que_no_son_ataque`.
+  - 8: `test_salvajes_no_encadenan`, y en Combate el turno de `surcon_s1` corta la cadena de la tribu (tests 6a y 11).
+  - 9: `test_s28_relacion_sin_adyacencia_y_en_el_momento` (lejos, la anterior caída, y la leal que pasa a neutral por el hambre de combate).
+  - 10: `test_validar_y_previsualizar_no_avanzan`.
+  - 11: `test_registro_instantanea_y_grabacion` (eslabones, un corte por cadena con sus participantes, instantánea, reproducción igual, victoria con un solo corte y `fin_combate` una sola vez).
+  - 12: `test_t16_desglose_y_panel_de_la_cadena`.
+  - 13: `addons/gdUnit4/runtest.cmd -a res://pruebas`: 328/328.
+- **Tests de tareas anteriores cuyo daño cambia** (`Sistema.md` 10.2). Los saqué de correr la suite completa con los combos prendidos y un aviso temporal en cada ataque con `COMBO`, antes de tocar ningún test. El aviso ya no está.
+  - `pruebas/pantalla/test_vista_combate.gd::test_jugar_c_con_activas_se_reproduce_igual` (**C**, datos reales): en las rondas 1 y 2, la Ocarra leal y después el Maestro encadenan sobre el Tasajero. Son afines, el bono es +70 y el Maestro pega 8. El test no afirma daños y sigue pasando: lleva un comentario con 10.2 y no cambió ninguna aserción.
+  - **Corrige el plan:** había predicho que también cambiaba `test_jugar_a_guarda_y_se_reproduce_igual` (A). No cambia: la Rodauva y el Maestro nunca le pegan a la Ocarra en la misma ronda (la Rodauva pega en la 2, el Maestro en la 3 a la 5).
+  - Ningún test viejo falló, y ninguno se reescribió ni se borró.
+- **Lecturas declaradas:**
+  - S-27 (pares mixtos) y S-28 (relación sin adyacencia y en el momento), tal como las da `Arquitectura.md` 10.5.
+  - P-029 (técnica): `objetivo_fuera` gana a `fin_combate`. Hoy `fin_combate` no se da en ningún combate real; su camino está probado con `Cadena.cortar`.
+  - Técnicas:
+    - `cadena_cortada` por `otro_objetivo` va detrás del `ataque` que la corta, como los demás eventos de la acción.
+    - El de `fin_ronda` va detrás del `hambre_combate`, para dejar el hambre "justo después" del `fin_ronda` (A.7).
+    - El mismo atacante dos veces seguidas (solo posible con un Tasajero de la tribu, que hoy existe únicamente en un fixture) cuenta como "sin relación", porque `relacion_afin(a, a)` da `false`.
+- **Claves de texto nuevas sin texto:** `panel.cadena` (se ve `[FALTA: panel.cadena]`). Los textos `combo.eslabon.*` de `es.json` existen, pero T16 no pide sucesos de eslabón: no se usan.
+- **Preguntas:** nueva P-029 (ARQUITECTO, no bloquea). Ninguna cerrada.
+- **Aviso:** cambia el daño de los golpes encadenados y el registro (`eslabon` en `ataque` y eventos `cadena_cortada`). Las grabaciones anteriores se reproducen sin aviso de huella, pero dan otro registro (esperado).
+- **Lista de prueba manual (usuario):**
+  1. Abrir el juego (F5) y elegir C. En la ronda 1, atacar al Tasajero con la Ocarra y no atacar con la Rodauva (moverla o erizarla). En el turno del Maestro, el panel muestra `[FALTA: panel.cadena]: Tasajero (1)`, y con el mouse sobre el Tasajero el desglose muestra "Cadena: +70%".
+  2. Atacar con el Maestro: la vida baja lo que dijo el desglose, y el panel pasa a `(2)` mientras dure su turno.
+  3. En el turno siguiente de la tribu (después del Tasajero), el panel ya no muestra la cadena: el turno de la enemiga la cortó.
+  4. Elegir A y, si la Rodauva y el Maestro llegan a la Ocarra en la misma ronda, pegarle con los dos: el desglose del Maestro muestra "Cadena: +50%".
+- **Para la próxima sesión:** nada: tarea terminada. Faltan la revisión de P-029, el commit, el PR y la prueba manual.

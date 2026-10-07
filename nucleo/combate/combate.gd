@@ -31,11 +31,16 @@ var _surcos: Surcos = Surcos.new()
 var _surcos_volcados: int = 0
 # Eventos de Junco del turno en curso ya volcados al registro (vuelve a 0 con cada turno).
 var _junco_volcados: int = 0
+# Sistema.md 10.2: la cadena de combos es del combate (T16), como los surcos.
+var _cadena: Cadena
+# Eventos cadena_cortada ya volcados al registro.
+var _cadena_volcados: int = 0
 
 
 func _init(contexto_combate: ContextoCombate) -> void:
 	_contexto = contexto_combate
 	_plantel = contexto_combate.plantel
+	_cadena = Cadena.new(contexto_combate.combo)
 
 
 # Arma el combate y lo juega hasta el primer turno del jugador (o el fin).
@@ -178,6 +183,8 @@ func instantanea() -> Dictionary:
 		}
 	# Arquitectura.md A.7 (B.2.1): los surcos del combate.
 	foto["surcos"] = _surcos.instantanea()
+	# A.7 (T16): la cadena actual, o null.
+	foto["cadena"] = _cadena.instantanea()
 	return foto
 
 
@@ -227,8 +234,13 @@ func _avanzar() -> void:
 		# Antes de empezar el turno: las tiradas de su inicio (T18 a T25) van despues.
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
+		# Sistema.md 10.2 y 10.7: el turno de una enemiga corta la cadena, haga lo
+		# que haga (tambien el Tasajero en sus dos modos).
+		if not _es_del_jugador(entrada.unidad_id):
+			_cadena.cortar(Cadena.MOTIVO_ENEMIGA)
+			_registrar_cadena()
 		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-				_contexto.afinidad)
+				_contexto.afinidad, _cadena)
 		_junco_volcados = 0
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
 		if not _turno.cambio_modo.is_empty():
@@ -240,13 +252,16 @@ func _avanzar() -> void:
 # combate (Sistema.md 7.2, T14), con el numero de la ronda que se cierra (A.7).
 # En una ronda que la dispara, el evento va aunque nadie cambie (todas en el
 # tope): lectura tecnica de T14. Un combate que termina a mitad de ronda no
-# llega aca, asi que no suma.
+# llega aca, asi que no suma. Despues, la cadena se corta: nunca pasa a la ronda
+# siguiente (10.2).
 func _cerrar_ronda() -> void:
 	_cola.terminar_ronda()
 	_registrar({"tipo": "fin_ronda"})
 	var cambios: Variant = _contexto.hambre_combate.cerrar_ronda(_cola.ronda, _plantel)
 	if cambios != null:
 		_registrar({"tipo": "hambre_combate", "cambios": cambios})
+	_cadena.cortar(Cadena.MOTIVO_FIN_RONDA)
+	_registrar_cadena()
 
 
 # Sistema.md 11.8: las acciones de la IA, una por una. Corta si el combate
@@ -291,11 +306,13 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 					"desde": Plantel.casilla_a_lista(desde), "hasta": Plantel.casilla_a_lista(accion.casilla)})
 		Accion.Tipo.ATACAR:
 			_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": accion.objetivo_id,
-					"desglose": resultado.desglose.a_diccionario(),
+					"desglose": resultado.desglose.a_diccionario(), "eslabon": resultado.eslabon,
 					"vida_antes": vida_antes, "vida_despues": _vida(accion.objetivo_id)})
 	_registrar_junco()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
+	# Los cortes de la accion (otra objetivo, objetivo que ya no es hostil).
+	_registrar_cadena()
 
 	_fin = resultado.fin
 	if _fin != FinCombate.Fin.EN_CURSO:
@@ -307,8 +324,11 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 
 
 # Sistema.md 11.5: el combate termino. Se registra el desenlace y el Cierre
-# corre una sola vez; no se juega ninguna entrada mas.
+# corre una sola vez; no se juega ninguna entrada mas. Antes, la cadena que
+# quede se corta: toda cadena termina con su cadena_cortada (A.7).
 func _terminar() -> void:
+	_cadena.cortar(Cadena.MOTIVO_FIN_COMBATE)
+	_registrar_cadena()
 	_registrar({"tipo": "fin", "desenlace": (FinCombate.Fin.keys()[_fin] as String).to_lower()})
 	var ardidos_antes: Array[String] = _pergaminos_ardidos()
 	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin)
@@ -376,6 +396,14 @@ func _registrar_junco() -> void:
 	for indice in range(_junco_volcados, eventos.size()):
 		_registrar(eventos[indice])
 	_junco_volcados = eventos.size()
+
+
+# Arquitectura.md A.7 (T16): los eventos cadena_cortada nuevos, en orden.
+func _registrar_cadena() -> void:
+	var historial: Array[Dictionary] = _cadena.historial()
+	for indice in range(_cadena_volcados, historial.size()):
+		_registrar(historial[indice])
+	_cadena_volcados = historial.size()
 
 
 func _pergaminos_ardidos() -> Array[String]:
