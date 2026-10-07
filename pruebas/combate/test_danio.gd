@@ -38,7 +38,8 @@ func _plantel() -> Plantel:
 
 
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
+			DatosFixture.afinidad())
 
 
 func _aporte(fuente: ModificadorDanio.Fuente, tipo: ModificadorDanio.Tipo, valor: int) -> ModificadorDanio:

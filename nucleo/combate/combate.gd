@@ -227,7 +227,8 @@ func _avanzar() -> void:
 		# Antes de empezar el turno: las tiradas de su inicio (T18 a T25) van despues.
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
-		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos)
+		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
+				_contexto.afinidad)
 		_junco_volcados = 0
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
 		if not _turno.cambio_modo.is_empty():

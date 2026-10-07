@@ -49,11 +49,13 @@ func _plantel(escenario: Dictionary = {}) -> Plantel:
 
 # Turno suelto, sin cola: la entrada se arma a mano.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
+			DatosFixture.afinidad())
 
 
 func _siguiente_turno(cola: ColaIniciativa, plantel: Plantel) -> Turno:
-	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new())
+	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new(),
+			DatosFixture.afinidad())
 
 
 # Todo lo que una accion puede cambiar en el Plantel.
@@ -88,7 +90,8 @@ func test_mover_y_atacar_en_cualquier_orden() -> void:
 	plantel = _plantel()
 	turno = _turno(plantel, Maestro.ID)
 	_assert_valida(turno.aplicar(Accion.atacar("ocarra_s1")))
-	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 4)
+	# Sistema.md 10.3 (T15): desde [3,6] tiene a sus leales al lado, +1 de afinidad.
+	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - (4 + 1))
 	# Pasa por encima de la Rodauva aliada [2,6].
 	_assert_valida(turno.aplicar(Accion.mover(Vector2i(2, 7))))
 	assert_that(plantel.maestro.posicion).is_equal(Vector2i(2, 7))
@@ -110,7 +113,8 @@ func test_no_hay_segunda_accion() -> void:
 	var turno: Turno = _turno(plantel, Maestro.ID)
 	_assert_valida(turno.aplicar(Accion.atacar("ocarra_s1")))
 	_assert_rechazada(turno.aplicar(Accion.atacar("ocarra_s1")), ResultadoAccion.Motivo.ACCION_USADA)
-	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 4)
+	# Sistema.md 10.3 (T15): un solo golpe, con el +1 de sus leales al lado en [3,6].
+	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - (4 + 1))
 	assert_bool(turno.puede_erizarse()).is_false()
 	assert_array(turno.objetivos_para_atacar()).is_empty()
 
@@ -152,20 +156,23 @@ func test_rechazos_con_motivo_sin_cambios() -> void:
 
 
 # (5) El Maestro pega el danio de su balanza; una criatura, el de su ficha.
+# Sistema.md 10.3 (T15): en [3,6] el Maestro tiene a sus leales al lado y la
+# Ocarra [3,7] al Maestro; los tres golpes suman +1 de afinidad sobre la base.
 func test_danio_de_balanza_y_de_ficha() -> void:
 	var plantel: Plantel = _plantel()
 	_turno(plantel, Maestro.ID).aplicar(Accion.atacar("ocarra_s1"))
-	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 4)
+	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - (4 + 1))
 
+	# Balanza 5 (umbral 8): las dos siguen leales con obediencia 8.
 	var escenario: Dictionary = _escenario()
 	escenario["maestro"]["balanza"] = 5
 	plantel = _plantel(escenario)
-	assert_int(_turno(plantel, Maestro.ID).aplicar(Accion.atacar("ocarra_s1")).danio).is_equal(3)
-	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 3)
+	assert_int(_turno(plantel, Maestro.ID).aplicar(Accion.atacar("ocarra_s1")).danio).is_equal(3 + 1)
+	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - (3 + 1))
 
 	plantel = _plantel()
 	_turno(plantel, "ocarra_1").aplicar(Accion.atacar("ocarra_s1"))
-	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - 4)
+	assert_int(plantel.criatura("ocarra_s1").vida).is_equal(12 - (4 + 1))
 
 	plantel = _plantel()
 	var rodauva: Turno = _turno(plantel, "rodauva_1")
@@ -180,7 +187,8 @@ func test_vida_no_baja_de_cero() -> void:
 	(escenario["enemigas"] as Array)[1]["vida"] = 1
 	var plantel: Plantel = _plantel(escenario)
 	var ataque: ResultadoAccion = _turno(plantel, "ocarra_1").aplicar(Accion.atacar("rodauva_s1"))
-	assert_int(ataque.danio).is_equal(4)
+	# Sistema.md 10.3 (T15): la Ocarra leal [3,7] tiene al Maestro al lado, +1.
+	assert_int(ataque.danio).is_equal(4 + 1)
 	assert_int(plantel.criatura("rodauva_s1").vida).is_equal(0)
 	assert_int(plantel.criatura("rodauva_s1").estado).is_equal(Criatura.Estado.FUERA)
 
@@ -229,7 +237,8 @@ func test_erizada_hasta_su_proximo_turno() -> void:
 		assert_bool(rodauva.erizada).override_failure_message("en el turno de " + turno.unidad_id).is_true()
 		turno.aplicar(Accion.terminar())
 		var entrada: EntradaCola = cola.siguiente(plantel)
-		turno = null if entrada == null else Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new())
+		turno = null if entrada == null else Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(),
+				DatosFixture.afinidad())
 	cola.terminar_ronda()
 
 	cola.empezar_ronda(plantel)

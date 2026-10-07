@@ -904,3 +904,66 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Preguntas:** nueva P-028 (ARQUITECTO, no bloquea); cerrada P-003. En esta sesión, ninguna.
 - **Aviso:** cambió la huella de los datos; las grabaciones anteriores dan el aviso de huella (esperado).
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T15 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T15-afinidad
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho:**
+  - **P-028** (al empezar), en este orden: esquema → datos → fixtures. Sale `dudosa_hasta` de `datos/_esquemas/lealtad.schema.json` (de `required` y de `properties`), de `datos/tablas/lealtad.json` y del fixture `pruebas/fixtures/unidades/lealtad.json`. La `_nota` y la `description` dicen ahora que Dudosa va de `desleal_hasta + 1` a `neutral_desde − 1`. En el código no hubo que cambiar nada: desde T14, `EstadosUnidad` lee solo `desleal_hasta` y `neutral_desde`.
+  - **Afinidad** (`nucleo/combate/afinidad.gd`, `Sistema.md` 10.3, 10.7, 10.8, 11.2.2 y 11.5):
+    - `aporte(atacante_id, desde, plantel)` devuelve un `ModificadorDanio` (fuente `AFINIDAD`, plano `combate.json` `afinidad_danio_plano`, detalle `""`) si alguna unidad distinta de la atacante, a distancia 1 de `desde`, es afín. Corta en la primera, así que suma como máximo +1. Si no hay ninguna, devuelve `null`.
+    - `son_afines(a, b, plantel)`: tienen que ser del mismo bando y estar las dos de pie (`Objetivos.de_pie`: ni caída, ni guardada, ni fuera). No mira `oculta`. Entre criaturas, el par tiene que ser `bien` en relaciones. Entre el Maestro y una criatura, la criatura tiene que estar en tramo `leal` de `Obediencia`, preguntado en el momento.
+    - No guarda estado de combate. Vive en `ContextoCombate.afinidad`, armada con las `Relaciones` y la `Obediencia` que el contexto ya tenía.
+  - **Enchufe:** `Turno.empezar(..., surcos, afinidad)`, con el parámetro obligatorio. `Turno._aportes(desde, objetivo_id)` devuelve la afinidad mirada desde `desde`. El único campo nuevo de `Turno` es `_afinidad`, una referencia a la regla, como `_danio`; no se guarda ningún afín, tramo ni bono. `Danio` no cambió. Como la afinidad pasa por `_atacar_desde`, la ven el ataque real, `validar`, `previsualizar_ataque`, la IA y el desglose del mouse. No hay eventos nuevos.
+  - Tests con un `Turno` suelto: los 11 llamados pasan `DatosFixture.afinidad()` (relaciones, obediencia y `combate.json` de los fixtures), así que todos corren con la afinidad prendida.
+- **Tabla de cotejo (A.2.2), para revisar contra `Sistema.md`:**
+
+  | Valor | Archivo y campo | Sección |
+  |---|---|---|
+  | 1 (afinidad; también el tope por ataque) | `tablas/combate.json` `afinidad_danio_plano` (ya existía) | 10.3, 10.7, 11.4 paso 3 |
+  | ~~3~~ | quitado (`tablas/lealtad.json` `dudosa_hasta`): es `neutral_desde − 1` | 5.1 (P-028) |
+
+  - **Derivada reproducida:** 11.4, ejemplo, da 4 × 1,5 = 6, + 1 = 7 (test 9). 5.1 con la balanza 2 da Desleal 0–1, Dudosa 2–3, Neutral 4–6 y Leal 7–10 (test 12).
+  - **No guardado:** el tope "máximo +1 por ataque" sale del mismo plano, porque la afinidad se suma una sola vez.
+- **Archivos:**
+  - Creados: `nucleo/combate/afinidad.gd`; tests `pruebas/combate/test_afinidad.gd` y `pruebas/datos/test_p028.gd`; fixtures `pruebas/fixtures/combate/escenario_afinidad.json` y `relaciones_junco_afin.json`.
+  - Modificados:
+    - Datos: `datos/_esquemas/lealtad.schema.json` y `datos/tablas/lealtad.json`.
+    - Núcleo: `nucleo/combate/turno.gd`, `contexto_combate.gd` y `combate.gd`.
+    - Tests y fixtures: `pruebas/combate/datos_fixture.gd` (`DatosFixture.afinidad(relaciones)`); los helpers de `Turno` de `test_turno`, `test_vida_cero`, `test_danio`, `test_junco`, `test_surco`, `test_caza_y_cuenta`, `ia/test_ia_salvaje` y `pantalla/test_interprete_clic`; `pruebas/pantalla/test_lectura_combate.gd`; `pruebas/fixtures/unidades/lealtad.json`; `pruebas/fixtures/pantalla/es_rasgos.json` (copia textual de `desglose.fuente.afinidad` de `es.json`).
+    - Documentos: `CLAUDE.md` (Estado actual) y `docs/PREGUNTAS.md`.
+- **Tests:** 13 nuevos (11 en `test_afinidad`, incluido `test_sin_azar`, 1 en `test_lectura_combate` y 1 en `test_p028`). Total 312, todos pasan (sí).
+- **Criterio de terminado:** cumplido punto por punto:
+  - 1: `test_rodauva_junto_a_rodauva`.
+  - 2: `test_maestro_y_leal`.
+  - 3: `test_en_el_acto_por_hambre_de_combate` (`HambreCombate.cerrar_ronda(5)` sobre el mismo turno).
+  - 4: `test_mismo_bando`.
+  - 5: `test_caida_y_guardada_no_dan`.
+  - 6: `test_oculta_da_y_recibe`, con `relaciones_junco_afin.json` y su control con las relaciones de siempre.
+  - 7: `test_se_mira_desde_la_casilla_del_ataque`.
+  - 8: `test_ocarra_a_distancia_2`.
+  - 9: `test_ejemplo_11_4`.
+  - 10: `test_ia_remata_con_la_afinidad` (sola: no es `REMATE`; con su afín: `REMATE`, y el daño aplicado = `danio_previsto` = 3).
+  - 11: `test_t15_desglose_del_registro_y_del_mouse_con_afinidad` (registro = previsualización; la pantalla muestra "Afinidad: +1").
+  - 12: `test_p028_sin_dudosa_hasta`; el test permanente de datos pasa.
+  - 13: `addons/gdUnit4/runtest.cmd -a res://pruebas`: 312/312.
+- **Tests de tareas anteriores reescritos** (`Sistema.md` 10.3: ahora hay una afín al lado). Salieron de correr la suite con la afinidad prendida antes de tocar ninguno, y coinciden con la predicción del plan. Ninguno se borró; cada aserción lleva su comentario con 10.3:
+  - `pruebas/combate/test_turno.gd::test_mover_y_atacar_en_cualquier_orden` (2ª mitad): el Maestro en [3,6], con sus leales al lado, deja la vida en 12 − (4 + 1).
+  - `test_turno.gd::test_no_hay_segunda_accion`: 12 − (4 + 1).
+  - `test_turno.gd::test_danio_de_balanza_y_de_ficha`: el Maestro de la balanza 2 pega 4 + 1; el de la balanza 5, 3 + 1 (umbral 8, las dos siguen leales); la Ocarra junto al Maestro, 4 + 1. El caso de la Rodauva que se mueve a [2,5] no cambia.
+  - `test_turno.gd::test_vida_no_baja_de_cero`: la Ocarra junto al Maestro pega 4 + 1.
+  - `pruebas/combate/test_vida_cero.gd::test_salvaje_en_cero_sale_del_tablero`: la Rodauva junto al Maestro pega 2 + 1.
+  - `test_vida_cero.gd::test_atacante_en_cero_queda_caida`: el Maestro junto a la Rodauva leal pega 4 + 1.
+- **Lecturas declaradas:** ninguna de reglas. Técnicas (plan aprobado):
+  - `Turno` guarda una referencia a `Afinidad` (sin estado), con el parámetro obligatorio en `empezar`.
+  - Una guardada no da afinidad porque `Objetivos.de_pie` la deja fuera, aunque conservara una posición.
+  - El Tasajero y las salvajes son del mismo bando (`ENEMIGA`), así que un Zancajunco salvaje junto al Tasajero son afines (10.8 `bien`; "mismo bando", 10.7). Ningún escenario de `datos/escenarios/` los pone juntos hoy.
+- **Claves de texto nuevas sin texto:** ninguna (`desglose.fuente.afinidad` ya está en `es.json`).
+- **Preguntas:** ninguna nueva. Cerrada P-028.
+- **Aviso:** cambió la huella de los datos (salió un campo de `lealtad.json`) y cambia el daño de los ataques con una afín al lado. Las grabaciones anteriores dan el aviso de huella y se juegan distinto (esperado).
+- **Lista de prueba manual (usuario):**
+  1. Abrir el juego (F5) y elegir C. En el turno del Maestro, con criaturas leales al lado, pasar el mouse sobre una enemiga a su alcance: el desglose muestra "Afinidad: +1" y el total sube en 1.
+  2. Mover al Maestro lejos de sus leales y volver a pasar el mouse: no aparece "Afinidad".
+  3. Atacar junto a una afín: la vida baja lo que dijo el desglose.
+  4. Con una Rodauva de la tribu junto a otra (o junto a un Surcón), su desglose también muestra "Afinidad: +1". Junto a una Rodauva salvaje, no.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan la revisión de la tabla de cotejo, el commit, el PR y la prueba manual.

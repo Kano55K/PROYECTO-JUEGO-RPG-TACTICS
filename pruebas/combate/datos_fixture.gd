@@ -29,3 +29,15 @@ static func cargar() -> Dictionary:
 		errores.append_array(lectura["errores"])
 		datos[clave] = lectura["datos"]
 	return {"errores": errores, "datos": datos}
+
+
+# La Afinidad de los fixtures (T15), armada como en ContextoCombate, para los
+# tests que crean un Turno suelto. relaciones: otro fixture de relaciones.json
+# ya leido, o {} para el de siempre.
+static func afinidad(relaciones: Dictionary = {}) -> Afinidad:
+	var datos: Dictionary = cargar()["datos"]
+	var tabla_combate: Dictionary = datos["tablas/combate.json"]
+	var obediencia: Obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"],
+			tabla_combate)
+	return Afinidad.desde_datos(tabla_combate,
+			Relaciones.new(datos["relaciones.json"] if relaciones.is_empty() else relaciones), obediencia)

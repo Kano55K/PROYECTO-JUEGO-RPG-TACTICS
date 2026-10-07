@@ -39,6 +39,8 @@ var relaciones: Relaciones
 var obediencia: Obediencia
 # Sistema.md 7.2 (T14): la usa el Combate al cerrar cada ronda.
 var hambre_combate: HambreCombate
+# Sistema.md 10.3 (T15): la usa el Turno para el aporte de afinidad.
+var afinidad: Afinidad
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -68,6 +70,7 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	contexto.cierre = Cierre.desde_datos(tabla_combate, datos["tablas/lealtad.json"], contexto.relaciones)
 	contexto.obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"], tabla_combate)
 	contexto.hambre_combate = HambreCombate.desde_datos(datos["tablas/hambre.json"])
+	contexto.afinidad = Afinidad.desde_datos(tabla_combate, contexto.relaciones, contexto.obediencia)
 	contexto.valido = true
 	return contexto
 

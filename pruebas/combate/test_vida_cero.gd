@@ -41,11 +41,13 @@ func _plantel(escenario: Dictionary = {}) -> Plantel:
 
 # Turno suelto, sin cola: la entrada se arma a mano.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
+			DatosFixture.afinidad())
 
 
 func _siguiente_turno(cola: ColaIniciativa, plantel: Plantel) -> Turno:
-	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new())
+	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new(),
+			DatosFixture.afinidad())
 
 
 # Todo lo que una accion puede cambiar en el Plantel.
@@ -110,7 +112,8 @@ func test_salvaje_en_cero_sale_del_tablero() -> void:
 	var turno: Turno = _turno(plantel, "rodauva_1")
 	var ataque: ResultadoAccion = turno.aplicar(Accion.atacar("ocarra_s1"))
 	_assert_valida(ataque)
-	assert_int(ataque.danio).is_equal(2)
+	# Sistema.md 10.3 (T15): la Rodauva leal [2,6] tiene al Maestro al lado, +1.
+	assert_int(ataque.danio).is_equal(2 + 1)
 	_assert_fin(ataque, FinCombate.Fin.EN_CURSO)
 	assert_int(salvaje.vida).is_equal(0)
 	assert_int(salvaje.estado).is_equal(Criatura.Estado.FUERA)
@@ -132,7 +135,8 @@ func test_atacante_en_cero_queda_caida() -> void:
 	var atacante: Criatura = plantel.criatura("ocarra_n1")
 	var ataque: ResultadoAccion = _turno(plantel, Maestro.ID).aplicar(Accion.atacar("ocarra_n1"))
 	_assert_valida(ataque)
-	assert_int(ataque.danio).is_equal(4)
+	# Sistema.md 10.3 (T15): el Maestro [3,6] tiene a la Rodauva leal al lado, +1.
+	assert_int(ataque.danio).is_equal(4 + 1)
 	_assert_fin(ataque, FinCombate.Fin.EN_CURSO)
 	assert_int(atacante.vida).is_equal(0)
 	assert_int(atacante.estado).is_equal(Criatura.Estado.CAIDA)
