@@ -268,7 +268,8 @@ func test_escenarios_abren_dentro_de_los_limites() -> void:
 		var vista: VistaCombate = runner.scene()
 		_assert_zoom_en_rango(vista, ruta)
 		_assert_dentro(vista, ruta)
-		# Los de 8 x 8 entran enteros: centrados en el tablero.
+		# Entran enteros, centrados en el tablero: los de 12 x 12 y G en 8 x 8
+		# (Sistema.md 11.9 v1.6, T43; solo cambio este comentario).
 		assert_vector(vista.camara().global_position).override_failure_message(ruta) \
 				.is_equal_approx(vista.limites_camara().get_center(), Vector2(_EPSILON, _EPSILON))
 	var runner_12: GdUnitSceneRunner = _vista_12()

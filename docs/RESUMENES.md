@@ -1169,3 +1169,64 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Abrir C y E: la cámara encuadra el tablero entero y centrado.
   6. Opcional: en el inspector de `vista_combate.tscn`, probar otros `zoom_minimo`, `velocidad_camara` y `margen`.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
+
+## T43 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T43-escenarios-12
+- **Estado:** TERMINADA (pendiente de PR, de la prueba manual del usuario y de la aprobación de Sistemas, P-030)
+- **Hecho:**
+  - **Dato** (`Sistema.md` 11.3 v1.6): `datos/tablas/combate.json` `despliegue_filas` pasa de 2 a 3 (tribu en las filas 9 a 11, enemigas en las 0 a 2), y la `_nota` cita 11.3 v1.6. El esquema ya lo admitía (`integer`, `minimum: 1`). **La huella cambia:** al reproducir grabaciones anteriores, el aviso del reproductor es lo esperado.
+  - **Escenarios:** `a_dia_1`, `b_muro`, `c_tasajero`, `d_rivales_normal`, `d_rivales_hambriento`, `d_rivales_balanza4`, `e_cobardia`, `e_cobardia_afines`, `f_rescate` y `h_soplo` pasan a 12 × 12, con las coordenadas de la tabla de abajo. Las `_nota` citan 11.9 v1.6. No cambian las semillas, las lealtades, el hambre ni nada más. Comparten coordenadas: C y H, las tres D y las dos E. `g_ataque_nocturno` no se tocó.
+  - **Test permanente** `pruebas/datos/test_contacto.gd` (con `datos/` real). Juega cada escenario con el jugador esperando (solo `terminar`). Lee el registro (`ataque`, `movimiento`, `accion.paso`, `turno.marca`, `oculto`, `destape`, `fin_turno.posicion`), la `instantanea` y consultas del núcleo (`Tablero.despliegue`, `distancia`, `es_vecina_en_8`, `Objetivos.cuenta_como_rival_a_su_alcance`, `ContextoCombate.relaciones`). No calcula reglas por su cuenta. Las coordenadas salieron bien en la primera corrida: no hubo que iterar.
+  - Ningún cambio en `nucleo/` ni en `pantalla/`.
+  - **Tabla de cotejo (A.2.2):**
+
+    | Valor | Archivo y campo | Sección |
+    |---|---|---|
+    | Filas de despliegue por bando: 3 (antes 2) | `tablas/combate.json` `despliegue_filas` | 11.3 v1.6 |
+    | Tablero 12 × 12 en A a F y H; G en 8 × 8 | `escenarios/*.json` `tablero` | 11.3 y 11.9 v1.6 |
+
+  - **Tabla de coordenadas para A.9** (reemplaza a "Posiciones iniciales provisorias en 8 × 8"; `[x, y]`, `y = 0` arriba; M = Maestro):
+
+    | Escenario | Tribu | Enemigas | Lo que buscan |
+    |---|---|---|---|
+    | A | M [5,10], Rodauva [6,10] | Ocarra [6,2] | La Ocarra, a 8 de la Rodauva y a 9 del Maestro, va por la Rodauva: se acerca en la ronda 1 y la golpea en la 2 |
+    | B | M [4,9], Rodauva [6,10] | Ocarras [4,1] y [6,2] | Cada una va por la unidad que tiene más cerca. Llegan en la ronda 2 a 2 casillas una de otra, sin ser vecinas: juntarlas es una jugada de la Lanzadera (T22) |
+    | C y H | M [5,10], Rodauva [4,10], Ocarra [4,11], Zancajunco [6,10] | Tasajero [5,2] | Se acerca en la ronda 1 y caza en la 2. La Rodauva queda en la zona de Caza si el jugador no la mueve. La Ocarra y el Zancajunco no empiezan vecinos |
+    | D (3 variantes) | M [5,10], Ocarra [5,11], Zancajunco [6,11] | Surcón [4,2], Rodauva [5,2] | Las rivales aliadas empiezan vecinas. La Rodauva salvaje abre el combate en la ronda 2 |
+    | E (2 variantes) | M [4,10], Rodauva leal [6,10], Rodauva Neutral [6,11], Surcón [4,11] | Tasajero [8,2] | A 10 de las Rodauvas: ninguna rival a su alcance en la ronda 1, sí en la 2 |
+    | F | M [5,10] (vida 6), Rodauva [5,11], Ocarra [6,11] | Zancajunco [5,2], Surcón [6,2] | Se oculta en la 1, avanza con el bono en la 2 y en la 3 pega 7 al Maestro |
+    | G | Sin cambios (8 × 8) | — | — |
+
+- **Archivos:**
+  - Creados: `pruebas/datos/test_contacto.gd`.
+  - Modificados:
+    - Datos: `datos/tablas/combate.json` y los 10 escenarios de arriba.
+    - Tests: `pruebas/datos/test_datos_completos.gd` y `pruebas/pantalla/test_vista_camara.gd` (solo un comentario).
+    - Documentos: `docs/PREGUNTAS.md` (P-030) y `CLAUDE.md` (Estado actual).
+- **Tests:** 10 nuevos (`test_contacto.gd`). Total 365, todos pasan (sí). En la consola, solo los dos `ERROR` del "Remote Debugger" del runner, que ya salían antes.
+- **Criterio de terminado:** cumplido punto por punto.
+  1. `test_contacto.gd` pasa en los 11 escenarios:
+     - `test_tableros_y_zonas` y `test_distancia_minima`: 8; en E, 10.
+     - `test_ninguna_enemiga_ataca_en_la_ronda_1`.
+     - Uno por escenario: `test_a_ocarra_va_por_la_rodauva`, `test_b_ocarras_llegan_sin_juntarse`, `test_c_y_h_caza_en_la_ronda_2`, `test_d_rivales_vecinas_y_ataque_en_la_ronda_2`, `test_e_rival_a_su_alcance_en_la_ronda_2`, `test_f_zancajunco_oculto_avanza_y_pega_7` y `test_g_llega_al_jugador`.
+     - Con los datos viejos, fallaba en las zonas, las distancias, el ataque de la ronda 1 de A, C y H, B en diagonal ([3,0]/[4,1] y [3,3]/[4,4]) y C y H.
+  2. `datos/` carga sin errores. Los 11 llegan al primer turno del jugador: `test_combate.gd` (9), `test_vista_combate.gd` (3) y `test_g_llega_al_jugador`.
+  3. **Probado:** con el Tasajero de C en [5,5] (distancia 5 al Maestro), fallan cuatro tests: `test_tableros_y_zonas` (fuera de las filas 0 a 2), `test_distancia_minima`, `test_ninguna_enemiga_ataca_en_la_ronda_1` y `test_c_y_h_caza_en_la_ronda_2`. Revertido: C vuelve a [5,2] y el test pasa.
+  4. Los tests de T06 (`test_tablero.gd`, con su fixture `pruebas/fixtures/combate/combate.json`) pasan sin cambios.
+  5. Tests reescritos (ninguno borrado):
+     - `pruebas/datos/test_datos_completos.gd::test_a_dia_1_es_el_ejemplo_de_a2`. **Corrige el plan:** no lo había previsto. Comparaba `a_dia_1` entero con el ejemplo de A.2 en 8 × 8. Por `Sistema.md` 11.9 v1.6 (y A.2: "desde T43, A pasa a 12 × 12"), ahora no compara el tablero, las posiciones ni sus `_nota`; el resto sigue igual al ejemplo.
+     - `pruebas/pantalla/test_vista_camara.gd::test_escenarios_abren_dentro_de_los_limites`: solo cambió el comentario ("Los de 8 x 8 entran enteros" → los de 12 × 12 y G), citando 11.9 v1.6. La aserción no cambió.
+     - Los demás tests con `datos/` real que preveía el plan (A y C jugados por la vista, el clic real, R durante la secuencia, el desglose de A) pasan sin cambios.
+  6. `addons/gdUnit4/runtest.cmd -a res://pruebas`: 365/365.
+- **Lecturas declaradas:** ninguna de reglas. Coordenadas propuestas, pendientes de la aprobación de Sistemas (P-030), con dos avisos: en B cada Ocarra va por un objetivo distinto (con las dos a 8, ir las dos por la Rodauva las junta en diagonal), y en C/H la Ocarra pasa detrás de la Rodauva, para no empezar en diagonal con el Zancajunco.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nueva P-030 (SISTEMAS, no bloquea). Ninguna cerrada.
+- **Aviso:** las grabaciones anteriores cambian de huella y de posiciones. El aviso del reproductor es lo esperado (B.3.1).
+- **Lista de prueba manual (usuario):**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. F5. En A, B, C y E, apretar Esperar en todos los turnos y mirar los sucesos: el primer golpe enemigo llega en la ronda 2, no en la 1. En E llega en la 3, pero el Tasajero ya está al alcance de las Rodauvas en la 2.
+  3. En F, apretar Esperar: el Zancajunco se oculta en la ronda 1, avanza en la 2 y en la 3 tumba al Maestro.
+  4. En B, mirar que las dos Ocarras no terminen pegadas (ni en diagonal) al final de las rondas 1 y 2.
+  5. Abrir G: se ve igual que antes, en 8 × 8, y la cámara lo encuadra entero.
+  6. Jugar C de verdad, con el mouse: ¿la ronda 1 da tiempo para acomodarse (sacar a la Rodauva de la zona de Caza, esconder al Zancajunco)? Anotarlo para Sistemas, junto con P-030.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR, la prueba manual y la respuesta de P-030.

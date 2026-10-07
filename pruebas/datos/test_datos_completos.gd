@@ -51,12 +51,22 @@ func test_estan_los_once_escenarios() -> void:
 
 
 # Arquitectura.md A.2: a_dia_1 es el ejemplo de escenario, copiado tal cual.
-# Salvo la _nota, que T05 actualiza por P-009 (A.9, fila A).
+# Salvo la _nota, que T05 actualiza por P-009 (A.9, fila A). Reescrito en T43
+# por Sistema.md 11.9 v1.6: el ejemplo es del tablero de 8 x 8 y A pasa a
+# 12 x 12 con posiciones nuevas (A.2 y B.3.1), asi que tampoco se comparan el
+# tablero ni las posiciones (ni sus _nota); lo verifica pruebas/datos/test_contacto.gd.
 func test_a_dia_1_es_el_ejemplo_de_a2() -> void:
 	var ejemplo: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_FIXTURE_EJEMPLO_A2))
 	var archivo: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_CARPETA_DATOS.path_join("escenarios/a_dia_1.json")))
-	ejemplo.erase("_nota")
-	archivo.erase("_nota")
+	for escenario: Dictionary in [ejemplo, archivo]:
+		escenario.erase("_nota")
+		escenario.erase("tablero")
+		var unidades: Array = [escenario["maestro"]]
+		unidades.append_array(escenario["tribu"])
+		unidades.append_array(escenario["enemigas"])
+		for unidad: Dictionary in unidades:
+			unidad.erase("posicion")
+			unidad.erase("_nota")
 	assert_dict(archivo).is_equal(ejemplo)
 
 
