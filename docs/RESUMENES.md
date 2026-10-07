@@ -878,3 +878,29 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   4. Después de la ronda 5, el panel muestra el hambre y la obediencia nuevas, y el desglose de una criatura que estaba Saciada ya no suma el +25 %.
   5. D hambriento: las criaturas con lealtad 5 y hambre 6 se ven con obediencia 3 y tramo baja.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
+
+## T14 · sesión 2 · 06/10/2026
+- **Rama:** tarea/T14-obediencia
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho (tarea entera):**
+  - Sesión 1:
+    - **Obediencia** (`nucleo/unidades/obediencia.gd`, `Sistema.md` 5.4): `valor(criatura)` = lealtad + la penalización del estado de hambre, sin recorte y `null` en las enemigas; `tramo(criatura, maestro)` → `baja` / `neutral` / `leal`, con `neutral_desde` y el `umbral_rescate` de la fila de la balanza. Las salvajes y la atacante nocturna dan `salvajes.tramo_obediencia` (10.7 y 9.2 punto 3). No se guarda; vive en `ContextoCombate.obediencia`.
+    - **Cortes compartidos** (5.4, P-003): `EstadosUnidad.corte(valor, neutral_desde, umbral)`, usada por la lealtad y la obediencia. `EstadosUnidad` ya no lee `dudosa_hasta` (P-028).
+    - **Hambre de combate** (`nucleo/combate/hambre_combate.gd`, 7.2): al cerrar una ronda múltiplo de `combate.cada_rondas`, suma `combate.suma` (tope `maximo`) al Maestro y a la tribu en el tablero, de pie o caída. La llama `Combate._cerrar_ronda`; el evento `hambre_combate` va después del `fin_ronda`. Un combate que termina a mitad de ronda no suma.
+    - **Arrimo** (`nucleo/combate/arrimo.gd`, 1.3): `Arrimo.pasos(maestro)` y `ajuste(pasos, Arrimo.Uso)`. Hoy no la usa ninguna regla.
+    - **P-003:** salió `obediencia.baja.hasta` (esquema `combate`, `datos/tablas/combate.json` y fixture).
+    - **Resultado e instantánea** (A.7): `hambre` por unidad (entero en la tribu, `null` en las enemigas); esquema `resultado` incluido.
+    - **Pantalla:** `LecturaCombate` muestra la obediencia en el panel y en el tooltip de la tribu, y el suceso `hambre_combate`. `ClavesTextos`: `PANEL_OBEDIENCIA`, `COMBATE_HAMBRE` y `tramo_obediencia(tramo)`.
+  - Sesión 2: el usuario hizo la lista de prueba manual de la sesión 1 (puntos 1 a 5): todo OK. Sin cambios de código; se corrió de nuevo la suite completa.
+- **Tabla de cotejo (A.2.2):** la de T14 · sesión 1, sin cambios.
+- **Archivos (tarea entera):**
+  - Creados: `nucleo/unidades/obediencia.gd`, `nucleo/combate/hambre_combate.gd`, `nucleo/combate/arrimo.gd`; tests `pruebas/unidades/test_obediencia.gd`, `pruebas/combate/test_hambre_combate.gd`, `pruebas/combate/test_arrimo.gd`, `pruebas/datos/test_p003.gd`; fixtures `pruebas/fixtures/combate/arrimo.json` y `escenario_hambre_combate.json`.
+  - Modificados: `datos/_esquemas/combate.schema.json`, `resultado.schema.json`, `datos/tablas/combate.json`; `nucleo/unidades/estados_unidad.gd`, `plantel.gd`, `criatura.gd`; `nucleo/combate/combate.gd`, `contexto_combate.gd`, `resultado_combate.gd`, `cola_iniciativa.gd`; `pantalla/claves_textos.gd`, `pantalla/combate/lectura_combate.gd`; `pruebas/fixtures/combate/combate.json`, `pruebas/fixtures/pantalla/es_rasgos.json`, `pruebas/pantalla/test_lectura_combate.gd`; `CLAUDE.md` (Estado actual), `docs/PREGUNTAS.md` y `docs/RESUMENES.md`.
+- **Tests:** 12 nuevos, total 299, todos pasan (sí).
+- **Criterio de terminado:** cumplido punto por punto (1 `test_obediencia_con_la_balanza_2`, 2 `test_cortes_desde_los_datos`, 3 `test_salvaje_y_atacante_son_baja`, 4 `test_hambre_de_combate_en_rondas_5_y_10`, 5 `test_recalculo_en_el_acto`, 6 `test_combate_que_termina_en_la_ronda_5_no_suma`, 7 `test_registro_del_hambre_de_combate`, 8 `test_resultado_trae_el_hambre`, 9 `test_arrimo`, 10 `test_p003_sin_baja_hasta` y el test permanente de datos, 11 `test_t14_panel_y_tooltip_con_obediencia` y `test_t14_suceso_de_hambre_de_combate`, 12 suite completa 299/299).
+- **Tests de tareas anteriores reescritos:** ninguno.
+- **Lecturas declaradas:** ninguna de reglas. Técnicas (plan aprobado en la sesión 1): el evento `hambre_combate` se registra aunque `cambios` quede vacío; el hambre la aplica `Combate._cerrar_ronda` y no `ColaIniciativa`; el test 3 pone la lealtad a la `Criatura` enemiga (el esquema de escenario no la admite); los tests 6 y 8 acomodan posición y vida de la salvaje.
+- **Claves de texto nuevas sin texto:** `panel.obediencia`, `obediencia.tramo.baja`, `obediencia.tramo.neutral` y `obediencia.tramo.leal`.
+- **Preguntas:** nueva P-028 (ARQUITECTO, no bloquea); cerrada P-003. En esta sesión, ninguna.
+- **Aviso:** cambió la huella de los datos; las grabaciones anteriores dan el aviso de huella (esperado).
+- **Para la próxima sesión:** nada: tarea terminada.
