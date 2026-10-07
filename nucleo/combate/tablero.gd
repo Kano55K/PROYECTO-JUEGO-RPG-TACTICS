@@ -48,6 +48,14 @@ func adyacentes(a: Vector2i, b: Vector2i) -> bool:
 	return distancia(a, b) == 1
 
 
+# Sistema.md 11.3 v1.6, Vecinas (8) y D-001: el vinculo mira las 8 casillas
+# alrededor, diagonales incluidas (distancia de Chebyshev 1). Es la unica
+# consulta de "vecina en 8": la usan la afinidad y, despues, el incidente y la
+# cobardia. El cuerpo (mover, atacar, junco, Caza) sigue con `vecinas` y `adyacentes`.
+static func es_vecina_en_8(a: Vector2i, b: Vector2i) -> bool:
+	return a != b and maxi(absi(a.x - b.x), absi(a.y - b.y)) == 1
+
+
 # Sistema.md 11.3, Movimiento: camino ortogonal de hasta `movimiento` pasos (BFS).
 # Se pasa por aliadas y caidas propias, nunca por enemigas; no se termina en una
 # casilla ocupada. Incluye `desde` (quedarse quieto). Orden de lectura.

@@ -252,3 +252,18 @@ func test_pasos_hasta_con_rodeo() -> void:
 	assert_int(pasos[Vector2i(2, 7)]).is_equal(1)
 	assert_int(pasos[Vector2i(3, 5)]).is_equal(4)
 	assert_bool(pasos.has(Vector2i(3, 6))).is_false()
+
+
+# T41, Sistema.md 11.3 v1.6 (D-001): el vinculo mira las 8 vecinas (Chebyshev 1).
+# Las 4 ortogonales y las 4 diagonales si; la misma casilla y a distancia 2, no.
+# Las vecinas del cuerpo (vecinas, adyacentes) no cambian: test_diagonal_no_es_adyacente.
+func test_vecina_en_8() -> void:
+	var centro: Vector2i = Vector2i(3, 3)
+	for dx in [-1, 0, 1]:
+		for dy in [-1, 0, 1]:
+			var otra: Vector2i = centro + Vector2i(dx, dy)
+			assert_bool(Tablero.es_vecina_en_8(centro, otra)).override_failure_message(str(otra)) \
+					.is_equal(otra != centro)
+	assert_bool(Tablero.es_vecina_en_8(centro, Vector2i(5, 3))).is_false()
+	assert_bool(Tablero.es_vecina_en_8(centro, Vector2i(5, 4))).is_false()
+	assert_bool(Tablero.es_vecina_en_8(centro, Vector2i(5, 5))).is_false()

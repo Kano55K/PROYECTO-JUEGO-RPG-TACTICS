@@ -1,6 +1,6 @@
-# Sistema.md 10.3: afinidad por adyacencia. La atacante suma el plano de
-# tablas/combate.json si tiene al menos una afin adyacente a la casilla desde la
-# que golpea; nunca mas de una vez por ataque. Es un aporte externo de Danio
+# Sistema.md 10.3 v1.6: afinidad entre vecinas. La atacante suma el plano de
+# tablas/combate.json si tiene al menos una afin en las 8 casillas alrededor de
+# la casilla desde la que golpea (11.3 v1.6, D-001); nunca mas de una vez por ataque. Es un aporte externo de Danio
 # (T09): lo pide Turno._aportes para el ataque real, validar, previsualizar y la
 # IA. Sin estado de combate: las relaciones, la obediencia y las posiciones se
 # preguntan en el momento (7.2, "en el acto").
@@ -24,16 +24,26 @@ static func desde_datos(tabla_combate: Dictionary, relaciones: Relaciones, obedi
 
 
 # Sistema.md 10.3: "se mira la posicion del atacante al golpear", o sea `desde`,
-# no la casilla actual. La atacante no cuenta como su propia afin (desde una
-# casilla vecina veria la suya). Se mira a la atacante, nunca a la objetivo.
-# null si no tiene ninguna afin al lado.
+# no la casilla actual. Se mira a la atacante, nunca a la objetivo. +1 como
+# maximo, aunque tenga varias afines vecinas. null si no tiene ninguna.
 func aporte(atacante_id: String, desde: Vector2i, plantel: Plantel) -> ModificadorDanio:
+	if afines_vecinas(atacante_id, desde, plantel).is_empty():
+		return null
+	return ModificadorDanio.new(ModificadorDanio.Fuente.AFINIDAD, ModificadorDanio.Tipo.PLANO, _plano)
+
+
+# Sistema.md 10.3 y 11.3 v1.6: los ids de las afines de pie en las 8 vecinas de
+# `desde`, en el orden del Plantel. La atacante no cuenta como su propia afin
+# (desde una casilla vecina veria la suya). La usan el aporte y la pantalla
+# (Combate.afines_desde).
+func afines_vecinas(atacante_id: String, desde: Vector2i, plantel: Plantel) -> Array[String]:
+	var resultado: Array[String] = []
 	for otra_id in _ids(plantel):
 		if otra_id == atacante_id or not Objetivos.de_pie(otra_id, plantel):
 			continue
-		if Tablero.distancia(_posicion(otra_id, plantel), desde) == 1 and son_afines(atacante_id, otra_id, plantel):
-			return ModificadorDanio.new(ModificadorDanio.Fuente.AFINIDAD, ModificadorDanio.Tipo.PLANO, _plano)
-	return null
+		if Tablero.es_vecina_en_8(_posicion(otra_id, plantel), desde) and son_afines(atacante_id, otra_id, plantel):
+			resultado.append(otra_id)
+	return resultado
 
 
 # Sistema.md 10.3, 10.7, 10.8, 11.2.2 y 11.5: la relacion y las dos de pie (ni

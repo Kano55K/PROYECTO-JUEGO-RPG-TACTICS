@@ -25,6 +25,8 @@ const _MARCA_ZONA: Vector2i = Vector2i(4, 0)
 const _MARCA_CAVAR: Vector2i = Vector2i(5, 0)
 # T40, sesion 2: el destino de cada paso de la IA.
 const _MARCA_DESTINO: Vector2i = Vector2i(6, 0)
+# T41: las unidades que darian afinidad desde la casilla bajo el mouse.
+const _MARCA_AFIN: Vector2i = Vector2i(7, 0)
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
@@ -75,6 +77,7 @@ var _en_secuencia: bool = false
 @onready var _capa_surcos: TileMapLayer = $Tablero/Surcos
 @onready var _capa_zona: TileMapLayer = $Tablero/Zona
 @onready var _marcas: TileMapLayer = $Tablero/Marcas
+@onready var _capa_afines: TileMapLayer = $Tablero/Afines
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -161,11 +164,14 @@ func clic_casilla(casilla: Vector2i) -> bool:
 # El mouse sobre una casilla: con una objetivo atacable, el desglose de
 # previsualizar_ataque desde donde esta la unidad. T40: con una unidad, su
 # tooltip; en una casilla para moverse que la dejaria junto a una oculta
-# enemiga, el aviso (Combate.destaparia).
+# enemiga, el aviso (Combate.destaparia). T41: en una casilla para moverse o en
+# la propia, se marcan las unidades que le darian afinidad desde ahi
+# (Combate.afines_desde) y, si hay alguna, el aviso suma afinidad.tooltip.
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
+	_capa_afines.clear()
 	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
 	# las fichas todavia no.
 	if _combate == null or _en_secuencia:
@@ -182,9 +188,18 @@ func sobre_casilla(casilla: Vector2i) -> void:
 			var vista_previa: ResultadoAccion = turno.previsualizar_ataque(_casilla_de(foto, turno.unidad_id), objetivo)
 			if vista_previa.valida:
 				_desglose_mostrado = vista_previa.desglose.a_diccionario()
-		elif not _eligiendo_cavar and turno.casillas_para_mover().has(casilla) \
-				and not _combate.destaparia(turno.unidad_id, casilla).is_empty():
-			_aviso_mostrado = _armador.armar(ClavesTextos.AVISO_DESTAPAR)
+		elif not _eligiendo_cavar:
+			var para_mover: bool = turno.casillas_para_mover().has(casilla)
+			var avisos: Array[String] = []
+			if para_mover and not _combate.destaparia(turno.unidad_id, casilla).is_empty():
+				avisos.append(_armador.armar(ClavesTextos.AVISO_DESTAPAR))
+			if para_mover or casilla == _casilla_de(foto, turno.unidad_id):
+				var afines: Array[String] = _combate.afines_desde(turno.unidad_id, casilla)
+				for afin in afines:
+					_capa_afines.set_cell(_casilla_de(foto, afin), _FUENTE_MARCAS, _MARCA_AFIN)
+				if not afines.is_empty():
+					avisos.append(_armador.armar(ClavesTextos.AFINIDAD_TOOLTIP))
+			_aviso_mostrado = "\n".join(avisos)
 	_dibujar_desglose()
 	_dibujar_tooltip()
 
@@ -194,9 +209,14 @@ func tooltip_mostrado() -> Array[String]:
 	return _tooltip_mostrado.duplicate()
 
 
-# El aviso de destapar que se ve ahora, o "".
+# El aviso que se ve ahora (destapar y afinidad, una linea cada uno), o "".
 func aviso_mostrado() -> String:
 	return _aviso_mostrado
+
+
+# T41: las casillas de las unidades marcadas como afines ahora.
+func casillas_afines() -> Array[Vector2i]:
+	return _capa_afines.get_used_cells()
 
 
 # T40: el boton de una activa (LecturaCombate.ACTIVA_*). Cavar no aplica nada:
@@ -320,6 +340,7 @@ func _empezar_secuencia(pasos: Array[Dictionary]) -> void:
 	_en_secuencia = true
 	_botones.visible = false
 	_marcas.clear()
+	_capa_afines.clear()
 	_capa_zona.clear()
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -399,6 +420,8 @@ func _dibujar_tablero() -> void:
 # T40: eligiendo donde cavar, solo las casillas de casillas_para_cavar.
 func _dibujar_marcas() -> void:
 	_marcas.clear()
+	# T41: las de afinidad son del hover; el proximo movimiento del mouse las rearma.
+	_capa_afines.clear()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()

@@ -195,3 +195,23 @@ func test_resultado_trae_el_hambre() -> void:
 	var esquema: Dictionary = Cargador.new().esquema_resuelto(_CARPETA_DATOS, "resultado")["esquema"]
 	var errores: Array = Validador.new().validar(resultado, esquema, "resultado")["errores"]
 	assert_array(errores).override_failure_message(str(errores)).is_empty()
+
+
+# T41 (8), Sistema.md 7.2 v1.6: con un fixture de cada 6 rondas, cerrar la 5 no
+# suma y cerrar la 6 suma +1 al Maestro y a la suelta de la tribu. El fixture de
+# T14 (cada 5) no cambia.
+func test_cada_6_rondas() -> void:
+	var lectura: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/hambre_cada_6.json", "hambre")
+	var errores: Array[Dictionary] = lectura["errores"]
+	assert_array(errores).override_failure_message(str(errores)).is_empty()
+	var hambre_combate: HambreCombate = HambreCombate.desde_datos(lectura["datos"])
+	var combate: Combate = _combate(_escenario())
+	var plantel: Plantel = combate.contexto().plantel
+	var inicial: Dictionary = _hambres(combate)
+
+	assert_that(hambre_combate.cerrar_ronda(5, plantel)).is_null()
+	assert_dict(_hambres(combate)).is_equal(inicial)
+
+	assert_that(hambre_combate.cerrar_ronda(6, plantel)).is_not_null()
+	assert_int(plantel.maestro.hambre).is_equal(inicial[Maestro.ID] + 1)
+	assert_int(plantel.criatura("ocarra_1").hambre).is_equal(inicial["ocarra_1"] + 1)

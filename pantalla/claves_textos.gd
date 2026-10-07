@@ -50,6 +50,8 @@ const PANEL_OBEDIENCIA: String = "panel.obediencia"
 const COMBATE_HAMBRE: String = "combate.hambre"
 # T16: la cadena en curso en el panel (clave propuesta, falta en es.json).
 const PANEL_CADENA: String = "panel.cadena"
+# T41: el aviso de afinidad al pasar el mouse por una casilla (Mundo.md 9.2 v1.2).
+const AFINIDAD_TOOLTIP: String = "afinidad.tooltip"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -60,7 +62,7 @@ const FIJAS: Array[String] = [
 	RESULTADO_TITULO, RESULTADO_RONDAS, RESULTADO_LEALTAD, RESULTADO_VOLVER,
 	ACCION_CAVAR, MARCA_OCULTO, MARCA_BONO, SUCESO_SURCO_CAVAR, SUCESO_SURCO_CERRAR,
 	SUCESO_OCULTO, SUCESO_PIERDE_BONO, AVISO_CUENTA_UMBRAL, AVISO_DESTAPAR,
-	PANEL_OBEDIENCIA, COMBATE_HAMBRE, PANEL_CADENA,
+	PANEL_OBEDIENCIA, COMBATE_HAMBRE, PANEL_CADENA, AFINIDAD_TOOLTIP,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [

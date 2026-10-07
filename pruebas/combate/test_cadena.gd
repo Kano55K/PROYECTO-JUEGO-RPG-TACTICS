@@ -469,9 +469,11 @@ func test_registro_instantanea_y_grabacion() -> void:
 			de_enemigas.append(ataque["eslabon"])
 		else:
 			de_la_tribu.append([ataque["atacante"], ataque["eslabon"], ataque["vida_antes"] - ataque["vida_despues"]])
-	# Zancajunco 4; Ocarra (rivales, sin relacion: +50) 6; Maestro 4; Surcon
-	# (neutral con el Maestro, sin relacion: +50) 3 x 1,5 = 4.
-	assert_array(de_la_tribu).is_equal([["zancajunco_1", 1, 4], ["ocarra_1", 2, 6], [Maestro.ID, 1, 4],
+	# Zancajunco 4 + 1; Ocarra (rivales, sin relacion: +50) 6; Maestro 4 + 1;
+	# Surcon (neutral con el Maestro, sin relacion: +50) 3 x 1,5 = 4. Sistema.md
+	# 10.3 v1.6 (T41): el Zancajunco leal [4,5] y el Maestro [5,4] estan en
+	# diagonal y se dan afinidad (con vecinas en 4 pegaban 4 cada uno).
+	assert_array(de_la_tribu).is_equal([["zancajunco_1", 1, 4 + 1], ["ocarra_1", 2, 6], [Maestro.ID, 1, 4 + 1],
 			["surcon_1", 2, 4]])
 	assert_array(de_enemigas).is_not_empty()
 	for eslabon in de_enemigas:
@@ -491,7 +493,7 @@ func test_registro_instantanea_y_grabacion() -> void:
 	assert_array(reproduccion.combate.registro().lineas_json()).is_equal(combate.registro().lineas_json())
 
 	# Victoria con el golpe que saca a la objetivo de la cadena (sin rodauva_s1,
-	# surcon_s1 con 10 de vida: 4 + 6).
+	# surcon_s1 con 10 de vida: 5 + 6 desde T41, Sistema.md 10.3 v1.6).
 	var escenario: Dictionary = _escenario()
 	(escenario["enemigas"] as Array).pop_back()
 	(escenario["enemigas"] as Array)[0]["vida"] = 10

@@ -265,3 +265,112 @@ func test_sin_azar() -> void:
 		var codigo: String = FileAccess.get_file_as_string(ruta)
 		for prohibido in _AZAR_PROHIBIDO:
 			assert_str(codigo).not_contains(prohibido)
+
+
+# --- T41: vecinas en 8 (Sistema.md 10.3 v1.6, 11.3 v1.6 y D-001) ---
+
+# (T41.1) Sistema.md 10.3 v1.6: una afin en diagonal de `desde` da +1. La
+# Rodauva (2) con otra Rodauva en diagonal pega 3; sin ella, 2.
+func test_afin_en_diagonal() -> void:
+	var diagonal: Plantel = _plantel({"rodauva_2": Vector2i(3, 3), "ocarra_s1": Vector2i(3, 2),
+			"rodauva_3": Vector2i(2, 4)})
+	assert_int(_pega(diagonal, "rodauva_2", "ocarra_s1")).is_equal(2 + 1)
+
+	var sola: Plantel = _plantel({"rodauva_2": Vector2i(3, 3), "ocarra_s1": Vector2i(3, 2)})
+	assert_int(_pega(sola, "rodauva_2", "ocarra_s1")).is_equal(2)
+
+
+# (T41.2) Sistema.md 10.3 v1.6: una afin ortogonal y otra en diagonal dan +1, no +2.
+func test_ortogonal_y_diagonal_dan_uno() -> void:
+	var plantel: Plantel = _plantel({"rodauva_2": Vector2i(3, 3), "ocarra_s1": Vector2i(3, 2),
+			"rodauva_3": Vector2i(2, 3), "rodauva_1": Vector2i(4, 4)})
+	var vista: ResultadoAccion = _turno(plantel, "rodauva_2").validar(Accion.atacar("ocarra_s1"))
+	assert_int(vista.danio).is_equal(2 + 1)
+	assert_int(_fuentes(vista.desglose).count(ModificadorDanio.Fuente.AFINIDAD)).is_equal(1)
+	assert_array(DatosFixture.afinidad().afines_vecinas("rodauva_2", Vector2i(3, 3), plantel)) \
+			.is_equal(["rodauva_1", "rodauva_3"])
+
+
+# (T41.3) Sistema.md 10.3 v1.6: a distancia 2 ([x+2, y] y [x+2, y+1]) no da.
+func test_a_distancia_2_no_da() -> void:
+	for casilla in [Vector2i(5, 3), Vector2i(5, 4)]:
+		var plantel: Plantel = _plantel({"rodauva_2": Vector2i(3, 3), "ocarra_s1": Vector2i(3, 2),
+				"rodauva_3": casilla})
+		assert_int(_pega(plantel, "rodauva_2", "ocarra_s1")).override_failure_message(str(casilla)).is_equal(2)
+
+
+# (T41.4) Sistema.md 10.3 v1.6: la Ocarra (4) que pega a distancia 2 suma con el
+# Surcon en diagonal de ella; con el Surcon en diagonal de la objetivo (lejos de
+# ella), no.
+func test_ocarra_a_distancia_2_afin_en_diagonal() -> void:
+	var de_ella: Plantel = _plantel({"ocarra_1": Vector2i(1, 4), "surcon_1": Vector2i(2, 5),
+			"rodauva_s1": Vector2i(3, 4)})
+	assert_int(_pega(de_ella, "ocarra_1", "rodauva_s1")).is_equal(4 + 1)
+
+	var de_la_objetivo: Plantel = _plantel({"ocarra_1": Vector2i(1, 4), "surcon_1": Vector2i(4, 5),
+			"rodauva_s1": Vector2i(3, 4)})
+	assert_int(_pega(de_la_objetivo, "ocarra_1", "rodauva_s1")).is_equal(4)
+
+
+# (T41.5) Sistema.md 10.3 y 10.7 v1.6: dos Rodauvas salvajes en diagonal pegan 3
+# cada una. Una Rodauva de la tribu con una salvaje en diagonal, 2.
+func test_salvajes_en_diagonal_y_bandos() -> void:
+	var salvajes: Plantel = _plantel({"rodauva_s1": Vector2i(3, 3), "rodauva_s2": Vector2i(2, 2),
+			"rodauva_2": Vector2i(3, 4), "ocarra_1": Vector2i(1, 2)})
+	assert_int(_pega(salvajes, "rodauva_s1", "rodauva_2")).is_equal(2 + 1)
+	assert_int(_pega(salvajes, "rodauva_s2", "ocarra_1")).is_equal(2 + 1)
+
+	var mezcla: Plantel = _plantel({"rodauva_2": Vector2i(3, 3), "ocarra_s1": Vector2i(3, 2),
+			"rodauva_s1": Vector2i(2, 4)})
+	assert_int(_pega(mezcla, "rodauva_2", "ocarra_s1")).is_equal(2)
+
+
+# (T41.9) Sistema.md 11.8 (paso 5) y 10.3 v1.6: la Rodauva salvaje (2) remata a
+# la Ocarra con 3 de vida gracias a su afin en diagonal, y el danio aplicado es
+# el previsto.
+func test_ia_remata_con_afin_en_diagonal() -> void:
+	var plantel: Plantel = _plantel({"rodauva_s1": Vector2i(3, 2), "rodauva_s2": Vector2i(4, 1), "ocarra_1": Vector2i(3, 3)})
+	plantel.criatura("ocarra_1").vida = 3
+	var jugada: Dictionary = _decidir(plantel, "rodauva_s1")
+	var decision: DecisionIA = jugada["decision"]
+	assert_int(decision.paso).override_failure_message(decision.describir()).is_equal(DecisionIA.Paso.REMATE)
+	assert_str(decision.objetivo_id).is_equal("ocarra_1")
+	assert_int(decision.danio_previsto).is_equal(2 + 1)
+	var turno: Turno = jugada["turno"]
+	var aplicado: int = -1
+	for accion in decision.acciones:
+		var resultado: ResultadoAccion = turno.aplicar(accion)
+		assert_bool(resultado.valida).is_true()
+		if accion.tipo == Accion.Tipo.ATACAR:
+			aplicado = resultado.danio
+	assert_int(aplicado).is_equal(decision.danio_previsto)
+	assert_int(plantel.criatura("ocarra_1").estado).is_equal(Criatura.Estado.CAIDA)
+
+
+# (T41.10) Sistema.md 10.3 v1.6: Combate.afines_desde, en una esquina y en el
+# centro, con el Maestro y la leal (rodauva_1) en diagonal. Calcula sin aplicar.
+func test_afines_desde() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var contexto: ContextoCombate = ContextoCombate.armar(_leer(_CARPETA + "escenario_afinidad.json", "escenario"),
+			lectura["datos"])
+	assert_bool(contexto.valido).is_true()
+	var combate: Combate = Combate.empezar(contexto)
+	assert_str(combate.error()).is_empty()
+	var plantel: Plantel = contexto.plantel
+
+	# Esquina [0,0], con el Maestro y la leal en [1,1].
+	_ubicar(plantel, {Maestro.ID: Vector2i(1, 1)})
+	var antes: Dictionary = combate.instantanea()
+	assert_array(combate.afines_desde("rodauva_1", Vector2i(0, 0))).is_equal([Maestro.ID])
+	# Calcula sin aplicar: la foto es la misma.
+	assert_dict(combate.instantanea()).is_equal(antes)
+	_ubicar(plantel, {Maestro.ID: Vector2i(5, 5), "rodauva_1": Vector2i(1, 1)})
+	assert_array(combate.afines_desde(Maestro.ID, Vector2i(0, 0))).is_equal(["rodauva_1"])
+
+	# Centro [3,3]: la leal en [2,2] da; la neutral en [4,4], no.
+	_ubicar(plantel, {Maestro.ID: Vector2i(3, 3), "rodauva_1": Vector2i(2, 2), "rodauva_2": Vector2i(4, 4)})
+	assert_array(combate.afines_desde(Maestro.ID, Vector2i(3, 3))).is_equal(["rodauva_1"])
+	# rodauva_2 desde [3,3]: las dos Rodauvas en diagonal, en el orden del Plantel.
+	_ubicar(plantel, {Maestro.ID: Vector2i(0, 7), "rodauva_3": Vector2i(4, 2)})
+	assert_array(combate.afines_desde("rodauva_2", Vector2i(3, 3))).is_equal(["rodauva_1", "rodauva_3"])
