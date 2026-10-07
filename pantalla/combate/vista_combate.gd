@@ -27,6 +27,8 @@ const _MARCA_CAVAR: Vector2i = Vector2i(5, 0)
 const _MARCA_DESTINO: Vector2i = Vector2i(6, 0)
 # T41: las unidades que darian afinidad desde la casilla bajo el mouse.
 const _MARCA_AFIN: Vector2i = Vector2i(7, 0)
+# T17: las aliadas que se pueden Secundar (la misma marca de "elegir" que cavar).
+const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
@@ -43,6 +45,7 @@ const _ACCION_CAMARA_ACERCAR: String = "camara_acercar"
 const _ACCION_CAMARA_ALEJAR: String = "camara_alejar"
 const _ACCION_CAMARA_ARRASTRAR: String = "camara_arrastrar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
+const _NOMBRE_BOTON_SECUNDAR: String = "Secundar"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -82,6 +85,10 @@ var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
 # T40, estado de la interfaz (no de reglas): el modo "elegir casilla" de Cavar,
 # si la zona de Caza se ve, y el tooltip y el aviso que se muestran.
 var _eligiendo_cavar: bool = false
+# T17: el modo "elegir aliada" de Secundar y la aliada bajo el mouse ("" si
+# ninguna), cuya cola resultante se muestra.
+var _eligiendo_aliada: bool = false
+var _aliada_previa: String = ""
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -206,7 +213,8 @@ func filas_cola() -> Array[Label]:
 func clic_casilla(casilla: Vector2i) -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
-	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar)
+	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar,
+			_eligiendo_aliada)
 	if accion == null:
 		return false
 	return _aplicar(accion)
@@ -235,7 +243,13 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	if _combate.esperando_jugador():
 		var turno: Turno = _combate.turno_actual()
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
-		if not objetivo.is_empty():
+		if _eligiendo_aliada:
+			# T17: sobre una aliada valida, la cola muestra el orden que quedaria.
+			var aliada: String = InterpreteClic.aliada_en(turno, foto, casilla)
+			if aliada != _aliada_previa:
+				_aliada_previa = aliada
+				_dibujar_cola(lectura)
+		elif not objetivo.is_empty():
 			var vista_previa: ResultadoAccion = turno.previsualizar_ataque(_casilla_de(foto, turno.unidad_id), objetivo)
 			if vista_previa.valida:
 				_desglose_mostrado = vista_previa.desglose.a_diccionario()
@@ -282,6 +296,8 @@ func pulsar_activa(tipo: String) -> bool:
 			return _aplicar(Accion.hacerse_junco())
 		LecturaCombate.ACTIVA_CAVAR:
 			_eligiendo_cavar = not _eligiendo_cavar
+			_eligiendo_aliada = false
+			_aliada_previa = ""
 			redibujar()
 			return true
 	return false
@@ -289,6 +305,24 @@ func pulsar_activa(tipo: String) -> bool:
 
 func eligiendo_cavar() -> bool:
 	return _eligiendo_cavar
+
+
+# T17: el boton Secundar no aplica nada: entra (o sale) del modo "elegir
+# aliada". Devuelve true si hizo algo.
+func pulsar_secundar() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if not _eligiendo_aliada and _combate.turno_actual().aliadas_para_secundar().is_empty():
+		return false
+	_eligiendo_aliada = not _eligiendo_aliada
+	_eligiendo_cavar = false
+	_aliada_previa = ""
+	redibujar()
+	return true
+
+
+func eligiendo_aliada() -> bool:
+	return _eligiendo_aliada
 
 
 func zona_visible() -> bool:
@@ -419,6 +453,8 @@ func _aplicar(accion: Accion) -> bool:
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
 	if pausa_ia > 0.0 and not pasos.is_empty():
@@ -537,9 +573,14 @@ func _dibujar_marcas() -> void:
 		for casilla in turno.casillas_para_cavar():
 			_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_CAVAR)
 		return
+	var foto: Dictionary = _combate.instantanea()
+	# T17: eligiendo a quien Secundar, solo las aliadas de aliadas_para_secundar.
+	if _eligiendo_aliada:
+		for aliada in turno.aliadas_para_secundar():
+			_marcas.set_cell(_casilla_de(foto, aliada), _FUENTE_MARCAS, _MARCA_ALIADA)
+		return
 	for casilla in turno.casillas_para_mover():
 		_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_MOVER)
-	var foto: Dictionary = _combate.instantanea()
 	for objetivo in turno.objetivos_para_atacar():
 		_marcas.set_cell(_casilla_de(foto, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO)
 
@@ -600,13 +641,23 @@ func _dibujar_fichas(lectura: LecturaCombate) -> void:
 
 func _dibujar_interfaz(lectura: LecturaCombate) -> void:
 	_ronda.text = lectura.texto_ronda()
+	_dibujar_cola(lectura)
+	_panel_turno.text = "\n".join(lectura.panel_turno())
+
+
+# La cola de la ronda; T17: con una aliada bajo el mouse en el modo Secundar, la
+# cola que quedaria (LecturaCombate.filas_cola_si_secunda).
+func _dibujar_cola(lectura: LecturaCombate) -> void:
 	for hijo in _cola.get_children():
 		_cola.remove_child(hijo)
 		hijo.queue_free()
 	var titulo: Label = Label.new()
 	titulo.text = lectura.titulo_cola()
 	_cola.add_child(titulo)
-	for fila in lectura.filas_cola():
+	var filas: Array[Dictionary] = lectura.filas_cola()
+	if _eligiendo_aliada and not _aliada_previa.is_empty():
+		filas = lectura.filas_cola_si_secunda(_aliada_previa)
+	for fila in filas:
 		var etiqueta: Label = Label.new()
 		var actual: bool = fila["actual"]
 		etiqueta.text = (_MARCA_ACTUAL if actual else "") + (fila["texto"] as String)
@@ -615,7 +666,6 @@ func _dibujar_interfaz(lectura: LecturaCombate) -> void:
 		etiqueta.set_meta("marca", fila["marca"])
 		etiqueta.set_meta("actual", actual)
 		_cola.add_child(etiqueta)
-	_panel_turno.text = "\n".join(lectura.panel_turno())
 
 
 func _dibujar_botones(lectura: LecturaCombate) -> void:
@@ -641,6 +691,17 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		boton.pressed.connect(pulsar_activa.bind(tipo))
 		_botones.add_child(boton)
 		_botones.move_child(boton, _boton_terminar.get_index())
+	# T17: Secundar, solo si hay alguna aliada a la que se pueda Secundar.
+	var datos_secundar: Dictionary = lectura.boton_secundar()
+	if not datos_secundar.is_empty():
+		var boton_secundar: Button = Button.new()
+		boton_secundar.name = _NOMBRE_BOTON_SECUNDAR
+		boton_secundar.text = datos_secundar["texto"]
+		boton_secundar.toggle_mode = true
+		boton_secundar.button_pressed = _eligiendo_aliada
+		boton_secundar.pressed.connect(pulsar_secundar)
+		_botones.add_child(boton_secundar)
+		_botones.move_child(boton_secundar, _boton_terminar.get_index())
 
 
 func _dibujar_desglose() -> void:

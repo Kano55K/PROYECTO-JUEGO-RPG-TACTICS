@@ -50,7 +50,7 @@ func _ubicar(plantel: Plantel, ubicar: Dictionary) -> void:
 
 func _turno(plantel: Plantel, unidad_id: String, afinidad: Afinidad = null) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			afinidad if afinidad != null else DatosFixture.afinidad(), DatosFixture.cadena())
+			afinidad if afinidad != null else DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new())
 
 
 # El danio del ataque desde donde esta, por la misma funcion que lo aplica.

@@ -1230,3 +1230,72 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Abrir G: se ve igual que antes, en 8 × 8, y la cámara lo encuadra entero.
   6. Jugar C de verdad, con el mouse: ¿la ronda 1 da tiempo para acomodarse (sacar a la Rodauva de la zona de Caza, esconder al Zancajunco)? Anotarlo para Sistemas, junto con P-030.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR, la prueba manual y la respuesta de P-030.
+
+## T17 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T17-secundar
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho:**
+  - **Acción** (`Sistema.md` 10.1): `Accion.secundar(aliado_id)`, con `{"tipo": "secundar", "aliado": id}` y la ida y vuelta por diccionario. Primero el esquema: `grabacion.schema.json` suma `secundar` al enum y la propiedad `aliado`.
+  - **Cola** (`ColaIniciativa`):
+    - `orden_si_secunda` (calcular sin aplicar) y `secundar` usan la misma función, `_reordenar`. Saca la entrada del turno en curso y la pone justo detrás de la de la aliada; el resto no se reordena.
+    - Al aplicar, el cursor retrocede uno y la entrada queda pendiente, con `EntradaCola.vuelve = true`.
+    - Consultas nuevas: `pendiente(unidad_id, plantel)` y `lugar_de(unidad_id)`.
+  - **Turno** (`Turno`):
+    - `Turno.empezar(..., cadena, cola)`: la cola es un parámetro obligatorio, como la cadena en T16.
+    - **Turno que vuelve y turno nuevo:** lo dice la entrada. Si `entrada.vuelve`, no corre `_inicio_del_turno`; `_preparar` corre siempre. Así, el borrado de Erizarse, el cambio de modo y los puntos de T18, T19, T21 y T25 corren una vez por ronda (S-31).
+    - **Regla de quién Secunda:** está toda en `_motivo_puede_secundar`, con el lugar de T19 marcado (enconada o acobardada). Acepta solo a la tribu (`SALVAJE_NO_SECUNDA`) y con el turno sin usar (`YA_SE_MOVIO` y `ACCION_USADA`, S-29).
+    - **Rechazos por la aliada** en `_secundar`: `OBJETIVO_INEXISTENTE`, `SECUNDAR_A_SI_MISMA`, `ALIADA_DE_OTRO_BANDO` y `ALIADA_SIN_ENTRADA_PENDIENTE`. Este último cubre la que ya actuó, la caída, la guardada y "más allá del final de la ronda".
+    - Al aplicar, el turno se cierra **sin** `_fin_del_turno`: `junco_turno_anterior` se escribe recién cuando el turno termina de verdad. No toca la cadena (10.2).
+    - Consultas: `puede_secundar()`, `aliadas_para_secundar()` y `cola_si_secunda(aliado_id)`.
+  - **Combate:**
+    - Evento `secundar` (`unidad`, `detras_de`, `lugar` desde 0), sin `fin_turno`.
+    - Cuando la entrada vuelve, evento **`turno_vuelve`** (`unidad`) en lugar de otro `turno`. Es una decisión técnica: A.7 dice que `turno` va una vez por ronda y que las tareas agregan tipos.
+    - La IA no cambia.
+  - **Pantalla:**
+    - `LecturaCombate`: `boton_secundar()`, `filas_cola_si_secunda(aliado_id)` (armadas con un `_fila_cola` compartido con `filas_cola`) y el suceso "Unidad · Secundar · Aliada".
+    - `InterpreteClic.accion(..., modo_secundar)` y `aliada_en`; `objetivo_en` usa el mismo `_unidad_de`.
+    - `VistaCombate`:
+      - El botón `Secundar` (toggle) aparece solo si hay aliadas válidas.
+      - `pulsar_secundar()` y `eligiendo_aliada()`. El modo excluye al de cavar.
+      - Las aliadas válidas se marcan con la marca de "elegir" (5:0).
+      - Con el mouse sobre una aliada, la cola se redibuja con el orden resultante (`_dibujar_cola`).
+      - El clic aplica.
+    - `ClavesTextos.ACCION_SECUNDAR` (`accion.secundar`, ya está en `es.json`).
+  - **Preguntas:** S-29 a S-31 registradas como P-031 a P-033.
+- **Archivos:**
+  - Creados: `pruebas/combate/test_secundar.gd` y `pruebas/pantalla/test_vista_secundar.gd` (con sus `.uid`).
+  - Modificados:
+    - Esquema: `datos/_esquemas/grabacion.schema.json`.
+    - Núcleo: `nucleo/combate/accion.gd`, `cola_iniciativa.gd`, `entrada_cola.gd`, `turno.gd`, `combate.gd` y `resultado_accion.gd`.
+    - Pantalla: `pantalla/claves_textos.gd` y `pantalla/combate/interprete_clic.gd`, `lectura_combate.gd` y `vista_combate.gd`.
+    - Tests: solo se agregó la cola a los llamados a `Turno.empezar`, en `pruebas/combate/ia/test_ia_salvaje.gd` y en `test_afinidad.gd`, `test_cadena.gd`, `test_caza_y_cuenta.gd`, `test_danio.gd`, `test_junco.gd`, `test_surco.gd`, `test_turno.gd` y `test_vida_cero.gd` (`pruebas/combate/`), más `pruebas/pantalla/test_interprete_clic.gd`. Ninguna aserción cambió y ningún test se reescribió.
+    - Fixture: `pruebas/fixtures/pantalla/es_rasgos.json` suma `accion.secundar`.
+    - Documentos: `docs/PREGUNTAS.md` y `CLAUDE.md` (Estado actual).
+- **Tests:** 17 nuevos (15 de núcleo y 2 de pantalla). Total 382, todos pasan (sí), con `test_contacto.gd`. En la consola, solo los dos `ERROR` del "Remote Debugger" del runner, que ya salían antes; `--import`, sin advertencias.
+- **Criterio de terminado:** cumplido punto por punto.
+  1. `test_prueba_c` y `test_prueba_c_con_el_combate`: Tasajero, Ocarra, Zancajunco, Rodauva y Maestro; el `turno` del Tasajero va antes de que vuelva el Zancajunco.
+  2. `test_detras_de_la_ultima`.
+  3. `test_rechazos` y `test_rechazos_despues_de_atacar_y_guardada`: enemiga, sí misma, inexistente, caída, guardada, aliada que ya actuó, después de mover y de atacar, y una salvaje. En cada caso, la cola, el lugar, el Plantel y el turno no cambian.
+  4. `test_volver_a_secundar` y `test_volver_sin_aliada_detras`.
+  5. `test_s31_erizarse_una_vez` y `test_s31_cambio_de_modo_una_vez` (con `escenario_caza_tribu`, el de T36).
+  6. `test_cadena_sin_enemigas_en_el_medio` (eslabón 2) y `test_cadena_con_enemiga_en_el_medio` (corte `enemiga`, cadena nueva y eslabón 2 del que Secundó). **Corrige el plan:** no hice la fixture nueva con el Tasajero. Usé `escenario_cadena_combate.json` de T16: la objetivo es el Surcón salvaje y la enemiga del medio es la Rodauva encerrada, que solo espera. Así el resultado no depende de cómo se mueve la IA del Tasajero.
+  7. `test_cola_si_secunda`: la cola prevista es la aplicada, y la `instantanea` y `combate.cola()` no cambian.
+  8. `test_registro_y_grabacion` y `test_accion_ida_y_vuelta`: la grabación valida contra el esquema y la reproducción da el mismo registro.
+  9. `test_boton_hover_y_clic` y `test_sin_aliadas_no_hay_boton`.
+  10. `addons/gdUnit4/runtest.cmd -a res://pruebas`: 382/382.
+- **Lecturas declaradas:**
+  - P-031 (S-29): solo con el turno sin usar.
+  - P-032 (S-30): se puede volver a Secundar si queda otra aliada pendiente detrás.
+  - P-033 (S-31): el inicio del turno y el cambio de modo corren una vez por ronda.
+  - Técnica: el evento `turno_vuelve`.
+  - Técnica: si la unidad que Secundó cae o es guardada antes de volver, pierde su entrada (11.3) y su fin del turno no corre.
+- **Claves de texto nuevas sin texto:** ninguna (`accion.secundar` ya está en `es.json`).
+- **Preguntas:** nuevas P-031, P-032 y P-033 (SISTEMAS, no bloquean). Ninguna cerrada.
+- **Lista de prueba manual (usuario):**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. F5 y elegir C. En el turno del Zancajunco (ronda 1 o 2), apretar Secundar: se marcan la Rodauva, la Ocarra y el Maestro. Pasar el mouse por la Ocarra: la cola muestra al Zancajunco detrás de ella. Clic: actúa el Tasajero, después la Ocarra y después el Zancajunco. En los sucesos se lee "Zancajunco · Secundar · Ocarra".
+  3. Pegarle al Tasajero con la Ocarra y después con el Zancajunco: el desglose del segundo golpe muestra "Cadena".
+  4. Moverse con una unidad: el botón Secundar desaparece.
+  5. En A, la Rodauva puede Secundar al Maestro y actúa después de él.
+  6. Apretar Secundar dos veces: sale del modo y vuelven las marcas de mover y atacar.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.

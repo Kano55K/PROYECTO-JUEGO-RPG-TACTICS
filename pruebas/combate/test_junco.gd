@@ -43,7 +43,7 @@ func _plantel(nombre: String = "escenario_junco") -> Plantel:
 # Turno suelto, sin cola y sin surcos.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena())
+			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new())
 
 
 # Un turno entero que se oculta y termina.

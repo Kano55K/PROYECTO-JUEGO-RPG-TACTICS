@@ -83,18 +83,44 @@ func _marcas_rasgo(foto_criatura: Dictionary) -> Array[String]:
 # Una fila por entrada de la cola de la ronda, en orden:
 # {unidad_id, marca, texto, actual: bool, actuo: bool}.
 func filas_cola() -> Array[Dictionary]:
-	var filas: Array[Dictionary] = []
 	var actual: int = _combate.entrada_actual()
 	var entradas: Array[EntradaCola] = _combate.cola()
+	var filas: Array[Dictionary] = []
 	for i in range(entradas.size()):
-		var entrada: EntradaCola = entradas[i]
-		var texto: String = nombre(entrada.unidad_id)
-		var clave_marca: String = ClavesTextos.marca_cola(entrada.marca)
-		if not clave_marca.is_empty():
-			texto += _SEPARADOR + _armador.armar(clave_marca)
-		filas.append({"unidad_id": entrada.unidad_id, "marca": entrada.marca, "texto": texto,
-				"actual": i == actual, "actuo": entrada.actuo})
+		filas.append(_fila_cola(entradas[i], i == actual, entradas[i].actuo))
 	return filas
+
+
+# T17 (Sistema.md 10.1): las filas de la cola como quedaria si la unidad del
+# turno Secundara a la aliada (Turno.cola_si_secunda: el nucleo hace la cuenta).
+# La unidad del turno va como actual en su lugar nuevo. [] si no vale.
+func filas_cola_si_secunda(aliado_id: String) -> Array[Dictionary]:
+	var filas: Array[Dictionary] = []
+	var turno: Turno = _combate.turno_actual()
+	if turno == null:
+		return filas
+	for entrada in turno.cola_si_secunda(aliado_id):
+		var es_la_del_turno: bool = entrada.unidad_id == turno.unidad_id
+		filas.append(_fila_cola(entrada, es_la_del_turno, entrada.actuo and not es_la_del_turno))
+	return filas
+
+
+func _fila_cola(entrada: EntradaCola, actual: bool, actuo: bool) -> Dictionary:
+	var texto: String = nombre(entrada.unidad_id)
+	var clave_marca: String = ClavesTextos.marca_cola(entrada.marca)
+	if not clave_marca.is_empty():
+		texto += _SEPARADOR + _armador.armar(clave_marca)
+	return {"unidad_id": entrada.unidad_id, "marca": entrada.marca, "texto": texto, "actual": actual,
+			"actuo": actuo}
+
+
+# T17: el boton de Secundar {texto}, o {} si no hay ninguna aliada a
+# la que se pueda Secundar ahora (Turno.aliadas_para_secundar).
+func boton_secundar() -> Dictionary:
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.aliadas_para_secundar().is_empty():
+		return {}
+	return {"texto": _armador.armar(ClavesTextos.ACCION_SECUNDAR)}
 
 
 func titulo_cola() -> String:
@@ -225,6 +251,10 @@ func suceso(evento: Dictionary) -> Array[String]:
 			return [_armador.armar(ClavesTextos.suceso_cambio(evento["a"]))]
 		"hambre_combate":
 			return _suceso_hambre_combate(evento["cambios"])
+		# T17 (Sistema.md 10.1): quien Secundo y detras de quien.
+		"secundar":
+			return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_SECUNDAR),
+					nombre(evento["detras_de"])])]
 	return []
 
 

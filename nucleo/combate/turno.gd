@@ -44,10 +44,12 @@ var _surcos: Surcos
 var _afinidad: Afinidad
 # La del combate (la guarda el Combate, T16): solo un ataque aplicado la avanza.
 var _cadena: Cadena
+# La del combate (la guarda el Combate, T17): solo Secundar aplicado la cambia.
+var _cola: ColaIniciativa
 
 
 func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
-		afinidad: Afinidad, cadena: Cadena) -> void:
+		afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
@@ -56,15 +58,21 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 	_surcos = surcos
 	_afinidad = afinidad
 	_cadena = cadena
+	_cola = cola
 
 
 # Crea el turno de la entrada y corre el inicio del turno. surcos: los del
 # combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
-# ContextoCombate. cadena: la del combate (un turno suelto, una nueva).
+# ContextoCombate. cadena: la del combate (un turno suelto, una nueva). cola: la
+# del combate (un turno suelto, una vacia: no puede Secundar).
+# Sistema.md 11.3 y S-31 (P-033): el inicio del turno corre una sola vez por
+# ronda. La entrada que vuelve despues de Secundar (EntradaCola.vuelve) sigue el
+# turno sin repetirlo; por S-29 ese turno estaba sin usar, asi que se prepara igual.
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
-		surcos: Surcos, afinidad: Afinidad, cadena: Cadena) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena)
-	turno._inicio_del_turno()
+		surcos: Surcos, afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola)
+	if not entrada.vuelve:
+		turno._inicio_del_turno()
 	turno._preparar()
 	return turno
 
@@ -173,6 +181,33 @@ func puede_terminar() -> bool:
 	return validar(Accion.terminar()).valida
 
 
+# Sistema.md 10.1: si la unidad del turno puede Secundar, sin mirar a quien.
+func puede_secundar() -> bool:
+	return _motivo_puede_secundar() == ResultadoAccion.Motivo.NINGUNO
+
+
+# Las aliadas a las que `secundar` vale ahora, en el orden del Plantel (el
+# Maestro y despues las criaturas), para la pantalla.
+func aliadas_para_secundar() -> Array[String]:
+	var resultado: Array[String] = []
+	var ids: Array[String] = [Maestro.ID]
+	for criatura in _plantel.criaturas():
+		ids.append(criatura.id)
+	for id_aliada in ids:
+		if validar(Accion.secundar(id_aliada)).valida:
+			resultado.append(id_aliada)
+	return resultado
+
+
+# Sistema.md 10.1, calcular sin aplicar: la cola de la ronda como quedaria si
+# Secundara a la aliada (la misma cuenta que aplica la cola), o [] si no vale.
+# Las entradas son las de la cola: de solo lectura.
+func cola_si_secunda(aliado_id: String) -> Array[EntradaCola]:
+	if not validar(Accion.secundar(aliado_id)).valida:
+		return []
+	return _cola.orden_si_secunda(unidad_id, aliado_id)
+
+
 # Sistema.md 11.3, Inicio del turno. Primero se borra la marca de erizada: dura
 # hasta el inicio de su proximo turno (11.2, S-15). Despues van los chequeos de
 # 11.3, en este orden:
@@ -228,6 +263,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _cavar(accion.casilla, aplica)
 		Accion.Tipo.HACERSE_JUNCO:
 			resultado = _hacerse_junco(aplica)
+		Accion.Tipo.SECUNDAR:
+			resultado = _secundar(accion.aliado_id, aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -427,6 +464,45 @@ func _enemiga_de_pie_adyacente() -> bool:
 				and Tablero.distancia(_posicion(id_otra), posicion) == 1:
 			return true
 	return false
+
+
+# Sistema.md 10.1, Restricciones, y S-29 (P-031): el unico lugar de la regla de
+# quien puede Secundar. Solo la tribu (Maestro o criatura) y con el turno sin
+# usar: Secundar aplaza el turno entero, no lo parte.
+func _motivo_puede_secundar() -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if _bando(unidad_id) != Criatura.Bando.TRIBU:
+		return ResultadoAccion.Motivo.SALVAJE_NO_SECUNDA
+	# T19: no Secunda una enconada ni una acobardada (10.1). Esos estados no
+	# existen todavia: su motivo va aca.
+	if se_movio:
+		return ResultadoAccion.Motivo.YA_SE_MOVIO
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Sistema.md 10.1: actuar justo despues de una aliada (mismo bando, otra unidad)
+# que todavia tiene su entrada pendiente en la ronda. Al aplicar, la cola mueve
+# la entrada y el turno queda cerrado sin el fin del turno: el turno sigue
+# cuando la entrada vuelve (S-31). No es un ataque y no toca la cadena (10.2).
+func _secundar(aliado_id: String, aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_puede_secundar()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	if aliado_id != Maestro.ID and _plantel.criatura(aliado_id) == null:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE)
+	if aliado_id == unidad_id:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SECUNDAR_A_SI_MISMA)
+	if _bando(aliado_id) != _bando(unidad_id):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ALIADA_DE_OTRO_BANDO)
+	if not _cola.pendiente(aliado_id, _plantel) or _cola.orden_si_secunda(unidad_id, aliado_id).is_empty():
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ALIADA_SIN_ENTRADA_PENDIENTE)
+	if aplica:
+		_cola.secundar(unidad_id, aliado_id)
+		terminado = true
+	return ResultadoAccion.aceptada()
 
 
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es

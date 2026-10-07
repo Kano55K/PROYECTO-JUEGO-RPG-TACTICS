@@ -434,3 +434,42 @@
 - **Bloquea:** no
 - **Mientras tanto:** las coordenadas están en `datos/escenarios/` (T43) y el test de contacto queda como regresión permanente.
 - **Respuesta:** _(la completa el staff)_
+
+## P-031 — Cuándo se declara Secundar (S-29)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T17
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 10.1 (Secundar) y 11.3 (Turno de una unidad); `Arquitectura.md` 10.5, S-29
+- **Duda:** ¿Secundar solo se puede declarar con el turno sin usar (sin haberse movido ni usado la acción)?
+- **Caso que la dispara:** el Zancajunco de C se mueve dos casillas y después quiere Secundar a la Ocarra. 10.1 no dice cuándo se declara y 11.3 no lo lista entre las acciones del turno.
+- **Opciones:** A) solo con el turno sin usar: Secundar aplaza el turno entero, no lo parte. B) también después de moverse, guardando la acción para después. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
+- **Bloquea:** no
+- **Mientras tanto:** programada la lectura A: `Turno` rechaza Secundar con `YA_SE_MOVIO` o `ACCION_USADA` (`nucleo/combate/turno.gd`, `_motivo_puede_secundar`). Tests en `pruebas/combate/test_secundar.gd`.
+- **Respuesta:** _(la completa el staff)_
+
+## P-032 — Secundar dos veces en la misma ronda (S-30)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T17
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 10.1 (Secundar, Restricciones); `Arquitectura.md` 10.5, S-30
+- **Duda:** ¿una unidad que ya Secundó puede volver a Secundar cuando le toca de nuevo en la misma ronda?
+- **Caso que la dispara:** en C, el Zancajunco Secunda a la Ocarra; al volver, la Rodauva sigue pendiente detrás y la quiere Secundar también.
+- **Opciones:** A) vale si al volver queda otra aliada pendiente detrás; la entrada siempre avanza en la cola, así que la ronda termina. B) una sola vez por ronda. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
+- **Bloquea:** no
+- **Mientras tanto:** programada la lectura A (`ColaIniciativa.secundar`, `Turno._secundar`). Tests en `pruebas/combate/test_secundar.gd`.
+- **Respuesta:** _(la completa el staff)_
+
+## P-033 — Inicio del turno al volver de Secundar (S-31)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T17
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 11.3 (Inicio del turno: orden de los chequeos) y 11.2.3 (cambio de modo); `Arquitectura.md` 10.5, S-31
+- **Duda:** al volver después de Secundar, ¿el turno sigue sin repetir los chequeos del inicio del turno ni el cambio de modo?
+- **Caso que la dispara:** un Tasajero de la tribu en Caza Secunda al Maestro; entre medio una enemiga lo deja por debajo del umbral de Cuenta. Si el inicio corriera dos veces, cambiaría de modo al volver; con T18 y T21, Secundar sería una segunda tirada de incidente o un segundo maná.
+- **Opciones:** A) los chequeos de 11.3 (maná, huida, Encono o cobardía, incidente), el borrado de Erizarse y el cambio de modo corren una sola vez por ronda, la primera vez que le toca; al volver, el turno sigue. B) corren cada vez que le toca. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
+- **Bloquea:** no (antes de T18 y T21)
+- **Mientras tanto:** programada la lectura A: la entrada que vuelve lleva `EntradaCola.vuelve` y `Turno.empezar` no corre `_inicio_del_turno` con ella. Tests en `pruebas/combate/test_secundar.gd`.
+- **Respuesta:** _(la completa el staff)_

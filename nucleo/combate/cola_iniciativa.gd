@@ -1,6 +1,6 @@
 # Sistema.md 10.1 y 11.3: la cola de iniciativa. Se arma al empezar cada ronda
 # desde el Plantel y se recorre turno por turno; no ejecuta turnos (T08).
-# Es una lista ordenada editable: Secundar (T17) movera entradas dentro de ella.
+# Es una lista ordenada editable: Secundar (T17) mueve entradas dentro de ella.
 class_name ColaIniciativa
 extends RefCounted
 
@@ -49,6 +49,66 @@ func terminar_ronda() -> void:
 # Copia del arreglo, en el orden de la ronda. Las entradas son las mismas.
 func entradas() -> Array[EntradaCola]:
 	return _entradas.duplicate()
+
+
+# Sistema.md 10.1: la unidad tiene una entrada que todavia no se recorrio y
+# puede actuar (no cayo, no fue guardada, no salio del tablero). Lo que ya actuo
+# o se salteo queda antes del cursor.
+func pendiente(unidad_id: String, plantel: Plantel) -> bool:
+	for indice in range(_cursor, _entradas.size()):
+		if _entradas[indice].unidad_id == unidad_id:
+			return _puede_actuar(unidad_id, plantel)
+	return false
+
+
+# Indice de la entrada de la unidad en la ronda, o -1.
+func lugar_de(unidad_id: String) -> int:
+	for indice in range(_entradas.size()):
+		if _entradas[indice].unidad_id == unidad_id:
+			return indice
+	return -1
+
+
+# Sistema.md 10.1, Secundar: la cola que quedaria, sin tocar nada (calcular sin
+# aplicar). [] si la unidad no es la del turno en curso o la aliada no tiene
+# una entrada pendiente detras.
+func orden_si_secunda(unidad_id: String, aliado_id: String) -> Array[EntradaCola]:
+	return _reordenar(unidad_id, aliado_id)
+
+
+# Sistema.md 10.1: mueve la entrada de la unidad justo detras de la de la
+# aliada, sin reordenar el resto, y la deja como pendiente y marcada como turno
+# que vuelve (S-31). La entrada sacada estaba antes del cursor, asi que el
+# cursor retrocede uno. La entrada siempre avanza: la ronda termina (S-30).
+# Devuelve el lugar nuevo, o -1 si no se puede.
+func secundar(unidad_id: String, aliado_id: String) -> int:
+	var orden: Array[EntradaCola] = _reordenar(unidad_id, aliado_id)
+	if orden.is_empty():
+		return -1
+	var entrada: EntradaCola = _entradas[_cursor - 1]
+	_entradas = orden
+	_cursor -= 1
+	entrada.actuo = false
+	entrada.vuelve = true
+	return _entradas.find(entrada)
+
+
+# La unica cuenta de Secundar: la usan orden_si_secunda y secundar. No modifica nada.
+func _reordenar(unidad_id: String, aliado_id: String) -> Array[EntradaCola]:
+	var resultado: Array[EntradaCola] = []
+	if _cursor == 0 or _entradas[_cursor - 1].unidad_id != unidad_id:
+		return resultado
+	var aliada: int = -1
+	for indice in range(_cursor, _entradas.size()):
+		if _entradas[indice].unidad_id == aliado_id:
+			aliada = indice
+	if aliada == -1:
+		return resultado
+	resultado = _entradas.duplicate()
+	var movida: EntradaCola = resultado.pop_at(_cursor - 1)
+	# Al sacar la entrada, la de la aliada quedo un lugar antes.
+	resultado.insert(aliada, movida)
+	return resultado
 
 
 # Sistema.md 11.3, Orden y Empates: mayor Velocidad primero; empates: bando del
