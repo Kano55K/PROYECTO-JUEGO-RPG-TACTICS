@@ -10,12 +10,13 @@ const _CARPETA_UNIDADES: String = "res://pruebas/fixtures/unidades/"
 const _ESPECIES: Array[String] = ["ocarra", "rodauva", "surcon", "tasajero", "zancajunco"]
 
 
-# Devuelve {"errores": Array[Dictionary], "datos": Dictionary}.
-static func cargar() -> Dictionary:
+# Devuelve {"errores": Array[Dictionary], "datos": Dictionary}. combate: el
+# fixture de tablas/combate.json (T18: con el incidente en 100 o en 0).
+static func cargar(combate: String = "combate.json") -> Dictionary:
 	var errores: Array[Dictionary] = []
 	var datos: Dictionary = {}
 	var archivos: Dictionary = {
-		"tablas/combate.json": [_CARPETA_COMBATE + "combate.json", "combate"],
+		"tablas/combate.json": [_CARPETA_COMBATE + combate, "combate"],
 		"tablas/hambre.json": [_CARPETA_COMBATE + "hambre.json", "hambre"],
 		"tablas/arrimo.json": [_CARPETA_COMBATE + "arrimo.json", "arrimo"],
 		"tablas/lealtad.json": [_CARPETA_UNIDADES + "lealtad.json", "lealtad"],
@@ -50,6 +51,17 @@ static func afinidad(relaciones: Dictionary = {}) -> Afinidad:
 # fixture de relaciones.json ya leido, o {} para el de siempre.
 static func cadena(relaciones: Dictionary = {}) -> Cadena:
 	return Cadena.new(combo(relaciones))
+
+
+# El Incidente de los fixtures (T18), armado como en ContextoCombate, para los
+# tests que crean un Turno suelto. combate: el fixture de tablas/combate.json.
+static func incidente(combate: String = "combate.json") -> Incidente:
+	var datos: Dictionary = cargar(combate)["datos"]
+	var tabla_combate: Dictionary = datos["tablas/combate.json"]
+	var obediencia: Obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"],
+			tabla_combate)
+	return Incidente.desde_datos(tabla_combate, Arrimo.desde_datos(datos["tablas/arrimo.json"]),
+			Relaciones.new(datos["relaciones.json"]), obediencia)
 
 
 # El Combo de los fixtures (T16), armado como en ContextoCombate.

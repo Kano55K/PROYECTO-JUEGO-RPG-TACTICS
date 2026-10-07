@@ -8,6 +8,9 @@ extends RefCounted
 
 # Sistema.md 11.2: el efecto de rasgo que habilita Erizarse. Nunca se mira el id.
 const EFECTO_ERIZARSE: String = "erizarse"
+# Arquitectura.md A.7 (T18): el resultado del evento incidente.
+const RESULTADO_DISTRAIDA: String = "distraida"
+const RESULTADO_GOLPE: String = "golpe"
 
 var unidad_id: String
 # La de la entrada: "caza", "cuenta" o "". Es el modo al armar la ronda; el
@@ -27,6 +30,12 @@ var terminado: bool = false
 var cambio_modo: Dictionary = {}
 # true desde su primer `mover` aplicado (cavar exige no haberse movido, 11.2.1).
 var se_movio: bool = false
+# Sistema.md 10.4 (T18): {rivales, porcentaje, resultado, objetivo} si el inicio
+# de este turno tuvo un incidente; si no, {}. resultado: RESULTADO_DISTRAIDA o
+# RESULTADO_GOLPE; objetivo: la rival golpeada o null.
+var incidente: Dictionary = {}
+# El golpe del incidente para el registro: {desglose, vida_antes, vida_despues}, o {}.
+var golpe_incidente: Dictionary = {}
 
 var _ataques_hechos: int = 0
 var _movimiento_partido: bool = false
@@ -46,10 +55,15 @@ var _afinidad: Afinidad
 var _cadena: Cadena
 # La del combate (la guarda el Combate, T17): solo Secundar aplicado la cambia.
 var _cola: ColaIniciativa
+# La regla del incidente (T18), como _afinidad, y el generador de combate del
+# contexto (A.8): el unico azar del turno es la tirada del paso 4 de 11.3.
+var _incidente: Incidente
+var _azar: GeneradorAzar
 
 
 func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
-		afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa) -> void:
+		afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
+		azar: GeneradorAzar) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
@@ -59,21 +73,29 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 	_afinidad = afinidad
 	_cadena = cadena
 	_cola = cola
+	_incidente = regla_incidente
+	_azar = azar
 
 
 # Crea el turno de la entrada y corre el inicio del turno. surcos: los del
 # combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
 # ContextoCombate. cadena: la del combate (un turno suelto, una nueva). cola: la
-# del combate (un turno suelto, una vacia: no puede Secundar).
+# del combate (un turno suelto, una vacia: no puede Secundar). regla_incidente:
+# la del ContextoCombate. azar: el generador de combate (un turno suelto, uno propio).
 # Sistema.md 11.3 y S-31 (P-033): el inicio del turno corre una sola vez por
 # ronda. La entrada que vuelve despues de Secundar (EntradaCola.vuelve) sigue el
 # turno sin repetirlo; por S-29 ese turno estaba sin usar, asi que se prepara igual.
+# El incidente (paso 4) va despues de preparar: el golpe gasta los ataques del modo.
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
-		surcos: Surcos, afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola)
+		surcos: Surcos, afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
+		azar: GeneradorAzar) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola,
+			regla_incidente, azar)
 	if not entrada.vuelve:
 		turno._inicio_del_turno()
 	turno._preparar()
+	if not entrada.vuelve:
+		turno._chequear_incidente()
 	return turno
 
 
@@ -215,12 +237,46 @@ func cola_si_secunda(aliado_id: String) -> Array[EntradaCola]:
 #   2. Huida de las salvajes con vida <= 25% (11.7): T25. Si sale, el turno termina ahi.
 #   Cambio de modo (11.2.3, 11.8 paso 2): una regla, no una decision de la IA.
 #   3. Rival enemiga a su alcance: Encono (10.5) o cobardia (10.6): T19.
-#   4. Incidente con rival aliada (10.4), solo si no quedo enconada: T18.
+#   4. Incidente con rival aliada (10.4): _chequear_incidente, despues de _preparar.
 func _inicio_del_turno() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
 	if criatura != null:
 		criatura.erizada = false
 		cambio_modo = CambioModo.aplicar(criatura)
+
+
+# Sistema.md 10.4 v1.6 y 11.3, paso 4: una sola tirada (Incidente). Si sale, con
+# obediencia leal o neutral se distrae: pierde la accion y conserva el
+# movimiento. Con obediencia baja golpea, sin moverse y con su alcance normal, a
+# la rival de menos vida que alcanza desde su casilla (empate: la primera de la
+# tribu); si no alcanza a ninguna, se distrae. Las rivales golpeables pasan por la
+# misma validacion del ataque (Objetivos HOSTIL: una oculta provoca pero no se
+# golpea, S-32 / P-034). El golpe gasta la accion entera (S-34 / P-036).
+func _chequear_incidente() -> void:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.bando != Criatura.Bando.TRIBU:
+		return
+	# T19: si quedo enconada en el paso 3, no tira (10.4). Ese estado no existe todavia.
+	var datos: Dictionary = _incidente.tirar(unidad_id, _plantel, _azar)
+	if datos.is_empty():
+		return
+	var objetivo: Variant = null
+	if not _incidente.se_distrae(criatura, _plantel.maestro):
+		var desde: Vector2i = _posicion(unidad_id)
+		for rival in datos["rivales"]:
+			if not _atacar_desde(desde, rival, false, true).valida:
+				continue
+			if objetivo == null or _vida(rival) < _vida(objetivo):
+				objetivo = rival
+	incidente = {"rivales": datos["rivales"], "porcentaje": datos["porcentaje"],
+			"resultado": RESULTADO_DISTRAIDA if objetivo == null else RESULTADO_GOLPE, "objetivo": objetivo}
+	if objetivo == null:
+		accion_usada = true
+		ataques_restantes = 0
+		return
+	var vida_antes: int = _vida(objetivo)
+	var golpe: ResultadoAccion = _atacar_desde(_posicion(unidad_id), objetivo, true, true)
+	golpe_incidente = {"desglose": golpe.desglose, "vida_antes": vida_antes, "vida_despues": _vida(objetivo)}
 
 
 # Despues del inicio: el turno se juega con el modo que quedo (11.2.3, "juega
@@ -326,7 +382,10 @@ func _pasos_desde(desde: Vector2i) -> Dictionary:
 # este turno ya vale (destapar y pegar, 11.2.2 v1.4). La vida no baja de 0, y
 # en 0 se resuelve en el acto, solo al aplicar (11.5, VidaCero). `desde` es la
 # casilla de la unidad; otra solo para previsualizar (nunca se aplica desde otra).
-func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> ResultadoAccion:
+# por_incidente (10.4, T18): el golpe a una rival aliada. La objetivo es del mismo
+# bando; no suma combo, no tiene eslabon y corta la cadena sin empezar otra
+# (S-33 / P-035), y gasta la accion entera (S-34 / P-036).
+func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incidente: bool = false) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
 	if ataques_restantes == 0:
@@ -334,7 +393,7 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 	var motivo: ResultadoAccion.Motivo = Objetivos.motivo(objetivo_id, Objetivos.Clase.HOSTIL, _plantel)
 	if motivo == ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE:
 		return ResultadoAccion.rechazada(motivo)
-	if _bando(objetivo_id) == _bando(unidad_id):
+	if (_bando(objetivo_id) == _bando(unidad_id)) != por_incidente:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_ALIADO)
 	if motivo != ResultadoAccion.Motivo.NINGUNO:
 		return ResultadoAccion.rechazada(motivo)
@@ -347,34 +406,40 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool) -> Result
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
 
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id))
+	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id, por_incidente))
 	resultado.danio = resultado.desglose.total
-	resultado.eslabon = _cadena.eslabon_para(unidad_id, objetivo_id, _plantel)
+	resultado.eslabon = null if por_incidente else _cadena.eslabon_para(unidad_id, objetivo_id, _plantel)
 	if aplica:
 		_poner_vida(objetivo_id, maxi(0, _vida(objetivo_id) - resultado.danio))
 		# Sistema.md 10.2: solo el ataque aplicado avanza la cadena (nunca validar
-		# ni previsualizar), antes de resolver la vida en 0.
-		_cadena.atacar(unidad_id, objetivo_id, _plantel)
+		# ni previsualizar), antes de resolver la vida en 0. El golpe de un
+		# incidente la corta y no empieza otra (S-33).
+		if por_incidente:
+			_cadena.cortar(Cadena.MOTIVO_OTRO_OBJETIVO)
+		else:
+			_cadena.atacar(unidad_id, objetivo_id, _plantel)
 		# Sistema.md 11.2.2: la atacante se destapa y cobra su bono; la objetivo
 		# destapada pierde el suyo.
 		_eventos.append_array(Junco.atacar(unidad_id, _plantel))
 		_eventos.append_array(Junco.recibir_ataque(objetivo_id, unidad_id, _plantel))
 		VidaCero.resolver(objetivo_id, _plantel, _surcos)
-		ataques_restantes -= 1
+		ataques_restantes = 0 if por_incidente else ataques_restantes - 1
 		_ataques_hechos += 1
 		accion_usada = true
 	return resultado
 
 
 # Los aportes externos del danio (11.4) para un ataque desde `desde`: la
-# afinidad (10.3, mirada desde `desde`) y el combo del eslabon siguiente (10.2).
-# Aca se enchufan despues Encono o cobardia (T19); el ataque real y la
-# previsualizacion los ven igual.
-func _aportes(desde: Vector2i, objetivo_id: String) -> Array[ModificadorDanio]:
+# afinidad (10.3, mirada desde `desde`) y el combo del eslabon siguiente (10.2;
+# nunca en el golpe de un incidente, S-33). Aca se enchufan despues Encono o
+# cobardia (T19); el ataque real y la previsualizacion los ven igual.
+func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false) -> Array[ModificadorDanio]:
 	var aportes: Array[ModificadorDanio] = []
 	var afinidad: ModificadorDanio = _afinidad.aporte(unidad_id, desde, _plantel)
 	if afinidad != null:
 		aportes.append(afinidad)
+	if por_incidente:
+		return aportes
 	var combo: ModificadorDanio = _cadena.aporte(unidad_id, objetivo_id, _plantel)
 	if combo != null:
 		aportes.append(combo)

@@ -255,6 +255,15 @@ func suceso(evento: Dictionary) -> Array[String]:
 		"secundar":
 			return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_SECUNDAR),
 					nombre(evento["detras_de"])])]
+		# T18 (Sistema.md 10.4): con la rival golpeada o, si se distrajo, la
+		# primera de sus rivales. El par de especies elige la variante.
+		"incidente":
+			var rival: String = evento["rivales"][0] if evento["objetivo"] == null else evento["objetivo"]
+			var clave: String = ClavesTextos.INCIDENTE_DISTRAIDA if evento["objetivo"] == null \
+					else ClavesTextos.INCIDENTE_ATAQUE
+			var datos: Dictionary = _hueco(evento["unidad"])
+			datos["rival"] = HuecoCriatura.new(_sujeto(rival))
+			return [_armador.armar(clave, datos, "%s.%s" % [_sujeto(evento["unidad"]), _sujeto(rival)])]
 	return []
 
 

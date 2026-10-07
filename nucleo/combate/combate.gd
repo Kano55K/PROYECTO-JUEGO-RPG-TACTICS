@@ -171,6 +171,14 @@ func afines_desde(unidad_id: String, casilla: Vector2i) -> Array[String]:
 	return _contexto.afinidad.afines_vecinas(unidad_id, casilla, _plantel)
 
 
+# T18 (Sistema.md 10.4: "la probabilidad se muestra en la casilla antes de
+# mover"): {rivales, porcentaje} que tendria la unidad al empezar su proximo
+# turno parada en `casilla`, con el tablero de ahora (Incidente.consulta, la
+# misma cuenta que la tirada). Calcula sin aplicar.
+func incidente_en(unidad_id: String, casilla: Vector2i) -> Dictionary:
+	return _contexto.incidente.consulta(unidad_id, casilla, _plantel)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -243,8 +251,7 @@ func _avanzar() -> void:
 		# (A.7: uno por ronda) y la tribu no corta la cadena.
 		if entrada.vuelve:
 			_registrar({"tipo": "turno_vuelve", "unidad": entrada.unidad_id})
-			_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-					_contexto.afinidad, _cadena, _cola)
+			_turno = _empezar_turno(entrada)
 			_junco_volcados = 0
 			continue
 		# Antes de empezar el turno: las tiradas de su inicio (T18 a T25) van despues.
@@ -255,13 +262,47 @@ func _avanzar() -> void:
 		if not _es_del_jugador(entrada.unidad_id):
 			_cadena.cortar(Cadena.MOTIVO_ENEMIGA)
 			_registrar_cadena()
-		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-				_contexto.afinidad, _cadena, _cola)
+		var estados_antes: Dictionary = _estados()
+		_turno = _empezar_turno(entrada)
 		_junco_volcados = 0
-		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
+		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7). Paso
+		# antes que la tirada del incidente (paso 4 de 11.3): se registra sin
+		# volcarla, asi el orden del registro es el de lo que paso.
 		if not _turno.cambio_modo.is_empty():
 			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
-					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]})
+					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]}, false)
+		_registrar_incidente(estados_antes)
+
+
+func _empezar_turno(entrada: EntradaCola) -> Turno:
+	return Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
+			_contexto.afinidad, _cadena, _cola, _contexto.incidente, _contexto.azar_combate)
+
+
+# Sistema.md 10.4 (T18, A.7): el incidente del inicio del turno, detras del
+# `turno` y de su `tirada` (se vuelca sola). Si golpea, el golpe va como un
+# `ataque` normal (sin eslabon, S-33) con lo que dispara: Junco, estados, surcos
+# y el corte de la cadena. Si la tirada no sale, solo queda la `tirada`.
+func _registrar_incidente(estados_antes: Dictionary) -> void:
+	if _turno.incidente.is_empty():
+		return
+	var unidad_id: String = _turno.unidad_id
+	_registrar({"tipo": "incidente", "unidad": unidad_id, "rivales": _turno.incidente["rivales"].duplicate(),
+			"porcentaje": _turno.incidente["porcentaje"], "resultado": _turno.incidente["resultado"],
+			"objetivo": _turno.incidente["objetivo"]})
+	if _turno.golpe_incidente.is_empty():
+		return
+	_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": _turno.incidente["objetivo"],
+			"desglose": (_turno.golpe_incidente["desglose"] as DesgloseDanio).a_diccionario(), "eslabon": null,
+			"vida_antes": _turno.golpe_incidente["vida_antes"], "vida_despues": _turno.golpe_incidente["vida_despues"]})
+	_registrar_junco()
+	_registrar_estados(estados_antes)
+	_registrar_surcos()
+	_registrar_cadena()
+	# Una rival de la tribu que cae no termina el combate (11.5), pero se mira igual.
+	_fin = FinCombate.evaluar(_plantel)
+	if _fin != FinCombate.Fin.EN_CURSO:
+		_terminar()
 
 
 # Fin de ronda (T07): el punto de la cola y, despues del fin_ronda, el hambre de
@@ -368,14 +409,17 @@ func _terminar() -> void:
 
 # Arquitectura.md A.7: antes de cada evento se vuelcan las tiradas nuevas del
 # generador de combate (lo que registra T02), asi quedan en orden.
-func _registrar(evento: Dictionary) -> void:
-	var historial: Array[Dictionary] = _contexto.azar_combate.historial()
-	for indice in range(_tiradas_volcadas, historial.size()):
-		var tirada: Dictionary = historial[indice]
-		_agregar({"tipo": "tirada", "ronda": _cola.ronda, "indice": tirada["indice"],
-				"metodo": tirada["metodo"], "parametros": tirada["parametros"],
-				"resultado": tirada["resultado"]})
-	_tiradas_volcadas = historial.size()
+# volcar_tiradas: false solo para un evento que paso antes que las tiradas
+# pendientes (el cambio de modo, antes de la tirada del incidente, T18).
+func _registrar(evento: Dictionary, volcar_tiradas: bool = true) -> void:
+	if volcar_tiradas:
+		var historial: Array[Dictionary] = _contexto.azar_combate.historial()
+		for indice in range(_tiradas_volcadas, historial.size()):
+			var tirada: Dictionary = historial[indice]
+			_agregar({"tipo": "tirada", "ronda": _cola.ronda, "indice": tirada["indice"],
+					"metodo": tirada["metodo"], "parametros": tirada["parametros"],
+					"resultado": tirada["resultado"]})
+		_tiradas_volcadas = historial.size()
 	evento["ronda"] = _cola.ronda
 	_agregar(evento)
 
