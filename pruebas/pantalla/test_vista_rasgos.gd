@@ -131,6 +131,10 @@ func test_marca_y_aviso_de_afinidad() -> void:
 	assert_str(vista.aviso_mostrado()).is_empty()
 	assert_bool(runner.find_child("Aviso").visible).is_false()
 
+	# Reescrito en T18 por Sistema.md 10.4 v1.6: en la propia casilla la Ocarra
+	# de la tribu [3,7] es su rival en diagonal, asi que el aviso suma la linea del
+	# incidente (este fixture de textos no tiene incidente.tooltip: sale [FALTA]).
 	vista.sobre_casilla(Vector2i(4, 6))
 	assert_array(vista.casillas_afines()).is_equal([maestro])
-	assert_str(vista.aviso_mostrado()).is_equal(tooltip)
+	assert_array(vista.casillas_rivales()).is_equal([Vector2i(3, 7)])
+	assert_str(vista.aviso_mostrado()).is_equal(tooltip + "\n[FALTA: incidente.tooltip]")

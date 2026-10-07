@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../datos/_esquemas/combate.schema.json",
+  "_nota": "T18: copia de combate.json de prueba con el incidente en 0 para fijar el resultado de la tirada (Arquitectura.md B.3, fila T18). Copia de datos/tablas/combate.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 8.2, 8.4, 10.1 a 10.7, 11.3, 11.5 y 11.7. En otros archivos: Arrimo por paso (tablas/arrimo.json), obediencia por hambre, Saciado y hambre de combate (tablas/hambre.json), % de huida y rasgos (especies/), costo de guardar caida (tablas/costos_mana.json), muerte en el grupo, rescate y victoria (tablas/lealtad.json), umbral de rescate y pasos de Arrimo (tablas/balanza.json). Las tablas de 10.2 (eslabones) y 10.6 (cobardia por balanza) se derivan, no se guardan. Campos sueltos: despliegue_filas 11.3; danio_minimo 8.4 y 11.4 paso 4; afinidad_danio_plano 10.3 (tambien es el tope por ataque) y 10.7; enfermedad_danio_pct 8.2, por enfermedad, se suman (el mismo -25 rige la recoleccion en 0b); alcance_sellar 4.1; alcance_guardar_caida y vida_tras_caida 11.5",
+  "despliegue_filas": 2,
+  "danio_minimo": 1,
+  "afinidad_danio_plano": 1,
+  "combo": {
+    "_nota": "Sistema.md 10.2: bono base sin relacion y entre afines (incluye Maestro + criatura con obediencia leal); cada eslabon vale el anterior dividido 2, redondeo hacia abajo (8.4)",
+    "sin_relacion_pct": 20,
+    "afines_pct": 40,
+    "divisor_por_eslabon": 2
+  },
+  "incidente": {
+    "_nota": "Sistema.md 10.4: una sola tirada por turno. Base de prueba: 0",
+    "base_pct": 0
+  },
+  "encono": {
+    "_nota": "Sistema.md 10.5: 25% + 25% por punto; contador de 0 a 3; +1 de danio por punto, contando el que suma ese golpe",
+    "base_pct": 25,
+    "por_punto_pct": 25,
+    "max_puntos": 3,
+    "danio_plano_por_punto": 1
+  },
+  "cobardia": {
+    "_nota": "Sistema.md 10.6: base, Maestro adyacente y -50% de danio acobardada (se suma con los otros porcentajes, 8.4)",
+    "base_pct": 60,
+    "maestro_adyacente_pts": -10,
+    "danio_pct": -50
+  },
+  "afines_contra_cobardia": {
+    "_nota": "Sistema.md 10.6, PROPUESTA: solo con el toggle del escenario E. -10 por afin adyacente, maximo -20, minimo 5%",
+    "por_afin_pts": -10,
+    "tope_pts": -20,
+    "minimo_pct": 5
+  },
+  "obediencia": {
+    "_nota": "Sistema.md 5.4 y 10.6. El tramo neutral (4 hasta umbral - 1) no modifica. Ver P-003",
+    "leal": {
+      "_nota": "Desde el umbral de rescate (tablas/balanza.json)",
+      "encono_pts": -10,
+      "cobardia_pts": -20
+    },
+    "baja": {
+      "_nota": "Sistema.md 5.4: debajo del piso de Neutral (tablas/lealtad.json neutral_desde; P-003)",
+      "encono_pts": 10,
+      "cobardia_pts": 20
+    }
+  },
+  "salvajes": {
+    "_nota": "Sistema.md 10.7: se tratan como obediencia <= 3 y sin Arrimo",
+    "tramo_obediencia": "baja"
+  },
+  "enfermedad_danio_pct": -25,
+  "huida_salvaje": {
+    "_nota": "Sistema.md 11.7: tiran con vida <= 25%; acobardada +25 puntos. El % por especie esta en especies/",
+    "umbral_vida_pct": 25,
+    "acobardada_pts": 25
+  },
+  "alcance_sellar": 2,
+  "alcance_guardar_caida": 2,
+  "vida_tras_caida": 1
+}

@@ -473,3 +473,42 @@
 - **Bloquea:** no (antes de T18 y T21)
 - **Mientras tanto:** programada la lectura A: la entrada que vuelve lleva `EntradaCola.vuelve` y `Turno.empezar` no corre `_inicio_del_turno` con ella. Tests en `pruebas/combate/test_secundar.gd`.
 - **Respuesta:** _(la completa el staff)_
+
+## P-034 — Incidente con una rival oculta (S-32)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T18
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 11.2.2 (Relaciones: la oculta "sigue dando y recibiendo incidentes"; no puede ser objetivo de ningún ataque) y 10.4; `Arquitectura.md` 10.5, S-32
+- **Duda:** una rival aliada oculta, ¿provoca la tirada de incidente aunque el golpe no pueda ir a ella?
+- **Caso que la dispara:** una Ocarra de la tribu con obediencia 3 junto a un Zancajunco oculto de la tribu (Ocarra–Zancajunco mal). Sale el incidente y el Zancajunco es su única rival al alcance.
+- **Opciones:** A) provoca la tirada, pero el golpe no puede ir a ella; si es la única rival a su alcance, la criatura se distrae. B) la oculta no provoca la tirada. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
+- **Bloquea:** no
+- **Mientras tanto:** programada la lectura A: `Incidente.rivales_vecinas` cuenta a la oculta (`Objetivos.de_pie`) y `Turno._chequear_incidente` elige el golpe con la validación del ataque (`Objetivos`, clase `HOSTIL`). Test `test_oculta_provoca_pero_no_se_golpea` en `pruebas/combate/test_incidente.gd`.
+- **Respuesta:** _(la completa el staff)_
+
+## P-035 — El golpe del incidente y la cadena (S-33)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T18
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 10.2 (la cadena se corta si un aliado ataca a otro objetivo, "incluido el golpe de un incidente"); `Arquitectura.md` 10.5, S-33
+- **Duda:** el golpe de un incidente, ¿empieza una cadena nueva sobre la aliada golpeada?
+- **Caso que la dispara:** la tribu viene encadenando sobre el Surcón salvaje. Una Ocarra con obediencia 3 golpea a su rival aliada por un incidente: la cadena vieja se corta. Si empezara una nueva, un segundo incidente sobre la misma aliada en la ronda sumaría combo contra una compañera.
+- **Opciones:** A) corta la cadena que había, no empieza otra y no recibe bono de combo (`eslabon` nulo en el evento `ataque`). B) empieza una cadena nueva sobre la aliada, en el eslabón 1. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
+- **Bloquea:** no
+- **Mientras tanto:** programada la lectura A: `Turno._atacar_desde(..., por_incidente)` no pide el combo, deja `eslabon` en nulo y corta con `otro_objetivo` en lugar de avanzar la cadena. Test `test_golpe_corta_la_cadena_sin_empezar_otra` en `pruebas/combate/test_incidente.gd`.
+- **Respuesta:** _(la completa el staff)_
+
+## P-036 — Incidente de un Tasajero de la tribu en Caza (S-34)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T18
+- **Fecha:** 07/10/2026
+- **Fuente:** `Sistema.md` 10.4 ("pierde la acción"; "usa la acción para golpear a la rival") y 11.2.3 (Caza: dos ataques por turno)
+- **Duda:** un Tasajero de la tribu en Caza con un incidente, ¿pierde los dos ataques (si se distrae) y gasta los dos con el golpe a la rival (si golpea)?
+- **Caso que la dispara:** un Tasajero de la tribu en Caza, con obediencia 3, empieza su turno junto a una Rodauva de la tribu (Rodauva–Tasajero mal) y con una enemiga a su alcance. Sale el incidente y golpea a la Rodauva: ¿puede usar el segundo ataque de Caza contra la enemiga?
+- **Opciones:** A) "la acción" son todos los ataques del turno: la distraída pierde los dos y el golpe gasta los dos (no hay segundo ataque). B) el golpe gasta solo uno: el segundo queda para otra objetivo. — Recomendación técnica: A, lectura literal con la acción de T36 (`accion_usada` = "usó alguna acción").
+- **Bloquea:** no
+- **Mientras tanto:** programada la lectura A: el golpe del incidente deja `ataques_restantes` en 0 y la distraída también. Sin test propio: el caso no aparece en ningún escenario de la 0a.
+- **Respuesta:** _(la completa el staff)_

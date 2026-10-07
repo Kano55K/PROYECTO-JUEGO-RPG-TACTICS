@@ -39,13 +39,13 @@ func _plantel() -> Plantel:
 # Turno suelto, sin cola: la entrada se arma a mano.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new())
+			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), GeneradorAzar.new(1))
 
 
 func _siguiente_turno(cola: ColaIniciativa, plantel: Plantel) -> Turno:
 	var entrada: EntradaCola = cola.siguiente(plantel)
 	return null if entrada == null else Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), cola)
+			DatosFixture.afinidad(), DatosFixture.cadena(), cola, DatosFixture.incidente(), GeneradorAzar.new(1))
 
 
 # Todo lo que una accion puede cambiar en el Plantel y en el turno.

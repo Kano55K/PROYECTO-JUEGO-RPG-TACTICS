@@ -27,6 +27,8 @@ const _MARCA_CAVAR: Vector2i = Vector2i(5, 0)
 const _MARCA_DESTINO: Vector2i = Vector2i(6, 0)
 # T41: las unidades que darian afinidad desde la casilla bajo el mouse.
 const _MARCA_AFIN: Vector2i = Vector2i(7, 0)
+# T18: las rivales que darian riesgo de incidente desde la casilla bajo el mouse.
+const _MARCA_RIVAL: Vector2i = Vector2i(8, 0)
 # T17: las aliadas que se pueden Secundar (la misma marca de "elegir" que cavar).
 const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
 const _TEXTOS: String = "textos/es.json"
@@ -104,6 +106,7 @@ var _limites: Rect2 = Rect2()
 @onready var _capa_zona: TileMapLayer = $Tablero/Zona
 @onready var _marcas: TileMapLayer = $Tablero/Marcas
 @onready var _capa_afines: TileMapLayer = $Tablero/Afines
+@onready var _capa_rivales: TileMapLayer = $Tablero/Rivales
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -225,12 +228,14 @@ func clic_casilla(casilla: Vector2i) -> bool:
 # tooltip; en una casilla para moverse que la dejaria junto a una oculta
 # enemiga, el aviso (Combate.destaparia). T41: en una casilla para moverse o en
 # la propia, se marcan las unidades que le darian afinidad desde ahi
-# (Combate.afines_desde) y, si hay alguna, el aviso suma afinidad.tooltip.
+# (Combate.afines_desde) y, si hay alguna, el aviso suma afinidad.tooltip. T18:
+# ahi mismo, las rivales del incidente (Combate.incidente_en) e incidente.tooltip.
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_capa_afines.clear()
+	_capa_rivales.clear()
 	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
 	# las fichas todavia no.
 	if _combate == null or _en_secuencia:
@@ -264,6 +269,15 @@ func sobre_casilla(casilla: Vector2i) -> void:
 					_capa_afines.set_cell(_casilla_de(foto, afin), _FUENTE_MARCAS, _MARCA_AFIN)
 				if not afines.is_empty():
 					avisos.append(_armador.armar(ClavesTextos.AFINIDAD_TOOLTIP))
+				# T18 (Sistema.md 10.4: "la probabilidad se muestra en la casilla
+				# antes de mover"): el % de incidente parada ahi y sus rivales. Con
+				# 0 % no hay riesgo: no se marca nada.
+				var incidente: Dictionary = _combate.incidente_en(turno.unidad_id, casilla)
+				if incidente["porcentaje"] > 0:
+					for rival in incidente["rivales"]:
+						_capa_rivales.set_cell(_casilla_de(foto, rival), _FUENTE_MARCAS, _MARCA_RIVAL)
+					avisos.append(_armador.armar(ClavesTextos.INCIDENTE_TOOLTIP,
+							{"porcentaje": incidente["porcentaje"]}))
 			_aviso_mostrado = "\n".join(avisos)
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -282,6 +296,11 @@ func aviso_mostrado() -> String:
 # T41: las casillas de las unidades marcadas como afines ahora.
 func casillas_afines() -> Array[Vector2i]:
 	return _capa_afines.get_used_cells()
+
+
+# T18: las casillas de las rivales marcadas por riesgo de incidente ahora.
+func casillas_rivales() -> Array[Vector2i]:
+	return _capa_rivales.get_used_cells()
 
 
 # T40: el boton de una activa (LecturaCombate.ACTIVA_*). Cavar no aplica nada:
@@ -488,6 +507,7 @@ func _empezar_secuencia(pasos: Array[Dictionary]) -> void:
 	_botones.visible = false
 	_marcas.clear()
 	_capa_afines.clear()
+	_capa_rivales.clear()
 	_capa_zona.clear()
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -566,6 +586,7 @@ func _dibujar_marcas() -> void:
 	_marcas.clear()
 	# T41: las de afinidad son del hover; el proximo movimiento del mouse las rearma.
 	_capa_afines.clear()
+	_capa_rivales.clear()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()

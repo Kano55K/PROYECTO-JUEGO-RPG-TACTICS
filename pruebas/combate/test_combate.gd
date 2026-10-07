@@ -261,7 +261,7 @@ func test_unidades_en_0_al_armar() -> void:
 
 
 # Ronda 1 de C con la tribu esperando, mas una tirada hecha a mano antes de la
-# accion de la Ocarra de la tribu (en 0a.1 ninguna regla tira dados).
+# accion de la Ocarra de la tribu (despues de la tirada de su incidente, T18).
 func _jugar_ronda_c() -> Combate:
 	var combate: Combate = _combate(_escenario(_CARPETA + "escenario_c.json"))
 	while combate.instantanea()["ronda"] == 1:
@@ -277,14 +277,18 @@ func _jugar_ronda_c() -> Combate:
 # Caza), y 11.9: desde [3,1] alcanza al Maestro en la ronda 1 (antes pegaba en la Cuenta).
 # Reescrito en T39 por Sistema.md 11.8 paso 6b: desde [3,5], con una sola presa
 # (el Maestro), le da los dos ataques de Caza: dos pares accion/ataque.
+# Reescrito en T18 por Sistema.md 10.4 v1.6 y 11.3 paso 4: la Ocarra y el
+# Zancajunco de la tribu son rivales vecinas en C, asi que cada una tira su
+# incidente al empezar el turno (5 % con la balanza 2). Con la semilla de C
+# ninguna sale: queda la `tirada` sin evento `incidente`. La hecha a mano es la 2.
 func test_registro_de_una_ronda_de_c() -> void:
 	var combate: Combate = _jugar_ronda_c()
 	assert_str(combate.turno_actual().unidad_id).is_equal("zancajunco_1")
 	assert_array(_tipos(combate)).is_equal([
 		"inicio", "ronda",
-		"turno", "accion", "fin_turno",
-		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
 		"turno", "tirada", "accion", "fin_turno",
+		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
+		"turno", "tirada", "tirada", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
 		"fin_ronda", "ronda", "turno",
@@ -310,8 +314,14 @@ func test_registro_de_una_ronda_de_c() -> void:
 	var movimiento: Dictionary = _de_tipo(combate, "movimiento")[0]
 	assert_array(movimiento["desde"]).is_equal([3, 1])
 
-	var tirada: Dictionary = _de_tipo(combate, "tirada")[0]
-	assert_int(tirada["indice"] as int).is_equal(0)
+	var tiradas: Array[Dictionary] = _de_tipo(combate, "tirada")
+	assert_int(tiradas.size()).is_equal(3)
+	assert_array(_de_tipo(combate, "incidente")).is_empty()
+	for incidente in tiradas.slice(0, 2):
+		assert_dict(incidente["parametros"]).is_equal({"minimo": 1, "maximo": 100})
+		assert_int(incidente["resultado"] as int).is_greater(5)
+	var tirada: Dictionary = tiradas[2]
+	assert_int(tirada["indice"] as int).is_equal(2)
 	assert_str(tirada["metodo"]).is_equal("entero")
 	assert_dict(tirada["parametros"]).is_equal({"minimo": 1, "maximo": 100})
 	var siguiente: Dictionary = lineas[(tirada["n"] as int) + 1]

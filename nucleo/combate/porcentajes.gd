@@ -16,3 +16,10 @@ static func aplicar(valor: int, porcentaje: int) -> int:
 	if numerador % _CIEN != 0 and numerador < 0:
 		cociente -= 1
 	return cociente
+
+
+# Sistema.md 10.4 (T18): una tirada en porcentaje con el generador que se pasa
+# (el de combate, A.8). Sale si el entero de 1 a 100 es <= porcentaje. Una sola
+# tirada: quien llama decide no tirar con 0 % (no consume el generador).
+static func tirar(azar: GeneradorAzar, porcentaje: int) -> bool:
+	return azar.entero(1, _CIEN) <= porcentaje

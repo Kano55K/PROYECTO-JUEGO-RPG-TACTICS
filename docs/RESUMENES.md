@@ -1299,3 +1299,93 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. En A, la Rodauva puede Secundar al Maestro y actúa después de él.
   6. Apretar Secundar dos veces: sale del modo y vuelven las marcas de mover y atacar.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
+
+## T18 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T18-incidentes
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Regla** (`Sistema.md` 10.4 v1.6, 1.3, 5.4, 11.2.2, 11.3 paso 4 y 11.5): `Incidente` (`nucleo/combate/incidente.gd`) es una regla sin estado y vive en `ContextoCombate.incidente`.
+    - **Rivales:** mismo bando, de pie por `Objetivos.de_pie` (la oculta cuenta; la caída, la guardada y la que está fuera, no), par `mal` en `relaciones.json` y vecina en 8 por `Tablero.es_vecina_en_8`.
+    - **Porcentaje:** base de `combate.json` + `Arrimo.ajuste(pasos, INCIDENTE)`, con piso 0.
+    - `consulta` sirve para la tirada y para la pantalla. Una sola tirada por turno y, con 0 %, ninguna.
+    - Hoy tiran solo las criaturas de la tribu: las salvajes son de T20.
+    - Es una clase aparte de `Turno` porque `Combate.incidente_en` necesita la misma cuenta sin un turno y con una casilla hipotética, y T20 la reusa.
+  - `Porcentajes.tirar(azar, pct)`: la convención única de las tiradas en % (`entero(1, 100) <= pct`).
+  - **`Turno`:**
+    - `empezar` recibe la regla y el generador de combate; los dos son obligatorios.
+    - El paso 4 (`_chequear_incidente`) va después de `_preparar` y no corre al volver de Secundar (S-31).
+    - **Leal o neutral:** se distrae. Pierde la acción (`ACCION_USADA` para atacar, erizarse, cavar, Hacerse junco y Secundar) y conserva el movimiento.
+    - **Baja:** golpea a la rival de menos vida que alcanza desde su casilla; si empatan, a la primera de la tribu. Las rivales golpeables pasan por la misma validación del ataque; si no alcanza a ninguna, se distrae.
+    - El golpe va por `_atacar_desde(..., por_incidente)`: `Danio` con la afinidad, `Junco` y `VidaCero`.
+    - Queda marcado el lugar de T19 ("la enconada no tira").
+  - **`Combate`:**
+    - Evento `incidente` (`unidad`, `rivales`, `porcentaje`, `resultado` `distraida`/`golpe`, `objetivo`) detrás de `turno` y de su `tirada`. Si golpea, además un `ataque` normal con `eslabon: null`, y después los eventos de Junco, estados, surcos y el `cadena_cortada`.
+    - Si la tirada no sale, solo queda la `tirada`.
+    - El `cambio_modo` se registra antes de volcar la tirada, porque pasó antes.
+    - `incidente_en(unidad_id, casilla)` calcula sin aplicar.
+  - **Pantalla:**
+    - Capa `Tablero/Rivales` con una marca placeholder nueva (`8:0`, círculo rojo punteado).
+    - En el hover de una casilla para mover o de la propia, se marcan las rivales y el aviso suma `incidente.tooltip` con `{porcentaje}` (si es > 0).
+    - Suceso del `incidente` con `incidente.distraida` / `incidente.ataque` y la variante del par de especies como sujeto.
+    - `ClavesTextos` suma las tres claves y las variantes por par que están en el archivo.
+  - **Datos:** sin cambios; la huella no cambia. Tabla de cotejo:
+
+    | Número | Sección | Dónde | Estado |
+    |---|---|---|---|
+    | 20 % de incidente | `Sistema.md` 10.4 | `tablas/combate.json` `incidente.base_pct` | ya existía |
+    | −5 puntos por paso de Arrimo | `Sistema.md` 1.3 | `tablas/arrimo.json` `por_paso.incidente_pts` | ya existía |
+    | Pasos de Arrimo | `Sistema.md` 1.2 | `tablas/balanza.json` `pasos_arrimo` | ya existía |
+- **Archivos:**
+  - **Creados:**
+    - `nucleo/combate/incidente.gd`;
+    - `pruebas/combate/test_incidente.gd`;
+    - `pruebas/pantalla/test_vista_incidente.gd`;
+    - en `pruebas/fixtures/combate/`: `combate_incidente_100.json`, `combate_incidente_0.json`, `escenario_incidente.json` y `escenario_incidente_combate.json`.
+  - **Modificados:**
+    - en `nucleo/combate/`: `turno.gd`, `combate.gd`, `contexto_combate.gd` y `porcentajes.gd`;
+    - `pantalla/claves_textos.gd`;
+    - en `pantalla/combate/`: `lectura_combate.gd`, `vista_combate.gd`, `vista_combate.tscn`, `casillas_cenital.tres` y `marcas_placeholder.svg`;
+    - `pruebas/combate/datos_fixture.gd`;
+    - las llamadas a `Turno.empezar` de `test_afinidad`, `test_cadena`, `test_caza_y_cuenta`, `test_danio`, `test_junco`, `test_secundar`, `test_surco`, `test_turno`, `test_vida_cero`, `ia/test_ia_salvaje` y `pantalla/test_interprete_clic`;
+    - `test_combate.gd` y `test_vista_rasgos.gd` (reescritos, abajo);
+    - `docs/PREGUNTAS.md`, `CLAUDE.md` ("Estado actual") y este archivo.
+- **Tests:** 20 nuevos, total 402; todos pasan, `pruebas/datos/test_contacto.gd` incluido. **Reescritos** (ninguno borrado):
+  - `test_combate.gd::test_registro_de_una_ronda_de_c`, por `Sistema.md` 10.4 v1.6 y 11.3 paso 4: en C la Ocarra y el Zancajunco de la tribu son rivales vecinas y cada una tira su incidente (5 %; con la semilla de C no sale). Hay dos `tirada` más y la hecha a mano pasa a ser la 2.
+  - `test_vista_rasgos.gd::test_marca_y_aviso_de_afinidad`, por `Sistema.md` 10.4 v1.6: en la propia casilla del Zancajunco, la Ocarra rival en diagonal suma la línea del incidente al aviso (el fixture de textos no la tiene: `[FALTA: incidente.tooltip]`).
+  - `test_turno.gd::test_turno_sin_azar` y `test_secundar.gd::test_sin_azar`, por `Sistema.md` 10.4 y 11.3 paso 4: `turno.gd` recibe el generador de combate y solo lo pasa a `Incidente.tirar`. Ahora se prohíben `GeneradorAzar.new`, `GeneradorAzar.derivado`, `.entero(`, `.decimal(`, `randi`, `randf` y `RandomNumberGenerator`.
+- **Criterio de terminado:** cumplido punto por punto. Todos los tests están en `test_incidente.gd`, salvo los de pantalla.
+  1. `test_rival_en_diagonal_tira_y_a_dos_no`.
+  2. `test_caida_guardada_fuera_y_otro_bando_no_y_oculta_si`.
+  3. `test_aliada_que_no_es_rival_no_tira`.
+  4. `test_leal_se_distrae`.
+  5. `test_neutral_se_distrae`.
+  6. `test_baja_golpea_a_la_rival`: 4 de daño, 5 con una afín en diagonal.
+  7. `test_baja_elige_la_de_menos_vida_y_desempata_por_orden`.
+  8. `test_baja_sin_rival_al_alcance_se_distrae`.
+  9. `test_base_0_no_tira`: comparado con un generador gemelo.
+  10. `test_arrimo_y_piso_0`: balanza 2 → 5 %, 5 → 20 %, 1 → 0 % sin tirada; base 0 con la balanza 2 → 0.
+  11. `test_turno_que_vuelve_no_tira`.
+  12. `test_golpe_corta_la_cadena_sin_empezar_otra`.
+  13. `test_incidente_en_coincide_con_la_tirada`.
+  14. `test_registro_y_grabacion`.
+  - Extras de la fila de `Arquitectura.md`: `test_tres_rivales_una_tirada`, `test_oculta_provoca_pero_no_se_golpea`, `test_golpe_quita_el_bono` y `test_salvajes_y_maestro_no_tiran`.
+  - Pantalla (`test_vista_incidente.gd`): `test_aviso_y_marca_de_incidente` y `test_suceso_del_incidente`.
+  - `addons/gdUnit4/runtest.cmd -a res://pruebas`: 402/402.
+- **Lecturas declaradas:**
+  - P-034 (S-32): la oculta provoca, pero no se golpea.
+  - P-035 (S-33): el golpe corta la cadena y no empieza otra.
+  - P-036 (S-34): el golpe o la distracción gastan todos los ataques del turno (Tasajero en Caza).
+  - P-033 (S-31): el turno que vuelve no tira.
+  - Técnica: si la tirada no sale, no hay evento `incidente` (solo la `tirada`).
+  - Técnica: el `cambio_modo` va antes de la `tirada` del incidente en el registro.
+  - Técnica: con 0 % no se marca la rival en pantalla.
+- **Claves de texto nuevas sin texto:** ninguna (`incidente.tooltip`, `incidente.distraida`, `incidente.ataque` y las variantes por par ya están en `es.json`).
+- **Preguntas:** nuevas P-034, P-035 y P-036 (SISTEMAS, no bloquean). Ninguna cerrada.
+- **Lista de prueba manual (usuario):**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. F5 y elegir **D Normal** (`d_rivales_normal`). En el turno de la Ocarra o del Zancajunco, pasar el mouse por su propia casilla: se marca la rival vecina con el círculo rojo y el aviso dice "5% de incidente: …". Sobre una casilla alcanzable lejos de la rival, el aviso no lo dice.
+  3. Pasar el mouse por una casilla en diagonal a la rival: también avisa (vecinas en 8).
+  4. Elegir **H Soplo** (balanza 5): el aviso dice 20 %.
+  5. Jugar D Normal o D Hambriento terminando turnos con las rivales juntas hasta ver un incidente. En los sucesos sale la línea de `incidente.distraida.*` (Normal) o `incidente.ataque.*` (Hambriento, con el golpe en el registro). Con F3, la línea `incidente` va detrás de `turno` y de su `tirada`.
+  6. La distraída todavía se puede mover, y el botón Secundar y los ataques ya no están.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.

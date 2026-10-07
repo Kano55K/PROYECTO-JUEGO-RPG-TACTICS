@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "incidente_combate",
+  "_nota": "Sistema.md 10.4 y 10.2 (tests de T18 con el Combate; usar con combate_incidente_100.json). Balanza 5: Arrimo 0, umbral 8. Orden: zancajunco_1 (Vel 8), ocarra_1 y ocarra_2 (7), rodauva_1 (6), Maestro (5), surcon_s1 (2). zancajunco_1 [3,2] y rodauva_1 [4,3] le pegan a surcon_s1 [3,3] sin moverse y no tienen rivales cerca. ocarra_1 (lealtad 5, hambre 6: obediencia 3, baja) y ocarra_2 (lealtad 8, hambre 3: leal) son rivales y vecinas: ocarra_1 golpea a ocarra_2 y ocarra_2 se distrae",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 5, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 2] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 6, "enfermedades": 0, "vida": null, "posicion": [5, 5] },
+    { "id": "ocarra_2", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [5, 6] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 3] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [3, 3] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

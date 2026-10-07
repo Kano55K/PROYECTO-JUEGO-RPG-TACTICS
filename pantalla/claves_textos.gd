@@ -54,6 +54,11 @@ const PANEL_CADENA: String = "panel.cadena"
 const AFINIDAD_TOOLTIP: String = "afinidad.tooltip"
 # T17: el boton de Secundar y su suceso (Sistema.md 10.1).
 const ACCION_SECUNDAR: String = "accion.secundar"
+# T18: el aviso del incidente y su suceso (Mundo.md 9.2 v1.2). Los sucesos tienen
+# variantes por par de especies (incidente.<resultado>.<especie>.<rival>).
+const INCIDENTE_TOOLTIP: String = "incidente.tooltip"
+const INCIDENTE_DISTRAIDA: String = "incidente.distraida"
+const INCIDENTE_ATAQUE: String = "incidente.ataque"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -65,6 +70,7 @@ const FIJAS: Array[String] = [
 	ACCION_CAVAR, MARCA_OCULTO, MARCA_BONO, SUCESO_SURCO_CAVAR, SUCESO_SURCO_CERRAR,
 	SUCESO_OCULTO, SUCESO_PIERDE_BONO, AVISO_CUENTA_UMBRAL, AVISO_DESTAPAR,
 	PANEL_OBEDIENCIA, COMBATE_HAMBRE, PANEL_CADENA, AFINIDAD_TOOLTIP, ACCION_SECUNDAR,
+	INCIDENTE_TOOLTIP, INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -214,6 +220,13 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 			var variante: String = "%s.%s" % [base, sujeto]
 			if existentes.has(variante):
 				_sumar(claves, variante)
+	# T18: los sucesos del incidente se piden con el par de especies como sujeto.
+	for base in [INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE]:
+		for especie in especies:
+			for rival in especies:
+				var variante: String = "%s.%s.%s" % [base, especie, rival]
+				if existentes.has(variante):
+					_sumar(claves, variante)
 
 
 static func _es_etiqueta(clave: String) -> bool:
