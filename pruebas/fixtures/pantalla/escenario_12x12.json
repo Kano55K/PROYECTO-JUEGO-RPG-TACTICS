@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "tablero_12x12",
+  "_nota": "Arquitectura.md B.3.1 (T42): el tablero de referencia de 12 x 12 para probar la camara. El Maestro y la Rodauva en la esquina de abajo a la izquierda; la Ocarra salvaje en la de arriba a la derecha, lejos: el jugador empieza con casillas para mover y sin contacto",
+  "tipo": "test",
+  "semilla": 4242,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
+               "vida": null, "mana_entrada": null, "hambre": 3,
+               "enfermedades": 0, "posicion": [0, 11] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
+      "lealtad": 8, "hambre": 3, "enfermedades": 0,
+      "vida": null, "posicion": [1, 11] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje",
+      "vida": null, "posicion": [11, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

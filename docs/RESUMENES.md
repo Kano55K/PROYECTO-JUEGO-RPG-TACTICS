@@ -1129,3 +1129,43 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Durante la secuencia de la IA, el anillo no aparece.
   6. Anotar si el panel de la cadena ("Cadena: Tasajero (2)") se lee bien o si el número parece vida.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
+
+## T42 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T42-camara
+- **Estado:** TERMINADA (pendiente de PR y de la prueba manual del usuario)
+- **Hecho:**
+  - **Cómo estaba:** la vista ya tenía un `Camera2D` (`Camara`) y ya convertía el mouse con `TileMapLayer.get_local_mouse_position()` + `local_to_map`, en clic y en hover: no hubo que reemplazar la conversión. Pero `_dibujar_tablero` centraba la cámara en cada `redibujar()`. Ahora el encuadre se hace una sola vez, al abrir, y después la cámara solo la mueve el jugador (D-003).
+  - **`EncuadreCamara`** (`pantalla/combate/encuadre_camara.gd`, `RefCounted`, estática, sin nodos):
+    - `limites(esquina_a, esquina_b, margen)`: el rectángulo entre `map_to_local` de las esquinas, más el margen.
+    - `acotar_zoom` y `acotar_centro(centro, visible, limites)`: lo visible no sale de los límites; en el eje donde es más grande que los límites, queda centrado.
+    - `entra_entero` e `inicial(...)`: si el tablero entra con el zoom mínimo, se encuadra entero con el zoom más cercano a 1 que lo muestra entero; si no, se centra en el Maestro (o en el tablero si no tiene posición) con zoom 1 acotado.
+  - **`VistaCombate`:**
+    - `@export` de presentación: `zoom_minimo` 0,5, `zoom_maximo` 2, `paso_zoom` 0,25, `velocidad_camara` 600 (píxeles de pantalla por segundo) y `margen` 64.
+    - `_encuadrar()` en `empezar`. El tamaño sale de `contexto().tablero`, nunca escrito.
+    - `_process`: las cuatro direcciones con `Input.get_vector`. `_unhandled_input`: rueda (`camara_acercar`/`camara_alejar`) y arrastre (`InputEventMouseMotion` con `camara_arrastrar` apretada).
+    - Consultas y comandos nuevos: `camara()`, `limites_camara()`, `casilla_bajo_mouse()`, `mover_camara(desplazamiento)`, `acercar()` y `alejar()`.
+    - Todo movimiento termina en `_acotar_camara()`: acota y, si con el mouse quieto cambió la casilla bajo el mouse, rearma el hover.
+    - La cámara anda durante la secuencia de la IA (el hover sigue apagado ahí) y nunca se mueve sola.
+  - **InputMap:** `camara_arriba` (↑, W), `camara_abajo` (↓, S), `camara_izquierda` (←, A), `camara_derecha` (→, D), `camara_acercar` (rueda arriba), `camara_alejar` (rueda abajo) y `camara_arrastrar` (botón del medio). No pisan F3, R, Z, Espacio ni el clic izquierdo.
+  - **Fixture** `pruebas/fixtures/pantalla/escenario_12x12.json` (valida con `escenario`): Maestro [0,11], Rodauva [1,11], Ocarra salvaje [11,0].
+- **Archivos:** creados `pantalla/combate/encuadre_camara.gd`, `pruebas/pantalla/test_encuadre_camara.gd`, `pruebas/pantalla/test_vista_camara.gd`, `pruebas/fixtures/pantalla/escenario_12x12.json`; modificados `pantalla/combate/vista_combate.gd`, `project.godot` (InputMap), `CLAUDE.md` (Estado actual).
+- **Tests:** 16 nuevos (7 de `EncuadreCamara`, 9 de la vista), total 355, todos pasan (sí). Ningún test anterior cambió.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. `test_clic_y_hover_con_la_camara_movida` (zoom y cámara movida, mouse y clic reales: hover en la casilla y movimiento a esa casilla) y `test_hover_sigue_al_mover_la_camara`.
+  2. `test_direcciones_no_salen_de_los_limites` (las cuatro acciones, con el zoom de apertura y el máximo) y `test_arrastrar_no_sale_de_los_limites`.
+  3. `test_zoom_respeta_minimo_y_maximo` (rueda por `Input.parse_input_event`).
+  4. `test_escenarios_abren_dentro_de_los_limites` (los 11 de `datos/` y el de 12 × 12) y `test_sin_entrar_centra_en_el_maestro`.
+  5. `test_recargar_a_mitad_de_un_desplazamiento` (sobre `principal.tscn`, con `camara_derecha` apretada).
+  6. Los tests de pantalla anteriores pasan sin cambios. Además, `test_camara_durante_la_secuencia_de_la_ia`.
+  - Consola: sin errores ni advertencias nuevas. Los dos `ERROR` del debugger remoto (`127.0.0.1:0`) son del arranque de `runtest.cmd`.
+- **Lecturas declaradas:** ninguna de reglas. Supuestos de presentación: el encuadre no agranda más allá de zoom 1 (los 8 × 8 se ven igual que antes); el zoom suma o resta un paso y se centra en la cámara, no en el mouse; la velocidad se divide por el zoom (en pantalla se mueve igual con cualquier zoom). Con la ventana de 1152 × 648, el 12 × 12 entra entero con el zoom mínimo 0,5: abre encuadrado entero, no en el Maestro.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** ninguna nueva; ninguna cerrada.
+- **Lista de prueba manual:**
+  1. F5 → A. Mover la cámara con las flechas y con WASD, acercar y alejar con la rueda, y arrastrar con el botón del medio: no se sale del tablero (más el margen) y el zoom tiene tope en los dos sentidos.
+  2. Con la cámara movida y con zoom, jugar A con el mouse: los clics y las marcas azules y rojas caen en la casilla correcta. Con el mouse quieto, mover la cámara con el teclado: el tooltip y las marcas de afinidad pasan a la casilla nueva.
+  3. Durante la secuencia de la IA, mover la cámara: no se rompe nada, la secuencia sigue, y la cámara no vuelve sola al centro (tampoco al terminar la secuencia).
+  4. Apretar R mientras se desplaza la cámara (tecla sostenida o arrastre): reinicia sin errores en la consola.
+  5. Abrir C y E: la cámara encuadra el tablero entero y centrado.
+  6. Opcional: en el inspector de `vista_combate.tscn`, probar otros `zoom_minimo`, `velocidad_camara` y `margen`.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
