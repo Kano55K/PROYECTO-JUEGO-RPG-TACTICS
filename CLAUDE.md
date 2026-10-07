@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Revisado por última vez contra `docs/Arquitectura.md` v0.23 (06/10/2026). Dueño: Arquitecto Técnico.
+> Revisado por última vez contra `docs/Arquitectura.md` v0.28 (07/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -14,7 +14,7 @@ Tactics RPG 2D isométrico de captura de criaturas y supervivencia medieval. Est
 | `docs/00_Vision.md` | Qué es el juego y su alcance |
 | `docs/Sistema.md` | Reglas y números |
 | `docs/Mundo.md` | Nombres y textos |
-| `docs/Arquitectura.md` | Cómo se construye: estructura, datos, tareas (B.2 a B.4) |
+| `docs/Arquitectura.md` | Cómo se construye: estructura, datos, tareas (B.2 a B.4) y decisiones técnicas (A.11) |
 | Brief de la prueba 0a (en `docs/`) | **Histórico** desde el 06/10/2026 (`Sistema.md` 11.9): no lo uses para decidir y no anotes sus contradicciones. Manda `Sistema.md` |
 | `docs/PREGUNTAS.md` | Dudas abiertas con el staff y sus respuestas |
 
@@ -191,7 +191,7 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 ## Cómo trabajás cada tarea
 
 1. Creá la rama de la tarea desde `develop`.
-2. Leé la fila de la tarea en `docs/Arquitectura.md` (B.2 a B.4), las secciones de `docs/Sistema.md` y del Brief que cita, y las entradas de `docs/PREGUNTAS.md` que la afecten.
+2. Leé la fila de la tarea en `docs/Arquitectura.md` (B.2 a B.4, y B.3.1 para T41 a T43), las secciones de `docs/Sistema.md` y del Brief que cita, y las entradas de `docs/PREGUNTAS.md` que la afecten.
 3. **Proponé un plan** antes de escribir código: archivos que vas a crear o tocar, tests (uno por renglón del criterio de terminado) y dudas. Las dudas de diseño van como entradas nuevas de `PREGUNTAS.md`. Esperá la aprobación.
 4. Escribí los tests, después el código, y corré **todos** los tests.
 5. Actualizá la sección "Estado actual" de este archivo (solo esa sección). Es una foto corta del presente: qué está terminado (una línea por tarea), en qué rama se trabaja, qué preguntas abiertas afectan y cuál es la siguiente tarea. La historia va en `docs/RESUMENES.md`.
@@ -210,6 +210,24 @@ Reglas completas en `docs/Arquitectura.md` B.2.1. Las que más se olvidan:
 - **Estado intermedio:** entre T35 y T38, las activas nuevas existen en los datos y todavía no tienen acción. Es lo esperado.
 - **Grabaciones del playtest 0a.1:** cambian de huella; el aviso del reproductor es lo esperado. No se arreglan.
 - Las lecturas S-21 a S-26 están confirmadas por `Sistema.md` v1.4: no hace falta preguntarlas.
+
+## Geometría y tablero (desde T41)
+
+Reglas completas en `docs/Sistema.md` 11.3 v1.6 y `docs/Arquitectura.md` B.3.1 y A.11.
+
+**El cuerpo mira 4, el vínculo mira 8:**
+
+| Vecindad | Reglas |
+|---|---|
+| **4 ortogonales** | Mover, atacar, guardar (criatura junto al Maestro), invocar, cavar, Remiendo, presas de la Caza, Erizarse de la IA, Hacerse junco (activar y destape por contacto), casilla libre y encierro |
+| **8 vecinas** (diagonales incluidas) | Afinidad (también entre salvajes), incidente con rival aliada, toggle de afines contra la cobardía y −10 del Maestro vecino |
+| **Sin posición** | Combos |
+| **Manhattan ≤ Movimiento + Alcance** | "A su alcance" del Encono y de la cobardía (sin cambios) |
+
+- Toda regla de vínculo usa la consulta de vecina en 8 de `Tablero` (T41), y toda regla de cuerpo usa las vecinas ortogonales de T06. Nunca una tercera forma de medir, y ninguna clase calcula distancias por su cuenta.
+- **Tablero de referencia: 12 × 12.** Un escenario puede ser más chico (G es de 8 × 8), nunca más grande. Ningún tamaño de tablero escrito en el código.
+- **Cámara (desde T42):** la pantalla convierte el mouse con `TileMapLayer.get_local_mouse_position()` y `local_to_map`, nunca con la posición en pantalla. La cámara no toca el núcleo.
+- **Test de contacto (desde T43):** si una tarea hace fallar `pruebas/datos/test_contacto.gd` (cambia la ronda del primer ataque de un escenario), no ajustes el test ni las coordenadas: anotalo en `docs/PREGUNTAS.md` y pará.
 
 ## Estado actual
 

@@ -339,7 +339,7 @@
 - **Respuesta:** `Sistema.md` 9.2, paso 6 (v1.4 y v1.5) y Visión 6.4 v1.2: opción B. Si el combate nocturno termina en derrota, la atacante se va, también si ya estaba caída: su pergamino arde, vuelve a ser salvaje y no hay `atacante_pendiente`. Su ida no cambia la lealtad de nadie. Cambia una condición de `ResultadoCombate.armar` y se suma la derrota al test 11 de T12. Se aplica en T30.
 
 ## P-025 — Guardar a una caída y la consulta única de objetivo
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** ARQUITECTO
 - **Tarea:** T38
 - **Fecha:** 06/10/2026
@@ -349,10 +349,10 @@
 - **Opciones:** A) una tercera clase, "aliada que admite caída", solo para guardar. B) la consulta recibe el tipo de acción (ataque, Martillazo, Lanzadera, sellar, Encono, Remiendo, guardar) y de ahí saca qué estados deja pasar. — Recomendación técnica: B (cada acción dice una sola vez qué admite, y la próxima diferencia no pide otra clase).
 - **Bloquea:** no (se necesita antes de T26)
 - **Mientras tanto:** `nucleo/combate/objetivos.gd` (`Objetivos.Clase`) tiene `HOSTIL` y `ALIADA`, y `ALIADA` deja afuera a la caída, que es lo que pide el Remiendo. Test: `pruebas/combate/test_junco.gd`, `test_aliada_vale_sobre_oculta` (una caída da `OBJETIVO_CAIDO` como aliada). Ninguna acción aliada existe todavía.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto (06/10/2026): depende de la acción. ALIADA (Remiendo) sigue dejando afuera a la caída (Sistema.md 1.6). Guardar a una caída usa una clase nueva de Objetivos, CAIDA_PROPIA, que exige que esté caída; que sea de la tribu lo revisa la acción, no la consulta. Se aplica y se cierra en T27.
 
 ## P-026 — Qué presas elige el Tasajero en Caza y en qué orden las ataca
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T39
 - **Fecha:** 06/10/2026
@@ -362,10 +362,10 @@
 - **Opciones:** A) Menos vida → antes en la cola, para elegir y para el orden (el primer ataque va a la de menos vida, como el segundo de S-23). B) Solo antes en la cola. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A como lectura declarada: `nucleo/combate/ia/ia_salvaje.gd`, `_DESEMPATE_PRESAS` y `_presas_elegidas`. Test: `pruebas/combate/ia/test_ia_salvaje.gd`, `test_t39_desempates_de_la_caza`, caso (g). Si la respuesta es otra, cambian esa constante y ese caso.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistema.md 11.8 v1.6: opción A. Con 3 o más presas, las 2 de menos vida → la que actúa antes en la cola; el primer ataque va a la de menos vida. Ya programado así: no cambia código ni tests. Se cierra al empezar T41.
 
 ## P-027 — Empate en "la enemiga de pie más cercana"
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** SISTEMAS
 - **Tarea:** T39
 - **Fecha:** 06/10/2026
@@ -375,7 +375,7 @@
 - **Opciones:** A) Más cercana → menos vida → antes en la cola, como el objetivo de "Acercarse". B) Mirar todas las empatadas: la casilla que queda más cerca (en la retirada, más lejos) de cualquiera de ellas. — Recomendación técnica: A. En el caso de F, A y B dan la misma casilla, [3,1].
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A como lectura declarada: `nucleo/combate/ia/ia_salvaje.gd`, `_enemiga_mas_cercana` (usa `_DESEMPATE_CERCANA`). Tests: `pruebas/combate/ia/test_ia_salvaje.gd`, `test_t39_surcon_cava_hacia_la_mas_cercana` (caso con la Rodauva a 6) y `test_t39_f_el_zancajunco_se_oculta_avanza_y_embiste` (el camino de F depende del surco en [3,1]).
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistema.md 11.8 v1.6: opción A. "La enemiga de pie más cercana" se desempata por más cercana → menos vida → la que actúa antes en la cola, como Acercarse. Ya programado así: no cambia código ni tests. Se cierra al empezar T41.
 
 ## P-028 — `dudosa_hasta` repite el piso de Neutral
 - **Estado:** CERRADA
@@ -391,7 +391,7 @@
 - **Respuesta:** Arquitecto (06/10/2026): se quita dudosa_hasta de tablas/lealtad.json y de su esquema. Es neutral_desde − 1 y viola "cada número en un solo archivo" (A.2.2). El estado Dudosa queda definido como desleal_hasta + 1 hasta neutral_desde − 1. Orden: esquema → datos → fixtures → código, con su línea en la tabla de cotejo. Se aplica y se cierra al empezar T15, en el mismo PR.
 - **Cerrada en:** T15
 ## P-029 — Golpe que gana el combate y saca a la objetivo de la cadena: ¿`objetivo_fuera` o `fin_combate`?
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** ARQUITECTO
 - **Tarea:** T16
 - **Fecha:** 07/10/2026
@@ -401,4 +401,4 @@
 - **Opciones:** A) `objetivo_fuera` (lo que pasó primero en la regla de 10.2); `fin_combate` queda para las cadenas que sigan vivas al terminar (desde T18, T25 y T26). B) `fin_combate` siempre que el combate termine en esa acción. — Recomendación técnica: A (un orden fijo y sin caso especial; para T23 da igual, porque cuenta eslabones).
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A como lectura técnica: `nucleo/combate/turno.gd` (`_resolver` llama a `Cadena.revisar_objetivo` antes de evaluar el fin) y `nucleo/combate/combate.gd` (`_terminar` corta con `fin_combate` lo que quede). Tests: `pruebas/combate/test_cadena.gd`, `test_registro_instantanea_y_grabacion` (victoria con un solo corte `objetivo_fuera`, y `Cadena.cortar(fin_combate)` sobre una cadena abierta, una sola vez).
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto (07/10/2026): opción A. El corte por objetivo se mira después de cada acción aplicada y va antes que el de fin: un golpe que saca a la objetivo y gana el combate deja un solo cadena_cortada, con objetivo_fuera. fin_combate queda para las cadenas que sigan vivas al terminar (desde T18, T25, T26 y T28). Para T23 da igual, porque cuenta eslabones. Ya programado así: no cambia código ni tests. Se cierra al empezar T41.

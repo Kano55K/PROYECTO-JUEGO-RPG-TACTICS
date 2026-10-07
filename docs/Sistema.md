@@ -1,7 +1,7 @@
 # SISTEMA — Reglas, números y balance
 
-> **Estado:** Borrador v1.5 · **Dueño:** Diseñador de Sistemas y Balance · **Última actualización:** 05/10/2026
-> **Sincronizado con:** `00_Vision.md` v1.2 · `Mundo.md` v1.0 · `Arquitectura.md` v0.22 · `docs/PREGUNTAS.md` y `docs/RESUMENES.md` al cierre de T13. La v1.5 sincroniza con la Visión v1.2: la atacante que se va si cae el Maestro (9.2, 9.3, 11.5) y su registro en el epílogo (13), la prenda sin consecuencias (3.3) y los playtests sin encuesta (11.9); además, suma lo que mide el hito 0a.1b (11.9) y pone al día los pendientes (15). **No cambia ningún número ni ninguna regla ya programada.** La v1.4 responde las lecturas declaradas S-21 a S-26 y la P-024 (S-20) del Arquitecto, y cierra las preguntas de `Mundo.md` 9.1 (confianza, golondrinas, aviso al comer y solo se come a una suelta). La v1.3 cierra los números de los rasgos reescritos tras el playtest 0a.1 (Visión 6.2) en una sola pasada de balance: el surco, Hacerse junco y Caza y cuenta (11.2.1 a 11.2.3), y la IA del Tasajero (11.8).
+> **Estado:** Borrador v1.6 · **Dueño:** Diseñador de Sistemas y Balance · **Última actualización:** 07/10/2026
+> **Sincronizado con:** `00_Vision.md` v1.3 · `Mundo.md` v1.0 · `Arquitectura.md` v0.22 · `docs/PREGUNTAS.md` y `docs/RESUMENES.md` al cierre de T16. La v1.6 sincroniza con la Visión v1.3 (geometría y tablero): qué reglas miran las **4 casillas ortogonales** y cuáles las **8 vecinas** (11.3); afinidad, incidente y cobardía con vecinas en 8, **sin cambiar sus números** (10.3, 10.4, 10.6); incidente con la rival en diagonal (10.4); tablero de **12 × 12** con contacto en la ronda 2 y criterios de despliegue (11.3, 11.9); hambre de combate **cada 6 rondas** (7.2); métricas 1 y 13 contadas desde el primer ataque (11.9); respuestas a P-026 y P-027 (11.8). La v1.5 sincroniza con la Visión v1.2: la atacante que se va si cae el Maestro (9.2, 9.3, 11.5) y su registro en el epílogo (13), la prenda sin consecuencias (3.3) y los playtests sin encuesta (11.9); además, suma lo que mide el hito 0a.1b (11.9) y pone al día los pendientes (15). La v1.4 responde las lecturas declaradas S-21 a S-26 y la P-024 (S-20) del Arquitecto, y cierra las preguntas de `Mundo.md` 9.1 (confianza, golondrinas, aviso al comer y solo se come a una suelta). La v1.3 cierra los números de los rasgos reescritos tras el playtest 0a.1 (Visión 6.2) en una sola pasada de balance: el surco, Hacerse junco y Caza y cuenta (11.2.1 a 11.2.3), y la IA del Tasajero (11.8).
 > Este documento baja a números lo definido en `00_Vision.md`. Si algo acá contradice la Visión, manda la Visión: se propone el cambio y se registra en `Decisiones.md`.
 > Los nombres del juego (Arrimo, Encono, Secundar, péñola, prenda, Urdimbre, "lo que diste", Erizarse, Alabarda, Hacerse junco, Caza y cuenta, Martillazo, Lanzadera, Remiendo, Leña en las púas, Sueño liviano, Madriguera, Acecho, Poza Tibia, quebranto, Menestral, las rayas y las golondrinas) son finales y viven en `Mundo.md` (1.2, 2.8, 2.9, 4.5, 4.7, 4.9 y 4.10). Los marcados como *(provisorio)* esperan la confirmación del Worldbuilder: en la v1.3, **el surco** del Surcón y el estado **oculto** del Zancajunco.
 
@@ -130,7 +130,7 @@ Rama única del MVP. Aprobados en la Visión v0.7; nombres finales en `Mundo.md`
 |---|---|---|---|---|---|
 | **Martillazo** (básico) | 2 | Distancia Manhattan ≤ 3, sin bloqueo | Daño **2 + Poder** (3 al inicio) | Sí | ¿Pego 4 cuerpo a cuerpo gratis o 3 a distancia con el maná del sellado? |
 | **Lanzadera** (básico) | 2 | Línea recta ≤ 2; no atraviesa enemigas | Empuja o atrae **1 casilla** a una unidad que no esté caída. Si la casilla está ocupada o fuera del tablero, no se mueve y recibe 1 de daño | No | Separar rivales aliadas, juntar rivales salvajes, sacar a la Rodauva del alcance del Tasajero |
-| **Remiendo** (fuerte) | 4 | Adyacente o sí mismo | Cura **3 + Poder** (4 al inicio). **No afecta a las caídas** (11.5) | Sí | ¿Media reserva para sostener a una aliada o para sellar? |
+| **Remiendo** (fuerte) | 4 | Adyacente (4 ortogonales, 11.3) o sí mismo | Cura **3 + Poder** (4 al inicio). **No afecta a las caídas** (11.5) | Sí | ¿Media reserva para sostener a una aliada o para sellar? |
 
 **Reglas comunes:**
 - Lanzar un hechizo gasta la **acción** del Maestro; conserva su movimiento.
@@ -213,9 +213,9 @@ Si una criatura ataca de noche (ver 9.2), el sueño se interrumpe: el Maestro re
 
 | Regla | Valor | Decisión que genera |
 |---|---|---|
-| Invocar en combate | Gasta el turno completo del Maestro. La criatura aparece en una **casilla libre adyacente** al Maestro; si no hay ninguna, no se puede invocar | Conviene tener criaturas sueltas antes del combate, pero eso cuesta comida. Un Maestro rodeado no recibe refuerzos |
+| Invocar en combate | Gasta el turno completo del Maestro. La criatura aparece en una **casilla libre adyacente** al Maestro (4 ortogonales, 11.3); si no hay ninguna, no se puede invocar | Conviene tener criaturas sueltas antes del combate, pero eso cuesta comida. Un Maestro rodeado no recibe refuerzos |
 | Guardar fuera de combate | Gratis | — |
-| Guardar en combate | Cuesta la acción de la criatura y exige que esté adyacente al Maestro | ¿La salvo o la dejo pelear un turno más? |
+| Guardar en combate | Cuesta la acción de la criatura y exige que esté adyacente al Maestro (4 ortogonales) | ¿La salvo o la dejo pelear un turno más? |
 | Guardar a una caída | Cuesta la acción del Maestro y maná (11.5) | ¿La salvo ahora o sigo peleando? |
 | Cobro de comida | Come toda criatura que estuvo suelta en algún momento del día | Sacarla "un ratito" también cuesta |
 | Criatura guardada | No come, no sufre clima, no gana ni pierde lealtad, no participa de relaciones, no abandona, **no se cura** | Seguridad contra vínculo |
@@ -447,7 +447,7 @@ Todos los eventos de esta sección cambian la lealtad **solo de las sueltas**: l
 |---|---|---|---|---|
 | ≥ umbral de rescate | Afín: +1 de daño mutuo y combo de afines | −10 puntos | −20 puntos | Se distrae |
 | 4 hasta umbral − 1 | Sin relación | Normal | Normal | Se distrae |
-| ≤ 3 | Sin relación | +10 puntos | +20 puntos | **Ataca a la rival** |
+| ≤ 3 | Sin relación | +10 puntos | +20 puntos | **Ataca a la rival** si la alcanza desde su casilla; si no, se distrae (10.4) |
 
 **Decisión que genera:** una criatura leal con hambre deja de ser tu mejor aliada en el tablero, aunque todavía pueda rescatarte.
 
@@ -510,8 +510,10 @@ Cada ser (el Maestro y cada criatura suelta) tiene un valor de **Hambre de 0 a 1
 | Fuente | Cantidad | Decisión que genera |
 |---|---|---|
 | Fin del día (al dormir) | Según el apetito (7.3) | ¿Cuántas bocas puedo sostener afuera? |
-| Combate | +1 al cerrar las rondas 5, 10, 15…, al Maestro y a **toda criatura de la tribu en el tablero, de pie o caída**. No alcanza a las guardadas (tampoco a la caída que se guardó), a las salvajes ni a la atacante nocturna. La obediencia, la regeneración y el estado de hambre se recalculan en el acto | Cerrar rápido o arriesgarse: una leal puede pasar a Hambrienta en pleno combate. Guardar a una caída también la saca del reloj |
+| Combate | +1 al cerrar las rondas **6, 12, 18…**, al Maestro y a **toda criatura de la tribu en el tablero, de pie o caída**. No alcanza a las guardadas (tampoco a la caída que se guardó), a las salvajes ni a la atacante nocturna. La obediencia, la regeneración y el estado de hambre se recalculan en el acto | Cerrar rápido o arriesgarse: una leal puede pasar a Hambrienta en pleno combate. Guardar a una caída también la saca del reloj |
 | Descanso para curarse | El hambre sigue subiendo normalmente (solo se toma agua) | Ver 8.3 |
+
+**Cada 6 rondas** — `DECIDIDO` (07/10/2026; antes, cada 5): con el tablero de 12 × 12, la ronda 1 es de acercamiento (11.3), y la Visión pide que el tablero grande no cobre hambre por caminar. Seis rondas equivalen a las cinco de pelea de antes. Es un dato (`tablas/hambre.json`, `combate.cada_rondas`: 5 → 6), sin cambio de código. **Alternativa descartada:** contar desde el primer ataque; es más exacto, pero exige programar un contador nuevo.
 
 ### 7.3 Apetito — `DECIDIDO`
 
@@ -775,6 +777,8 @@ La probabilidad total y la de sorpresa se muestran antes de dormir.
 
 ## 10. Combate: iniciativa, combos y relaciones
 
+**Geometría (v1.6, Visión v1.3):** las relaciones de esta sección (afinidad, incidente y sostén de la cobardía) miran las **8 vecinas**, diagonales incluidas. Moverse, atacar y guardar miran las **4 ortogonales**. Los combos **no miran la posición**. Tabla completa en 11.3.
+
 ### 10.1 Iniciativa y Secundar — `DECIDIDO`
 
 | Regla | Valor | Decisión que genera |
@@ -786,7 +790,7 @@ La probabilidad total y la de sorpresa se muestran antes de dormir.
 
 ### 10.2 Combos: ataque en cadena — `DECIDIDO`
 
-Cuando aliados atacan **de forma consecutiva** al **mismo objetivo**, cada golpe desde el segundo suma un bono.
+Cuando aliados atacan **de forma consecutiva** al **mismo objetivo**, cada golpe desde el segundo suma un bono. **El combo no mira la posición:** dos afines encadenan como afines aunque estén lejos entre sí (Visión v1.3; S-28).
 
 | La cadena se corta si… | No la corta… |
 |---|---|
@@ -810,20 +814,26 @@ Con daños de 3 a 5 y redondeo hacia abajo, el tope real queda en 3 o 4 eslabone
 
 **Decisión que genera:** el orden en que actúan tus unidades importa tanto como dónde están.
 
-### 10.3 Afinidad por adyacencia — `DECIDIDO`
+### 10.3 Afinidad entre vecinas — `DECIDIDO`
 
-Una unidad adyacente a una afín suma **+1 de daño plano**, como máximo +1 por ataque aunque tenga varias afines al lado. Se mira la posición del atacante al golpear. El Maestro es afín de toda criatura con obediencia ≥ umbral de rescate (y viceversa).
+Una unidad **vecina** de una afín (cualquiera de las **8 casillas** alrededor, diagonales incluidas) suma **+1 de daño plano**, como máximo +1 por ataque aunque tenga varias afines vecinas. Se mira la posición del atacante al golpear. El Maestro es afín de toda criatura con obediencia ≥ umbral de rescate (y viceversa).
 
-**Decisión que genera:** formar en bloque o dispersarse para cubrir el tablero; el Maestro en el frente potencia a la tribu, pero se expone.
+**Con vecinas en 8 el número no cambia** — `DECIDIDO` (07/10/2026, responde la pregunta de la Visión 11): no hay entero menor que +1, y el tope de +1 por ataque ya impide acumular. Lo que sube es la **frecuencia**, que es lo buscado: dos aliadas que rodean por los lados a la misma objetivo quedan en diagonal entre sí y ahora se potencian (Visión 6.4). Efecto en C: unos 3 o 4 de daño más por ronda (⚠️ 14).
+
+**Decisión que genera:** rodear a una objetivo potencia a la tribu, pero deja esquinas abiertas al Tasajero (11.2.3); el bloque protege, pero llega con menos golpes. El Maestro en el frente potencia a la tribu, pero se expone.
 
 ### 10.4 Rivalidad entre aliadas: incidente — `DECIDIDO`
 
-Una criatura adyacente a una rival aliada tiene **20% de incidente** al **inicio de su turno** (−5 puntos por paso de Arrimo). El resultado depende de su obediencia (5.4): **≥ 4 se distrae y pierde la acción; ≤ 3 usa la acción para golpear a la rival**. En ambos casos **conserva el movimiento**: la distraída todavía se puede alejar. La probabilidad se muestra en la casilla antes de mover, el turno anterior.
+Una criatura **vecina** (8 casillas) de una rival aliada tiene **20% de incidente** al **inicio de su turno** (−5 puntos por paso de Arrimo). El resultado depende de su obediencia (5.4): **≥ 4 se distrae y pierde la acción; ≤ 3 usa la acción para golpear a la rival, si la alcanza desde su casilla**. En ambos casos **conserva el movimiento**: la distraída todavía se puede alejar. La probabilidad se muestra en la casilla antes de mover, el turno anterior.
 
 **Precisiones** — `DECIDIDO` (03/10/2026):
-- **Una sola tirada por turno**, aunque tenga varias rivales aliadas adyacentes: amontonarlas no multiplica el riesgo. Con obediencia ≤ 3 golpea a la rival de **menos vida actual**; si empatan, a la primera en el orden de la tribu.
+- **Una sola tirada por turno**, aunque tenga varias rivales aliadas vecinas: amontonarlas no multiplica el riesgo. Con obediencia ≤ 3 golpea a la rival de **menos vida actual** entre las que alcanza; si empatan, a la primera en el orden de la tribu.
 - **Una criatura enconada no tira incidente** ese turno: la furia la enfoca en la rival enemiga (orden del inicio del turno en 11.3). Motivo: la enconada ya perdió el control; cobrarle dos veces la misma pérdida no genera una decisión nueva.
-- *Palanca en reserva:* una tirada por rival adyacente castigaría más a una tribu de Ocarras (14). Solo si esa tribu domina en los tests.
+- *Palanca en reserva:* una tirada por rival vecina castigaría más a una tribu de Ocarras (14). Solo si esa tribu domina en los tests.
+
+**Con vecinas en 8** — `DECIDIDO` (07/10/2026):
+- **El 20% no cambia.** Con una sola tirada por turno, más rivales vecinas no multiplican el riesgo: solo sube la chance de tener alguna al lado. Eso además mitiga el riesgo de incidentes casi invisibles con la balanza 2 (14).
+- **La rival en diagonal:** con obediencia ≤ 3, golpea a la rival solo **si la alcanza desde su casilla**, sin moverse y con su alcance normal (el ataque es ortogonal; la Alabarda pega en línea recta). Si ninguna rival vecina está a su alcance, **se distrae** y pierde la acción, como la obediente. **Alternativa descartada:** que se mueva para pegarle, como la enconada; suma una decisión forzada nueva y más código en T18.
 
 **Decisión que genera:** juntar rivales es un riesgo chico con una tribu leal y bien alimentada, y un peligro con una hambrienta.
 
@@ -864,7 +874,9 @@ Aplica a las criaturas **de trabajo**. Se chequea con el mismo disparador que el
 | Arrimo | −5 puntos por paso |
 | Obediencia leal (≥ umbral) | −20 puntos |
 | Obediencia ≤ 3 | +20 puntos |
-| El Maestro está adyacente | −10 puntos |
+| El Maestro es **vecino** (8 casillas) | −10 puntos |
+
+**El Maestro vecino en 8** — `DECIDIDO` (07/10/2026): es sostén, como el de las afines del toggle, y la Visión v1.3 pone el sostén de la cobardía en las 8 vecinas. Si quedara en 4, el Maestro en diagonal sostendría como afín pero no como Maestro.
 
 | Balanza | Leal + Maestro al lado | Leal | Neutral | Obediencia ≤ 3 |
 |---|---|---|---|---|
@@ -880,19 +892,19 @@ Aplica a las criaturas **de trabajo**. Se chequea con el mismo disparador que el
 
 **Decisión que genera:** ¿pongo al Maestro junto a la criatura asustada para sostenerla, sabiendo que eso lo expone?
 
-> `PROPUESTA` a testear (toggle en el escenario E de la Prueba 0a, 11.9): cada afín adyacente resta **−10 puntos** a la cobardía (máximo −20), con un **mínimo de 5%**. Ejemplo: Rodauva leal con la balanza en 2, junto a dos Rodauvas: 25% → 5%. Anticipa la barra de zozobra. Si se aprueba, también alcanza a las salvajes (10.7). **El Maestro no cuenta como afín adyacente** para este toggle: ya tiene su −10 propio (`DECIDIDO` 03/10/2026, responde P-008). Así quedan dos herramientas separadas: sostener con el Maestro o sostener con la manada.
+> `PROPUESTA` a testear (toggle en el escenario E de la Prueba 0a, 11.9): cada afín **vecina** (8 casillas) resta **−10 puntos** a la cobardía (máximo −20), con un **mínimo de 5%**. Ejemplo: Rodauva leal con la balanza en 2, junto a dos Rodauvas: 25% → 5%. Anticipa la barra de zozobra. Si se aprueba, también alcanza a las salvajes (10.7). **El Maestro no cuenta como afín vecina** para este toggle: ya tiene su −10 propio (`DECIDIDO` 03/10/2026, responde P-008). Así quedan dos herramientas separadas: sostener con el Maestro o sostener con la manada. **Con vecinas en 8 los números no cambian** (07/10/2026): llegar a −20 se vuelve más fácil, y el escenario E lo mide.
 
 ### 10.7 Criaturas salvajes — `DECIDIDO`
 
-Siguen las mismas reglas de relación: afinidad, rivalidad, Encono y cobardía. No tienen lealtad: se tratan como **obediencia ≤ 3** y sin Arrimo. Si ocurre un incidente, siempre se atacan entre ellas.
+Siguen las mismas reglas de relación: afinidad, rivalidad, Encono y cobardía, con las **8 vecinas**. No tienen lealtad: se tratan como **obediencia ≤ 3** y sin Arrimo. Si ocurre un incidente, siempre se atacan entre ellas (si se alcanzan desde su casilla, 10.4).
 
 | Regla | Valor |
 |---|---|
-| Afinidad | +1 plano entre salvajes afines adyacentes (10.3). **La afinidad solo existe dentro del mismo bando**: una Rodauva de la tribu junto a una Rodauva salvaje no suma nada |
+| Afinidad | +1 plano entre salvajes afines vecinas (10.3). **La afinidad solo existe dentro del mismo bando**: una Rodauva de la tribu junto a una Rodauva salvaje no suma nada |
 | Combos | **No encadenan**: sus ataques consecutivos no suman bono. La cadena es algo que solo da el vínculo con el Maestro (Visión 6.4). Sus turnos sí cortan las cadenas de la tribu (10.2) |
 | Impacto en el MVP | El único par afín salvaje posible es Rodauva–Rodauva (Huertos, 15%): pasan de 2 a 3 de daño |
 
-**Decisión que genera:** atraer a una Ocarra salvaje hacia un Zancajunco salvaje es una táctica legítima; separar a dos Rodauvas salvajes con la Lanzadera les quita la afinidad.
+**Decisión que genera:** atraer a una Ocarra salvaje hacia un Zancajunco salvaje es una táctica legítima; separar a dos Rodauvas salvajes con la Lanzadera les quita la afinidad (ahora hay que dejarlas a 2 casillas o más, también en diagonal).
 
 ### 10.8 Relaciones entre las reclutables (referencia, de `Mundo.md`)
 
@@ -945,7 +957,7 @@ La vida y el daño del Maestro siguen la balanza (tabla 1.2). Su Movimiento, Alc
 | Maestro | Pega lo mismo que la Ocarra: el Maestro también pelea (Pilar 1) |
 | Rodauva | Frágil. Su daño de 2 la vuelve la **mano fina para sellar**: baja a una salvaje al tramo ≤ 25% sin hacerla huir. Salvaje y erizada, debilitarla cuesta mucho: conviene domesticarla |
 | Surcón | El Maestro necesita 6 golpes para debilitarlo (24 ÷ 4): la vida compensa la pérdida de Lomo de tierra (05/10/2026). Ya no es un muro que aguanta golpes, sino uno que **cierra el paso**: se para detrás de su surco |
-| Ocarra | Ataca primero (temperamento). Desde atrás del Maestro queda adyacente a él: la formación natural refuerza la regla de oro |
+| Ocarra | Ataca primero (temperamento). Desde atrás del Maestro queda vecina de él: la formación natural refuerza la regla de oro |
 | Zancajunco | "Si ataca, lo hace primero y rápido". Desde el juncal, el golpe sale de la quietud |
 | Tasajero | Un solo turno por ronda (Visión 6.2 v1.1), pero con **dos ataques en Caza**: el jefe no pierde por número de acciones. En Caza abre la ronda (Vel 8); en Cuenta actúa tarde (Vel 3) y **corta las cadenas** de las más lentas. Daño 5: dos golpes no tumban a ninguna presa entera salvo a la Rodauva (8), que erizada aguanta |
 
@@ -969,23 +981,25 @@ Rasgo del Surcón. Reemplaza a Lomo de tierra (Visión 6.2 v1.1). Es el **único
 
 ### 11.2.2 Hacerse junco — `DECIDIDO` (05/10/2026)
 
-Rasgo del Zancajunco, reescrito como activa (Visión 6.2 v1.1). Reemplaza a la pasiva de primer ataque.
+Rasgo del Zancajunco, reescrito como activa (Visión 6.2 v1.1). Reemplaza a la pasiva de primer ataque. **"Adyacente" en este rasgo son las 4 ortogonales** (v1.6, 11.3): contacto es poder pegarle.
 
 | Regla | Valor | Decisión que genera |
 |---|---|---|
-| Activar | Gasta la **acción**. Solo si **no se movió** este turno y **no tiene ninguna enemiga de pie adyacente** | ¿Avanzo o me escondo? No sirve para escapar de un cuerpo a cuerpo |
+| Activar | Gasta la **acción**. Solo si **no se movió** este turno y **no tiene ninguna enemiga de pie adyacente** (4 ortogonales) | ¿Avanzo o me escondo? No sirve para escapar de un cuerpo a cuerpo |
 | Oculto *(provisorio)* | No puede ser objetivo de **ataques, hechizos** (Martillazo, Lanzadera) ni del **Encono**. **Sigue visible en el tablero** y ocupa su casilla. No hay niebla de guerra | Un hueco que la IA ignora |
 | Bono | Su **próximo ataque suma +3** (plano, paso 3 de 11.4). No acumula: volver a hacerse junco con el bono no suma | Concentrar el daño en un golpe: rematar, o pegar antes de un sellado |
-| Se destapa | Si **se mueve**, si **ataca** o si **una enemiga de pie queda adyacente** (por su movimiento o por la Lanzadera) | Sondear el juncal: acercarse lo destapa, pero esa unidad queda al lado de un golpe de 7 |
+| Se destapa | Si **se mueve**, si **ataca** o si **una enemiga de pie queda adyacente** (4 ortogonales; por su movimiento o por la Lanzadera). Una enemiga en diagonal no lo destapa | Sondear el juncal: acercarse lo destapa, pero esa unidad queda al lado de un golpe de 7 |
 | Moverse | Lo destapa, pero **conserva el bono**: el golpe es una embestida (amenaza a distancia 5) | — |
 | Pierde el bono | Si **recibe un ataque** después de destapado y antes de atacar (incluidos el Martillazo y el golpe de un incidente). La Lanzadera no cuenta | Destaparlo y pegarle en la misma ronda; se arma con Secundar |
 | Límite | **No puede hacerse junco dos turnos seguidos** | Nunca queda oculto dos rondas enteras: no hay rescatista blindada |
-| Relaciones | Oculto **sigue dando y recibiendo afinidad e incidentes**. No cuenta como rival a su alcance (10.5) | Sigue siendo parte de la tribu |
+| Relaciones | Oculto **sigue dando y recibiendo afinidad e incidentes** (vecinas en 8). No cuenta como rival a su alcance (10.5) | Sigue siendo parte de la tribu |
 | Fin del combate | Se borran el estado oculto y el bono | — |
 | Acciones hostiles y aliadas | Oculto no puede ser objetivo de ninguna acción **hostil**: ataque, Martillazo, Lanzadera, Encono **ni sellado** (S-21). Las **aliadas** sí lo alcanzan: Remiendo y guardar (S-22) | Para sellar a un Zancajunco salvaje, primero hay que destaparlo |
 | Destape por contacto | Se mira **al terminar** un movimiento, una Lanzadera o una invocación; pasar al lado por el camino no destapa (S-24). En Cuenta, cada tramo del movimiento partido cuenta como un movimiento que termina | Rodearlo sin destaparlo es posible |
 | Destapar y pegar | La unidad que lo destapa al moverse **puede atacarlo en la misma acción del turno**: le quita el bono. **La IA no lo planifica**: elige su objetivo antes de moverse y una oculta no es objetivo (11.8) | Contra el Zancajunco salvaje, acercarse y pegar es la respuesta; cuesta quedar al lado de un golpe de 4 |
 | Movimiento después | Hacerse junco **cierra el movimiento que quede**, como Erizarse (S-26) | — |
+
+**Por qué el contacto es ortogonal** (07/10/2026): con 8 vecinas, en 12 × 12 esconderse sería casi imposible, y una enemiga en diagonal no puede pegarle. Coincide con la regla general: el cuerpo mira 4, el vínculo mira 8.
 
 **Por qué +3 con defensa:** esconderse y después golpear rinde 7 en dos turnos, contra 8 si pega dos veces. La diferencia la paga el turno en que nadie lo puede tocar. ⚠️ Si se vuelve la jugada por defecto de cada ronda impar, baja a +2 (14).
 
@@ -1001,7 +1015,7 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 |---|---|---|
 | Velocidad | 8 | 3 |
 | Movimiento | Normal, sin partir | **Partido**: se acerca, pega y se retira, con 4 en total |
-| Ataques | **2 ataques separados de 5**, a una o a dos presas adyacentes | **1 ataque de 4** (−1 plano) |
+| Ataques | **2 ataques separados de 5**, a una o a dos presas adyacentes (4 ortogonales) | **1 ataque de 4** (−1 plano) |
 | Daño recibido | **+25%**: se suma a los porcentajes del atacante (paso 1 de 11.4) | Normal |
 | Decisión que genera | Castigarlo mientras está expuesto, o no pararse en su zona | Corta las cadenas tardías; pica y se va |
 
@@ -1015,7 +1029,10 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 | Primera presa tumbada | El segundo ataque va a otra presa adyacente (menos vida → antes en la cola); si no hay, **se pierde** (S-23) | Dejar a una sola herida en su zona no le regala el segundo golpe a otra |
 | IA | Pasos 2 y 6b de 11.8: **prefiere repartir los golpes antes que ejecutar**; predecible y sin azar | Dónde no me paro |
 
-**Dos presas, geometría:** en la cuadrícula ortogonal, dos unidades adyacentes entre sí **no tienen ninguna casilla vecina en común**. El Tasajero consigue dos presas solo en las **esquinas cóncavas**: junto a unidades en diagonal o con una casilla de hueco. Eso pasa en la **formación en cruz** alrededor del Maestro, la que más afinidad da (11.3); una línea o un bloque no le dan dos presas.
+**Dos presas, geometría** (reescrito en la v1.6, con vecinas en 8): las presas del Tasajero son **ortogonales**, así que consigue dos solo en las **esquinas cóncavas**: una casilla que toca por los lados a dos unidades que están en diagonal entre sí, o con una casilla de hueco (formación en cruz, en L o en diagonal). Una **línea** o un **bloque de 2 × 2** no dejan ninguna. Con vecinas en 8, las diagonales también dan afinidad (10.3):
+- **Rodear a una objetivo** (aliadas en diagonal entre sí) da afinidad y concentra golpes, pero abre esquinas.
+- **El bloque** da afinidad a todos y cierra las esquinas, pero llega con menos golpes: contra una enemiga solo pega el miembro que la toca, más la Ocarra por encima.
+- **El bloque aguanta; rodear mata y expone.** Es el dilema de *dónde no me paro* (Visión 6.2). ⚠️ Vigilar que el bloque no se vuelva dominante (14).
 
 **Contra la Rodauva:** sola en su zona de Caza recibe 5 + 5 = 10 y cae (8 de vida). Erizada recibe 2 + 2 = 4 y aguanta. Dejarla sola a su alcance es la "decisión previa" que pide la Visión; la zona de Caza se ve (15, Arte / UI).
 
@@ -1023,19 +1040,34 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 
 | Regla | Valor | Decisión que genera |
 |---|---|---|
-| Tablero de referencia | 8 × 8, sin terreno en el MVP **salvo el surco** (11.2.1), que lo crea una criatura en combate | — |
+| Tablero de referencia | **12 × 12**, con cámara móvil (Visión v1.3). Un escenario puede ser más chico si lo pide (combates de nodo, peleas cortas, G), nunca más grande en el MVP. Sin terreno en el MVP **salvo el surco** (11.2.1), que lo crea una criatura en combate | Espacio para maniobrar: flanquear, cavar, separar rivales |
 | Turno de una unidad | **1 movimiento y 1 acción**, en cualquier orden, sin partir el movimiento. Acciones: atacar, hechizo, sellar, guardar, Erizarse, Hacerse junco (sin haberse movido, 11.2.2), esperar. Invocar, huir y **cavar un surco** gastan el turno completo. **Excepción al movimiento sin partir:** el Tasajero en Cuenta (11.2.3). **Terminar el turno sin usar la acción es esperar** (con o sin movimiento; P-015). **Erizarse cierra el movimiento que quede** (P-014) | ¿Pego y me retiro, o me acomodo y pego? Con la Rodauva: ¿me ubico primero y después me erizo? |
 | Movimiento | Solo ortogonal. Se atraviesan aliadas y caídas propias, nunca enemigas, **tampoco caídas** (P-018). No se termina en una casilla ocupada. **Los surcos** solo los pisa un Surcón (11.2.1) | Las enemigas funcionan como muro; un pasillo protege. La caída propia sigue cubriendo: guardarla libera la casilla y abre el paso |
 | Distancias | Todas **Manhattan** | — |
 | Casilla libre | Dentro del tablero, **sin unidad** (de pie o caída) **y sin surco**, para cualquier unidad, incluido un Surcón (S-25). La usan cavar, invocar y la métrica de encierro (11.9) | — |
-| Despliegue | El jugador ubica a sus sueltas en las **2 filas de su borde**; las salvajes ocupan las 2 filas opuestas | La formación inicial ya es una decisión |
-| Adyacencia | 4 casillas ortogonales (coherente con los sprites en 4 direcciones). Rige afinidad, incidentes, Arrimo del Maestro adyacente y guardar en combate | Las diagonales no dan afinidad: formar en cruz, no en bloque |
+| Despliegue | Tribu en las filas **9 a 11** (su borde); enemigas en las filas **0 a 2**. Dentro de esas zonas, la distancia la fija el criterio de contacto (abajo). En la 0b, el jugador ubica a sus sueltas en su zona | La formación inicial ya es una decisión |
+| **Adyacencia (4 ortogonales)** | `DECIDIDO` por la Visión v1.3: mover, atacar, guardar y presas de la Caza. `DECIDIDO` 07/10/2026, por coherencia: invocar, cavar, Remiendo, Erizarse de la IA (11.8), Hacerse junco (activar y destape por contacto, 11.2.2) y casilla libre / encierro | **El cuerpo mira 4**: se pega y se toca por los lados |
+| **Vecinas (8, diagonales incluidas)** | `DECIDIDO` por la Visión v1.3: afinidad (también entre salvajes, 10.3 y 10.7), incidente (10.4) y sostén de la cobardía (toggle de afines, 10.6). `DECIDIDO` 07/10/2026, por coherencia: el −10 del Maestro vecino en la cobardía (10.6). **Los combos no miran la posición** (10.2) | **El vínculo mira 8**: rodear potencia, pero abre esquinas al Tasajero (11.2.3) |
 | Orden | Mayor Velocidad primero, **sin azar** | El jugador planifica la ronda entera |
 | Empates | Bando del jugador antes que el enemigo · El Maestro antes que sus criaturas · Entre criaturas, el orden de la tribu (lo define el jugador fuera del combate) · **Entre enemigas, el orden de la lista de enemigas del encuentro** (P-011) | Predecible |
 | Velocidad por modo | El Tasajero usa la Velocidad de su modo (8 en Caza, 3 en Cuenta). Si cambia, la nueva rige **desde la ronda siguiente** (11.2.3) | La Caza abre la ronda; la Cuenta corta cadenas tardías |
 | Criatura invocada | Entra en la cola **a partir de la ronda siguiente** | Invocar en combate cuesta el turno del Maestro y una ronda de la criatura: conviene sacarla antes, y eso cuesta comida |
 | Unidad que deja de actuar a mitad de ronda | Si cae, es guardada, huye o sale del tablero, **pierde todas sus entradas restantes de la ronda**: con el Tasajero de un solo turno (v1.3), el ejemplo original de P-012 ya no aplica. La cola no se rearma | Tumbar o hacer huir a una unidad antes de su turno le quita la acción de esa ronda |
 | Alcance 2 | En línea recta; puede golpear **por encima de una aliada**, nunca por encima de una enemiga, **tampoco de una caída** (P-018). **Los surcos no bloquean la línea** (11.2.1) | Segunda fila detrás del Maestro |
+
+**Contacto en la ronda 2** — `DECIDIDO` (07/10/2026; Visión v1.3, Escala 3):
+
+- **Definición:** **con la tribu quieta, la primera enemiga ataca en la ronda 2.** Pegar primero en la ronda 1, yendo a buscarla, es una decisión del jugador: pega antes, pero se mete en su zona.
+- **Por qué no se pide más:** la enemiga se acerca en su turno de la ronda 1, y después la tribu ya la tiene a tiro (el Martillazo llega a 6: 3 de movimiento más 3 de alcance). Con estos movimientos, es imposible garantizar a la vez que nadie pegue en la ronda 1 y que la enemiga llegue en la 2.
+
+| Enemiga que abre el combate | Alcance (Mov + Alc) | Distancia mínima válida a la tribu | Estándar |
+|---|---|---|---|
+| Tasajero, Zancajunco, Rodauva (Mov 4) | 5 | 6 a 9 | **8** |
+| Ocarra (Mov 3, Alc 2) | 5 | 6 a 8 | **8** |
+| Surcón (Mov 2) | 3 | No abre: llega tarde | — |
+
+- **Ronda del primer ataque:** la primera en que cualquier unidad de cualquier bando ataca (incluido el Martillazo). **Rondas de pelea:** desde esa ronda hasta el fin, inclusive. Las métricas 1 y 13 y el umbral de duración de C se leen así (11.9).
+- **Decisión que genera:** la ronda 1 es para acomodarse: sacar a la herida de la zona de Caza, cavar, esconderse o separar rivales con la Lanzadera.
 
 **Inicio del turno: orden de los chequeos** — `DECIDIDO` (03/10/2026):
 
@@ -1044,7 +1076,7 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 | 1 | Regeneración de maná (2.1) | Maestro |
 | 2 | Huida con vida ≤ 25% (11.7) | Salvajes |
 | 3 | Rival enemiga a su alcance → Encono (10.5) o cobardía (10.6) | Criaturas |
-| 4 | Incidente con rival aliada (10.4), **solo si no quedó enconada** | Criaturas |
+| 4 | Incidente con rival aliada vecina (10.4), **solo si no quedó enconada** | Criaturas |
 
 Si la huida del paso 2 sale, el turno termina ahí.
 
@@ -1059,7 +1091,7 @@ Si la huida del paso 2 sale, el turno termina ahí.
 - **Sin recorte intermedio** (responde P-017): si los porcentajes dejan el daño por debajo de 0, los planos se suman sobre ese valor negativo y el único recorte es el mínimo del paso 4. Ejemplo: Zancajunco (4) con 3 enfermedades contra una Rodauva erizada, con el bono de Hacerse junco: −125% → 4 × (−0,25) = −1; +3 = **2**. Motivo: un solo recorte, desglose legible; el caso es extremo y el mínimo 1 lo cubre.
 - **Saciado y enfermedades son del bando de la tribu** (Maestro y criaturas de la tribu; responde P-016). Las enemigas (salvajes, Tasajero, atacante nocturna) pegan con su Daño base, sus rasgos y los aportes de combate que les toquen (afinidad entre salvajes, Encono, cobardía). Motivo: las salvajes no tienen hambre en el modelo, y la atacante nocturna es famélica, así que Saciado nunca le aplicaría; sus enfermedades quedan fuera para no sumar un caso aparte en la 0a. Coincide con 11.6: dos golpes de la Ocarra salvaje tumban a la Rodauva.
 
-**Ejemplo:** el Maestro (4), segundo eslabón de la cadena (+50%) y adyacente a una afín: 4 × 1,5 = 6, más 1 = **7**.
+**Ejemplo:** el Maestro (4), segundo eslabón de la cadena (+50%) y vecino de una afín: 4 × 1,5 = 6, más 1 = **7**.
 
 > ⚠️ **A vigilar:** con Saciado, la Rodauva hace 2 × 1,25 = 2,5 → **2**: el bono no le sirve. Se acepta; su aporte está en la recolección.
 
@@ -1088,11 +1120,13 @@ Si la huida del paso 2 sale, el turno termina ahí.
 
 ### 11.6 Encuentros de referencia — `DECIDIDO`
 
+> **Desde la v1.6**, las líneas típicas de esta sección usan las posiciones del tablero de 8 × 8 y se leen como **rondas de pelea** (desde el primer ataque, 11.3). En 12 × 12 se les suma la ronda de acercamiento: la primera ronda de cada tabla pasa a ser la ronda 2 del combate. Los daños no cambian, salvo la afinidad, que con vecinas en 8 aparece más seguido (10.3).
+
 **Prueba A — Día 1: Maestro + Rodauva (Neutral) contra 1 Ocarra salvaje.** Orden: Ocarra (7), Rodauva (6), Maestro (5). La cadena sale sola. Bono: "sin relación" + 3 pasos de Arrimo = **+50%**.
 
 > Esta sección es **referencia de daño**. El objetivo de cada salvaje lo decide la IA de 11.8, que **manda** (03/10/2026, responde P-009): la Ocarra va por la Rodauva, que tiene menos vida, no por el Maestro.
 
-Línea típica con las posiciones del escenario A (Maestro [3,7], Rodauva [4,7], Ocarra [4,0]):
+Línea típica con las posiciones del escenario A en 8 × 8 (Maestro [3,7], Rodauva [4,7], Ocarra [4,0]):
 
 | Ronda | Ocarra | Tribu | Vida de la Ocarra |
 |---|---|---|---|
@@ -1104,15 +1138,15 @@ Línea típica con las posiciones del escenario A (Maestro [3,7], Rodauva [4,7],
 
 **Prueba B — 2 Ocarras en los Huertos:** las dos van primero por la Rodauva y la tumban en la ronda 2 (11.8); después el Maestro recibe 8 por ronda, la pelea dura unas 4 rondas y cae sin rescatista. Es un muro. La pregunta "¿guardo a la caída antes de huir?" aparece temprano.
 
-**Prueba C — Tasajero** (v1.3): en Caza pega 10 por ronda (dos ataques de 5) y recibe +25%; en Cuenta pica 4 y se retira. Un Maestro solo dura 2 rondas. Línea típica con el Tasajero en [3,1] (11.9):
+**Prueba C — Tasajero** (v1.3): en Caza pega 10 por ronda (dos ataques de 5) y recibe +25%; en Cuenta pica 4 y se retira. Un Maestro solo dura 2 rondas. Línea típica en rondas de pelea (en 8 × 8, con el Tasajero en [3,1]; en 12 × 12, la ronda 1 de esta tabla es la ronda 2 del combate):
 
-| Ronda | Qué pasa | Vida del Tasajero |
+| Ronda de pelea | Qué pasa | Vida del Tasajero |
 |---|---|---|
 | 1 | El Zancajunco se oculta. Caza: su única presa al alcance es el Maestro → 5 + 5 (20 → 10). La tribu, con +25%: Ocarra 5, Rodauva 3, Maestro con combo y afinidad 7 | 30 → 15 |
 | 2 | El Zancajunco embiste antes del cambio de modo (empate en 8, gana la tribu): 4 × 1,25 = 5, + 3 = 8. En su turno, con 7 de 30 (≤ 25%), **primero tira huida (25%)**; si se queda, pasa a Cuenta y pica 4. La tribu remata | 15 → 7 → 0 |
 | 3 | Si sobrevivió: remate o huida | — |
 
-**Duración: unas 2 a 2,5 rondas**, dentro de la meta. Va por la Rodauva si queda sola en su zona de Caza (10), así que **llevar a la compañera al Robledal sigue siendo una apuesta real**; erizada recibe 4.
+**Duración: unas 2 a 2,5 rondas de pelea**, dentro de la meta. Con vecinas en 8 la afinidad aparece más seguido: estimo el borde bajo, 2 rondas (⚠️ 14). Va por la Rodauva si queda sola en su zona de Caza (10), así que **llevar a la compañera al Robledal sigue siendo una apuesta real**; erizada recibe 4.
 
 **Tope de amenaza por destino:**
 
@@ -1180,7 +1214,7 @@ Cada salvaje, en su turno, decide en este orden:
 1. **Huida:** con vida ≤ 25%, tira huida al inicio de su turno (11.7).
 2. **Cambio de modo** (Tasajero en Caza): con vida **≤ 50%**, pasa a Cuenta y juega este turno en Cuenta (11.2.3).
 3. **Encono:** si está enconada, va por su rival (10.5). Así el Tasajero va por la Rodauva. En Caza, solo el primero de sus dos ataques; el segundo sigue el paso 6b.
-4. **Erizarse:** si su especie tiene Erizarse, su vida es **≤ 50%** y tiene una enemiga **de pie adyacente**, se eriza (03/10/2026). Una caída no cuenta: no es objetivo ni amenaza (04/10/2026, responde P-022).
+4. **Erizarse:** si su especie tiene Erizarse, su vida es **≤ 50%** y tiene una enemiga **de pie adyacente** (4 ortogonales), se eriza (03/10/2026). Una caída no cuenta: no es objetivo ni amenaza (04/10/2026, responde P-022). Una enemiga en diagonal tampoco: no puede pegarle (07/10/2026).
 5. **Remate:** si puede tumbar a alguna unidad este turno, ataca a esa. Si hay varias, la de menos vida actual.
 6. **Cercana:** si no, ataca a la unidad más cercana que pueda alcanzar; si empatan, la de menos vida.
    - **6b. Tasajero en Caza** (reemplaza a los pasos 5 y 6): elige la casilla alcanzable que lo deja junto a **2 presas** y les da un ataque a cada una; si no hay, junto a **1 presa**, y le da los dos ataques. Desempates en la tabla de abajo. **Prefiere repartir antes que ejecutar.**
@@ -1198,15 +1232,17 @@ Cada salvaje, en su turno, decide en este orden:
 
 | Elección | Criterio, en orden |
 |---|---|
-| Objetivo con remate (paso 4) | Menos vida actual → más cercana → la que actúa antes en la cola |
-| Objetivo sin remate (paso 5) | **Más cercana** → menos vida actual → la que actúa antes en la cola (04/10/2026, responde P-020) |
+| Objetivo con remate (paso 5) | Menos vida actual → más cercana → la que actúa antes en la cola |
+| Objetivo sin remate (paso 6) | **Más cercana** → menos vida actual → la que actúa antes en la cola (04/10/2026, responde P-020) |
 | "La que actúa antes en la cola" | El orden de la **ronda entera**, por la primera entrada de cada unidad, haya actuado o no (04/10/2026, responde P-021) |
 | "Puede tumbar" | Se calcula con la misma función de previsualización del daño (determinista: el daño no tiene azar) |
 | Casilla desde dónde golpear | Si ya alcanza desde donde está, **no se mueve** · la Ocarra prefiere la distancia 2 · la de menos movimiento · orden de lectura (y menor, después x menor) |
 | Acercarse | Objetivo: la más cercana → menos vida → cola. Casilla: la alcanzable más cercana a la objetivo (Manhattan) → orden de lectura. Si ninguna la acerca, no se mueve |
-| Casilla del Tasajero en Caza (paso 6b) | Junto a 2 presas > junto a 1 → la que tumba a alguien → menos vida sumada de sus presas → menos pasos → orden de lectura. Con 3 o más presas adyacentes, ataca a las 2 de menos vida |
+| Casilla del Tasajero en Caza (paso 6b) | Junto a 2 presas > junto a 1 → la que tumba a alguien → menos vida sumada de sus presas → menos pasos → orden de lectura |
+| **Presas del Tasajero en Caza** (paso 6b) | Con 3 o más presas adyacentes, elige **las 2 de menos vida → la que actúa antes en la cola**. El **primer ataque** va a la de menos vida (mismo criterio que el segundo de S-23) (07/10/2026, responde P-026) |
 | Retirada del Tasajero en Cuenta | Golpea desde la casilla de menos pasos (le queda más para irse). Después, la casilla alcanzable **más lejana** (Manhattan) de la enemiga de pie más cercana → orden de lectura. Si ninguna la aleja, no se mueve |
 | Casilla del surco (Surcón salvaje, paso 7) | La casilla válida más cercana a la enemiga de pie más cercana → orden de lectura |
+| **"La enemiga de pie más cercana"** (retirada y surco) | **Más cercana → menos vida → la que actúa antes en la cola**, igual que el objetivo de Acercarse. Nunca una oculta (07/10/2026, responde P-027) |
 
 **Por qué dos órdenes distintos** (P-020): el remate premia exponer a una herida; sin remate, manda la **posición**. El que se pone adelante recibe, incluido el Maestro (Pilar 1), y el Surcón puede hacer de muro. Con "menos vida primero" en los dos casos, la IA ignoraría la formación.
 
@@ -1226,7 +1262,7 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 |---|---|---|---|---|
 | A. Día 1 | `a_dia_1.json` (Arquitecto) | Prueba A (11.6) | ¿Sello al 50% o arriesgo una ronda más? | Siempre se elige lo mismo |
 | B. Muro | `b_muro.json` | Maestro + Rodauva Neutral (5) contra 2 Ocarras separadas. Sin rescatista | ¿Reconoce que hay que huir? ¿Guarda a la caída antes? Segunda salida: juntar a las Ocarras (rivales) con la Lanzadera | Huir nunca se lee como opción |
-| C. Tasajero | `c_tasajero.json` | Maestro + Rodauva, Ocarra y Zancajunco leales (8) contra el Tasajero. La Rodauva se puede pasar a guardada en el panel | Duración (meta: 2 o 3 rondas) · ¿Llevo a la Rodauva? | Más de 5 rondas, o la Rodauva muere sin decisión |
+| C. Tasajero | `c_tasajero.json` | Maestro + Rodauva, Ocarra y Zancajunco leales (8) contra el Tasajero. La Rodauva se puede pasar a guardada en el panel | Duración (meta: 2 o 3 rondas de pelea) · ¿Llevo a la Rodauva? | Más de 5 rondas de pelea, o la Rodauva muere sin decisión |
 | D. Rivales aliadas | `d_rivales_normal.json` · `d_rivales_hambriento.json` | Ocarra + Zancajunco Neutrales (5) contra Surcón + Rodauva salvajes, sin relación con la tribu. Hambre 3 y 6 | Incidentes por combate · ¿Separa con la Lanzadera? Con hambre, la obediencia baja a 3 y el incidente pasa a golpe | 0 incidentes, o castigo puro. **Leer también con la balanza 4** (ver 14) |
 | E. Cobardía | `e_cobardia.json` · `e_cobardia_afines.json` | Rodauva leal (8), Rodauva Neutral (5) y Surcón leal contra el Tasajero; sin y con el toggle de afines (10.6) | ¿Sostiene a la asustada? | Nunca aparece, o frustra siempre |
 | F. Rescate | `f_rescate.json` | Maestro con 6 de vida · Rodauva leal (rescatista frágil) · Ocarra Neutral, contra Zancajunco + Surcón | ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? | El rescate se siente azaroso |
@@ -1240,9 +1276,25 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 | "Leal" y "Neutral" sin número | **Leal 8, Neutral 5.** 8 sigue siendo leal con la balanza 5 (umbral 8); 5 es Neutral en todas las posiciones |
 | El Maestro | Está en **los 11 escenarios**, con los valores iniciales salvo F (vida 6), G (maná 4), H (balanza 5, Poder 3) y `d_rivales_balanza4` |
 | D hambriento | Hambre 6 **solo en las criaturas**; el Maestro queda en 3. La única diferencia entre las dos D es la obediencia |
-| Posiciones | Las de `Arquitectura.md` A.9 quedan aprobadas como provisorias. **Ante una alarma, primero se descarta que la causa sea la posición; después se toca la regla** |
-| Tasajero en C y H | **[3,1]** (antes [3,0]), desde el 05/10/2026. Con un solo turno, desde [3,0] no alcanza a nadie en la ronda 1 y la Caza no se juega. E sigue en [0,0] |
-| F con el Zancajunco nuevo | Se oculta en la ronda 1, avanza destapado con el bono en la 2 y embiste en la 3 (4 + 3 = 7 tumba al Maestro con 6), salvo que lo golpeen en la 2. Actualizar la `_nota` de `f_rescate.json` |
+| Posiciones | Las de `Arquitectura.md` A.9 fueron provisorias para 8 × 8. **Desde la v1.6 se reubican en 12 × 12** con los criterios de despliegue (abajo). **Ante una alarma, primero se descarta que la causa sea la posición; después se toca la regla** |
+| Tasajero en C y H | ~~[3,1] en 8 × 8 (05/10/2026)~~ → reemplazado por los criterios de 12 × 12: vuelve a la fila del frente de su zona, a distancia 8 de la tribu |
+| F con el Zancajunco nuevo | Se oculta en la ronda 1, avanza destapado con el bono en la 2 y embiste en la 3 (4 + 3 = 7 tumba al Maestro con 6), salvo que lo golpeen en la 2. A distancia 8 la línea se mantiene igual. Actualizar la `_nota` de `f_rescate.json` |
+
+**Criterios de despliegue en 12 × 12** — `DECIDIDO` (07/10/2026; Visión v1.3: "los despliegues los define Sistemas"):
+
+| Escenario | Distancia mínima tribu–enemiga | Qué tiene que pasar con la tribu quieta | Qué no puede pasar |
+|---|---|---|---|
+| A | 8 (Ocarra–Rodauva) | La Ocarra se acerca en la ronda 1, va por la Rodauva y la golpea en la ronda 2. La línea de 11.6 se mantiene | — |
+| B | 8 a las dos Ocarras | Las dos llegan a la tribu en la ronda 2 | Que las Ocarras salvajes **terminen vecinas** (8, también en diagonal) al final de las rondas 1 o 2: sería un incidente gratis. La Lanzadera tiene que poder juntarlas con 1 o 2 pasos del Maestro |
+| C y H | 8 (Tasajero a la tribu) | En la ronda 1 el Tasajero se acerca; el jugador tiene su ronda 1 para sacar a la Rodauva de la zona de Caza, erizarla o esconder al Zancajunco. Caza en la ronda 2 | Que el Tasajero pegue en la ronda 1 |
+| D (3 variantes) | 8 a la Rodauva salvaje | Las rivales aliadas (Ocarra y Zancajunco) **empiezan vecinas** (la diagonal ya cuenta) | Que separarlas no sea la primera decisión |
+| E (2 variantes) | **10** a las Rodauvas (excepción) | La primera tirada de cobardía cae en la **ronda 2**, con la formación que eligió el jugador. Con 8, el Tasajero (Vel 8) se acerca y las Rodauvas (Vel 6) tiran en la ronda 1, antes de que el Maestro (Vel 5) pueda acomodarse. E mide la cobardía, no la duración | Que la primera tirada caiga antes de que el Maestro actúe |
+| F | 8 (Zancajunco salvaje) | La línea de F de arriba | — |
+| G | Excepción: tablero de **8 × 8** | Es un ataque nocturno donde se duerme: contacto inmediato. La atacante queda cerca, como hoy | — |
+
+**Cómo se fijan las coordenadas:** Claude Code las propone sobre estos criterios y las **verifica contra la IA real** con un test que juega las rondas 1 y 2 con el jugador esperando, y comprueba la distancia, la ronda del primer ataque enemigo y las condiciones de cada fila. Sistemas las aprueba, como en P-007. Motivo: verificar a mano el camino de la IA es fácil de errar (el despliegue actual de B ya deja a las Ocarras en diagonal).
+
+**Bandos que se cruzan en la cola:** depende de las Velocidades, no de las posiciones. Se cruzan C, D, G y H; E se cruza solo después del cambio a Cuenta; A, B y F no se cruzan. **Se acepta** (07/10/2026): cruzarlos exigiría cambiar la composición de los escenarios, y con eso, lo que mide cada uno. Secundar (métrica 2) se lee solo en los escenarios que se cruzan.
 
 **Reglas de los escenarios:** todos usan posiciones fijas (el panel las cambia), hambre 3 y maná completo salvo indicación. Las variantes que se comparan **comparten semilla** (C y H; las dos D; las dos E), para que la diferencia salga de la regla y no del azar. Las notas de diseño de cada escenario viven en su campo `_nota`.
 
@@ -1250,8 +1302,8 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 
 | # | Métrica | Cómo se cuenta |
 |---|---|---|
-| 1 | Rondas | Rondas iniciadas hasta el fin del combate |
-| 2 | Secundar | Usos |
+| 1 | Rondas | **Rondas totales**, **ronda del primer ataque** y **rondas de pelea** (desde el primer ataque hasta el fin, inclusive; 11.3). Los umbrales de duración usan las rondas de pelea (v1.6) |
+| 2 | Secundar | Usos. Se lee en C, D, G y H (y en E después de la Cuenta) |
 | 3 | Eslabones | Promedio y máximo, contando solo las cadenas de 2 eslabones o más |
 | 4 | Incidentes | Total, dividido en distracciones y golpes |
 | 5 | Encono | Veces que una criatura quedó enconada, por bando |
@@ -1262,20 +1314,20 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 | 10 | Caídas guardadas | Por id de unidad |
 | 11 | Muertes | Por id y causa: derrota, huida o caída del Maestro |
 | 12 | Rescate | Sí o no, y quién rescató |
-| 13 | Distancia del Maestro | Manhattan a la enemiga de pie más cercana, al final de cada turno suyo; promedio del combate (vigila el Martillazo) |
+| 13 | Distancia del Maestro | Manhattan a la enemiga de pie más cercana, al final de cada turno suyo **desde la ronda del primer ataque**; promedio del combate (vigila el Martillazo). Motivo (v1.6): la ronda de acercamiento la inflaría y la alarma saltaría siempre |
 | 14 | Activas y terreno | Usos de Erizarse; surcos cavados; Hacerse junco (ocultos, destapes por contacto, bonos cobrados y perdidos); ronda del cambio a Cuenta; turnos que una unidad termina **sin ninguna casilla libre adyacente** (encierro) |
 
 **Umbrales de alarma** — `DECIDIDO` (03/10/2026; aprobados por el Director Creativo). Superar uno obliga a revisar la regla antes de pasar a la 0b (Visión 10).
 
 **Cómo se mide:** **10 partidas por escenario**, y cada variante cuenta aparte, con al menos **3 jugadores distintos**. Se usan 10 semillas; las variantes que se comparan usan **las mismas 10** (C y H; las dos D; las dos E). **Sin encuesta** (`DECIDIDO` por el Director, Visión 11 v1.2): todo sale del registro. Se reabre si los comentarios de los jugadores contradicen los números. Con 10 partidas, "80%" = 8 de 10.
 
-**Desde cuándo se miden** (`Arquitectura.md` B.2.1): el hito **0a.1b** sirve para **sentir** los rasgos (¿se ven?, ¿generan decisiones?, ¿el combate sigue rígido?), no para medir estos umbrales: sin combos, afinidad ni relaciones, los números de C todavía no son los de 11.6. Los umbrales se miden **desde la 0a.2**, y los de criterio de éxito, en isométrica (Visión 10). La métrica 14 sí se puede mirar desde la 0a.1b, como señal temprana y sin umbral.
+**Desde cuándo se miden** (`Arquitectura.md` B.2.1): el hito **0a.1b** sirve para **sentir** los rasgos (¿se ven?, ¿generan decisiones?, ¿el combate sigue rígido?), no para medir estos umbrales: sin combos, afinidad ni relaciones, los números de C todavía no son los de 11.6. Los umbrales se miden **desde la 0a.2**, sobre el tablero de 12 × 12, y los de criterio de éxito, en isométrica (Visión 10). La métrica 14 sí se puede mirar desde la 0a.1b, como señal temprana y sin umbral.
 
 | Escenario | Señal | Umbral | Métrica |
 |---|---|---|---|
 | A. Día 1 | Siempre se elige lo mismo | Más del **80%** de los primeros intentos de sellado en el mismo tramo de probabilidad (50% o 80%) | 7 |
 | B. Muro | Huir nunca se lee como opción | Menos del **30%** de las partidas terminan en huida o en victoria | Desenlace |
-| C. Tasajero | Combate largo | Más de **5 rondas** en más del **20%** de las partidas, o promedio fuera de **2 a 3,5** | 1 |
+| C. Tasajero | Combate largo | Más de **5 rondas de pelea** en más del **20%** de las partidas, o promedio de rondas de pelea fuera de **2 a 3,5** | 1 |
 | C. Tasajero | La Rodauva muere sin decisión | La Rodauva muere en más del **50%** de las partidas en que empezó suelta | 11 |
 | D. Normal | Rivales invisibles | Menos del **20%** de los combates con al menos 1 incidente. Leer también con la balanza 4 | 4 |
 | D. Hambriento | Castigo puro | Derrota en más del **50%** de las partidas, o **3 o más** golpes por incidente por combate, en promedio | 4, desenlace |
@@ -1286,7 +1338,7 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 | G. Ataque nocturno | Comer es siempre la respuesta | Comer en más del **70%** de las partidas | Destino de la atacante |
 | H. Soplo | Build trampa | Victorias en H por debajo del **20%** | Desenlace |
 | H. Soplo | Más fácil que el Barro | Victorias en H más de **20 puntos** por encima de las de C | Desenlace |
-| Todos | El Maestro se esconde (Martillazo) | Distancia media del Maestro **mayor a 3** en más del **50%** de los combates → se recorta el alcance del Martillazo (1.6) | 13 |
+| Todos | El Maestro se esconde (Martillazo) | Distancia media del Maestro (desde el primer ataque) **mayor a 3** en más del **50%** de los combates → se recorta el alcance del Martillazo (1.6) | 13 |
 | Todos | Una activa no genera decisiones | Una activa de la tribu (Erizarse, cavar, Hacerse junco) usada en menos del **20%** de los combates donde estaba disponible | 14 |
 | C y E | Encierro con surcos | El Tasajero termina un turno sin ninguna casilla libre adyacente en más del **20%** de las partidas | 14 |
 
@@ -1497,13 +1549,13 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | **Polo Soplo como build trampa** | ⚠️ Vigilar | Sin Arrimo y con umbral 8. La interfaz debe mostrar el umbral de rescate y los riesgos de incidente |
 | **Espiral de enfermedad** (enfermo → recolecta menos → famélico → come rechazado → enfermo) | ⚠️ Vigilar | Es intencional (Pilar 4). Testear que la cura viajando y el descanso parcial permitan salir |
 | **Bichos rompen la monotonía muy barato** | ⚠️ Vigilar | Si resulta trivial, exigir que cada tipo cubra al menos 1 ración completa |
-| **Hambre por ronda castiga combates largos legítimos (jefes)** | ⚠️ Vigilar | Si molesta, eximir a los jefes o subir a cada 8 rondas |
+| **Hambre por ronda castiga combates largos legítimos (jefes)** | ⚠️ Vigilar | Desde la v1.6, cada 6 rondas (7.2). Si molesta, eximir a los jefes o subir a cada 8 rondas |
 | **Invocar siempre a la noche** (gratis en maná) | ⚠️ Vigilar | Cuesta un día extra de comida. Si domina en los tests, revisar |
 | **El Zancajunco, único beneficiado por comer criaturas** | ⚠️ Vigilar | Coherente con su ficha; ver en test si empuja a comer compañeras |
 | **Cobardía poco testeada en el MVP** | ⚠️ Vigilar | Con la Rodauva como compañera desde el día 1, se testea si el jugador la lleva al Robledal (el colgadero y el Tasajero la castigan). Si aun así casi no aparece, armar un escenario de test forzado |
 | **Tribu de Rodauvas trivializa el hambre en los Huertos** | Resuelto | Agotamiento y pudrición (12.5); tope de +2 por pasiva y nodo; una sola habilidad de campamento por especie (9.4) |
 | **Acampar en los Huertos** (la dieta variada no lo impide) | Resuelto | Agotamiento y comida perecedera (12.5) |
-| **Tribu de Ocarras** (rango 1, alcance 2, Velocidad 7, come poco) | ⚠️ Vigilar | Ocarra–Ocarra mal, Centinela no se acumula, una sola habilidad por especie. Si domina, subir el incidente entre Ocarras |
+| **Tribu de Ocarras** (rango 1, alcance 2, Velocidad 7, come poco) | ⚠️ Vigilar | Ocarra–Ocarra mal, Centinela no se acumula, una sola habilidad por especie. Con vecinas en 8 se tocan más seguido (10.4). Si domina, subir el incidente entre Ocarras |
 | **Esquivar todos los combates eligiendo columnas** | ⚠️ Vigilar | Sin combates no hay +1 de lealtad. Desde la v0.6 el Vado trae un solo encuentro: si se vuelve un destino sin peleas, sumar un segundo encuentro en lugar de la Orilla |
 | **Guardar a todas las caídas y huir siempre** | ⚠️ Vigilar | Lo limitan el maná, la acción, el alcance y los dos turnos. Si nunca muere nadie, subir el costo al de sellar |
 | **IA predecible de más** (no se mueve si ya alcanza; 11.8) | ⚠️ Vigilar | Si trivializa B o D, sumar "la casilla con menos enemigas adyacentes" antes del orden de lectura |
@@ -1515,7 +1567,7 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | **Pegarle de más a una salvaje** | Resuelto | Huye: se pierde la captura, no hay muerte ni comida (11.5) |
 | **Cazar salvajes como fuente de carne** | Resuelto | Las salvajes huyen y no dan comida (11.5) |
 | **Exponer al Maestro con caídas en el tablero** | Intencional | Si cae, sus caídas mueren. La interfaz debe mostrar las caídas en riesgo |
-| **Jefe sin suficientes acciones** | ⚠️ Vigilar | Desde la v1.3, un solo turno con dos ataques en Caza (Visión 6.2). Si C dura menos de 2 rondas, subir la vida del Tasajero a 36 |
+| **Jefe sin suficientes acciones** | ⚠️ Vigilar | Desde la v1.3, un solo turno con dos ataques en Caza (Visión 6.2). Si C dura menos de 2 rondas de pelea, subir la vida del Tasajero a 36 |
 | **Criatura "guardaespaldas"** (una sola suelta, siempre leal) | Aceptado | Es la regla de oro funcionando |
 | **Congelar desleales en el pergamino** | Aceptado | Detiene el abandono, pero también el vínculo y la curación; sacarla cuesta maná |
 | **La IA de remate castiga de más a la Rodauva** (8 de vida) | ⚠️ Vigilar | Escenarios A y E. Si la compañera cae en casi todos los combates, bajar el remate a "solo si la objetivo no está erizada" |
@@ -1533,39 +1585,46 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | **Maestro solo en el ataque nocturno** (ninguna leal defiende; 9.2) | ⚠️ Vigilar | Peor caso ajustado. Si en 0b.3 termina en permadeath la mayoría de las veces, la atacante pierde el golpe inicial cuando no hay defensoras. Testear con la variante `g_sin_leales` |
 | **Muertes en cadena** (cada muerte resta por separado; 5.2) | Intencional | Perder un combate con dos caídas golpea a toda la tribu. Es la regla de oro; vigilar que no empuje a una espiral de abandonos |
 | **La enconada remata a la salvaje que se quería sellar** | ⚠️ Vigilar | Tensión intencional (Pilar 2). Si frustra, que la enconada deje a una salvaje en 1 de vida |
-| **Incidentes casi invisibles con la balanza 2** (5% por chequeo; cerca de 30% de ver al menos uno en un combate de 3 o 4 rondas) | ⚠️ Vigilar | Escenario D con la balanza 2 y con la 4 (15%). Si a balanza 2 los rivales nunca se notan, bajar el Arrimo a −3 puntos por paso o subir la base a 25% |
+| **Incidentes casi invisibles con la balanza 2** (5% por chequeo; cerca de 30% de ver al menos uno en un combate de 3 o 4 rondas) | ⚠️ Vigilar | Mitigado en parte por las vecinas en 8 (v1.6): las rivales se tocan más seguido. Escenario D con la balanza 2 y con la 4 (15%). Si a balanza 2 los rivales nunca se notan, bajar el Arrimo a −3 puntos por paso o subir la base a 25% |
 | **La Rodauva salvaje erizada alarga los combates** | ⚠️ Vigilar | Escenario D. Si se vuelve un muro, que solo se erice si la enemiga adyacente puede tumbarla este turno |
 | **Encierro con surcos** (dos surcos cierran una esquina) | ⚠️ Vigilar | Cavar junto a enemigas está permitido (05/10/2026). Umbral en 11.9. Palanca: prohibir cavar en casillas adyacentes a una enemiga de pie |
 | **Ocarra detrás del surco**, intocable para las de alcance 1 | ⚠️ Vigilar | Tope de 2 surcos y turno completo. Si domina, el surco corta la línea del Alcance 2 |
 | **Zancajunco oculto como rescatista blindada** | Resuelto | No dos turnos seguidos; se destapa al moverse, al atacar o con una enemiga adyacente (11.2.2) |
 | **Hacerse junco en cada ronda impar** (+3 y defensa) | ⚠️ Vigilar | Métrica 14. Si es la jugada por defecto, bajar el bono a +2 |
 | **Zancajunco con el bono y enconado** (4 + 3 + 3 = 10) | Aceptado | Raro: exige una espera previa y a la rival a tiro |
-| **El Tasajero muere antes de cazar** | ⚠️ Vigilar | El castigo de Caza bajó de +50% a +25% (05/10/2026). Si C dura menos de 2 rondas, vida 36 |
+| **El Tasajero muere antes de cazar** | ⚠️ Vigilar | El castigo de Caza bajó de +50% a +25% (05/10/2026). Si C dura menos de 2 rondas de pelea, vida 36 |
 | **Rodauva sola en la zona de Caza** (recibe 10) | ⚠️ Vigilar | Métrica 11 en C. Si muere sin decisión, la IA nunca pone los dos ataques sobre una presa con la vida completa |
 | **Surcón frágil sin Lomo de tierra** | Resuelto | Vida 18 → 24 (05/10/2026) |
 | **Hacerse junco asimétrico** (el jugador destapa y pega en el mismo turno; la IA no lo planifica, 11.2.2) | ⚠️ Vigilar | Aceptado mientras la IA sea simple: la salvaje se oculta solo si nadie la alcanza (11.8, paso 7), así que el jugador rara vez llega a destaparla y pegar. Métrica 14 (bonos cobrados y perdidos) en F y en el Vado de la 0b. Si la oculta del jugador resulta intocable, la IA suma "destapar y pegar" a su lista |
 | **Comer criaturas guardadas como despensa** | Resuelto | Solo se come a una suelta (7.7, opción B) |
+| **Bloque de 2 × 2 como formación dominante** (v1.6) | ⚠️ Vigilar | Con vecinas en 8, el bloque da afinidad a todos y el Tasajero no consigue dos presas (11.2.3). Contrapeso: pega con menos golpes (solo el miembro que toca a la enemiga, más la Ocarra por encima). Escenarios C y E: si la tribu termina en bloque la mayoría de los turnos y gana igual, revisar con el Director (palanca a definir con los datos) |
+| **La afinidad más frecuente acorta C** (v1.6) | ⚠️ Vigilar | Unos 3 o 4 de daño más por ronda; estimo 2 rondas de pelea, en el borde bajo de la meta. Palanca ya anotada: vida del Tasajero 36 |
+| **Cuenta con espacio** (v1.6) | ⚠️ Vigilar | En 12 × 12, el Tasajero en Cuenta siempre tiene lugar para retirarse: pica y se va. Puede alargar C. Métrica 1 (rondas de pelea). Palanca: la retirada de Cuenta usa como máximo 2 casillas |
+| **El jugador pega primero en la ronda 1** (v1.6) | Aceptado | La enemiga se acerca en su turno de la ronda 1 y queda a tiro (11.3). Ir a buscarla es una decisión: pega antes, pero entra en su zona |
 
 ---
 
 ## 15. Pendientes
 
-> En la v1.5 se resumen los pendientes ya cerrados de las versiones anteriores: el detalle de cada cierre está en el registro de cambios (16).
+> En la v1.5 se resumieron los pendientes ya cerrados de las versiones anteriores: el detalle de cada cierre está en el registro de cambios (16).
 
 **PARA SISTEMAS:**
-- [x] ~~Todo lo pedido hasta la v1.4~~: S-1 a S-26, P-001 a P-024, escenarios B a F y H, rasgos reescritos e IA del Tasajero, preguntas de `Mundo.md` 9.1 (todas cerradas). Ver 16.
-- [x] ~~Sincronizar con la Visión v1.2~~ → Hecho en la v1.5: atacante que se va (9.2, 9.3, 11.5) y su registro como abandono (13), prenda sin consecuencias (3.3), sin encuesta (11.9). **Sistemas no tiene pendientes que bloqueen la 0a ni el hito 0a.1b.**
+- [x] ~~Todo lo pedido hasta la v1.5~~: S-1 a S-26, P-001 a P-024, escenarios B a F y H, rasgos reescritos e IA del Tasajero, preguntas de `Mundo.md` 9.1, sincronización con la Visión v1.2. Ver 16.
+- [x] ~~Visión v1.3: números con vecinas en 8 y despliegues en 12 × 12~~ → Hecho en la v1.6 (10.3, 10.4, 10.6, 11.3, 11.9). P-026 y P-027 respondidas (11.8).
+- [ ] **Aprobar las coordenadas de 12 × 12** que proponga Claude Code sobre los criterios de 11.9, con el test de las rondas 1 y 2. Antes de los playtests de la 0a.2.
 - [ ] Toggle de afines contra la cobardía (10.6): se decide con el escenario E (0a.2 en adelante).
-- [ ] Riesgos ⚠️ (14): se ajustan con las métricas de los playtests, **desde la 0a.2** (11.9).
+- [ ] Riesgos ⚠️ (14): se ajustan con las métricas de los playtests, **desde la 0a.2** (11.9). Nuevos en la v1.6: el bloque de 2 × 2, la afinidad que acorta C y la Cuenta con espacio.
 - [ ] Hito 0a.1b: leer la prueba manual de T40 (¿los rasgos se ven y generan decisiones?) y la métrica 14 como señal temprana. Si algún rasgo no genera decisiones, se revisa antes de la 0a.2.
 - [ ] Fuera del MVP (Capa 3): ¿5 posiciones de balanza alcanzan para el juego completo? · Posición inicial de la balanza por clase, entre 2 y 4.
 
 **PARA DIRECTOR CREATIVO:**
-- [ ] Registrar en `Decisiones.md` las decisiones de Sistemas v0.8 a v1.5 que todavía no estén. En especial: "las leales defienden" quiere decir **solo** las leales (v1.1, 9.2); solo se come a una criatura **suelta** (v1.4, 7.7, opción B); la atacante que se va se registra como abandono (v1.5, 13).
-- [ ] **Visión 6.2** (de la v1.3): Hacerse junco deja **oculto** (no se lo puede elegir como objetivo, sigue visible); Caza recibe +25%; Velocidad por modo; el surco se puede cavar junto a enemigas. Corregir "formar apretado le da dos presas": las dos presas salen de la formación en cruz (esquinas cóncavas), no del bloque (11.2.3).
-- [ ] **Visión 6.5** (de la v1.4): solo se come a una criatura suelta (7.7).
+- [ ] **Visión v1.3, Escala 3:** registrar la lectura de "el primer contacto llega en la ronda 2" aprobada en la sesión del 07/10: **con la tribu quieta, la primera enemiga ataca en la ronda 2**; pegar antes, yendo a buscarla, es una decisión del jugador (11.3).
+- [ ] **Visión 6.2 (corregir):** "formar apretado suma afinidad, pero le da al Tasajero dos presas" no es exacto. Las dos presas salen de **formar con huecos** (cruz, L, diagonales: esquinas cóncavas). El bloque cierra las esquinas y da afinidad, pero pega con menos golpes (11.2.3). El dilema queda: **el bloque aguanta, rodear mata y expone**.
+- [ ] **Visión 11:** cerrar "Con vecinas en 8: ¿bajan el bono de afinidad y la probabilidad de incidente?" (no: 10.3 y 10.4) y "Despliegues de A a H en 12 × 12" (criterios en 11.9; coordenadas a cargo de Claude Code con aprobación de Sistemas). Cerrar también "Regla de IA del Tasajero" (resuelta desde la v1.3: 11.2.3 y 11.8). **Encabezado de la Visión:** la línea "los números de cada rasgo están pendientes en `Sistema.md` 11.2" ya no rige (11.2.1 a 11.2.3).
 - [ ] **Visión 10:** dice "13 métricas"; desde la v1.3 son **14** (11.9). El registro del 03/10 no se toca (fue cierto ese día).
-- [ ] **Visión 11** (nuevo en la v1.5): cerrar "Regla de IA del Tasajero: reparto de los dos ataques de Caza y momento del cambio a Cuenta". Está resuelta desde la v1.3 (11.2.3 y 11.8, pasos 2 y 6b). **Encabezado de la Visión:** la línea "los números de cada rasgo están pendientes en `Sistema.md` 11.2" ya no rige (11.2.1 a 11.2.3).
+- [ ] Registrar en `Decisiones.md` las decisiones de Sistemas v0.8 a v1.6 que todavía no estén. En especial: "las leales defienden" quiere decir **solo** las leales (v1.1, 9.2); solo se come a una criatura **suelta** (v1.4, 7.7, opción B); la atacante que se va se registra como abandono (v1.5, 13); **el cuerpo mira 4 y el vínculo mira 8**, con la lista de 11.3 (v1.6).
+- [ ] **Visión 6.2** (de la v1.3): Hacerse junco deja **oculto** (no se lo puede elegir como objetivo, sigue visible); Caza recibe +25%; Velocidad por modo; el surco se puede cavar junto a enemigas.
+- [ ] **Visión 6.5** (de la v1.4): solo se come a una criatura suelta (7.7).
 - [ ] Marcar el Brief del 01/10/2026 como histórico (lo propone el Arquitecto en 10.5; 11.9 ya lo dice).
 - [ ] La niebla de guerra queda fuera del MVP (11.2.2). ¿Entra en Ideas en espera?
 - [x] ~~D-1: ¿encuesta en E y F?~~ → No (Visión 11 v1.2). Aplicado en 11.9.
@@ -1576,26 +1635,39 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 - [ ] **v1.3, textos nuevos** con las claves que el Arquitecto ya confirmó (`Arquitectura.md` 10.5): `rasgo.surco.*`, `accion.cavar`, `suceso.surco.cavar` y `.cerrar`, `marca.oculto`, `marca.bono`, `suceso.destape.mover`, `.atacar` y `.contacto`, `suceso.pierde_bono`, `aviso.cuenta.umbral` (`{n}`), `suceso.cuenta.cambio` y `aviso.destapar`.
 - [ ] **v1.3, nombres:** nombre final del **surco** (provisorio) y del estado **oculto** del Zancajunco (provisorio). Ojo con el choque entre "Caza" (modo de combate) y "Cazando" (hostilidad, 12.10).
 - [ ] **v1.3, fichas de `Mundo.md`:** el rasgo del Surcón pasa a ser el surco (sale Lomo de tierra); Hacerse junco cambia (se esconde y no se lo puede elegir como objetivo; ya no es "su primer golpe"); Caza y cuenta pasa a un turno en dos modos.
+- [ ] **v1.6, tooltips de relaciones:** si algún texto de afinidad, incidente o cobardía dice "adyacente" o "al lado", tiene que dejar claro que **cuentan las diagonales** (10.3, 10.4, 10.6). Y el del incidente, que la rival en diagonal no recibe el golpe: la criatura se distrae.
 - [ ] **v1.4, `Mundo.md` 9.1:** cerrar aviso de rescatistas al comer (sí, 7.7), olvido sin pergamino (sí, 4.5), cortes de etapas de confianza y de golondrinas (aprobados tal cual: 4.5 y 13) y "¿se puede comer a una guardada?" (no, opción B, 7.7). **Retirar la clave `comer.sacar_guardada`.** Cerrar también que las guardadas no pierden lealtad al comerse a una compañera (5.2).
 - [ ] **v1.5, la atacante que se va** (9.2, paso 6; Visión 6.4 v1.2): una línea para la mañana de la recuperación en `Mundo.md` 4.6, sin mostrar la ida ("nadie la ve irse; queda su rastro", Visión 7). En el epílogo usa la línea de Abandono (13); la variante "tras atacarte" es opcional.
 - [ ] Ataque nocturno (0b): una línea para las sueltas que miran sin defender al Maestro, con variante si **ninguna** lo defiende, y otra para la Centinela no leal ("avisa y se queda quieta") (9.2).
 - [ ] Claves de pantalla que dejó T13 sin texto (`RESUMENES.md`, T13): no son de Sistemas, pero conviene revisar las de lealtad (`lealtad.motivo.<evento>`), que nombran los eventos de 5.2.
 
 **PARA ARQUITECTO:**
+- [ ] **v1.6, geometría** (antes de T18, como pide la Visión 10): aplicar la tabla de 11.3.
+  - **8 vecinas:** afinidad (T15, ya programada con 4: pasa a 8), incidente (T18), toggle de afines y −10 del Maestro vecino en la cobardía (T19).
+  - **4 ortogonales:** todo lo demás, incluidos Hacerse junco (activar y destape por contacto, T38, sin cambios) y Erizarse de la IA (T11, sin cambios).
+  - **Incidente con la rival en diagonal (T18):** con obediencia ≤ 3, golpea solo a una rival que alcance desde su casilla (la de menos vida → orden de la tribu); si no alcanza a ninguna, se distrae (10.4).
+- [ ] **v1.6, dato:** `tablas/hambre.json`, `combate.cada_rondas`: **5 → 6** (7.2), con su línea en la tabla de cotejo. El test de T14 que fija "rondas 5 y 10" usa su propio fixture: actualizarlo solo si lee `datos/` real.
+- [ ] **v1.6, métricas (T23, T33):** la métrica 1 registra **rondas totales, ronda del primer ataque y rondas de pelea**; la métrica 13 se cuenta **desde la ronda del primer ataque**. El umbral de duración de C usa las rondas de pelea (11.9).
+- [ ] **v1.6, tablero y escenarios:** tablero de **12 × 12** con cámara móvil, antes de los playtests de la 0a.2. Claude Code propone las coordenadas de A a F y H sobre los criterios de 11.9 y las verifica con un test que juega las rondas 1 y 2 con el jugador esperando (distancia, ronda del primer ataque enemigo y condiciones de cada fila, incluida la de B: las Ocarras salvajes nunca terminan vecinas en las rondas 1 y 2). **G queda en 8 × 8.** Sistemas aprueba las coordenadas.
+- [ ] **P-026 y P-027:** cerrar con la opción A (lo programado), sin cambios de código. Respuestas para pegar en `docs/PREGUNTAS.md`:
+  - P-026: *"`Sistema.md` 11.8 v1.6: opción A. Con 3 o más presas, las 2 de menos vida → la que actúa antes en la cola; el primer ataque va a la de menos vida. Ya programado así: no cambia código ni tests."*
+  - P-027: *"`Sistema.md` 11.8 v1.6: opción A. 'La enemiga de pie más cercana' se desempata por más cercana → menos vida → la que actúa antes en la cola, como Acercarse. Ya programado así: no cambia código ni tests."*
 - [ ] **v1.4 / v1.5, P-024:** la atacante se va si el combate nocturno termina en derrota, de pie o caída, y su ida no cambia la lealtad (9.2, paso 6). Cambia una condición de `ResultadoCombate.armar` (hoy toma a la caída sin mirar `cierre.fin`) y se suma el caso de derrota al test 11 de T12 → T30. Respuesta para pegar en `docs/PREGUNTAS.md`: *"`Sistema.md` 9.2, paso 6 (v1.4 y v1.5) y Visión 6.4 v1.2: opción B. Si el combate nocturno termina en derrota, la atacante se va, también si ya estaba caída: su pergamino arde, vuelve a ser salvaje y no hay `atacante_pendiente`. Su ida no cambia la lealtad de nadie. Cambia una condición de `ResultadoCombate.armar` y se suma la derrota al test 11 de T12. Se aplica en T30."*
-- [ ] **10.5:** pasar S-20 = P-024 y S-21 a S-26 a "Resueltas" (S-21 a S-26 confirmadas en la v1.4, sin cambios de código). Sincronizar el encabezado con `Sistema.md` v1.5 y la Visión v1.2.
-- [ ] **B.2.1, regla de sincronización:** antes de T35, copiar a `docs/` la Visión **v1.2** y `Sistema.md` **v1.5** (B.2.1 nombra la v1.1 y la v1.3). La v1.5 no cambia nada de T35 a T40.
+- [ ] **10.5:** pasar S-20 = P-024 y S-21 a S-26 a "Resueltas" (S-21 a S-26 confirmadas en la v1.4, sin cambios de código). Sincronizar el encabezado con `Sistema.md` v1.6 y la Visión v1.3.
+- [ ] **B.2.1, regla de sincronización:** copiar a `docs/` la Visión **v1.3** y `Sistema.md` **v1.6**.
 - [ ] 0b: el reparto de la noche solo ofrece comer a las sueltas (7.7). La atacante que se va tras una derrota entra al registro del epílogo como abandono, con el flag "fue atacante" (13).
 - [ ] Escenario G: golpe inicial como ataque normal, 4 de daño con la Ocarra (9.2) → T30.
-- [ ] Orden del inicio del turno (11.3) y una tirada de incidente por turno, salteada si está enconada (10.4) → T18, T19. Corte de la cadena al cerrar la ronda (10.2) → T16. Casos borde de la Lanzadera (1.6) → T22.
+- [ ] Orden del inicio del turno (11.3) y una tirada de incidente por turno, salteada si está enconada (10.4) → T18, T19. Casos borde de la Lanzadera (1.6) → T22.
 - [ ] 0b.3: lista de defensoras al empezar el combate nocturno; +1 de victoria solo para las que pelearon; golpe inicial letal termina el combate antes de la ronda 1 (9.2). Variante de escenario `g_sin_leales` (Rodauva y Zancajunco con lealtad 5, misma semilla que G).
 - [ ] 0b: registro del epílogo con día del último guardado y flag de compañera inicial; orden de lectura y variante "Solo" (13). Cruce del río con vida mínima 1 (12.11). En los encuentros generados desde las tablas de 11.6, la lista de enemigas sigue el orden de la columna Composición (11.3).
 - [ ] Vigentes: todo número de las secciones 1 a 11 es dato editable (11.9); mapa del día, agotamiento, pudrición, confianza, campamento y cierre del día (7.9); contador de días, XP y nivel, hostilidad del Tasajero, tablas de encuentros y estado del río.
+- [x] ~~Corte de la cadena al cerrar la ronda (10.2) → T16~~ → Hecho en T16.
 - [x] ~~Rasgos reescritos de la v1.3~~ → Asumidos en el hito 0a.1b (B.2.1, T35 a T40), **antes de T14 y sin paralelo** (decisión del Arquitecto, que la Visión 10 le dejaba).
 - [x] ~~Escenarios B a F y H, paso de Erizarse en la IA y K-07, respuestas de la v1.1 y la v1.2 en 10.5, 14 métricas en T23 y T33~~ → Hechos en `Arquitectura.md` v0.8 a v0.22.
 
 **PARA ARTE / UI:**
 - [ ] Previsualizaciones obligatorias de la 0a: % de sellado y de huida, % de incidente por casilla, % de Encono y cobardía, desglose del daño (con el bono del Encono), cola de iniciativa (Caza y Cuenta), umbral de rescate, caídas en riesgo y empuje de la Lanzadera.
+- [ ] **v1.6:** al mover una unidad, marcar qué **vecinas** (las 8, con las diagonales) le darían afinidad o riesgo de incidente en la casilla de destino. Sin eso, la regla de las diagonales no se ve.
 - [ ] Al declarar la huida, enemigas que actúan antes del cierre y daño máximo sobre el Maestro (11.7).
 - [ ] Contador del Encono (0–3) visible sobre la criatura.
 - [ ] Antes de dormir, junto al ícono de riesgo (9.1): avisar si el golpe inicial puede tumbar al Maestro y mostrar quiénes lo defenderían (9.2).
@@ -1624,3 +1696,4 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | v1.4 | 05/10/2026 | Respuestas al Arquitecto: S-21 a S-26 confirmadas (11.2.2, 11.2.3, 11.3), con la precisión de destapar y pegar; P-024 = S-20: la atacante caída se va en una derrota (9.2). `Mundo.md` 9.1: olvido sin pergamino y etapas de confianza (4.5), aviso de rescatistas al comer y solo se come a una suelta (7.7, opción B), etapas de las golondrinas (13). Prueba C con la tirada de huida (11.6). Riesgos nuevos (14). Encabezado sincronizado con `Arquitectura.md` v0.22. Pendientes (15) |
 | v1.3 | 05/10/2026 | Sincronización con la Visión v1.1: pasada única de balance de los rasgos reescritos tras el playtest 0a.1. Nuevas 11.2.1 (el surco: reemplaza a Lomo de tierra; Surcón con vida 24), 11.2.2 (Hacerse junco activa: oculto, +3, no dos turnos seguidos) y 11.2.3 (Caza y cuenta: un turno por ronda, Caza con dos ataques de 5 y +25% recibido, Cuenta con −1 y movimiento partido, Velocidad 8 y 3, cambio con vida ≤ 50%). Tasajero con Daño 5 (11.2). Lanzadera contra ocultas y surcos (1.6). Golpe inicial nocturno sin Hacerse junco (9.2). Cortes de cadena (10.2). Encono: rival oculta y Tasajero enconado en Caza (10.5). Tablero, turno, movimiento y Velocidad por modo (11.3). Fórmula de daño (11.4). Prueba C y encuentros del Vado (11.6). Huida del Tasajero (11.7). IA con cambio de modo, Caza, retirada en Cuenta, Hacerse junco y cavar (11.8). Tasajero de C y H en [3,1], nota de F y métrica 14 con dos umbrales (11.9). Riesgos (14) y pendientes (15) actualizados |
 | v1.5 | 05/10/2026 | Sincronización con la Visión v1.2, sin cambios de números ni de reglas ya programadas. La atacante que se va si cae el Maestro: vuelve a ser salvaje y su ida no cambia la lealtad (9.2, 9.3, 11.5); se registra como abandono en el epílogo (13). La prenda no tiene consecuencias y no se registra (3.3). Playtests sin encuesta y medición desde la 0a.2, con el hito 0a.1b para sentir los rasgos; el Brief del 01/10 es histórico (11.9). Pendientes resumidos y puestos al día con `Arquitectura.md` v0.22, `docs/PREGUNTAS.md` y `docs/RESUMENES.md` (15) |
+| v1.6 | 07/10/2026 | Sincronización con la Visión v1.3 (geometría y tablero). **El cuerpo mira 4 y el vínculo mira 8:** tabla de adyacencia y vecinas (11.3); afinidad, incidente, toggle de afines y −10 del Maestro con vecinas en 8 (10.3, 10.4, 10.6, 10.7); Hacerse junco, Erizarse de la IA, invocar, cavar y Remiendo con las 4 ortogonales (1.6, 3.1, 11.2.2, 11.8). **Los números de afinidad (+1), incidente (20%) y del toggle no cambian.** Incidente con la rival en diagonal: golpea solo si la alcanza desde su casilla; si no, se distrae (10.4, 5.4). Geometría de las dos presas reescrita: el bloque cierra las esquinas, rodear las abre (11.2.3). Tablero de 12 × 12 con cámara móvil, zonas de despliegue y **contacto en la ronda 2** (definición, distancia estándar 8, rondas de pelea) (11.3). Hambre de combate cada **6** rondas (7.2). Líneas de 11.6 en rondas de pelea. Criterios de despliegue por escenario (E a distancia 10, G en 8 × 8), coordenadas a cargo de Claude Code con aprobación de Sistemas, bandos cruzados aceptados (11.9). Métrica 1 con ronda del primer ataque y rondas de pelea; métrica 13 desde el primer ataque; umbral de C en rondas de pelea (11.9). P-026 y P-027 respondidas, opción A; numeración de pasos corregida en los desempates (11.8). Riesgos nuevos: bloque de 2 × 2, afinidad que acorta C, Cuenta con espacio y golpe primero en la ronda 1 (14). Pendientes (15) |
