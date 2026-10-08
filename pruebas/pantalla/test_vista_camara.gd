@@ -3,6 +3,8 @@ extends GdUnitTestSuite
 # Arquitectura.md B.3.1 (T42) y D-003: la camara movil de la vista de combate,
 # con el runner de escenas de GdUnit4. El fixture de 12 x 12 (A.6) con los
 # datos de prueba, y los 11 escenarios de datos/ solo para ver que abren bien.
+# T20-ajustes (D-006): el mouse se manda como eventos con su position, nunca
+# con el cursor del sistema.
 const _ESCENA: String = "res://pantalla/combate/vista_combate.tscn"
 const _ESCENA_PRINCIPAL: String = "res://pantalla/principal.tscn"
 const _ESCENARIO_12: String = "res://pruebas/fixtures/pantalla/escenario_12x12.json"
@@ -99,14 +101,49 @@ func _casilla_de(foto: Dictionary, unidad_id: String) -> Vector2i:
 	return Criatura.SIN_POSICION
 
 
+# D-006 (T20-ajustes): el mouse se manda como evento, sin mover el cursor del
+# sistema. El flush lo despacha en el momento (_input y _unhandled_input): la
+# comprobacion va sin await en el medio y ningun evento real se mete antes.
+func _mandar(evento: InputEvent) -> void:
+	Input.parse_input_event(evento)
+	Input.flush_buffered_events()
+
+
+func _mover_a(posicion: Vector2) -> void:
+	var evento: InputEventMouseMotion = InputEventMouseMotion.new()
+	evento.position = posicion
+	evento.global_position = posicion
+	_mandar(evento)
+
+
+func _clic_en(posicion: Vector2) -> void:
+	var evento: InputEventMouseButton = InputEventMouseButton.new()
+	evento.button_index = MOUSE_BUTTON_LEFT
+	evento.button_mask = MOUSE_BUTTON_MASK_LEFT
+	evento.position = posicion
+	evento.global_position = posicion
+	evento.pressed = true
+	_mandar(evento)
+	var suelto: InputEventMouseButton = evento.duplicate()
+	suelto.button_mask = 0
+	suelto.pressed = false
+	_mandar(suelto)
+
+
+# La casilla bajo una posicion del viewport (la inversa del canvas del tablero).
+func _casilla_en_pantalla(vista: VistaCombate, posicion: Vector2) -> Vector2i:
+	var tablero: TileMapLayer = vista.tablero()
+	return tablero.local_to_map(tablero.get_global_transform_with_canvas().affine_inverse() * posicion)
+
+
 func _rueda(boton: MouseButton) -> void:
 	var evento: InputEventMouseButton = InputEventMouseButton.new()
 	evento.button_index = boton
 	evento.pressed = true
-	Input.parse_input_event(evento)
+	_mandar(evento)
 	var suelto: InputEventMouseButton = evento.duplicate()
 	suelto.pressed = false
-	Input.parse_input_event(suelto)
+	_mandar(suelto)
 
 
 # (1) Con la camara desplazada y con zoom, el hover marca la casilla bajo el
@@ -136,23 +173,20 @@ func test_clic_y_hover_con_la_camara_movida() -> void:
 	assert_vector(destino).override_failure_message("ninguna casilla para mover a la vista").is_not_equal(Criatura.SIN_POSICION)
 	assert_vector(otra).override_failure_message("una sola casilla para mover a la vista").is_not_equal(Criatura.SIN_POSICION)
 
-	# Hover sobre la casilla vacia.
-	runner.simulate_mouse_move(_en_pantalla(vista, destino))
-	await runner.simulate_frames(2)
+	# Hover sobre la casilla vacia. D-006: eventos con su position.
+	_mover_a(_en_pantalla(vista, destino))
 	assert_vector(vista.casilla_bajo_mouse()).is_equal(destino)
 	assert_array(vista.tooltip_mostrado()).is_empty()
 
 	# Clic: la unidad del turno se mueve ahi.
-	runner.simulate_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	await runner.simulate_frames(2)
+	_clic_en(_en_pantalla(vista, destino))
 	assert_vector(_casilla_de(vista.combate().instantanea(), turno.unidad_id)).is_equal(destino)
+	await runner.simulate_frames(2)
 
 	# Hover sobre la unidad que llego: su tooltip. El mouse sale a otra casilla y
 	# vuelve al centro de la de destino.
-	runner.simulate_mouse_move(_en_pantalla(vista, otra))
-	await runner.simulate_frames(2)
-	runner.simulate_mouse_move(_en_pantalla(vista, destino))
-	await runner.simulate_frames(2)
+	_mover_a(_en_pantalla(vista, otra))
+	_mover_a(_en_pantalla(vista, destino))
 	assert_vector(vista.casilla_bajo_mouse()).is_equal(destino)
 	assert_array(vista.tooltip_mostrado()).is_not_empty()
 
@@ -167,14 +201,59 @@ func test_hover_sigue_al_mover_la_camara() -> void:
 	vista.acercar()
 	await runner.simulate_frames(1)
 	var centro_pantalla: Vector2 = vista.get_viewport_rect().size / 2.0
-	runner.simulate_mouse_move(centro_pantalla)
-	await runner.simulate_frames(2)
+	# D-006: el evento con su position; despues, ningun evento mas.
+	_mover_a(centro_pantalla)
 	var antes: Vector2i = vista.casilla_bajo_mouse()
 	vista.mover_camara(Vector2(0, _ENORME))
-	await runner.simulate_frames(2)
-	var tablero: TileMapLayer = vista.tablero()
-	assert_vector(vista.casilla_bajo_mouse()).is_equal(tablero.local_to_map(tablero.get_local_mouse_position()))
+	assert_vector(vista.casilla_bajo_mouse()).is_equal(_casilla_en_pantalla(vista, centro_pantalla))
 	assert_vector(vista.casilla_bajo_mouse()).is_not_equal(antes)
+
+
+# (3) D-006: antes del primer evento del mouse no hay casilla bajo el mouse ni
+# hover, aunque la camara se mueva y cambie el zoom.
+func test_sin_mouse_no_hay_hover() -> void:
+	var runner: GdUnitSceneRunner = _vista_12()
+	var vista: VistaCombate = runner.scene()
+	vista.acercar()
+	vista.mover_camara(Vector2(0, _ENORME))
+	assert_vector(vista.casilla_bajo_mouse()).is_equal(Criatura.SIN_POSICION)
+	assert_array(vista.tooltip_mostrado()).is_empty()
+	assert_str(vista.aviso_mostrado()).is_empty()
+	assert_dict(vista.desglose_mostrado()).is_empty()
+	assert_array(vista.casillas_afines()).is_empty()
+	assert_array(vista.casillas_rivales()).is_empty()
+	assert_array(vista.casillas_rivales_enemigas()).is_empty()
+
+
+# (4) D-006: mover el cursor real del sistema sin un evento no cambia la casilla
+# bajo el mouse, ni siquiera al rearmar el hover moviendo la camara. Se
+# comprueba en el mismo frame: el warp puede generar un evento real despues, y
+# ese si cuenta.
+func test_el_cursor_real_no_cambia_la_casilla() -> void:
+	var runner: GdUnitSceneRunner = _vista_12()
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = runner.scene()
+	# Una unidad a la vista, para que el hover tenga tooltip.
+	var foto: Dictionary = vista.combate().instantanea()
+	var unidad: Vector2i = Criatura.SIN_POSICION
+	for criatura in foto["criaturas"]:
+		var casilla: Vector2i = _casilla_de(foto, criatura["id"])
+		if casilla != Criatura.SIN_POSICION and _clickeable(vista, casilla):
+			unidad = casilla
+			break
+	assert_vector(unidad).override_failure_message("ninguna unidad a la vista").is_not_equal(Criatura.SIN_POSICION)
+	_mover_a(_en_pantalla(vista, unidad))
+	assert_vector(vista.casilla_bajo_mouse()).is_equal(unidad)
+	var tooltip: Array[String] = vista.tooltip_mostrado()
+	assert_array(tooltip).is_not_empty()
+	Input.warp_mouse(Vector2.ZERO)
+	vista.mover_camara(Vector2.ZERO)
+	assert_vector(vista.casilla_bajo_mouse()).is_equal(unidad)
+	assert_array(vista.tooltip_mostrado()).is_equal(tooltip)
+	Input.warp_mouse(vista.get_viewport_rect().size - Vector2.ONE)
+	vista.mover_camara(Vector2.ZERO)
+	assert_vector(vista.casilla_bajo_mouse()).is_equal(unidad)
+	assert_array(vista.tooltip_mostrado()).is_equal(tooltip)
 
 
 # (2) Con cada direccion apretada, con zoom maximo y con el de apertura, la
@@ -215,21 +294,19 @@ func test_arrastrar_no_sale_de_los_limites() -> void:
 	var boton: InputEventMouseButton = InputEventMouseButton.new()
 	boton.button_index = MOUSE_BUTTON_MIDDLE
 	boton.pressed = true
-	Input.parse_input_event(boton)
-	await runner.simulate_frames(1)
+	# D-006: eventos despachados en el momento, sin frames entre medio.
+	_mandar(boton)
 	var posiciones: Array[Vector2] = []
 	for relativo in [Vector2(_ENORME, _ENORME), Vector2(-_ENORME, -_ENORME)]:
 		var movimiento: InputEventMouseMotion = InputEventMouseMotion.new()
 		movimiento.relative = relativo
 		movimiento.button_mask = MOUSE_BUTTON_MASK_MIDDLE
-		Input.parse_input_event(movimiento)
-		await runner.simulate_frames(2)
+		_mandar(movimiento)
 		_assert_dentro(vista, str(relativo))
 		posiciones.append(vista.camara().global_position)
 	var suelto: InputEventMouseButton = boton.duplicate()
 	suelto.pressed = false
-	Input.parse_input_event(suelto)
-	await runner.simulate_frames(1)
+	_mandar(suelto)
 	# Arrastrar a la derecha y abajo lleva la camara arriba a la izquierda, y al reves.
 	var detalle: String = "inicio %s, posiciones %s, limites %s" % [inicio, posiciones, vista.limites_camara()]
 	assert_bool(posiciones[0].x < inicio.x and posiciones[0].y < inicio.y).override_failure_message(detalle).is_true()
@@ -237,8 +314,7 @@ func test_arrastrar_no_sale_de_los_limites() -> void:
 	# Suelto el boton, mover el mouse ya no arrastra.
 	var despues: InputEventMouseMotion = InputEventMouseMotion.new()
 	despues.relative = Vector2(_ENORME, 0)
-	Input.parse_input_event(despues)
-	await runner.simulate_frames(2)
+	_mandar(despues)
 	assert_vector(vista.camara().global_position).is_equal(posiciones[1])
 
 

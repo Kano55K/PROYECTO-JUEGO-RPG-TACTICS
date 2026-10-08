@@ -1734,3 +1734,43 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Una enemiga sin rival a su alcance: su tooltip no tiene línea de %.
   6. F3 durante y después de la secuencia de la IA: `chequeo_rival` e `incidente` de las enemigas en el registro, sin errores. Espacio salta la secuencia y la marca se va.
 - **Para la próxima sesión:** correr `addons/gdUnit4/runtest.cmd -a res://pruebas` sin usar el mouse mientras corre (unos 7 minutos). Si los tests de pantalla con mouse pasan, la tarea queda en verde y va el PR. Si siguen fallando, hacen falta una sesión corta y la decisión de qué hacer con esos tests (de T13 y T42).
+
+## T20-ajustes · sesión 1 · 08/10/2026
+- **Rama:** tarea/T20-ajustes
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - `VistaCombate` guarda la posición del último `InputEventMouse` (movimiento o botón) en `_input`, sin marcarlo como manejado. Va en `_input` para guardar también los eventos que se queda un `Control`, como pasaba antes con el cursor.
+  - Una sola conversión a casilla, `_casilla_del_mouse()`: inversa de `get_global_transform_with_canvas()` del `TileMapLayer` + `local_to_map`. Sin ningún evento todavía, da `Criatura.SIN_POSICION`. La usan el clic (`seleccionar`), el hover y el rehover de `_acotar_camara` (teclado, zoom y arrastre). Sin cambios en el comportamiento de la cámara.
+  - `casilla_bajo_mouse()` sigue con el significado de T42: la casilla del último hover, que ahora sale de esa conversión.
+  - Tests de pantalla: el mouse se manda con `Input.parse_input_event` + `Input.flush_buffered_events()`, y se comprueba sin `await` en el medio. Así ningún evento real se mete entre el evento del test y su comprobación.
+  - Comprobación a mano: con la lectura vieja (`get_local_mouse_position`) puesta un momento, fallan los tests del mouse, entre ellos los dos nuevos.
+- **Archivos:** modificados `pantalla/combate/vista_combate.gd`, `pruebas/pantalla/test_vista_camara.gd` y `pruebas/pantalla/test_principal.gd`. Sin cambios en `nucleo/` ni en `datos/`: la huella no cambió.
+- **Tests:** 2 nuevos, total 476, todos pasan. La suite completa pasó 3 veces seguidas, sin usar el mouse; la corrida usando la computadora queda en la prueba manual.
+  - Reescritos por D-006 (solo cambió la forma de mandar el mouse; comprueban lo mismo):
+    - `test_vista_camara.gd::test_clic_y_hover_con_la_camara_movida`: eventos con `position` en lugar de `simulate_mouse_move` / `simulate_mouse_button_pressed`.
+    - `test_vista_camara.gd::test_hover_sigue_al_mover_la_camara`: el evento con `position`. La casilla esperada sale de la inversa del canvas en lugar de `get_local_mouse_position()`.
+    - `test_vista_camara.gd::test_arrastrar_no_sale_de_los_limites` y `test_zoom_respeta_minimo_y_maximo`: con flush y sin frames entre el evento y la comprobación.
+    - `test_principal.gd::test_clic_del_mouse_llega_al_tablero`: eventos con `position`. Sigue pasando por la GUI de la principal.
+  - Nuevos:
+    - `test_vista_camara.gd::test_sin_mouse_no_hay_hover` (3).
+    - `test_vista_camara.gd::test_el_cursor_real_no_cambia_la_casilla` (4). Usa `Input.warp_mouse` a propósito y comprueba en el mismo frame, porque Windows puede generar un evento real por el warp en el frame siguiente, y ese sí cuenta.
+- **Criterio de terminado:** cumplido punto por punto.
+  - (1) Clic y hover con la cámara movida y con zoom: `test_clic_y_hover_con_la_camara_movida` y `test_clic_del_mouse_llega_al_tablero`.
+  - (2) La cámara se mueve con el mouse quieto y el hover se rearma: `test_hover_sigue_al_mover_la_camara`.
+  - (3) Sin evento del mouse no hay hover: test nuevo.
+  - (4) El warp no cambia la casilla: test nuevo.
+  - (5) Búsqueda en `pantalla/`, `pruebas/` y `herramientas/`: ninguna llamada a `get_local_mouse_position`, `get_global_mouse_position`, `get_mouse_position` ni `simulate_mouse_*`. Solo queda `Input.warp_mouse` en el test (4).
+    - Fuera de nuestro código: el `scene_runner` de GdUnit4, al crearse, lleva el cursor real a (0, 0) y trae la ventana al frente (`GdUnitSceneRunnerImpl.gd`, líneas 82 a 88). Es del addon y no se tocó; la vista ya no lee el cursor.
+  - (6) 3 corridas seguidas en verde, sin usar el mouse. Falta la corrida usando la computadora (prueba manual).
+  - (7) Los tests reescritos están listados arriba.
+  - Sin advertencias nuevas: los dos ERROR del depurador remoto ya existían.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** ninguna nueva ni cerrada.
+- **Lista de prueba manual:**
+  1. Correr `addons/gdUnit4/runtest.cmd -a res://pruebas` 3 veces seguidas. En una, mover el mouse y cambiar de ventana mientras corre. Las 3 en verde.
+  2. F5 → A: hover, clic, arrastre (botón del medio) y rueda funcionan igual que antes, con la cámara movida y con zoom.
+  3. Con el mouse quieto sobre el tablero, mover la cámara con WASD o la rueda: el hover (tooltip y marcas) pasa a la casilla que queda debajo.
+  4. Al abrir un escenario, antes de mover el mouse, no hay tooltip ni marcas de hover.
+  5. Con el mouse sobre un botón de abajo, mover la cámara con WASD: no hay errores en la consola.
+- **Para la próxima sesión:** nada: tarea terminada. Sigue T21.
