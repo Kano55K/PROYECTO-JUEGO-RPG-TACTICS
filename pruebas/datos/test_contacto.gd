@@ -2,11 +2,11 @@ extends GdUnitTestSuite
 
 # Arquitectura.md B.3.1 (T43) y A.11 ("Contacto de los escenarios"): test
 # permanente con datos/ real. Juega cada escenario con el jugador esperando
-# (solo `terminar`) y comprueba los criterios de despliegue de Sistema.md 11.9
-# v1.6 contra la IA real. Todo sale del registro, de la instantanea y de las
-# consultas del nucleo: el test no calcula reglas por su cuenta. Si una tarea
-# hace fallar este test, no se ajustan el test ni las coordenadas: se anota en
-# docs/PREGUNTAS.md (CLAUDE.md, "Test de contacto").
+# (solo `terminar`, salvo lo minimo que obliga una regla, T19) y comprueba los
+# criterios de despliegue de Sistema.md 11.9 v1.6 contra la IA real. Todo sale
+# del registro, de la instantanea y de las consultas del nucleo: el test no
+# calcula reglas por su cuenta. Si una tarea hace fallar este test, no se ajustan
+# el test ni las coordenadas: se anota en docs/PREGUNTAS.md (CLAUDE.md, "Test de contacto").
 const _CARPETA_DATOS: String = "res://datos"
 # Corta un combate que no avanza (nunca deberia pasar).
 const _TOPE_ACCIONES: int = 200
@@ -49,9 +49,32 @@ func _jugar(datos: Dictionary, escenario_id: String, hasta_ronda: int, al_turno:
 		assert_bool(combate.esperando_jugador()).override_failure_message(escenario_id).is_true()
 		if al_turno.is_valid():
 			al_turno.call(combate)
+		_jugar_lo_obligado(combate, escenario_id)
+		if combate.terminado():
+			return combate
 		assert_bool(combate.aplicar(Accion.terminar()).valida).override_failure_message(escenario_id).is_true()
 	fail("%s: el combate no avanzo" % escenario_id)
 	return combate
+
+
+# CLAUDE.md, "Test de contacto" (excepcion autorizada en T19; A.11): si una regla
+# no deja terminar el turno (una enconada, S-35), juega lo minimo que obliga:
+# ataca a la primera objetivo que acepta el nucleo o, si no puede, se mueve a la
+# primera casilla que acepta. Todo sale de las consultas del Turno.
+func _jugar_lo_obligado(combate: Combate, escenario_id: String) -> void:
+	var turno: Turno = combate.turno_actual()
+	while not turno.puede_terminar():
+		var accion: Accion = null
+		if not turno.objetivos_para_atacar().is_empty():
+			accion = Accion.atacar(turno.objetivos_para_atacar()[0])
+		elif not turno.casillas_para_mover().is_empty():
+			accion = Accion.mover(turno.casillas_para_mover()[0])
+		assert_object(accion).override_failure_message("%s: turno sin salida" % escenario_id).is_not_null()
+		if accion == null:
+			return
+		assert_bool(combate.aplicar(accion).valida).override_failure_message(escenario_id).is_true()
+		if combate.terminado():
+			return
 
 
 func _eventos(combate: Combate, tipo: String) -> Array[Dictionary]:

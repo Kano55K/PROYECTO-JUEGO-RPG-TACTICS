@@ -8,6 +8,10 @@ extends RefCounted
 
 # Sistema.md 11.2: el efecto de rasgo que habilita Erizarse. Nunca se mira el id.
 const EFECTO_ERIZARSE: String = "erizarse"
+# S-35 (T19): lo que obliga el Encono en este turno. ATACAR: alcanza a alguna
+# rival del chequeo; ACERCARSE: no alcanza a ninguna.
+enum Obligacion { NINGUNA, ATACAR, ACERCARSE }
+
 # Arquitectura.md A.7 (T18): el resultado del evento incidente.
 const RESULTADO_DISTRAIDA: String = "distraida"
 const RESULTADO_GOLPE: String = "golpe"
@@ -36,13 +40,23 @@ var se_movio: bool = false
 var incidente: Dictionary = {}
 # El golpe del incidente para el registro: {desglose, vida_antes, vida_despues}, o {}.
 var golpe_incidente: Dictionary = {}
+# Sistema.md 10.5 y 10.6 (T19): {tipo, rivales, porcentaje, tiro, resultado} si el
+# inicio de este turno tuvo chequeo de rival enemiga (tirada o enconada segura); si no, {}.
+var chequeo_rival: Dictionary = {}
+# Estados del turno (duran este turno): los ven las consultas, nunca se guardan.
+var enconada: bool = false
+var acobardada: bool = false
+var obligacion: Obligacion = Obligacion.NINGUNA
 
 var _ataques_hechos: int = 0
 var _movimiento_partido: bool = false
 # Sistema.md 11.2.2, Limite: si se oculto en este turno (lo guarda el fin del turno).
 var _se_oculto: bool = false
-# Arquitectura.md A.7: los eventos de Junco de las acciones aplicadas, en orden.
+# Arquitectura.md A.7: los eventos de las acciones aplicadas (Junco y encono), en orden.
 var _eventos: Array[Dictionary] = []
+# Sistema.md 10.5 y 10.6: las rivales del chequeo y la casilla donde empezo el turno.
+var _rivales_chequeo: Array[String] = []
+var _casilla_inicial: Vector2i = Criatura.SIN_POSICION
 
 var _plantel: Plantel
 var _tablero: Tablero
@@ -56,14 +70,16 @@ var _cadena: Cadena
 # La del combate (la guarda el Combate, T17): solo Secundar aplicado la cambia.
 var _cola: ColaIniciativa
 # La regla del incidente (T18), como _afinidad, y el generador de combate del
-# contexto (A.8): el unico azar del turno es la tirada del paso 4 de 11.3.
+# contexto (A.8): el unico azar del turno son las tiradas de los pasos 3 y 4 de
+# 11.3. El chequeo de rival enemiga (T19), como _incidente.
 var _incidente: Incidente
+var _chequeo: ChequeoRival
 var _azar: GeneradorAzar
 
 
 func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
 		afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
-		azar: GeneradorAzar) -> void:
+		regla_chequeo: ChequeoRival, azar: GeneradorAzar) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
@@ -74,6 +90,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 	_cadena = cadena
 	_cola = cola
 	_incidente = regla_incidente
+	_chequeo = regla_chequeo
 	_azar = azar
 
 
@@ -81,20 +98,23 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 # combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
 # ContextoCombate. cadena: la del combate (un turno suelto, una nueva). cola: la
 # del combate (un turno suelto, una vacia: no puede Secundar). regla_incidente:
-# la del ContextoCombate. azar: el generador de combate (un turno suelto, uno propio).
+# la del ContextoCombate. regla_chequeo: la del ContextoCombate (T19). azar: el
+# generador de combate (un turno suelto, uno propio).
 # Sistema.md 11.3 y S-31 (P-033): el inicio del turno corre una sola vez por
 # ronda. La entrada que vuelve despues de Secundar (EntradaCola.vuelve) sigue el
 # turno sin repetirlo; por S-29 ese turno estaba sin usar, asi que se prepara igual.
-# El incidente (paso 4) va despues de preparar: el golpe gasta los ataques del modo.
+# La obligacion del Encono (S-35) y el incidente (paso 4) van despues de
+# preparar: miran los pasos y los ataques del modo.
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
 		surcos: Surcos, afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
-		azar: GeneradorAzar) -> Turno:
+		regla_chequeo: ChequeoRival, azar: GeneradorAzar) -> Turno:
 	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola,
-			regla_incidente, azar)
+			regla_incidente, regla_chequeo, azar)
 	if not entrada.vuelve:
 		turno._inicio_del_turno()
 	turno._preparar()
 	if not entrada.vuelve:
+		turno._fijar_obligacion()
 		turno._chequear_incidente()
 	return turno
 
@@ -193,8 +213,8 @@ func puede_erizarse() -> bool:
 	return validar(Accion.erizarse()).valida
 
 
-# Copia de los eventos de Junco (oculto, destape, bono_perdido) de las acciones
-# aplicadas en este turno, para que el Combate registre los nuevos.
+# Copia de los eventos de las acciones aplicadas en este turno (encono, oculto,
+# destape, bono_perdido), para que el Combate registre los nuevos.
 func eventos() -> Array[Dictionary]:
 	return _eventos.duplicate(true)
 
@@ -236,13 +256,93 @@ func cola_si_secunda(aliado_id: String) -> Array[EntradaCola]:
 #   1. Regeneracion de mana del Maestro (2.1): T21.
 #   2. Huida de las salvajes con vida <= 25% (11.7): T25. Si sale, el turno termina ahi.
 #   Cambio de modo (11.2.3, 11.8 paso 2): una regla, no una decision de la IA.
-#   3. Rival enemiga a su alcance: Encono (10.5) o cobardia (10.6): T19.
+#   3. Rival enemiga a su alcance: Encono (10.5) o cobardia (10.6): _chequear_rival.
 #   4. Incidente con rival aliada (10.4): _chequear_incidente, despues de _preparar.
 func _inicio_del_turno() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
 	if criatura != null:
 		criatura.erizada = false
 		cambio_modo = CambioModo.aplicar(criatura)
+		_chequear_rival()
+
+
+# Sistema.md 10.5, 10.6 y 11.3 paso 3: una sola tirada aunque tenga varias rivales
+# (S-37; ChequeoRival). Hoy solo tira la tribu (ChequeoRival.rivales_a_su_alcance:
+# T20 suma las salvajes). Quedan las rivales del chequeo y la casilla de inicio.
+func _chequear_rival() -> void:
+	_casilla_inicial = _posicion(unidad_id)
+	chequeo_rival = _chequeo.tirar(unidad_id, _plantel, _azar)
+	if chequeo_rival.is_empty():
+		return
+	_rivales_chequeo.assign(chequeo_rival["rivales"])
+	enconada = chequeo_rival["resultado"] == ChequeoRival.RESULTADO_ENCONADA
+	acobardada = chequeo_rival["resultado"] == ChequeoRival.RESULTADO_ACOBARDADA
+
+
+# S-35: si la enconada golpea a alguna rival del chequeo desde su casilla o desde
+# una a la que llega, esta obligada a atacar; si no, a acercarse, y pierde la
+# accion como la distraida (10.5: "si no llega, se acerca lo mas posible y pierde
+# la accion"). Las casillas salen de Tablero, sin pasar por _mover.
+func _fijar_obligacion() -> void:
+	if not enconada:
+		return
+	if _casilla_golpea_rival(_posicion(unidad_id)):
+		obligacion = Obligacion.ATACAR
+		return
+	for casilla in _pasos_desde(_posicion(unidad_id)).keys():
+		if _casilla_golpea_rival(casilla):
+			obligacion = Obligacion.ATACAR
+			return
+	obligacion = Obligacion.ACERCARSE
+	accion_usada = true
+	ataques_restantes = 0
+
+
+# S-35: si desde `casilla` golpearia a alguna rival del chequeo, con lo mismo que
+# mira el ataque: la consulta unica de objetivo (Objetivos) y las casillas que
+# golpea (Tablero). No mira los ataques que quedan: la restriccion de casillas
+# dura todo el turno.
+func _casilla_golpea_rival(casilla: Vector2i) -> bool:
+	for rival in _rivales_chequeo:
+		if not Objetivos.puede_ser_objetivo(rival, Objetivos.Clase.HOSTIL, _plantel):
+			continue
+		if _tablero.golpeables(casilla, _alcance(), _bando(unidad_id), _plantel).has(_posicion(rival)):
+			return true
+	return false
+
+
+# S-35, la que no alcanza: la menor distancia (Manhattan, Tablero) de `casilla`
+# a la rival del chequeo mas cercana que sigue de pie.
+func _distancia_a_rival(casilla: Vector2i) -> int:
+	var menor: int = -1
+	for rival in _rivales_chequeo:
+		if not Objetivos.de_pie(rival, _plantel):
+			continue
+		var distancia: int = Tablero.distancia(casilla, _posicion(rival))
+		if menor < 0 or distancia < menor:
+			menor = distancia
+	return menor
+
+
+# S-35: la menor distancia a la rival que puede lograr con los pasos que quedan
+# (la casilla actual incluida).
+func _distancia_minima_alcanzable() -> int:
+	var menor: int = _distancia_a_rival(_posicion(unidad_id))
+	for casilla in _pasos_desde(_posicion(unidad_id)).keys():
+		menor = mini(menor, _distancia_a_rival(casilla))
+	return menor
+
+
+# Sistema.md 10.6 y S-36: si `casilla` queda mas cerca de alguna rival del
+# chequeo (de pie) que la casilla donde empezo el turno.
+func _mas_cerca_de_rival(casilla: Vector2i) -> bool:
+	for rival in _rivales_chequeo:
+		if not Objetivos.de_pie(rival, _plantel):
+			continue
+		var hasta: Vector2i = _posicion(rival)
+		if Tablero.distancia(casilla, hasta) < Tablero.distancia(_casilla_inicial, hasta):
+			return true
+	return false
 
 
 # Sistema.md 10.4 v1.6 y 11.3, paso 4: una sola tirada (Incidente). Si sale, con
@@ -256,7 +356,9 @@ func _chequear_incidente() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
 	if criatura == null or criatura.bando != Criatura.Bando.TRIBU:
 		return
-	# T19: si quedo enconada en el paso 3, no tira (10.4). Ese estado no existe todavia.
+	# Sistema.md 10.4 y 11.3 paso 4: la enconada no tira incidente.
+	if enconada:
+		return
 	var datos: Dictionary = _incidente.tirar(unidad_id, _plantel, _azar)
 	if datos.is_empty():
 		return
@@ -349,6 +451,9 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 	var pasos: Dictionary = _pasos_desde(desde)
 	if not pasos.has(destino):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.CASILLA_NO_ALCANZABLE)
+	var motivo_rival: ResultadoAccion.Motivo = _motivo_destino_rival(destino)
+	if motivo_rival != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo_rival)
 	if aplica:
 		_poner_posicion(unidad_id, destino)
 		_gastar_pasos(pasos[destino] if _movimiento_partido else pasos_restantes)
@@ -360,6 +465,18 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 			_eventos.append_array(Junco.destapar(criatura, Junco.MOTIVO_MOVER))
 		_eventos.append_array(Junco.revisar_contacto(unidad_id, _plantel))
 	return ResultadoAccion.aceptada()
+
+
+# Sistema.md 10.5, 10.6, S-35 y S-36: lo que el Encono o la cobardia le prohiben
+# a un destino ya alcanzable. NINGUNO si no le prohiben nada.
+func _motivo_destino_rival(destino: Vector2i) -> ResultadoAccion.Motivo:
+	if obligacion == Obligacion.ATACAR and not _casilla_golpea_rival(destino):
+		return ResultadoAccion.Motivo.CASILLA_SIN_RIVAL
+	if obligacion == Obligacion.ACERCARSE and _distancia_a_rival(destino) != _distancia_minima_alcanzable():
+		return ResultadoAccion.Motivo.CASILLA_NO_ACERCA
+	if acobardada and _mas_cerca_de_rival(destino):
+		return ResultadoAccion.Motivo.MAS_CERCA_DE_RIVAL
+	return ResultadoAccion.Motivo.NINGUNO
 
 
 func _gastar_pasos(cantidad: int) -> void:
@@ -397,6 +514,11 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_ALIADO)
 	if motivo != ResultadoAccion.Motivo.NINGUNO:
 		return ResultadoAccion.rechazada(motivo)
+	# S-35 y 10.5 (Tasajero enconado en Caza): la enconada que alcanza solo ataca a
+	# las rivales del chequeo; el primer ataque es el obligado.
+	if obligacion == Obligacion.ATACAR and _ataques_hechos == 0 and not por_incidente \
+			and not _rivales_chequeo.has(objetivo_id):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_NO_RIVAL)
 	var hasta: Vector2i = _posicion(objetivo_id)
 	var bando: Criatura.Bando = _bando(unidad_id)
 	if not _tablero.golpeables(desde, _alcance(), bando, _plantel).has(hasta):
@@ -418,6 +540,11 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 			_cadena.cortar(Cadena.MOTIVO_OTRO_OBJETIVO)
 		else:
 			_cadena.atacar(unidad_id, objetivo_id, _plantel)
+			# Sistema.md 10.5: todo golpe a una rival enemiga sube el Encono (el danio ya
+			# se calculo con el punto que suma). Su evento va detras del ataque.
+			var encono: Dictionary = _chequeo.sumar_golpe(unidad_id, objetivo_id, _plantel)
+			if not encono.is_empty():
+				_eventos.append(encono)
 		# Sistema.md 11.2.2: la atacante se destapa y cobra su bono; la objetivo
 		# destapada pierde el suyo.
 		_eventos.append_array(Junco.atacar(unidad_id, _plantel))
@@ -431,15 +558,20 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 
 # Los aportes externos del danio (11.4) para un ataque desde `desde`: la
 # afinidad (10.3, mirada desde `desde`) y el combo del eslabon siguiente (10.2;
-# nunca en el golpe de un incidente, S-33). Aca se enchufan despues Encono o
-# cobardia (T19); el ataque real y la previsualizacion los ven igual.
+# nunca en el golpe de un incidente, S-33), la cobardia (10.6: en todos sus
+# ataques, tambien el golpe del incidente) y el Encono (10.5: la enconada contra
+# una rival del chequeo). El ataque real y la previsualizacion los ven igual.
 func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false) -> Array[ModificadorDanio]:
 	var aportes: Array[ModificadorDanio] = []
 	var afinidad: ModificadorDanio = _afinidad.aporte(unidad_id, desde, _plantel)
 	if afinidad != null:
 		aportes.append(afinidad)
+	if acobardada:
+		aportes.append(_chequeo.aporte_cobardia())
 	if por_incidente:
 		return aportes
+	if enconada and _rivales_chequeo.has(objetivo_id):
+		aportes.append(_chequeo.aporte_encono(_plantel.criatura(unidad_id)))
 	var combo: ModificadorDanio = _cadena.aporte(unidad_id, objetivo_id, _plantel)
 	if combo != null:
 		aportes.append(combo)
@@ -453,6 +585,8 @@ func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false)
 func _erizarse(aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
+	if enconada:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ENCONADA)
 	if accion_usada:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
 	var criatura: Criatura = _plantel.criatura(unidad_id)
@@ -474,6 +608,8 @@ func _erizarse(aplica: bool) -> ResultadoAccion:
 func _cavar(casilla: Vector2i, aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
+	if enconada:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ENCONADA)
 	if not Surcos.es_surcon(unidad_id, _plantel):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_RASGO)
 	if accion_usada:
@@ -499,6 +635,8 @@ func _cavar(casilla: Vector2i, aplica: bool) -> ResultadoAccion:
 func _hacerse_junco(aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
+	if enconada:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ENCONADA)
 	if not Junco.es_junco(unidad_id, _plantel):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_RASGO)
 	if accion_usada:
@@ -539,8 +677,11 @@ func _motivo_puede_secundar() -> ResultadoAccion.Motivo:
 		return ResultadoAccion.Motivo.TURNO_TERMINADO
 	if _bando(unidad_id) != Criatura.Bando.TRIBU:
 		return ResultadoAccion.Motivo.SALVAJE_NO_SECUNDA
-	# T19: no Secunda una enconada ni una acobardada (10.1). Esos estados no
-	# existen todavia: su motivo va aca.
+	# Sistema.md 10.1: no Secunda una enconada ni una acobardada.
+	if enconada:
+		return ResultadoAccion.Motivo.ENCONADA
+	if acobardada:
+		return ResultadoAccion.Motivo.ACOBARDADA
 	if se_movio:
 		return ResultadoAccion.Motivo.YA_SE_MOVIO
 	if accion_usada:
@@ -575,6 +716,13 @@ func _secundar(aliado_id: String, aplica: bool) -> ResultadoAccion:
 func _terminar(aplica: bool) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
+	# S-35: la enconada que alcanza no termina sin atacar; la que no alcanza, mientras
+	# pueda acercarse y no se haya movido.
+	if obligacion == Obligacion.ATACAR and _ataques_hechos == 0:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.DEBE_ATACAR_RIVAL)
+	if obligacion == Obligacion.ACERCARSE and not se_movio and not movimiento_usado \
+			and _distancia_minima_alcanzable() < _distancia_a_rival(_posicion(unidad_id)):
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.DEBE_ACERCARSE)
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
 	resultado.espero = not accion_usada
 	if aplica:

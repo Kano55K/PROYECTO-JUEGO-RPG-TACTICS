@@ -179,6 +179,14 @@ func incidente_en(unidad_id: String, casilla: Vector2i) -> Dictionary:
 	return _contexto.incidente.consulta(unidad_id, casilla, _plantel)
 
 
+# T19 (Sistema.md 10.5: "el jugador ve la probabilidad antes de acercarla"):
+# {tipo, rivales, porcentaje, seguro} del chequeo de rival enemiga que tendria la
+# unidad al empezar su proximo turno parada en `casilla`, con el tablero de ahora
+# (ChequeoRival.consulta, la misma cuenta que la tirada). Calcula sin aplicar.
+func rival_en(unidad_id: String, casilla: Vector2i) -> Dictionary:
+	return _contexto.chequeo_rival.consulta(unidad_id, casilla, _plantel)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -266,17 +274,30 @@ func _avanzar() -> void:
 		_turno = _empezar_turno(entrada)
 		_junco_volcados = 0
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7). Paso
-		# antes que la tirada del incidente (paso 4 de 11.3): se registra sin
-		# volcarla, asi el orden del registro es el de lo que paso.
+		# antes que las tiradas de los pasos 3 y 4 de 11.3: se registra sin
+		# volcarlas, asi el orden del registro es el de lo que paso.
 		if not _turno.cambio_modo.is_empty():
 			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
-					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]}, false)
+					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]}, 0)
+		_registrar_chequeo_rival()
 		_registrar_incidente(estados_antes)
 
 
 func _empezar_turno(entrada: EntradaCola) -> Turno:
 	return Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-			_contexto.afinidad, _cadena, _cola, _contexto.incidente, _contexto.azar_combate)
+			_contexto.afinidad, _cadena, _cola, _contexto.incidente, _contexto.chequeo_rival, _contexto.azar_combate)
+
+
+# Sistema.md 10.5 y 10.6 (T19, A.7): el chequeo de rival enemiga, detras del
+# `turno` (y del `cambio_modo`) y de su propia `tirada`, si tiro; antes de todo
+# lo del incidente, cuya tirada queda sin volcar hasta su evento.
+func _registrar_chequeo_rival() -> void:
+	var chequeo: Dictionary = _turno.chequeo_rival
+	if chequeo.is_empty():
+		return
+	_registrar({"tipo": "chequeo_rival", "unidad": _turno.unidad_id, "tipo_chequeo": chequeo["tipo"],
+			"rivales": (chequeo["rivales"] as Array).duplicate(), "porcentaje": chequeo["porcentaje"],
+			"tiro": chequeo["tiro"], "resultado": chequeo["resultado"]}, 1 if chequeo["tiro"] else 0)
 
 
 # Sistema.md 10.4 (T18, A.7): el incidente del inicio del turno, detras del
@@ -295,7 +316,7 @@ func _registrar_incidente(estados_antes: Dictionary) -> void:
 	_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": _turno.incidente["objetivo"],
 			"desglose": (_turno.golpe_incidente["desglose"] as DesgloseDanio).a_diccionario(), "eslabon": null,
 			"vida_antes": _turno.golpe_incidente["vida_antes"], "vida_despues": _turno.golpe_incidente["vida_despues"]})
-	_registrar_junco()
+	_registrar_eventos_turno()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
 	_registrar_cadena()
@@ -370,7 +391,7 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 		Accion.Tipo.SECUNDAR:
 			_registrar({"tipo": "secundar", "unidad": unidad_id, "detras_de": accion.aliado_id,
 					"lugar": _cola.lugar_de(unidad_id)})
-	_registrar_junco()
+	_registrar_eventos_turno()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
 	# Los cortes de la accion (otra objetivo, objetivo que ya no es hostil).
@@ -409,17 +430,19 @@ func _terminar() -> void:
 
 # Arquitectura.md A.7: antes de cada evento se vuelcan las tiradas nuevas del
 # generador de combate (lo que registra T02), asi quedan en orden.
-# volcar_tiradas: false solo para un evento que paso antes que las tiradas
-# pendientes (el cambio de modo, antes de la tirada del incidente, T18).
-func _registrar(evento: Dictionary, volcar_tiradas: bool = true) -> void:
-	if volcar_tiradas:
-		var historial: Array[Dictionary] = _contexto.azar_combate.historial()
-		for indice in range(_tiradas_volcadas, historial.size()):
-			var tirada: Dictionary = historial[indice]
-			_agregar({"tipo": "tirada", "ronda": _cola.ronda, "indice": tirada["indice"],
-					"metodo": tirada["metodo"], "parametros": tirada["parametros"],
-					"resultado": tirada["resultado"]})
-		_tiradas_volcadas = historial.size()
+# tiradas: cuantas de las pendientes se vuelcan antes (-1, todas). Menos solo
+# para un evento que paso antes que alguna tirada pendiente: el cambio de modo
+# (0, antes de las tiradas de los pasos 3 y 4, T18) y el chequeo de rival (solo
+# la suya, antes de la del incidente, T19).
+func _registrar(evento: Dictionary, tiradas: int = -1) -> void:
+	var historial: Array[Dictionary] = _contexto.azar_combate.historial()
+	var hasta: int = historial.size() if tiradas < 0 else mini(historial.size(), _tiradas_volcadas + tiradas)
+	for indice in range(_tiradas_volcadas, hasta):
+		var tirada: Dictionary = historial[indice]
+		_agregar({"tipo": "tirada", "ronda": _cola.ronda, "indice": tirada["indice"],
+				"metodo": tirada["metodo"], "parametros": tirada["parametros"],
+				"resultado": tirada["resultado"]})
+	_tiradas_volcadas = maxi(_tiradas_volcadas, hasta)
 	evento["ronda"] = _cola.ronda
 	_agregar(evento)
 
@@ -454,9 +477,10 @@ func _registrar_surcos() -> void:
 	_surcos_volcados = historial.size()
 
 
-# Arquitectura.md A.7 (B.2.1): los eventos `oculto`, `destape` y `bono_perdido`
-# nuevos del turno, en el orden en que pasaron, despues del evento de la accion.
-func _registrar_junco() -> void:
+# Arquitectura.md A.7 (B.2.1 y T19): los eventos `encono`, `oculto`, `destape` y
+# `bono_perdido` nuevos del turno, en el orden en que pasaron, despues del evento
+# de la accion (el `encono`, justo detras del `ataque` que sube el contador).
+func _registrar_eventos_turno() -> void:
 	var eventos: Array[Dictionary] = _turno.eventos()
 	for indice in range(_junco_volcados, eventos.size()):
 		_registrar(eventos[indice])

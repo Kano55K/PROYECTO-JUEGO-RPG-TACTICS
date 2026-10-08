@@ -50,6 +50,26 @@ enum Motivo {
 	# Sistema.md 10.1: la aliada todavia no actuo en la ronda (ni cayo, ni fue
 	# guardada); asi tampoco se Secunda mas alla del final de la ronda.
 	ALIADA_SIN_ENTRADA_PENDIENTE,
+	# Sistema.md 10.5 y 10.1 (T19): la enconada no usa otra accion que atacar a su
+	# rival, y no Secunda.
+	ENCONADA,
+	# Sistema.md 10.1: la acobardada no Secunda.
+	ACOBARDADA,
+	# S-35: la enconada que alcanza a su rival solo se mueve a casillas desde
+	# donde golpea a alguna rival del chequeo.
+	CASILLA_SIN_RIVAL,
+	# S-35: la enconada solo ataca a las rivales del chequeo (en Caza, el primer ataque).
+	OBJETIVO_NO_RIVAL,
+	# S-35: la enconada que alcanza no termina sin atacar a su rival.
+	DEBE_ATACAR_RIVAL,
+	# S-35: la enconada que no alcanza solo se mueve a las casillas de menor
+	# distancia a la rival mas cercana.
+	CASILLA_NO_ACERCA,
+	# S-35: la enconada que no alcanza no termina mientras pueda acercarse.
+	DEBE_ACERCARSE,
+	# Sistema.md 10.6 y S-36: la acobardada no termina un movimiento mas cerca de
+	# ninguna rival del chequeo que donde empezo el turno.
+	MAS_CERCA_DE_RIVAL,
 }
 
 var valida: bool

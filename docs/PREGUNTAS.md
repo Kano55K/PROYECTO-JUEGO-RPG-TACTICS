@@ -103,7 +103,7 @@
 - **Cerrada en:** T05
 
 ## P-008 — El Maestro en el toggle de afines contra la cobardía
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -114,6 +114,7 @@
 - **Bloquea:** no (se programa en T19)
 - **Mientras tanto:** la `_nota` de `e_cobardia_afines` no da ese número y remite a esta pregunta.
 - **Respuesta:** `Sistema.md` 10.6 v1.1 (03/10/2026): opción A. El Maestro no cuenta como afín adyacente para el toggle: solo su −10 propio. En el caso: 15%. Se aplica en T19.
+- **Cerrada en:** T19
 
 ## P-009 — Objetivo de la Ocarra en las Pruebas A y B
 - **Estado:** CERRADA
@@ -511,4 +512,17 @@
 - **Opciones:** A) "la acción" son todos los ataques del turno: la distraída pierde los dos y el golpe gasta los dos (no hay segundo ataque). B) el golpe gasta solo uno: el segundo queda para otra objetivo. — Recomendación técnica: A, lectura literal con la acción de T36 (`accion_usada` = "usó alguna acción").
 - **Bloquea:** no
 - **Mientras tanto:** programada la lectura A: el golpe del incidente deja `ataques_restantes` en 0 y la distraída también. Sin test propio: el caso no aparece en ningún escenario de la 0a.
+- **Respuesta:** _(la completa el staff)_
+
+## P-037 — Nombre del campo "tipo" del evento chequeo_rival
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T19
+- **Fecha:** 07/10/2026
+- **Fuente:** `Arquitectura.md` A.7, "Eventos de 0a.2" (T19): `chequeo_rival` (unidad, tipo `encono` / `cobardia`, rivales, porcentaje, `tiro` y resultado)
+- **Duda:** todo evento del registro ya usa la clave `tipo` para su nombre (`"tipo": "chequeo_rival"`). ¿Con qué clave va el tipo `encono` / `cobardia`?
+- **Caso que la dispara:** el evento no puede tener dos claves `tipo`: `{"tipo": "chequeo_rival", "tipo": "encono"}` pisa una con la otra.
+- **Opciones:** A) `tipo_chequeo` (`{"tipo": "chequeo_rival", "tipo_chequeo": "encono", ...}`). B) `chequeo`. C) Otro nombre. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A en `Combate._registrar_chequeo_rival`, con su test (`test_registro_del_chequeo_y_del_incidente`). Cambiar el nombre es una línea y su test. La pantalla (sesión 2) y las métricas (T23) la van a leer.
 - **Respuesta:** _(la completa el staff)_

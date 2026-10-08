@@ -44,13 +44,16 @@ static func de_pie(unidad_id: String, plantel: Plantel) -> bool:
 # Sistema.md 10.5 (para T19): una rival enemiga "a su alcance" esta a distancia
 # Manhattan <= Movimiento + Alcance de la criatura. Una oculta no cuenta
 # (Rival oculta, 11.2.2): es la misma regla que la de los objetivos hostiles.
-# Que sean rivales (relaciones.json) lo mira quien llama.
-static func cuenta_como_rival_a_su_alcance(unidad_id: String, rival_id: String, plantel: Plantel) -> bool:
+# Que sean rivales (relaciones.json) lo mira quien llama. desde: la casilla desde
+# la que se mide (T19, Combate.rival_en: calcular sin aplicar); sin ella, la suya.
+static func cuenta_como_rival_a_su_alcance(unidad_id: String, rival_id: String, plantel: Plantel,
+		desde: Vector2i = Criatura.SIN_POSICION) -> bool:
 	if not puede_ser_objetivo(rival_id, Clase.HOSTIL, plantel):
 		return false
 	var criatura: Criatura = plantel.criatura(unidad_id)
+	var casilla: Vector2i = criatura.posicion if desde == Criatura.SIN_POSICION else desde
 	var alcance: int = criatura.especie.movimiento() + criatura.especie.alcance()
-	return Tablero.distancia(criatura.posicion, _posicion(rival_id, plantel)) <= alcance
+	return Tablero.distancia(casilla, _posicion(rival_id, plantel)) <= alcance
 
 
 # Ocupa una casilla: no esta guardada ni fuera, y tiene posicion.
