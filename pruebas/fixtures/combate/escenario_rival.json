@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "rival",
+  "_nota": "Sistema.md 10.5, 10.6, 5.4, 1.3, 11.2.2 y 11.5 v1.6 (tests de T19, Turno suelto). 12 x 12 y balanza 5: Arrimo 0 y umbral de rescate 8 (cada test puede cambiar la balanza del Maestro). Todas estacionadas: la tribu en la fila 0 (cada dos columnas, sin vecinas en 8 entre si) y el Maestro en [11,0]; las enemigas en el rincon de abajo a la derecha, a mas de 5 de cualquier casilla hasta [5,5]. Cada test acomoda a las que usa alrededor de [3,3] y fija lealtad y hambre (leal 8/3, neutral 5/3, baja 5/6). Rivales enemigas (relaciones.json de prueba): Ocarra-Ocarra, Ocarra-Zancajunco, Ocarra-Tasajero y Rodauva-Tasajero. Surcon sin rivales",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 5, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [11, 0] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 0] },
+    { "id": "ocarra_2", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 0] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 0] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 0] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [8, 0] },
+    { "id": "rodauva_3", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 2] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 4] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [11, 11] },
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [9, 11] },
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [11, 9] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [7, 11] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

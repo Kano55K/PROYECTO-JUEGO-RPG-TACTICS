@@ -208,11 +208,13 @@ func test_t40_sucesos_de_los_rasgos() -> void:
 # (5) El tooltip de una enemiga muestra su rasgo y su estado: el Tasajero de C
 # en Caza con el umbral de vida_de_cambio (30 x 50% = 15); el Zancajunco
 # salvaje oculto con el bono; los Surcones con sus surcos contra el tope (2).
+# T19 (Sistema.md 10.5 v1.6): el Tasajero es de Encono y suma su contador (0 de
+# 3); el fixture de textos no tiene panel.encono.
 func test_t40_tooltip_de_una_enemiga() -> void:
 	var lectura: LecturaCombate = _lectura_rasgos("escenario_c")
 	assert_array(lectura.tooltip_unidad("tasajero_s1")).is_equal(["Tasajero", "Vida: 30/30", "Caza y cuenta",
 			"Empieza cazando: dos zarpazos por turno, a una presa o a dos, y recibe más daño. Herido, pasa a contar: pica una vez, más flojo, y se aparta. No vuelve a cazar.",
-			"Caza", "Con 15 de vida o menos, pasa a Cuenta."])
+			"Caza", "[FALTA: panel.encono]: 0/3", "Con 15 de vida o menos, pasa a Cuenta."])
 	assert_str(lectura.tooltip_unidad(Maestro.ID)[0]).is_equal("Maestro")
 
 	lectura = _lectura_rasgos("escenario_junco_salvaje")

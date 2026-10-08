@@ -281,6 +281,10 @@ func _jugar_ronda_c() -> Combate:
 # Zancajunco de la tribu son rivales vecinas en C, asi que cada una tira su
 # incidente al empezar el turno (5 % con la balanza 2). Con la semilla de C
 # ninguna sale: queda la `tirada` sin evento `incidente`. La hecha a mano es la 2.
+# Reescrito en T19 por Sistema.md 10.6 y 11.3 paso 3 v1.6: la Rodauva de la tribu
+# (trabajo) tiene al Tasajero (rival) a su alcance y tira su cobardia (15 %: leal con
+# la balanza 2 y el Maestro vecino, tabla de 10.6): `tirada` y `chequeo_rival` detras de su `turno`. La Ocarra,
+# leal con la balanza 2, tiene 0 % de Encono y no tira (10.5).
 func test_registro_de_una_ronda_de_c() -> void:
 	var combate: Combate = _jugar_ronda_c()
 	assert_str(combate.turno_actual().unidad_id).is_equal("zancajunco_1")
@@ -289,7 +293,7 @@ func test_registro_de_una_ronda_de_c() -> void:
 		"turno", "tirada", "accion", "fin_turno",
 		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
 		"turno", "tirada", "tirada", "accion", "fin_turno",
-		"turno", "accion", "fin_turno",
+		"turno", "tirada", "chequeo_rival", "accion", "fin_turno",
 		"turno", "accion", "fin_turno",
 		"fin_ronda", "ronda", "turno",
 	])
@@ -315,8 +319,13 @@ func test_registro_de_una_ronda_de_c() -> void:
 	assert_array(movimiento["desde"]).is_equal([3, 1])
 
 	var tiradas: Array[Dictionary] = _de_tipo(combate, "tirada")
-	assert_int(tiradas.size()).is_equal(3)
+	assert_int(tiradas.size()).is_equal(4)
 	assert_array(_de_tipo(combate, "incidente")).is_empty()
+	var chequeo: Dictionary = _de_tipo(combate, "chequeo_rival")[0]
+	assert_dict(chequeo).contains_key_value("unidad", "rodauva_1").contains_key_value("tipo_chequeo", "cobardia") \
+			.contains_key_value("porcentaje", 15).contains_key_value("tiro", true)
+	assert_array(chequeo["rivales"]).is_equal(["tasajero_s1"])
+	assert_int(lineas[(tiradas[3]["n"] as int) + 1]["n"] as int).is_equal(chequeo["n"] as int)
 	for incidente in tiradas.slice(0, 2):
 		assert_dict(incidente["parametros"]).is_equal({"minimo": 1, "maximo": 100})
 		assert_int(incidente["resultado"] as int).is_greater(5)

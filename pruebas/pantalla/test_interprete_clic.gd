@@ -29,7 +29,7 @@ func before_test() -> void:
 	_plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_turno.json", "escenario"), especies, tabla,
 			_leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
 	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), GeneradorAzar.new(1))
+			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), GeneradorAzar.new(1))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -90,7 +90,7 @@ func test_modo_cavar() -> void:
 	var plantel: Plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_surco_tribu.json", "escenario"),
 			especies, tabla, _leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
 	var turno: Turno = Turno.empezar(EntradaCola.new("surcon_1", "", 0), plantel, tablero, danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), GeneradorAzar.new(1))
+			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), GeneradorAzar.new(1))
 	var foto: Dictionary = plantel.instantanea()
 
 	var accion: Accion = InterpreteClic.accion(turno, foto, Vector2i(3, 5), true)

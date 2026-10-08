@@ -26,6 +26,9 @@ tile_set = ExtResource("2_casillas")
 [node name="Rivales" type="TileMapLayer" parent="Tablero"]
 tile_set = ExtResource("2_casillas")
 
+[node name="RivalesEnemigas" type="TileMapLayer" parent="Tablero"]
+tile_set = ExtResource("2_casillas")
+
 [node name="PausaIA" type="Timer" parent="."]
 one_shot = true
 

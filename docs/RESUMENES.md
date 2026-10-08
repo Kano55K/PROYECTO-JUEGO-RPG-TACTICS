@@ -1389,3 +1389,201 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Jugar D Normal o D Hambriento terminando turnos con las rivales juntas hasta ver un incidente. En los sucesos sale la línea de `incidente.distraida.*` (Normal) o `incidente.ataque.*` (Hambriento, con el golpe en el registro). Con F3, la línea `incidente` va detrás de `turno` y de su `tirada`.
   6. La distraída todavía se puede mover, y el botón Secundar y los ataques ya no están.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
+
+## T19 · sesión 1 · 07/10/2026
+- **Rama:** tarea/T19-encono
+- **Estado:** EN CURSO (sigue en la sesión 2: pantalla)
+- **Hecho:**
+  - Regla nueva `ChequeoRival` (`nucleo/combate/chequeo_rival.gd`), sin estado, en `ContextoCombate.chequeo_rival`. Hace una sola tirada (S-37) para las criaturas de la tribu con alguna rival enemiga a su alcance (`Objetivos.cuenta_como_rival_a_su_alcance`). La rama sale del `rol`: combate y mixto → Encono, trabajo → cobardía.
+    - Encono: base + por punto × contador + Arrimo + tramo, entre 0 y 100. Con el contador en el máximo, enconada sin tirar.
+    - Cobardía: base + Arrimo + tramo + Maestro de pie vecino en 8. Con el toggle `afines_contra_cobardia` se suman las afines vecinas en 8 sin el Maestro (P-008), con tope y mínimo 5 %; sin el toggle, piso 0.
+    - El lugar de las salvajes queda marcado para T20.
+  - Contador `Criatura.encono`: todo golpe aplicado de una criatura de combate o mixta a su rival enemiga suma 1, de cualquier bando. El `Cierre` lo vuelve a 0 y la `instantanea` lo muestra.
+  - `Turno`:
+    - Estados `enconada` y `acobardada`, y `obligacion` (S-35).
+    - La enconada que alcanza solo se mueve a casillas desde donde golpea a su rival, su primer ataque va a la rival y no termina sin atacar. La que no alcanza solo se mueve a las casillas de menor distancia, pierde la acción y no termina mientras pueda acercarse.
+    - La acobardada no termina más cerca de ninguna rival (S-36) y pega con −50 % en todos sus ataques.
+    - Ninguna de las dos Secunda. La enconada no tira incidente.
+    - Bono plano del Encono por `_aportes`: validar, previsualizar y aplicar dan lo mismo.
+  - `Combate`:
+    - Eventos `chequeo_rival` (detrás de `turno`, `cambio_modo` y su `tirada`, antes del incidente) y `encono` (detrás del `ataque`).
+    - `_registrar` vuelca solo las tiradas que corresponden.
+    - `rival_en(unidad_id, casilla)` calcula sin aplicar.
+  - `test_contacto.gd`: el ayudante juega lo mínimo que obliga una regla. Pasa sin tocar coordenadas ni criterios.
+  - P-008 aplicada y `CERRADA`.
+- **Archivos:**
+  - Creados: `nucleo/combate/chequeo_rival.gd`; `pruebas/combate/test_chequeo_rival.gd`, `test_enconada.gd`, `test_acobardada.gd`; en `pruebas/fixtures/combate/`: `combate_rival_100.json`, `combate_rival_0.json`, `combate_sin_rival.json`, `escenario_rival.json`, `escenario_rival_combate.json`, `escenario_caza_tribu_encono.json`, `especie_rival_prueba.json`, `relaciones_rival_prueba.json`.
+  - Modificados en el núcleo: `turno.gd`, `combate.gd`, `contexto_combate.gd`, `objetivos.gd` (parámetro opcional `desde`), `resultado_accion.gd` (8 motivos), `cierre.gd`, `unidades/criatura.gd`, `unidades/plantel.gd`.
+  - Modificados en las pruebas: `datos_fixture.gd` (`chequeo_rival`) y los 13 archivos que crean un `Turno` suelto (parámetro nuevo, sin otro cambio), `test_combate.gd`, `test_incidente.gd`, `test_junco.gd`, `test_contacto.gd`.
+  - Modificados en docs: `docs/PREGUNTAS.md`, `CLAUDE.md` (Estado actual).
+  - Sin cambios en `datos/` ni en `pantalla/`: la huella no cambió.
+- **Tests:** 19 nuevos, total 421, todos pasan (sí).
+- **Tests viejos reescritos** (ninguno borrado):
+  1. `test_combate.gd::test_registro_de_una_ronda_de_c` (10.6 y 11.3 paso 3 v1.6): la Rodauva de C tira su cobardía (15 %: leal, balanza 2, Maestro vecino). Se suman `tirada` y `chequeo_rival`, y cuatro tiradas en lugar de tres.
+  2. `test_junco.gd::test_atacar_destapa_y_cobra` (10.5): el golpe del Zancajunco a la Ocarra suma el evento `encono` antes del `destape`.
+  3. `test_junco.gd::test_registro_instantanea_y_grabacion` (10.5): entre el `ataque` de la Ocarra salvaje y el `bono_perdido` va su `encono`.
+  4. `test_incidente.gd` (10.5 y 10.6, 11.3 paso 3): los turnos del archivo usan `combate_sin_rival.json` para el chequeo, así el generador mide solo el incidente. Cambia solo el ayudante `_turno` y tres llamadas a `Turno.empezar`; las aserciones no cambian. Fallaban por eso `test_rival_en_diagonal_tira_y_a_dos_no`, `test_caida_guardada_fuera_y_otro_bando_no_y_oculta_si`, `test_aliada_que_no_es_rival_no_tira`, `test_base_0_no_tira`, `test_turno_que_vuelve_no_tira` y `test_tres_rivales_una_tirada`.
+- **Criterio de terminado:** parcial (sesión 1).
+  - Cumplido punto por punto:
+    1. `test_porcentaje_del_encono`.
+    2. `test_porcentaje_de_la_cobardia`.
+    3. `test_toggle_de_afines`.
+    4. `test_a_su_alcance`.
+    5. `test_rama_por_rol`.
+    6. `test_golpe_voluntario_suma_sin_bono`, `test_ocarra_enconada_pega_5_6_7_7` y `test_salvaje_suma_y_cierre_en_0`.
+    7. `test_enconada_que_alcanza`.
+    8. `test_enconada_que_no_alcanza`.
+    9. `test_tasajero_enconado_en_caza`.
+    10. `test_pega_la_mitad_y_no_secunda`, `test_no_se_acerca_a_la_rival` y `test_puede_atacar_a_su_rival`.
+    11. `test_enconada_no_tira_incidente` y `test_secundo_no_rechequea`.
+    12. `test_rival_en`.
+    13. `test_registro_del_chequeo_y_del_incidente` y `test_registro_instantanea_y_grabacion`.
+    15. (adelantado) El test de contacto y todos los tests pasan.
+    16. (adelantado) Tests viejos reescritos y listados arriba.
+  - Falta el punto 14 (pantalla).
+- **Lecturas declaradas:**
+  - S-35, al pie de la letra: la restricción de casillas de la enconada que alcanza dura todo el turno; la del objetivo y la de `terminar` se cumplen con el primer ataque (10.5, Tasajero en Caza).
+  - S-36 y S-37, tal cual 10.5 de `Arquitectura.md`.
+  - S-31: no rechequea al volver de Secundar.
+  - Bono del Encono en todo golpe de la enconada a una rival del chequeo ("voluntario" = sin estar enconada, 10.5).
+  - El −50 % de la acobardada rige también en el golpe del incidente ("en todos sus ataques").
+  - Técnicas:
+    - Con el contador en el máximo, el porcentaje informado es 100 (`seguro`).
+    - El evento `encono` sale solo si el contador cambió.
+    - Con el toggle, el mínimo de 5 % rige siempre.
+    - Sin rivales o con 0 %, no hay `chequeo_rival`.
+    - La clave `tipo_chequeo` sale de P-037.
+- **Claves de texto nuevas sin texto:** ninguna (el núcleo no usa claves; las de pantalla van en la sesión 2).
+- **Preguntas:** nueva P-037 (ARQUITECTO, no bloquea); cerrada P-008.
+- **Para la próxima sesión:**
+  - Pantalla (punto 14):
+    - Con el mouse sobre una casilla alcanzable o la propia, marcar las rivales enemigas a su alcance (`Combate.rival_en`) y sumar al aviso `encono.tooltip` o `cobardia.tooltip` con `{porcentaje}` si es mayor que 0.
+    - Contador del Encono en la ficha y en el tooltip.
+    - Marcas de enconada y acobardada.
+    - Sucesos de `chequeo_rival` y `encono`.
+    - El botón de terminar sigue `puede_terminar()`: hoy, con una enconada, el botón puede no responder.
+  - Lista de prueba manual en el resumen final.
+
+## T19 · sesión 2 · 08/10/2026
+- **Rama:** tarea/T19-encono
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho (la tarea entera, sesiones 1 y 2):**
+  - **Regla** (`Sistema.md` 10.5, 10.6, 5.4, 1.3, 11.2.2, 11.3 paso 3 y 11.5 v1.6; K-06): `ChequeoRival` (`nucleo/combate/chequeo_rival.gd`), sin estado, en `ContextoCombate.chequeo_rival`.
+    - Una sola tirada (S-37) para las criaturas de la tribu con alguna rival enemiga a su alcance (`Objetivos.cuenta_como_rival_a_su_alcance`, con `desde` opcional). La rama sale del `rol`: combate y mixto → Encono, trabajo → cobardía.
+    - **Encono:** base + por punto × contador + Arrimo + tramo, entre 0 y 100. Con el contador en el máximo, enconada sin tirar.
+    - **Cobardía:** base + Arrimo + tramo + Maestro de pie vecino en 8. Con el toggle `afines_contra_cobardia`, se suman las afines vecinas en 8 sin el Maestro (P-008), con tope y mínimo 5 %. Sin el toggle, el piso es 0.
+    - El lugar de las salvajes queda marcado para T20.
+  - **Contador `Criatura.encono`:** todo golpe aplicado de una criatura de combate o mixta a su rival enemiga suma 1, de cualquier bando. El `Cierre` lo vuelve a 0. `plantel.gd` solo cambió en eso: la `instantanea` suma `encono` por criatura.
+  - **`Turno`:**
+    - Estados `enconada` y `acobardada`, y `obligacion` (`ATACAR` / `ACERCARSE`, S-35).
+    - La enconada que alcanza solo se mueve a casillas desde donde golpea a su rival, su primer ataque va a la rival y no termina sin atacar.
+    - La que no alcanza solo se mueve a las casillas de menor distancia, pierde la acción y no termina mientras pueda acercarse.
+    - La acobardada no termina más cerca de ninguna rival (S-36) y pega con −50 %.
+    - Ninguna de las dos Secunda. La enconada no tira incidente.
+    - El bono del Encono va por `_aportes`.
+  - **`Combate`:**
+    - Eventos `chequeo_rival` (detrás de `turno`, `cambio_modo` y su `tirada`, antes del incidente) y `encono` (detrás del `ataque`).
+    - `_registrar` vuelca solo las tiradas que corresponden.
+    - `rival_en(unidad_id, casilla)` calcula sin aplicar.
+  - **`test_contacto.gd`:** el ayudante juega lo mínimo que obliga una regla (`_jugar_lo_obligado`). Pasa sin tocar coordenadas ni criterios.
+  - **Pantalla (sesión 2):**
+    - **Hover:** con el mouse sobre una casilla para mover o sobre la propia, se marcan las rivales de `Combate.rival_en` en la capa nueva `Tablero/RivalesEnemigas` (marca `9:0`, rombo violeta, distinta del círculo rojo de las rivales aliadas). El aviso suma `encono.tooltip` o `cobardia.tooltip` con `{porcentaje}`. Con 0 % o sin rivales, nada. Durante la secuencia de la IA, el hover sigue bloqueado.
+    - **Botón de terminar:** `LecturaCombate.boton_terminar()` reemplaza a `texto_terminar()`. El botón sigue `puede_terminar()`. Si lo bloquea la obligación, el motivo (`ClavesTextos.motivo_terminar`, una clave por motivo) va en el tooltip del botón y al final del panel del turno.
+    - **Marcas:** `marca.enconada` y `marca.acobardada` en la ficha y en el tooltip de la unidad del turno, con la especie como sujeto (concordancia).
+    - **Contador:** `Encono: n/máx` en el tooltip de toda criatura de Encono, de los dos bandos y también en 0, y en la ficha cuando es mayor que 0.
+    - **Sucesos:**
+      - `chequeo_rival`: con la primera rival, la reacción del par (`encono.<especie>.<rival>`) o de la especie (`cobardia.<especie>`) si existe; si no, la línea general (`encono.inicio`, `cobardia.inicio`). Resistida: `cobardia.resiste`, con la variante de la especie. `no_enconada` no tiene línea.
+      - `encono`: `encono.sube`.
+    - **Consultas nuevas del núcleo**, sin cambiar reglas: `ChequeoRival.maximo_encono()` y `ArmadorTextos.tiene(clave)`.
+    - `ClavesTextos` suma las claves nuevas y las variantes que están en el archivo: por par, por especie y `cobardia.resiste.<especie>`, nunca `.maestro`.
+  - P-008 aplicada y `CERRADA`. P-038 a P-040 nuevas (abajo).
+  - **Datos:** sin cambios; la huella no cambió.
+- **Archivos (la tarea entera):**
+  - **Creados:**
+    - `nucleo/combate/chequeo_rival.gd`;
+    - `pruebas/combate/test_chequeo_rival.gd`, `test_enconada.gd` y `test_acobardada.gd`;
+    - `pruebas/pantalla/test_vista_rival.gd`;
+    - en `pruebas/fixtures/combate/`: `combate_rival_100.json`, `combate_rival_0.json`, `combate_sin_rival.json`, `escenario_rival.json`, `escenario_rival_combate.json`, `escenario_caza_tribu_encono.json`, `especie_rival_prueba.json` y `relaciones_rival_prueba.json`;
+    - `pruebas/fixtures/pantalla/escenario_cobardia_pantalla.json`.
+  - **Modificados en el núcleo:**
+    - en `nucleo/combate/`: `turno.gd`, `combate.gd`, `contexto_combate.gd`, `objetivos.gd`, `resultado_accion.gd` (8 motivos) y `cierre.gd`;
+    - `nucleo/unidades/criatura.gd` y `plantel.gd`;
+    - `nucleo/textos/armador_textos.gd` (`tiene`).
+  - **Modificados en la pantalla:**
+    - `pantalla/claves_textos.gd`;
+    - en `pantalla/combate/`: `lectura_combate.gd`, `vista_combate.gd`, `vista_combate.tscn`, `casillas_cenital.tres` y `marcas_placeholder.svg`.
+  - **Modificados en las pruebas:**
+    - `datos_fixture.gd` (`chequeo_rival`);
+    - los 13 archivos que crean un `Turno` suelto (parámetro nuevo);
+    - `test_combate.gd`, `test_incidente.gd`, `test_junco.gd`, `test_contacto.gd`, `test_armador_textos.gd`, `test_claves_textos.gd` y `test_lectura_combate.gd`.
+  - **Docs:** `docs/PREGUNTAS.md`, `CLAUDE.md` ("Estado actual") y este archivo.
+- **Tests:** 29 nuevos (19 en la sesión 1 y 10 en la 2), total 431; todos pasan, `pruebas/datos/test_contacto.gd` incluido.
+- **Tests viejos reescritos** (ninguno borrado):
+  1. `test_combate.gd::test_registro_de_una_ronda_de_c`, por 10.6 y 11.3 paso 3 v1.6: la Rodauva de C tira su cobardía (15 %). Se suman `tirada` y `chequeo_rival`, y hay cuatro tiradas en lugar de tres.
+  2. `test_junco.gd::test_atacar_destapa_y_cobra`, por 10.5: el golpe del Zancajunco a la Ocarra suma el evento `encono` antes del `destape`.
+  3. `test_junco.gd::test_registro_instantanea_y_grabacion`, por 10.5: entre el `ataque` de la Ocarra salvaje y el `bono_perdido` va su `encono`.
+  4. `test_incidente.gd`, por 10.5, 10.6 y 11.3 paso 3: los turnos del archivo usan `combate_sin_rival.json` para el chequeo. Cambian solo el ayudante `_turno` y tres llamadas a `Turno.empezar`; las aserciones no cambian.
+  5. (Sesión 2) `test_lectura_combate.gd::test_t40_tooltip_de_una_enemiga`, por 10.5 v1.6: el tooltip del Tasajero de C suma su contador, `[FALTA: panel.encono]: 0/3` (el fixture de textos no tiene la clave).
+- **Criterio de terminado:** cumplido punto por punto.
+  1. `test_porcentaje_del_encono`.
+  2. `test_porcentaje_de_la_cobardia`.
+  3. `test_toggle_de_afines`.
+  4. `test_a_su_alcance`.
+  5. `test_rama_por_rol`.
+  6. `test_golpe_voluntario_suma_sin_bono`, `test_ocarra_enconada_pega_5_6_7_7` y `test_salvaje_suma_y_cierre_en_0`.
+  7. `test_enconada_que_alcanza`.
+  8. `test_enconada_que_no_alcanza`.
+  9. `test_tasajero_enconado_en_caza`.
+  10. `test_pega_la_mitad_y_no_secunda`, `test_no_se_acerca_a_la_rival` y `test_puede_atacar_a_su_rival`.
+  11. `test_enconada_no_tira_incidente` y `test_secundo_no_rechequea`.
+  12. `test_rival_en`.
+  13. `test_registro_del_chequeo_y_del_incidente` y `test_registro_instantanea_y_grabacion`.
+  14. Pantalla, en `test_vista_rival.gd`:
+      - `test_aviso_y_marca_de_encono`, `test_sin_aviso_con_0` y `test_cobardia_baja_junto_al_maestro` (60 % → 50 %);
+      - `test_enconada_no_termina_hasta_atacar` y `test_enconada_que_no_alcanza_debe_acercarse` (botón, motivo, marca y contador);
+      - `test_sucesos_del_chequeo_y_del_encono` y `test_contador_y_marca_en_el_tooltip`.
+      - Además: `test_maximo_encono`, `test_tiene` y `test_claves_del_encono_y_la_cobardia`.
+  15. `addons/gdUnit4/runtest.cmd -a res://pruebas`: 431/431, con el test de contacto. Sin errores ni advertencias nuevas en la salida (los dos `ERROR` del depurador remoto son del arranque del runner de GdUnit4).
+  16. Tests viejos reescritos y listados arriba.
+- **Lecturas declaradas:**
+  - S-35: la restricción de casillas de la enconada que alcanza dura todo el turno → **P-038 (S-38)**.
+  - El −50 % de la acobardada rige también en el golpe del incidente → **P-039 (S-39)**.
+  - Con el toggle, el mínimo de 5 % rige siempre → **P-040 (S-40)**.
+  - S-36 y S-37, tal cual `Arquitectura.md` 10.5.
+  - S-31: no rechequea al volver de Secundar.
+  - El bono del Encono va en todo golpe de la enconada a una rival del chequeo.
+  - Técnicas:
+    - Con el contador en el máximo, el porcentaje informado es 100.
+    - El evento `encono` sale solo si el contador cambió.
+    - Sin rivales o con 0 %, no hay `chequeo_rival`.
+    - La clave `tipo_chequeo` es la de P-037.
+  - Técnicas de la pantalla:
+    - La reacción del par o de la especie reemplaza a la línea general (`Mundo.md` 5).
+    - Con varias rivales, la línea nombra a la primera.
+    - `no_enconada` no tiene línea.
+    - Con 0 %, no se marca la rival.
+    - El motivo de no poder terminar va en el panel del turno y en el tooltip del botón (el `Aviso` sigue siendo del hover).
+    - `cobardia.resiste.afin` y `cobardia.resiste.maestro` no se muestran: el evento `chequeo_rival` no dice quién la sostuvo, y la pantalla no lo puede recalcular después. Si se quieren, el evento tendría que traerlo (`Arquitectura.md` A.7, decisión del Arquitecto).
+- **Claves de texto nuevas sin texto:** `marca.enconada`, `marca.acobardada`, `panel.encono`, `aviso.terminar.debe_atacar_rival` y `aviso.terminar.debe_acercarse`. En pantalla salen como `[FALTA: …]`.
+- **Preguntas:** nuevas P-037 (ARQUITECTO), P-038, P-039 y P-040 (SISTEMAS); ninguna bloquea, pero P-038 conviene antes de T20. Cerrada P-008.
+- **Lista de prueba manual (usuario):**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. **C (Tasajero):**
+     - Cuando el Tasajero quede a tiro (ronda 2), en el turno de la Rodauva, pasar el mouse por su propia casilla: el Tasajero lleva el rombo violeta y el aviso dice el % de cobardía (leal con la balanza 2: 25 %; 15 % si el Maestro le queda al lado o en diagonal).
+     - Pasar el mouse por casillas lejos del Maestro y cerca de él: el % sube y baja.
+  3. **F (Rescate):**
+     - Con la Ocarra frente al Zancajunco salvaje, el hover avisa del Encono (neutral con la balanza 2: 10 %).
+     - Si queda enconada:
+       - la ficha dice `[FALTA: marca.enconada]`;
+       - el botón de terminar está gris;
+       - el panel del turno y el tooltip del botón dicen `[FALTA: aviso.terminar.debe_atacar_rival]` (o `…debe_acercarse` si no llega);
+       - solo se marcan casillas desde donde golpea.
+     - Después de atacar, el botón se habilita.
+     - En los sucesos sale la reacción "La Ocarra baja el cuello como una lanza en ristre…".
+  4. **E con el toggle (`e_cobardia_afines`):** en el turno de la Rodauva leal, el % de cobardía baja con la otra Rodauva al lado o en diagonal, y nunca baja de 5 %. En `e_cobardia` (sin el toggle), la misma casilla da más.
+  5. **Contador:**
+     - Después de cada golpe de la Ocarra al Zancajunco, su ficha muestra `[FALTA: panel.encono]: n/3` y el tooltip lo dice también.
+     - Los sucesos dicen "El encono de la Ocarra crece."
+     - Con 3, el hover avisa 100 %.
+  6. Si la Rodauva queda acobardada: la ficha dice `[FALTA: marca.acobardada]`, no se puede mover más cerca del Tasajero y el botón de terminar sigue habilitado.
+- **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.

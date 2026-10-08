@@ -64,6 +64,21 @@ static func incidente(combate: String = "combate.json") -> Incidente:
 			Relaciones.new(datos["relaciones.json"]), obediencia)
 
 
+# El ChequeoRival de los fixtures (T19), armado como en ContextoCombate, para los
+# tests que crean un Turno suelto. combate: el fixture de tablas/combate.json.
+# toggle: afines_contra_cobardia del escenario. relaciones: otro fixture de
+# relaciones.json ya leido, o {} para el de siempre.
+static func chequeo_rival(combate: String = "combate.json", toggle: bool = false,
+		relaciones: Dictionary = {}) -> ChequeoRival:
+	var datos: Dictionary = cargar(combate)["datos"]
+	var tabla_combate: Dictionary = datos["tablas/combate.json"]
+	var obediencia: Obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"],
+			tabla_combate)
+	var tabla_relaciones: Relaciones = Relaciones.new(datos["relaciones.json"] if relaciones.is_empty() else relaciones)
+	return ChequeoRival.desde_datos(tabla_combate, Arrimo.desde_datos(datos["tablas/arrimo.json"]), tabla_relaciones,
+			obediencia, Afinidad.desde_datos(tabla_combate, tabla_relaciones, obediencia), toggle)
+
+
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
 static func combo(relaciones: Dictionary = {}) -> Combo:
 	var datos: Dictionary = cargar()["datos"]

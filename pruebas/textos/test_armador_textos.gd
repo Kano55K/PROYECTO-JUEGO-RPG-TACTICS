@@ -191,3 +191,13 @@ func _jugar_ronda_c(armar_textos: bool) -> Combate:
 		var resultado: ResultadoAccion = combate.aplicar(Accion.terminar())
 		assert_bool(resultado.valida).is_true()
 	return combate
+
+
+# T19, sesion 2: si una clave tiene texto (para elegir entre la reaccion del par
+# y la linea general, Mundo.md 5). No avisa ni toca el generador.
+func test_tiene() -> void:
+	var armador: ArmadorTextos = _armador()
+	assert_bool(armador.tiene("noche.molino")).is_true()
+	assert_bool(armador.tiene("no.existe")).is_false()
+	assert_bool(armador.tiene("_nota")).is_false()
+	assert_array(armador.avisos()).is_empty()

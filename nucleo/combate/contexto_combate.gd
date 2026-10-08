@@ -45,6 +45,8 @@ var afinidad: Afinidad
 var combo: Combo
 # Sistema.md 10.4 y 1.3 (T18): la regla del incidente. La aplica el Turno con azar_combate.
 var incidente: Incidente
+# Sistema.md 10.5, 10.6 y 1.3 (T19): el chequeo de rival enemiga. Lo aplica el Turno con azar_combate.
+var chequeo_rival: ChequeoRival
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -78,6 +80,8 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	var arrimo: Arrimo = Arrimo.desde_datos(datos["tablas/arrimo.json"])
 	contexto.combo = Combo.desde_datos(tabla_combate, arrimo, contexto.afinidad)
 	contexto.incidente = Incidente.desde_datos(tabla_combate, arrimo, contexto.relaciones, contexto.obediencia)
+	contexto.chequeo_rival = ChequeoRival.desde_datos(tabla_combate, arrimo, contexto.relaciones, contexto.obediencia,
+			contexto.afinidad, contexto.toggles.get("afines_contra_cobardia", false))
 	contexto.valido = true
 	return contexto
 

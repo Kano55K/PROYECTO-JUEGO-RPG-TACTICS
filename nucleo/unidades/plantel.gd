@@ -109,6 +109,8 @@ func instantanea() -> Dictionary:
 			# Arquitectura.md A.7 (B.2.1): Hacerse junco (Sistema.md 11.2.2).
 			"oculta": c.oculta,
 			"bono_junco": c.bono_junco,
+			# Arquitectura.md A.7 (T19): el contador del Encono (Sistema.md 10.5).
+			"encono": c.encono,
 			"pergamino": c.pergamino_id,
 		})
 	var lista_pergaminos: Array = []

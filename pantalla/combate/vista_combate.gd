@@ -29,6 +29,8 @@ const _MARCA_DESTINO: Vector2i = Vector2i(6, 0)
 const _MARCA_AFIN: Vector2i = Vector2i(7, 0)
 # T18: las rivales que darian riesgo de incidente desde la casilla bajo el mouse.
 const _MARCA_RIVAL: Vector2i = Vector2i(8, 0)
+# T19: las rivales enemigas que la harian tirar Encono o cobardia desde ahi.
+const _MARCA_RIVAL_ENEMIGA: Vector2i = Vector2i(9, 0)
 # T17: las aliadas que se pueden Secundar (la misma marca de "elegir" que cavar).
 const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
 const _TEXTOS: String = "textos/es.json"
@@ -107,6 +109,7 @@ var _limites: Rect2 = Rect2()
 @onready var _marcas: TileMapLayer = $Tablero/Marcas
 @onready var _capa_afines: TileMapLayer = $Tablero/Afines
 @onready var _capa_rivales: TileMapLayer = $Tablero/Rivales
+@onready var _capa_rivales_enemigas: TileMapLayer = $Tablero/RivalesEnemigas
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -230,12 +233,14 @@ func clic_casilla(casilla: Vector2i) -> bool:
 # la propia, se marcan las unidades que le darian afinidad desde ahi
 # (Combate.afines_desde) y, si hay alguna, el aviso suma afinidad.tooltip. T18:
 # ahi mismo, las rivales del incidente (Combate.incidente_en) e incidente.tooltip.
+# T19: y las rivales enemigas del Encono o la cobardia (Combate.rival_en).
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_capa_afines.clear()
 	_capa_rivales.clear()
+	_capa_rivales_enemigas.clear()
 	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
 	# las fichas todavia no.
 	if _combate == null or _en_secuencia:
@@ -278,6 +283,16 @@ func sobre_casilla(casilla: Vector2i) -> void:
 						_capa_rivales.set_cell(_casilla_de(foto, rival), _FUENTE_MARCAS, _MARCA_RIVAL)
 					avisos.append(_armador.armar(ClavesTextos.INCIDENTE_TOOLTIP,
 							{"porcentaje": incidente["porcentaje"]}))
+				# T19 (Sistema.md 10.5 y 10.6): el chequeo de rival enemiga que tiraria
+				# al empezar su turno ahi (Combate.rival_en). Con 0 %, nada.
+				var rival: Dictionary = _combate.rival_en(turno.unidad_id, casilla)
+				if rival["porcentaje"] > 0:
+					for rival_id in rival["rivales"]:
+						_capa_rivales_enemigas.set_cell(_casilla_de(foto, rival_id), _FUENTE_MARCAS,
+								_MARCA_RIVAL_ENEMIGA)
+					var clave_rival: String = ClavesTextos.ENCONO_TOOLTIP \
+							if rival["tipo"] == ChequeoRival.TIPO_ENCONO else ClavesTextos.COBARDIA_TOOLTIP
+					avisos.append(_armador.armar(clave_rival, {"porcentaje": rival["porcentaje"]}))
 			_aviso_mostrado = "\n".join(avisos)
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -301,6 +316,11 @@ func casillas_afines() -> Array[Vector2i]:
 # T18: las casillas de las rivales marcadas por riesgo de incidente ahora.
 func casillas_rivales() -> Array[Vector2i]:
 	return _capa_rivales.get_used_cells()
+
+
+# T19: las casillas de las rivales enemigas marcadas por Encono o cobardia ahora.
+func casillas_rivales_enemigas() -> Array[Vector2i]:
+	return _capa_rivales_enemigas.get_used_cells()
 
 
 # T40: el boton de una activa (LecturaCombate.ACTIVA_*). Cavar no aplica nada:
@@ -508,6 +528,7 @@ func _empezar_secuencia(pasos: Array[Dictionary]) -> void:
 	_marcas.clear()
 	_capa_afines.clear()
 	_capa_rivales.clear()
+	_capa_rivales_enemigas.clear()
 	_capa_zona.clear()
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -587,6 +608,7 @@ func _dibujar_marcas() -> void:
 	# T41: las de afinidad son del hover; el proximo movimiento del mouse las rearma.
 	_capa_afines.clear()
 	_capa_rivales.clear()
+	_capa_rivales_enemigas.clear()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()
@@ -694,7 +716,11 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 	_botones.visible = esperando
 	if not esperando:
 		return
-	_boton_terminar.text = lectura.texto_terminar()
+	# T19: segun Turno.puede_terminar, con el motivo de la obligacion (S-35).
+	var datos_terminar: Dictionary = lectura.boton_terminar()
+	_boton_terminar.text = datos_terminar["texto"]
+	_boton_terminar.disabled = not datos_terminar["habilitado"]
+	_boton_terminar.tooltip_text = datos_terminar["motivo"]
 	# T40: un boton por activa, armados desde el efecto (LecturaCombate).
 	for hijo in _botones.get_children():
 		if hijo != _boton_terminar:

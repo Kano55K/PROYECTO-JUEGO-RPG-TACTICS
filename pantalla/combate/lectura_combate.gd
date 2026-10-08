@@ -58,6 +58,11 @@ func fichas() -> Array[Dictionary]:
 		if estado == _ESTADO_CAIDA:
 			marcas.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, criatura.especie.id()))
 		marcas.append_array(_marcas_rasgo(foto_criatura))
+		marcas.append_array(_marcas_turno(criatura.id))
+		# T19: en la ficha, el contador solo cuando ya subio.
+		var linea_encono: String = _linea_encono(foto_criatura)
+		if (foto_criatura["encono"] as int) > 0 and not linea_encono.is_empty():
+			marcas.append(linea_encono)
 		var ficha: Dictionary = _ficha(criatura.id, foto_criatura["posicion"], criatura.bando == Criatura.Bando.TRIBU,
 				false, estado == _ESTADO_CAIDA, foto_criatura["vida"], criatura.vida_max_real(), marcas)
 		ficha["oculta"] = foto_criatura["oculta"]
@@ -78,6 +83,30 @@ func _marcas_rasgo(foto_criatura: Dictionary) -> Array[String]:
 	if foto_criatura["bono_junco"]:
 		marcas.append(_armador.armar(ClavesTextos.MARCA_BONO))
 	return marcas
+
+
+# T19 (Sistema.md 10.5 y 10.6): enconada o acobardada, solo en su turno (los
+# estados viven en el Turno). Concuerdan con la especie (A.2.1).
+func _marcas_turno(id_unidad: String) -> Array[String]:
+	var marcas: Array[String] = []
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.unidad_id != id_unidad:
+		return marcas
+	if turno.enconada:
+		marcas.append(_armador.armar(ClavesTextos.MARCA_ENCONADA, {}, _sujeto(id_unidad)))
+	if turno.acobardada:
+		marcas.append(_armador.armar(ClavesTextos.MARCA_ACOBARDADA, {}, _sujeto(id_unidad)))
+	return marcas
+
+
+# T19 (Sistema.md 10.5): el contador del Encono, "Encono: n/max", con el tope que
+# da el nucleo (ChequeoRival.maximo_encono). "" si la criatura es de cobardia.
+func _linea_encono(foto_criatura: Dictionary) -> String:
+	var criatura: Criatura = _plantel.criatura(foto_criatura["id"])
+	if ChequeoRival.tipo(criatura) != ChequeoRival.TIPO_ENCONO:
+		return ""
+	return "%s: %d/%d" % [_armador.armar(ClavesTextos.PANEL_ENCONO), foto_criatura["encono"] as int,
+			_combate.contexto().chequeo_rival.maximo_encono()]
 
 
 # Una fila por entrada de la cola de la ronda, en orden:
@@ -132,7 +161,8 @@ func texto_ronda() -> String:
 
 
 # Lineas del panel de la unidad del turno: nombre, vida y, si los tiene,
-# lealtad y hambre con su estado; al final, la cadena en curso. Vacio si no hay turno.
+# lealtad y hambre con su estado; al final, la cadena en curso y (T19) por que no
+# puede terminar el turno, si es por el Encono. Vacio si no hay turno.
 func panel_turno() -> Array[String]:
 	var turno: Turno = _combate.turno_actual()
 	if turno == null:
@@ -141,6 +171,9 @@ func panel_turno() -> Array[String]:
 	var cadena: Variant = _combate.instantanea()["cadena"]
 	if cadena != null:
 		lineas.append(_linea_cadena(cadena))
+	var motivo: String = boton_terminar()["motivo"]
+	if not motivo.is_empty():
+		lineas.append(motivo)
 	return lineas
 
 
@@ -264,7 +297,37 @@ func suceso(evento: Dictionary) -> Array[String]:
 			var datos: Dictionary = _hueco(evento["unidad"])
 			datos["rival"] = HuecoCriatura.new(_sujeto(rival))
 			return [_armador.armar(clave, datos, "%s.%s" % [_sujeto(evento["unidad"]), _sujeto(rival)])]
+		"chequeo_rival":
+			return _suceso_chequeo_rival(evento)
+		# T19 (Sistema.md 10.5): el contador subio.
+		"encono":
+			return [_armador.armar(ClavesTextos.ENCONO_SUBE, _hueco(evento["unidad"]))]
 	return []
+
+
+# T19 (Sistema.md 10.5 y 10.6, Mundo.md 5), con la primera de sus rivales. La
+# reaccion del par (Encono) o de la especie (cobardia) reemplaza a la linea
+# general; resistir usa la variante de la especie. No enconarse no tiene linea.
+func _suceso_chequeo_rival(evento: Dictionary) -> Array[String]:
+	var unidad: String = evento["unidad"]
+	var rival: String = evento["rivales"][0]
+	var datos: Dictionary = _hueco(unidad)
+	datos["rival"] = HuecoCriatura.new(_sujeto(rival))
+	var clave: String = ""
+	match evento["resultado"]:
+		ChequeoRival.RESULTADO_ENCONADA:
+			clave = ClavesTextos.encono_par(_sujeto(unidad), _sujeto(rival))
+			if not _armador.tiene(clave):
+				clave = ClavesTextos.ENCONO_INICIO
+		ChequeoRival.RESULTADO_ACOBARDADA:
+			clave = ClavesTextos.cobardia_especie(_sujeto(unidad))
+			if not _armador.tiene(clave):
+				clave = ClavesTextos.COBARDIA_INICIO
+		ChequeoRival.RESULTADO_RESISTIDA:
+			return [_armador.armar(ClavesTextos.COBARDIA_RESISTE, datos, _sujeto(unidad))]
+		_:
+			return []
+	return [_armador.armar(clave, datos)]
 
 
 # T14 (Sistema.md 7.2, A.7): la linea del hambre de combate y, por cada unidad
@@ -322,12 +385,20 @@ func resultado(datos: Dictionary) -> Array[String]:
 	return lineas
 
 
-# El boton de terminar: "esperar" si la accion no se uso (P-015), si no "terminar".
-func texto_terminar() -> String:
+# El boton de terminar {texto, habilitado, motivo}: "esperar" si la accion no se
+# uso (P-015), si no "terminar". T19: habilitado segun Turno.puede_terminar; si
+# una obligacion del Encono no lo deja (S-35), motivo dice por que; si no, "".
+func boton_terminar() -> Dictionary:
 	var turno: Turno = _combate.turno_actual()
-	if turno != null and turno.accion_usada:
-		return _armador.armar(ClavesTextos.ACCION_TERMINAR)
-	return _armador.armar(ClavesTextos.ACCION_ESPERAR)
+	var clave: String = ClavesTextos.ACCION_TERMINAR if turno != null and turno.accion_usada \
+			else ClavesTextos.ACCION_ESPERAR
+	var datos: Dictionary = {"texto": _armador.armar(clave), "habilitado": turno != null and turno.puede_terminar(),
+			"motivo": ""}
+	if turno != null and not datos["habilitado"]:
+		var clave_motivo: String = ClavesTextos.motivo_terminar(turno.validar(Accion.terminar()).motivo)
+		if not clave_motivo.is_empty():
+			datos["motivo"] = _armador.armar(clave_motivo)
+	return datos
 
 
 # T40: los botones de las activas de la unidad del turno, [{tipo, texto,
@@ -382,6 +453,11 @@ func tooltip_unidad(id_unidad: String) -> Array[String]:
 	lineas.append(_armador.armar(ClavesTextos.nombre_rasgo(rasgo["id"])))
 	lineas.append(_armador.armar(ClavesTextos.tooltip_rasgo(rasgo["id"])))
 	lineas.append_array(_marcas_rasgo(foto_criatura))
+	lineas.append_array(_marcas_turno(id_unidad))
+	# T19 (Sistema.md 10.5): el contador, tambien en 0, en las de Encono.
+	var linea_encono: String = _linea_encono(foto_criatura)
+	if not linea_encono.is_empty():
+		lineas.append(linea_encono)
 	# Sistema.md 11.2.3: "el umbral se muestra sobre la unidad".
 	var vida_de_cambio: Variant = _combate.vida_de_cambio(id_unidad)
 	if vida_de_cambio != null:

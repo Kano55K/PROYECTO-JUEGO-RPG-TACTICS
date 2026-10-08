@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "cobardia_pantalla",
+  "_nota": "Sistema.md 10.6 y 11.3 v1.6 (pantalla de T19). Balanza 5 (Arrimo 0) y Rodauva neutral (lealtad 5, hambre 3): cobardia 60 % con el combate.json de prueba, 50 % vecina en 8 del Maestro. Orden: tasajero_s1 (Caza, Vel 8), rodauva_1 (6), Maestro (5). El Tasajero [6,2] esta a 8 de la Rodauva [2,6]: en la ronda 1 se acerca sin poder golpearla y queda a su alcance. El Maestro [0,6] esta a 2: no es vecino",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 5, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 6] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [6, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}
