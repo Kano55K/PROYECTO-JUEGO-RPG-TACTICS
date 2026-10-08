@@ -547,9 +547,15 @@ func _siguiente_paso() -> void:
 	_marcas.clear()
 	for ficha in fichas():
 		ficha.modulate = Color(1, 1, 1, ficha.modulate.a)
+		ficha.mostrar_marca("")
 	var actua: FichaUnidad = _ficha(paso["unidad"])
 	if actua != null:
 		actua.modulate = Color(_COLOR_ACTUAL, actua.modulate.a)
+		# T20: la que actua, enconada o acobardada en su turno (el chequeo_rival
+		# del registro), lleva la marca mientras se muestran sus pasos.
+		if not (paso["estado"] as String).is_empty():
+			actua.mostrar_marca(LecturaCombate.new(_combate, _armador, _estados).marca_estado(paso["unidad"],
+					paso["estado"]))
 	if paso["tipo"] == SecuenciaIA.MOVIMIENTO:
 		var hasta: Vector2i = paso["hasta"]
 		_marcas.set_cell(hasta, _FUENTE_MARCAS, _MARCA_DESTINO)

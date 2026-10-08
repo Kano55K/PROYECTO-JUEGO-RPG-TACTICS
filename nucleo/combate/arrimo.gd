@@ -2,7 +2,7 @@
 # la fila de la balanza (1.2) y el efecto de cada paso de tablas/arrimo.json; la
 # tabla por posicion de 1.3 es derivada y no se guarda (A.2.2). Es una consulta:
 # la leen el combo (T16), el incidente (T18) y el Encono y la cobardia (T19).
-# Las salvajes no tienen Arrimo (10.7): quien llama pasa 0 pasos.
+# Las salvajes no tienen Arrimo (10.7): pasos_de da 0 para las enemigas.
 class_name Arrimo
 extends RefCounted
 
@@ -31,6 +31,13 @@ static func desde_datos(tabla_arrimo: Dictionary) -> Arrimo:
 # Sistema.md 1.2: los pasos de la posicion actual de la balanza.
 static func pasos(maestro: Maestro) -> int:
 	return maestro.fila_balanza()["pasos_arrimo"]
+
+
+# Sistema.md 10.7 y 9.2 punto 3: los pasos que valen para una criatura. Las
+# enemigas (salvajes y la atacante nocturna) no tienen Arrimo: 0. El unico lugar
+# de esa regla; lo usan el incidente y el chequeo de rival enemiga (T20).
+static func pasos_de(criatura: Criatura, maestro: Maestro) -> int:
+	return pasos(maestro) if criatura.bando == Criatura.Bando.TRIBU else 0
 
 
 # Sistema.md 1.3: puntos que suma (o resta) el Arrimo a la probabilidad o al

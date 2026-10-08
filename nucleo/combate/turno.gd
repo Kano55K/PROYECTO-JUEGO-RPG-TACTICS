@@ -165,8 +165,11 @@ func pasos_para_mover() -> Dictionary:
 # unidad se hubiera movido a `desde`, sin modificar nada. Pasa por la misma
 # funcion que el ataque real (mismas comprobaciones, mismo danio y aportes) y no
 # cambia el estado de nadie. Si no puede llegar a `desde`, se rechaza con el motivo
-# del movimiento.
-func previsualizar_ataque(desde: Vector2i, objetivo_id: String) -> ResultadoAccion:
+# del movimiento. tras_primer_ataque (T20, para la IA): el ataque que seguiria al
+# primero del turno (Caza), sin la obligacion del Encono, que es solo del
+# primero (10.5, Tasajero enconado en Caza); sin un segundo ataque, ACCION_USADA.
+# Se calcula con el tablero de ahora, antes del primer golpe.
+func previsualizar_ataque(desde: Vector2i, objetivo_id: String, tras_primer_ataque: bool = false) -> ResultadoAccion:
 	if desde != _posicion(unidad_id):
 		var movimiento: ResultadoAccion = validar(Accion.mover(desde))
 		if not movimiento.valida:
@@ -176,7 +179,7 @@ func previsualizar_ataque(desde: Vector2i, objetivo_id: String) -> ResultadoAcci
 		var rechazo: ResultadoAccion = ResultadoAccion.rechazada(ResultadoAccion.Motivo.COMBATE_TERMINADO)
 		rechazo.fin = fin
 		return rechazo
-	return _atacar_desde(desde, objetivo_id, false)
+	return _atacar_desde(desde, objetivo_id, false, false, tras_primer_ataque)
 
 
 # Sistema.md 11.2.1: las casillas donde `cavar` vale ahora, en orden de lectura
@@ -207,6 +210,24 @@ func pasos_para_retirarse(desde: Vector2i) -> Dictionary:
 		return {desde: 0}
 	return _tablero.pasos_hasta(desde, pasos_restantes - hasta_desde[desde], _bando(unidad_id), _plantel,
 			_surcos, Surcos.es_surcon(unidad_id, _plantel), origen)
+
+
+# D-005 (T20): las de pasos_para_retirarse(desde) a las que `mover` dejaria ir
+# despues de moverse a `desde` y atacar a `objetivo_id`, con lo que el Encono y
+# la cobardia prohiben (10.5, 10.6, S-35, S-36). Lo unico que el golpe cambia
+# para esas reglas es si la objetivo cae: se mira con la previsualizacion. Con
+# P-038 en la lectura de hoy (la restriccion de la enconada dura todo el turno),
+# la enconada solo se retira a casillas desde donde sigue golpeando a una rival.
+# `desde` no se incluye. No modifica nada.
+func casillas_para_retirarse(desde: Vector2i, objetivo_id: String) -> Dictionary:
+	var golpe: ResultadoAccion = previsualizar_ataque(desde, objetivo_id)
+	var cae: String = objetivo_id if golpe.valida and golpe.danio >= _vida(objetivo_id) else ""
+	var resultado: Dictionary = {}
+	var pasos: Dictionary = pasos_para_retirarse(desde)
+	for casilla: Vector2i in pasos.keys():
+		if casilla != desde and _motivo_destino_rival(casilla, cae) == ResultadoAccion.Motivo.NINGUNO:
+			resultado[casilla] = pasos[casilla]
+	return resultado
 
 
 func puede_erizarse() -> bool:
@@ -266,9 +287,9 @@ func _inicio_del_turno() -> void:
 		_chequear_rival()
 
 
-# Sistema.md 10.5, 10.6 y 11.3 paso 3: una sola tirada aunque tenga varias rivales
-# (S-37; ChequeoRival). Hoy solo tira la tribu (ChequeoRival.rivales_a_su_alcance:
-# T20 suma las salvajes). Quedan las rivales del chequeo y la casilla de inicio.
+# Sistema.md 10.5, 10.6, 10.7 y 11.3 paso 3: una sola tirada aunque tenga varias
+# rivales (S-37; ChequeoRival), de cualquier bando (T20). Quedan las rivales del
+# chequeo y la casilla de inicio.
 func _chequear_rival() -> void:
 	_casilla_inicial = _posicion(unidad_id)
 	chequeo_rival = _chequeo.tirar(unidad_id, _plantel, _azar)
@@ -301,10 +322,11 @@ func _fijar_obligacion() -> void:
 # S-35: si desde `casilla` golpearia a alguna rival del chequeo, con lo mismo que
 # mira el ataque: la consulta unica de objetivo (Objetivos) y las casillas que
 # golpea (Tablero). No mira los ataques que quedan: la restriccion de casillas
-# dura todo el turno.
-func _casilla_golpea_rival(casilla: Vector2i) -> bool:
+# dura todo el turno. sin_rival: una rival que no se cuenta (la que caeria con un
+# golpe previsto, casillas_para_retirarse); "" para todas.
+func _casilla_golpea_rival(casilla: Vector2i, sin_rival: String = "") -> bool:
 	for rival in _rivales_chequeo:
-		if not Objetivos.puede_ser_objetivo(rival, Objetivos.Clase.HOSTIL, _plantel):
+		if rival == sin_rival or not Objetivos.puede_ser_objetivo(rival, Objetivos.Clase.HOSTIL, _plantel):
 			continue
 		if _tablero.golpeables(casilla, _alcance(), _bando(unidad_id), _plantel).has(_posicion(rival)):
 			return true
@@ -312,11 +334,12 @@ func _casilla_golpea_rival(casilla: Vector2i) -> bool:
 
 
 # S-35, la que no alcanza: la menor distancia (Manhattan, Tablero) de `casilla`
-# a la rival del chequeo mas cercana que sigue de pie.
-func _distancia_a_rival(casilla: Vector2i) -> int:
+# a la rival del chequeo mas cercana que sigue de pie (sin_rival como en
+# _casilla_golpea_rival).
+func _distancia_a_rival(casilla: Vector2i, sin_rival: String = "") -> int:
 	var menor: int = -1
 	for rival in _rivales_chequeo:
-		if not Objetivos.de_pie(rival, _plantel):
+		if rival == sin_rival or not Objetivos.de_pie(rival, _plantel):
 			continue
 		var distancia: int = Tablero.distancia(casilla, _posicion(rival))
 		if menor < 0 or distancia < menor:
@@ -326,18 +349,19 @@ func _distancia_a_rival(casilla: Vector2i) -> int:
 
 # S-35: la menor distancia a la rival que puede lograr con los pasos que quedan
 # (la casilla actual incluida).
-func _distancia_minima_alcanzable() -> int:
-	var menor: int = _distancia_a_rival(_posicion(unidad_id))
+func _distancia_minima_alcanzable(sin_rival: String = "") -> int:
+	var menor: int = _distancia_a_rival(_posicion(unidad_id), sin_rival)
 	for casilla in _pasos_desde(_posicion(unidad_id)).keys():
-		menor = mini(menor, _distancia_a_rival(casilla))
+		menor = mini(menor, _distancia_a_rival(casilla, sin_rival))
 	return menor
 
 
 # Sistema.md 10.6 y S-36: si `casilla` queda mas cerca de alguna rival del
-# chequeo (de pie) que la casilla donde empezo el turno.
-func _mas_cerca_de_rival(casilla: Vector2i) -> bool:
+# chequeo (de pie) que la casilla donde empezo el turno (sin_rival como en
+# _casilla_golpea_rival).
+func _mas_cerca_de_rival(casilla: Vector2i, sin_rival: String = "") -> bool:
 	for rival in _rivales_chequeo:
-		if not Objetivos.de_pie(rival, _plantel):
+		if rival == sin_rival or not Objetivos.de_pie(rival, _plantel):
 			continue
 		var hasta: Vector2i = _posicion(rival)
 		if Tablero.distancia(casilla, hasta) < Tablero.distancia(_casilla_inicial, hasta):
@@ -348,13 +372,15 @@ func _mas_cerca_de_rival(casilla: Vector2i) -> bool:
 # Sistema.md 10.4 v1.6 y 11.3, paso 4: una sola tirada (Incidente). Si sale, con
 # obediencia leal o neutral se distrae: pierde la accion y conserva el
 # movimiento. Con obediencia baja golpea, sin moverse y con su alcance normal, a
-# la rival de menos vida que alcanza desde su casilla (empate: la primera de la
-# tribu); si no alcanza a ninguna, se distrae. Las rivales golpeables pasan por la
+# la rival de menos vida que alcanza desde su casilla (empate: la primera en el
+# orden del Plantel, que es el de la tribu o el de la lista de enemigas, P-011);
+# si no alcanza a ninguna, se distrae. Las rivales golpeables pasan por la
 # misma validacion del ataque (Objetivos HOSTIL: una oculta provoca pero no se
-# golpea, S-32 / P-034). El golpe gasta la accion entera (S-34 / P-036).
+# golpea, S-32 / P-034). El golpe gasta la accion entera (S-34 / P-036). Las
+# enemigas tiran igual, siempre con obediencia baja (10.7, T20).
 func _chequear_incidente() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
-	if criatura == null or criatura.bando != Criatura.Bando.TRIBU:
+	if criatura == null:
 		return
 	# Sistema.md 10.4 y 11.3 paso 4: la enconada no tira incidente.
 	if enconada:
@@ -468,13 +494,15 @@ func _mover(destino: Vector2i, aplica: bool) -> ResultadoAccion:
 
 
 # Sistema.md 10.5, 10.6, S-35 y S-36: lo que el Encono o la cobardia le prohiben
-# a un destino ya alcanzable. NINGUNO si no le prohiben nada.
-func _motivo_destino_rival(destino: Vector2i) -> ResultadoAccion.Motivo:
-	if obligacion == Obligacion.ATACAR and not _casilla_golpea_rival(destino):
+# a un destino ya alcanzable. NINGUNO si no le prohiben nada. sin_rival: la que
+# no se cuenta (la que caeria con un golpe previsto, T20); "" para todas.
+func _motivo_destino_rival(destino: Vector2i, sin_rival: String = "") -> ResultadoAccion.Motivo:
+	if obligacion == Obligacion.ATACAR and not _casilla_golpea_rival(destino, sin_rival):
 		return ResultadoAccion.Motivo.CASILLA_SIN_RIVAL
-	if obligacion == Obligacion.ACERCARSE and _distancia_a_rival(destino) != _distancia_minima_alcanzable():
+	if obligacion == Obligacion.ACERCARSE \
+			and _distancia_a_rival(destino, sin_rival) != _distancia_minima_alcanzable(sin_rival):
 		return ResultadoAccion.Motivo.CASILLA_NO_ACERCA
-	if acobardada and _mas_cerca_de_rival(destino):
+	if acobardada and _mas_cerca_de_rival(destino, sin_rival):
 		return ResultadoAccion.Motivo.MAS_CERCA_DE_RIVAL
 	return ResultadoAccion.Motivo.NINGUNO
 
@@ -502,10 +530,13 @@ func _pasos_desde(desde: Vector2i) -> Dictionary:
 # por_incidente (10.4, T18): el golpe a una rival aliada. La objetivo es del mismo
 # bando; no suma combo, no tiene eslabon y corta la cadena sin empezar otra
 # (S-33 / P-035), y gasta la accion entera (S-34 / P-036).
-func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incidente: bool = false) -> ResultadoAccion:
+# tras_primer_ataque: solo para previsualizar (previsualizar_ataque); el ataque
+# como si ya hubiera hecho el primero del turno.
+func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incidente: bool = false,
+		tras_primer_ataque: bool = false) -> ResultadoAccion:
 	if terminado:
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
-	if ataques_restantes == 0:
+	if ataques_restantes == 0 or (tras_primer_ataque and _ataques_hechos == 0 and ataques_restantes < 2):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
 	var motivo: ResultadoAccion.Motivo = Objetivos.motivo(objetivo_id, Objetivos.Clase.HOSTIL, _plantel)
 	if motivo == ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE:
@@ -516,7 +547,7 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 		return ResultadoAccion.rechazada(motivo)
 	# S-35 y 10.5 (Tasajero enconado en Caza): la enconada que alcanza solo ataca a
 	# las rivales del chequeo; el primer ataque es el obligado.
-	if obligacion == Obligacion.ATACAR and _ataques_hechos == 0 and not por_incidente \
+	if obligacion == Obligacion.ATACAR and _ataques_hechos == 0 and not por_incidente and not tras_primer_ataque \
 			and not _rivales_chequeo.has(objetivo_id):
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.OBJETIVO_NO_RIVAL)
 	var hasta: Vector2i = _posicion(objetivo_id)
@@ -528,7 +559,8 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
 
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id, por_incidente))
+	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id, por_incidente,
+			tras_primer_ataque))
 	resultado.danio = resultado.desglose.total
 	resultado.eslabon = null if por_incidente else _cadena.eslabon_para(unidad_id, objetivo_id, _plantel)
 	if aplica:
@@ -561,7 +593,11 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 # nunca en el golpe de un incidente, S-33), la cobardia (10.6: en todos sus
 # ataques, tambien el golpe del incidente) y el Encono (10.5: la enconada contra
 # una rival del chequeo). El ataque real y la previsualizacion los ven igual.
-func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false) -> Array[ModificadorDanio]:
+# tras_primer_ataque (T20): el segundo golpe de Caza previsto antes del primero.
+# La enconada que alcanza da el primero a una rival del chequeo (OBJETIVO_NO_RIVAL),
+# asi que el contador ya habra subido 1 (10.5): se cuenta, como al aplicar.
+func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false,
+		tras_primer_ataque: bool = false) -> Array[ModificadorDanio]:
 	var aportes: Array[ModificadorDanio] = []
 	var afinidad: ModificadorDanio = _afinidad.aporte(unidad_id, desde, _plantel)
 	if afinidad != null:
@@ -571,7 +607,9 @@ func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false)
 	if por_incidente:
 		return aportes
 	if enconada and _rivales_chequeo.has(objetivo_id):
-		aportes.append(_chequeo.aporte_encono(_plantel.criatura(unidad_id)))
+		var golpes_previos: int = 1 if tras_primer_ataque and _ataques_hechos == 0 \
+				and obligacion == Obligacion.ATACAR else 0
+		aportes.append(_chequeo.aporte_encono(_plantel.criatura(unidad_id), golpes_previos))
 	var combo: ModificadorDanio = _cadena.aporte(unidad_id, objetivo_id, _plantel)
 	if combo != null:
 		aportes.append(combo)

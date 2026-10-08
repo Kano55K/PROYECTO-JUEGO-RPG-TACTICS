@@ -1,5 +1,5 @@
-# Sistema.md 10.4 v1.6: incidente entre rivales aliadas. Una criatura de la tribu
-# con al menos una rival aliada en sus 8 vecinas (11.3 v1.6, D-001) hace una sola
+# Sistema.md 10.4 v1.6: incidente entre rivales aliadas. Una criatura de
+# cualquier bando (10.7) con al menos una rival aliada en sus 8 vecinas (11.3 v1.6, D-001) hace una sola
 # tirada al inicio de su turno (paso 4 de 11.3). La probabilidad es la base de
 # tablas/combate.json mas el Arrimo (1.3), con piso 0; con 0 no se tira. Sin
 # estado de combate: la regla la aplica el Turno (el golpe pasa por el ataque) y
@@ -30,12 +30,13 @@ static func desde_datos(tabla_combate: Dictionary, arrimo: Arrimo, relaciones: R
 # Sistema.md 10.4, 10.8, 11.2.2 y 11.5: las rivales aliadas de la unidad en las 8
 # vecinas de `casilla`, en el orden del Plantel. Mismo bando, de pie (una oculta
 # si; una caida, guardada o fuera no) y su par de especies es "mal". La unidad
-# no cuenta como su propia rival. Hoy solo tiran las criaturas de la tribu: los
-# incidentes de las salvajes son de T20 (10.7, sin Arrimo).
+# no cuenta como su propia rival. De cualquier bando (10.7, T20): las enemigas
+# tiran entre ellas; en su bando, el orden del Plantel es el de la lista de
+# enemigas (P-011).
 func rivales_vecinas(unidad_id: String, casilla: Vector2i, plantel: Plantel) -> Array[String]:
 	var resultado: Array[String] = []
 	var criatura: Criatura = plantel.criatura(unidad_id)
-	if criatura == null or criatura.bando != Criatura.Bando.TRIBU:
+	if criatura == null:
 		return resultado
 	for otra in plantel.criaturas():
 		if otra.id == unidad_id or otra.bando != criatura.bando or not Objetivos.de_pie(otra.id, plantel):
@@ -48,12 +49,14 @@ func rivales_vecinas(unidad_id: String, casilla: Vector2i, plantel: Plantel) -> 
 
 # Sistema.md 10.4 y 1.3: {rivales, porcentaje} si la unidad empezara su turno en
 # `casilla` con el tablero de ahora. Sin rivales, 0. Una sola probabilidad,
-# aunque tenga varias. La usan la tirada y la pantalla. No modifica nada.
+# aunque tenga varias. Las enemigas, sin Arrimo (10.7). La usan la tirada y la
+# pantalla. No modifica nada.
 func consulta(unidad_id: String, casilla: Vector2i, plantel: Plantel) -> Dictionary:
 	var rivales: Array[String] = rivales_vecinas(unidad_id, casilla, plantel)
 	var porcentaje: int = 0
 	if not rivales.is_empty():
-		porcentaje = maxi(0, _base_pct + _arrimo.ajuste(Arrimo.pasos(plantel.maestro), Arrimo.Uso.INCIDENTE))
+		var pasos: int = Arrimo.pasos_de(plantel.criatura(unidad_id), plantel.maestro)
+		porcentaje = maxi(0, _base_pct + _arrimo.ajuste(pasos, Arrimo.Uso.INCIDENTE))
 	return {"rivales": rivales, "porcentaje": porcentaje}
 
 
@@ -71,6 +74,7 @@ func tirar(unidad_id: String, plantel: Plantel, azar: GeneradorAzar) -> Dictiona
 
 
 # Sistema.md 5.4 y 10.4: con obediencia leal o neutral se distrae; con baja
-# golpea a una rival (si la alcanza). Preguntada en el momento.
+# golpea a una rival (si la alcanza). Preguntada en el momento. Las enemigas
+# siempre son baja (10.7: "siempre se atacan entre ellas").
 func se_distrae(criatura: Criatura, maestro: Maestro) -> bool:
 	return _obediencia.tramo(criatura, maestro) != Obediencia.TRAMO_BAJA
