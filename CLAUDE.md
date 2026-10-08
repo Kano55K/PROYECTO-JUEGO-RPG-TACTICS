@@ -1,6 +1,6 @@
 # CLAUDE.md — Instrucciones para Claude Code
 
-> Revisado por última vez contra `docs/Arquitectura.md` v0.33 (07/10/2026). Dueño: Arquitecto Técnico.
+> Revisado por última vez contra `docs/Arquitectura.md` v0.35 (08/10/2026). Dueño: Arquitecto Técnico.
 > Si este archivo y `docs/` se contradicen, **manda `docs/`** y avisás de la contradicción en `docs/PREGUNTAS.md`.
 
 ## Qué es este proyecto
@@ -173,7 +173,10 @@ Comando para correr **todos** los tests por consola, desde la raíz del proyecto
 addons/gdUnit4/runtest.cmd -a res://pruebas
 ```
 
-Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://pruebas/azar`. Antes de cerrar una tarea, siempre el comando completo.
+Para una sola carpeta: `addons/gdUnit4/runtest.cmd -a res://pruebas/azar`.
+
+- **Mientras trabajás, corré solo la carpeta que tocás** (`res://pruebas/combate`, `res://pruebas/pantalla`…): la suite completa tarda unos 4 minutos. **La suite completa va una vez al cerrar cada sesión y antes del commit.**
+- **Tests intermitentes:** si en la suite completa falla un test de pantalla que no tocaste y pasa al correr solo su carpeta, no lo "arregles" con esperas ni reintentos: anotá en el resumen el test, el mensaje y si se repite, y avisá al usuario. Un test intermitente es un error del test y se corrige en su propia tarea.
 
 - Escribí los tests **antes** del código, a partir del criterio "Terminada cuando…" de la tarea.
 - **Tests de reglas: con datos de prueba propios en `pruebas/fixtures/`, nunca con `datos/`.** Llevan los números del ejemplo de `Sistema.md` que reproducen (los tests sí pueden tener esos números: son la comprobación; el código no) y la sección en `_nota`, y validan con los mismos esquemas. Así, cambiar un número de balance en `datos/` no rompe ningún test de reglas. Solo usan `datos/` real los tests que comprueban que todo carga y se puede crear (`docs/Arquitectura.md` A.6).
@@ -193,7 +196,7 @@ Para una sola carpeta mientras trabajás: `addons/gdUnit4/runtest.cmd -a res://p
 1. Creá la rama de la tarea desde `develop`.
 2. Leé la fila de la tarea en `docs/Arquitectura.md` (B.2 a B.4, y B.3.1 para T41 a T43), las secciones de `docs/Sistema.md` y del Brief que cita, y las entradas de `docs/PREGUNTAS.md` que la afecten.
 3. **Proponé un plan** antes de escribir código: archivos que vas a crear o tocar, tests (uno por renglón del criterio de terminado) y dudas. Las dudas de diseño van como entradas nuevas de `PREGUNTAS.md`. Esperá la aprobación.
-4. Escribí los tests, después el código, y corré **todos** los tests.
+4. Escribí los tests, después el código. Mientras trabajás, corré la carpeta que tocás; al cerrar la sesión, la suite completa.
 5. Actualizá la sección "Estado actual" de este archivo (solo esa sección). Es una foto corta del presente: qué está terminado (una línea por tarea), en qué rama se trabaja, qué preguntas abiertas afectan y cuál es la siguiente tarea. La historia va en `docs/RESUMENES.md`.
 6. Agregá la entrada de la sesión a `docs/RESUMENES.md` (sección anterior) y mostrala también en el chat. Si la tarea terminó, esa entrada es la descripción del pull request.
 7. Esperá el OK del usuario para el commit.
@@ -226,7 +229,7 @@ Reglas completas en `docs/Sistema.md` 11.3 v1.6 y `docs/Arquitectura.md` B.3.1 y
 
 - Toda regla de vínculo usa la consulta de vecina en 8 de `Tablero` (T41), y toda regla de cuerpo usa las vecinas ortogonales de T06. Nunca una tercera forma de medir, y ninguna clase calcula distancias por su cuenta.
 - **Tablero de referencia: 12 × 12.** Un escenario puede ser más chico (G es de 8 × 8), nunca más grande. Ningún tamaño de tablero escrito en el código.
-- **Cámara (desde T42):** la pantalla convierte el mouse con `TileMapLayer.get_local_mouse_position()` y `local_to_map`, nunca con la posición en pantalla. La cámara no toca el núcleo.
+- **Cámara (desde T42) y mouse (desde T20-ajustes, D-006):** la vista toma la posición del mouse del último `InputEventMouse` que recibió y la convierte a casilla con la inversa de la transformación de canvas del `TileMapLayer` (`get_global_transform_with_canvas().affine_inverse()`) y `local_to_map`. Nunca lee el cursor del sistema (`get_local_mouse_position`, `get_global_mouse_position`, `get_viewport().get_mouse_position`), ni en la vista ni en los tests: los tests mandan eventos con su `position` por `Input.parse_input_event` y no mueven el cursor real. La cámara no toca el núcleo.
 - **Test de contacto (desde T43):** si una tarea hace fallar `pruebas/datos/test_contacto.gd` (cambia la ronda del primer ataque de un escenario), no ajustes el test ni las coordenadas: anotalo en `docs/PREGUNTAS.md` y pará. **Única excepción autorizada (T19):** el ayudante del test que juega "esperando" puede jugar lo mínimo que obliga una regla cuando `puede_terminar()` da falso (una enconada que tiene que atacar o acercarse). Nunca se tocan coordenadas ni criterios.
 
 ## Relaciones en combate (desde T18)
@@ -237,8 +240,10 @@ Reglas completas en `docs/Sistema.md` 10.1 a 10.7 y 11.3, y en `docs/Arquitectur
 - **Toda tirada en %** pasa por `Porcentajes.tirar` con el generador de combate que recibe `Turno`. Con 0 % no se tira (el generador no se toca). **Una sola tirada por turno y por regla**, aunque haya varias rivales.
 - **La rama sale del dato:** Encono o cobardía por el `rol` de la ficha; los rasgos, por su `efecto`. Nunca por `id`.
 - **Los estados del turno** (distraída, enconada, acobardada) viven en `Turno` y se ven solo por sus consultas (`casillas_para_mover`, `objetivos_para_atacar`, `puede_terminar`, `puede_secundar` y la previsualización). La pantalla y la IA no los recalculan.
-- **Primero la tribu, después las salvajes:** las reglas nuevas de relación tiran solo para la tribu hasta T20, que suma las salvajes y su IA. Dejá el lugar marcado. Lo que es la misma regla para todos (por ejemplo, el contador del Encono) se programa una sola vez para todos.
-- **Lecturas declaradas abiertas** que ya están programadas o se programan así: S-27 y S-29 a S-37 (`docs/Arquitectura.md` 10.5). No las vuelvas a preguntar.
+- **Una sola función para todos los bandos (desde T20):** las enemigas (salvajes y atacante nocturna) tiran chequeo de rival e incidente por las mismas funciones que la tribu, con tramo `baja` (`Obediencia`), sin Arrimo y sin el −10 del Maestro vecino en la cobardía (S-41). Nunca una copia de la regla para las salvajes: la diferencia es un parámetro (tramo, Arrimo), no otra función.
+- **La IA toma sus casillas y objetivos de las consultas del `Turno`** (D-005): nunca recalcula una restricción (enconada, acobardada, distraída, obligación). Si le falta una consulta, se agrega al `Turno`, calculando sin aplicar, con su test.
+- **Test de robustez de la IA (desde T20):** `pruebas/datos/test_robustez_ia.gd` juega los 11 escenarios con 10 semillas cada uno, sin `error()`. Si una tarea lo hace fallar, no cambies semillas, escenarios ni criterios: buscá la decisión de la IA que el `Turno` rechaza. Si el origen es una regla, anotalo en `docs/PREGUNTAS.md` y pará.
+- **Lecturas declaradas abiertas** que ya están programadas o se programan así: S-27 y S-29 a S-43 (`docs/Arquitectura.md` 10.5). No las vuelvas a preguntar.
 
 ## Estado actual
 
