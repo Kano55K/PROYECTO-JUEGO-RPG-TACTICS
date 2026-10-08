@@ -429,7 +429,9 @@ func test_golpe_quita_el_bono() -> void:
 	assert_array(tipos).contains(["bono_perdido"])
 
 
-# Las salvajes no tiran (sus incidentes son de T20) y el Maestro no tiene rivales.
+# Reescrito en T20 (Sistema.md 10.4 y 10.7 v1.6): las salvajes ya tiran (lo
+# prueba test_rival_salvajes.gd). Aca queda: una salvaje sin rival aliada
+# vecina (Ocarra-Rodauva no es "mal") no tira, y el Maestro no tiene rivales.
 func test_salvajes_y_maestro_no_tiran() -> void:
 	var plantel: Plantel = _plantel({"ocarra_s1": Vector2i(3, 3), Maestro.ID: Vector2i(5, 5)})
 	plantel.criatura("rodauva_s1").posicion = Vector2i(3, 4)

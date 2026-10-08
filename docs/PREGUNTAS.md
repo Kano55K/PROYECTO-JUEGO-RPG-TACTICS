@@ -515,7 +515,7 @@
 - **Respuesta:** _(la completa el staff)_
 
 ## P-037 — Nombre del campo "tipo" del evento chequeo_rival
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T19
 - **Fecha:** 07/10/2026
@@ -526,6 +526,7 @@
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A en `Combate._registrar_chequeo_rival`, con su test (`test_registro_del_chequeo_y_del_incidente`). Cambiar el nombre es una línea y su test. La pantalla (sesión 2) y las métricas (T23) la van a leer.
 - **Respuesta:** Arquitecto (08/10/2026): opción A. La clave es tipo_chequeo (encono / cobardia); tipo sigue siendo el nombre del evento en todo el registro. Ya programado así: no cambia código ni tests. Se cierra al empezar T20 (Arquitectura.md A.7, v0.34).
+- **Cerrada en:** T20
 
 ## P-038 — Casillas de la enconada después del primer ataque (S-38)
 - **Estado:** ABIERTA

@@ -1587,3 +1587,73 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
      - Con 3, el hover avisa 100 %.
   6. Si la Rodauva queda acobardada: la ficha dice `[FALTA: marca.acobardada]`, no se puede mover más cerca del Tasajero y el botón de terminar sigue habilitado.
 - **Para la próxima sesión:** nada: tarea terminada. Faltan el commit, el PR y la prueba manual.
+
+## T20 · sesión 1 · 08/10/2026
+- **Rama:** tarea/T20-salvajes
+- **Estado:** EN CURSO (sigue en la sesión 2)
+- **Hecho:**
+  - P-037 pasó a `CERRADA` (sin cambios de código).
+  - Las enemigas (salvajes y atacante nocturna) tiran Encono, cobardía e incidentes por la misma función que la tribu:
+    - Sale el corte de la tribu de `ChequeoRival.rivales_a_su_alcance`, `Incidente.rivales_vecinas` y `Turno._chequear_incidente`.
+    - Sin Arrimo: `Arrimo.pasos_de(criatura, maestro)` da 0 para las enemigas, y es el único lugar de esa regla.
+    - Tramo `baja`, que ya daba `Obediencia`.
+    - La cobardía de una enemiga no recibe el −10 del Maestro vecino (S-41). Con el toggle restan sus afines de su bando.
+    - El empate del golpe del incidente es el orden del Plantel: para las enemigas, el de la lista `enemigas` (P-011).
+  - Consultas nuevas del `Turno` para la IA (D-005), las dos calculan sin aplicar:
+    - `previsualizar_ataque(..., tras_primer_ataque)`: el segundo ataque de Caza, sin la obligación del Encono.
+    - `casillas_para_retirarse(desde, objetivo)`: la retirada que `mover` aceptaría después del golpe. Los ayudantes de `_motivo_destino_rival` reciben `sin_rival`, la que caería con el golpe previsto.
+  - IA, paso 3 de 11.8 (`DecisionIA.Paso.ENCONO`, "paso 3"; `paso: "encono"` en el registro):
+    - Elige la rival con los desempates de 10.5 (`Criterio.PUEDE_TUMBAR` nuevo) entre las opciones que ya filtra el `Turno`, y la ataca con la tabla de 11.8 (en Cuenta, la de menos pasos y la retirada).
+    - Si no la alcanza, se acerca (S-43).
+    - En Caza, S-42. La clave del 6b se extrajo a `_clave_caza`, que comparten el 6b y la Caza enconada.
+    - `_retirada` usa `casillas_para_retirarse` para todas.
+    - La acobardada y la distraída no necesitaron código: los pasos 4 a 8 ya toman casillas y objetivos del `Turno`. Lo prueban los tests.
+  - `Combate`: sin cambios. `rival_en`, el registro y `_jugar_ia` ya eran de cualquier bando.
+  - Sin cambios de esquema ni de datos: la huella no cambió. No hizo falta el fixture `combate_sin_relaciones.json` del plan.
+- **Archivos:**
+  - Creados: `pruebas/combate/test_rival_salvajes.gd`, `pruebas/combate/ia/test_ia_encono.gd`, `pruebas/fixtures/combate/escenario_rival_salvajes.json` y `escenario_rival_salvajes_combate.json`.
+  - Modificados:
+    - Núcleo: `nucleo/combate/arrimo.gd`, `chequeo_rival.gd`, `incidente.gd`, `turno.gd`, `ia/ia_salvaje.gd` y `ia/decision_ia.gd`.
+    - Tests: `pruebas/combate/test_enconada.gd`, `test_hambre_combate.gd` y `test_incidente.gd`.
+    - Documentación: `docs/PREGUNTAS.md` y `CLAUDE.md` (Estado actual).
+- **Tests:** 22 nuevos, total 453, todos pasan (sí).
+  - Con `_paso_encono` apagado a mano fallan 8 de los 14 de la IA. Los 4 desempates exigen además "paso 3".
+  - `test_vista_camara.gd::test_clic_y_hover_con_la_camara_movida` falló una vez en la suite completa (el hover cayó en la casilla vecina después de mover el mouse 2 píxeles). Pasa solo 3 de 3 veces y en la corrida completa siguiente. No toca nada de T20: es intermitente.
+  - Tests viejos reescritos (ninguno borrado):
+    - `test_enconada.gd::test_salvaje_suma_y_cierre_en_0` (`Sistema.md` 10.5 y 10.7 v1.6): ahora la salvaje chequea. Con `combate_rival_0.json` tira 10 % y no se encona, así el golpe sigue siendo voluntario.
+    - `test_hambre_combate.gd::test_hambre_de_combate_en_rondas_5_y_10` (10.4 y 10.7 v1.6): la Ocarra salvaje y la atacante tiran incidente entre ellas. "Ningún ataque" pasa a "ningún ataque ni incidente que toque a la tribu".
+    - `test_incidente.gd::test_salvajes_y_maestro_no_tiran` (10.4 y 10.7 v1.6): solo cambió el comentario. Seguía pasando porque Ocarra–Rodauva no es "mal": ahora dice eso.
+- **Criterio de terminado (sesión 1):** cumplido del (1) al (14).
+  1. Encono de una salvaje: 35 / 60 / 85; seguro con 3, sin tirar; igual con la balanza 1, 2 y 5.
+  2. Cobardía de una salvaje: 80; con el Maestro vecino ortogonal o en diagonal, 80; con el toggle y dos afines (una en diagonal), 60.
+  3. La atacante nocturna tira 35; una rival oculta o caída no cuenta; el Maestro nunca es rival.
+  4. Incidente entre salvajes:
+     - 20 % con la balanza 1, 2 y 5.
+     - Con 100 %, golpe a la rival ortogonal; con dos rivales, la de menos vida, y con empate, la primera de `enemigas`.
+     - Con la rival en diagonal, se distrae; la enconada no tira.
+  5. La enconada va por su rival y no remata a la Rodauva con 1 de vida; el desglose trae el Encono (+1), el contador sube y el daño aplicado es el previsto.
+  6. Un test por cada desempate de 10.5.
+  7. La enconada que no alcanza va a [5,7] (las de distancia mínima son [5,7], [4,8] y [6,8]) y no ataca a la Rodauva que tiene al lado.
+  8. Caza enconada:
+     - Va a [6,9] y no a [8,7], que sería la del 6b.
+     - Primer ataque a la rival, segundo a la otra presa; con la rival como única presa, los dos a ella.
+     - Si el primero la tumba, el segundo va a otra presa o se pierde.
+  9. Cuenta enconada: se retira a [6,8] y no a [6,7], que el `Turno` no permite con P-038 en la lectura A.
+  10. Acobardada: golpea con −50 % (1) sin quedar más cerca; si solo podría acercarse a su rival, no se mueve.
+  11. Distraída: el Zancajunco no se oculta y la Ocarra no ataca; las dos se acercan y terminan.
+  12. Cada decisión de los tests de la IA comprueba que decidir no cambia el Plantel, la cola ni el generador, que da lo mismo dos veces y que toda acción valida.
+  13. `rival_en` de una enemiga = su `chequeo_rival` del turno siguiente, sin cambiar la `instantanea`.
+  14. Registro del chequeo con su tirada, `accion` con `paso: "encono"`, `ataque` con el Encono y `encono` detrás; registro del incidente de una salvaje; las dos grabaciones se reproducen igual.
+- **Lecturas declaradas:**
+  - S-41, S-42 y S-43, programadas como están en `Arquitectura.md` 10.5 y citadas en el código.
+  - P-038 sigue en la lectura A: la retirada de la enconada en Cuenta respeta `CASILLA_SIN_RIVAL`.
+  - Técnicas:
+    - La enconada que no alcanza y ya está a la menor distancia no se mueve (lo decide `puede_terminar()`).
+    - El daño previsto del segundo golpe de Caza a la misma rival no suma el punto de Encono del primero; solo sirve para depurar.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nuevas: ninguna; cerrada P-037.
+- **Para la próxima sesión:**
+  - `pruebas/datos/jugador_esperando.gd` (`JugadorEsperando.lo_obligado`, extraído de `test_contacto.gd` sin cambiar su comportamiento) y `test_robustez_ia.gd`: 11 escenarios × 10 semillas, hasta la ronda 12.
+  - Comprobar `test_contacto.gd`, que hoy pasa.
+  - Pantalla: el tooltip de una enemiga con el % de `rival_en`, y los tests de sucesos de enemigas.
+  - La lista de prueba manual.

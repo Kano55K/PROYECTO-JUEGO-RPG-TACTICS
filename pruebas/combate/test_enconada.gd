@@ -124,10 +124,16 @@ func test_ocarra_enconada_pega_5_6_7_7() -> void:
 
 # (6) Sistema.md 10.5: el contador suma sea del bando que sea (el golpe de una
 # salvaje a su rival), y el Cierre lo vuelve a 0 (Fin del combate).
+# Reescrito en T20 (Sistema.md 10.5 y 10.7 v1.6: las salvajes tiran Encono con
+# tramo baja). Antes la salvaje no chequeaba; ahora, con combate_rival_0.json,
+# tira 10 % (base 0 + 10 de baja) y con la semilla 1 (54) no se encona: el
+# golpe es voluntario, sin bono, y suma igual.
 func test_salvaje_suma_y_cierre_en_0() -> void:
 	var plantel: Plantel = _plantel({"ocarra_1": Vector2i(3, 3), "ocarra_s1": Vector2i(3, 4)})
-	var turno: Turno = _turno(plantel, "ocarra_s1")
-	assert_dict(turno.chequeo_rival).is_empty()
+	var turno: Turno = _turno(plantel, "ocarra_s1", _BASE_0)
+	assert_int(turno.chequeo_rival["porcentaje"] as int).is_equal(10)
+	assert_str(turno.chequeo_rival["resultado"]).is_equal(ChequeoRival.RESULTADO_NO_ENCONADA)
+	assert_bool(turno.enconada).is_false()
 	var golpe: ResultadoAccion = turno.aplicar(Accion.atacar("ocarra_1"))
 	assert_int(golpe.danio).is_equal(4)
 	assert_int(plantel.criatura("ocarra_s1").encono).is_equal(1)

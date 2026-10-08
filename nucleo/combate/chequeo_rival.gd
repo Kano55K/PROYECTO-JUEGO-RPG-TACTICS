@@ -69,12 +69,12 @@ func es_rival_enemiga(a_id: String, b_id: String, plantel: Plantel) -> bool:
 
 # Sistema.md 10.5, 11.2.2 y 11.5: las rivales enemigas a su alcance si la unidad
 # estuviera en `casilla` (Objetivos: ni caida, ni guardada, ni fuera, ni oculta),
-# en el orden del Plantel. Hoy solo chequea la tribu: T20 suma las salvajes
-# aca (10.7, sin Arrimo y con el tramo de las enemigas).
+# en el orden del Plantel. De cualquier bando (10.7 y 9.2 punto 3, T20): la
+# rival de una enemiga es una criatura de la tribu; el Maestro, que no tiene
+# especie, nunca es rival.
 func rivales_a_su_alcance(unidad_id: String, casilla: Vector2i, plantel: Plantel) -> Array[String]:
 	var resultado: Array[String] = []
-	var criatura: Criatura = plantel.criatura(unidad_id)
-	if criatura == null or criatura.bando != Criatura.Bando.TRIBU:
+	if plantel.criatura(unidad_id) == null:
 		return resultado
 	for otra in plantel.criaturas():
 		if es_rival_enemiga(unidad_id, otra.id, plantel) \
@@ -165,20 +165,26 @@ func aporte_cobardia() -> ModificadorDanio:
 			_cobardia["danio_pct"])
 
 
-# Sistema.md 10.5: base + por punto x contador, Arrimo (1.3) y tramo (5.4), entre 0 y 100.
+# Sistema.md 10.5: base + por punto x contador, Arrimo (1.3; las enemigas no
+# tienen, 10.7) y tramo (5.4; las enemigas, baja), entre 0 y 100.
 func _pct_encono(criatura: Criatura, plantel: Plantel) -> int:
 	var pct: int = (_encono["base_pct"] as int) + (_encono["por_punto_pct"] as int) * criatura.encono \
-			+ _arrimo.ajuste(Arrimo.pasos(plantel.maestro), Arrimo.Uso.ENCONO) + _ajuste_tramo(criatura, plantel, "encono_pts")
+			+ _arrimo.ajuste(Arrimo.pasos_de(criatura, plantel.maestro), Arrimo.Uso.ENCONO) \
+			+ _ajuste_tramo(criatura, plantel, "encono_pts")
 	return clampi(pct, 0, _PCT_MAXIMO)
 
 
 # Sistema.md 10.6: base, Arrimo, tramo y el Maestro de pie vecino en 8 (11.3
 # v1.6). Con el toggle, cada afin de pie vecina en 8 sin contar al Maestro
-# (P-008), con su tope y su minimo; sin el toggle, piso 0.
+# (P-008), con su tope y su minimo; sin el toggle, piso 0. Lectura declarada
+# S-41 (T20): el -10 del Maestro es sosten de su tribu; una enemiga junto al
+# Maestro no lo recibe. Sus afines del toggle son de su bando (Afinidad).
 func _pct_cobardia(criatura: Criatura, casilla: Vector2i, plantel: Plantel) -> int:
 	var pct: int = (_cobardia["base_pct"] as int) \
-			+ _arrimo.ajuste(Arrimo.pasos(plantel.maestro), Arrimo.Uso.COBARDIA) + _ajuste_tramo(criatura, plantel, "cobardia_pts")
-	if Objetivos.de_pie(Maestro.ID, plantel) and Tablero.es_vecina_en_8(plantel.maestro.posicion, casilla):
+			+ _arrimo.ajuste(Arrimo.pasos_de(criatura, plantel.maestro), Arrimo.Uso.COBARDIA) \
+			+ _ajuste_tramo(criatura, plantel, "cobardia_pts")
+	if criatura.bando == Criatura.Bando.TRIBU and Objetivos.de_pie(Maestro.ID, plantel) \
+			and Tablero.es_vecina_en_8(plantel.maestro.posicion, casilla):
 		pct += _cobardia["maestro_adyacente_pts"] as int
 	var piso: int = 0
 	if _con_toggle:

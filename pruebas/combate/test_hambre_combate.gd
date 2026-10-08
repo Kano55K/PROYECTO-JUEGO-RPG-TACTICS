@@ -111,8 +111,15 @@ func test_hambre_de_combate_en_rondas_5_y_10() -> void:
 	eventos = _de_tipo(combate, "hambre_combate")
 	assert_int(eventos.size()).is_equal(2)
 	assert_int(eventos[1]["ronda"] as int).is_equal(10)
-	# Nadie llego a pelear: el hambre no depende de los ataques.
-	assert_array(_de_tipo(combate, "ataque")).is_empty()
+	# Nadie de la tribu llego a pelear: el hambre no depende de los ataques.
+	# Reescrito en T20 (Sistema.md 10.4 y 10.7 v1.6): la Ocarra salvaje y la
+	# atacante son rivales vecinas del mismo bando y tiran incidente entre ellas;
+	# esos golpes no tocan a la tribu ni el hambre de nadie.
+	var enemigas: Array[String] = ["ocarra_s1", "ocarra_a1"]
+	for ataque in _de_tipo(combate, "ataque"):
+		assert_array(enemigas).contains([ataque["atacante"], ataque["objetivo"]])
+	for incidente in _de_tipo(combate, "incidente"):
+		assert_array(enemigas).contains([incidente["unidad"]])
 
 
 # (5) En el acto (7.2): la Rodauva con lealtad 7 y hambre 5 es leal durante la

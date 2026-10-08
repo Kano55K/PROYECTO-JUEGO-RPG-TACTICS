@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "rival_salvajes",
+  "_nota": "Sistema.md 9.2 punto 3, 10.4 a 10.7, 11.3 y 11.8 v1.6 (tests de T20, Turno suelto). 12 x 12 y balanza 5 (Arrimo 0; las enemigas no tienen Arrimo con ninguna balanza). Todas estacionadas: la tribu en la fila 0 y el Maestro en [11,0], a 6 o mas de cualquier casilla de las filas 6 a 9; las enemigas en la fila 11 y en la columna 11, sin vecinas en 8 entre si. Cada test acomoda a las que usa en las filas 6 a 9. Rivales (relaciones.json de prueba): Ocarra-Ocarra, Ocarra-Zancajunco, Ocarra-Tasajero y Rodauva-Tasajero; afines Rodauva-Rodauva. ocarra_a1 es la atacante nocturna (9.2 punto 3: se trata como salvaje)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 5, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [11, 0] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 0] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 0] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 0] },
+    { "id": "tasajero_1", "especie": "tasajero", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 0] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [11, 11] },
+    { "id": "ocarra_s2", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [9, 11] },
+    { "id": "ocarra_s3", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [7, 11] },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [5, 11] },
+    { "id": "rodauva_s2", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [3, 11] },
+    { "id": "rodauva_s3", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [1, 11] },
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [11, 9] },
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [11, 7] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [11, 5] },
+    { "id": "ocarra_a1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 9, "vida": null, "posicion": [11, 3] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}
