@@ -2,7 +2,8 @@
 # Arma el combate (la IA juega hasta el primer turno del jugador) y se redibuja
 # entera desde el nucleo: no guarda copias del estado de reglas. Casilla <->
 # pantalla solo con map_to_local / local_to_map (A.3): T32 cambia solo el
-# tileset. Sesion 2: el jugador juega con el mouse (InterpreteClic y botones),
+# tileset. El mouse sale de sus eventos, nunca del cursor del sistema (D-006).
+# Sesion 2: el jugador juega con el mouse (InterpreteClic y botones),
 # ve las marcas, el desglose de previsualizar_ataque y los sucesos del registro;
 # al terminar, se guardan solos la grabacion y el registro y se ve el resultado.
 class_name VistaCombate
@@ -86,6 +87,10 @@ var _guardado: String = ""
 var _desglose_mostrado: Dictionary = {}
 # La casilla bajo el mouse la ultima vez, para no rearmar el desglose en cada pixel.
 var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
+# D-006: la posicion (en el viewport) del ultimo InputEventMouse recibido, y si
+# llego alguno.
+var _posicion_mouse: Vector2 = Vector2.ZERO
+var _hay_mouse: bool = false
 # T40, estado de la interfaz (no de reglas): el modo "elegir casilla" de Cavar,
 # si la zona de Caza se ve, y el tooltip y el aviso que se muestran.
 var _eligiendo_cavar: bool = false
@@ -176,7 +181,8 @@ func limites_camara() -> Rect2:
 	return _limites
 
 
-# T42: la casilla bajo el mouse la ultima vez que se miro (hover).
+# T42: la casilla bajo el mouse la ultima vez que se miro (hover). D-006: sale
+# de _casilla_del_mouse; sin ningun evento del mouse, Criatura.SIN_POSICION.
 func casilla_bajo_mouse() -> Vector2i:
 	return _casilla_mouse
 
@@ -439,8 +445,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			sobre_casilla(casilla)
 
 
+# D-006: la posicion del mouse sale del ultimo evento, nunca del cursor del
+# sistema. Se guarda en _input (antes que _unhandled_input y tambien si un
+# Control se queda con el evento); no se marca como manejado.
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouse:
+		_posicion_mouse = (event as InputEventMouse).position
+		_hay_mouse = true
+
+
+# D-006: la unica conversion de la posicion guardada a casilla (clic, hover y
+# rehover al mover la camara). Sin ningun evento todavia, no hay casilla.
 func _casilla_del_mouse() -> Vector2i:
-	return _tablero.local_to_map(_tablero.get_local_mouse_position())
+	if not _hay_mouse:
+		return Criatura.SIN_POSICION
+	return _tablero.local_to_map(_tablero.get_global_transform_with_canvas().affine_inverse() * _posicion_mouse)
 
 
 # T42 (D-003), al abrir: los limites salen de map_to_local de las esquinas del
