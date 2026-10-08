@@ -93,10 +93,23 @@ func _marcas_turno(id_unidad: String) -> Array[String]:
 	if turno == null or turno.unidad_id != id_unidad:
 		return marcas
 	if turno.enconada:
-		marcas.append(_armador.armar(ClavesTextos.MARCA_ENCONADA, {}, _sujeto(id_unidad)))
+		marcas.append(marca_estado(id_unidad, ChequeoRival.RESULTADO_ENCONADA))
 	if turno.acobardada:
-		marcas.append(_armador.armar(ClavesTextos.MARCA_ACOBARDADA, {}, _sujeto(id_unidad)))
+		marcas.append(marca_estado(id_unidad, ChequeoRival.RESULTADO_ACOBARDADA))
 	return marcas
+
+
+# T20: la marca de un estado del chequeo de rival (ChequeoRival.RESULTADO_ENCONADA o
+# RESULTADO_ACOBARDADA), con la especie como sujeto. La usan las marcas del turno
+# y, durante la secuencia de la IA, la ficha de una enemiga (SecuenciaIA). Otro
+# resultado: "".
+func marca_estado(id_unidad: String, estado: String) -> String:
+	match estado:
+		ChequeoRival.RESULTADO_ENCONADA:
+			return _armador.armar(ClavesTextos.MARCA_ENCONADA, {}, _sujeto(id_unidad))
+		ChequeoRival.RESULTADO_ACOBARDADA:
+			return _armador.armar(ClavesTextos.MARCA_ACOBARDADA, {}, _sujeto(id_unidad))
+	return ""
 
 
 # T19 (Sistema.md 10.5): el contador del Encono, "Encono: n/max", con el tope que
@@ -458,6 +471,14 @@ func tooltip_unidad(id_unidad: String) -> Array[String]:
 	var linea_encono: String = _linea_encono(foto_criatura)
 	if not linea_encono.is_empty():
 		lineas.append(linea_encono)
+	# T20 (Sistema.md 10.5 a 10.7): una enemiga, el % del chequeo que tiraria si
+	# empezara su turno ahora (Combate.rival_en en su casilla). Con 0 %, nada.
+	if criatura.bando != Criatura.Bando.TRIBU and Objetivos.de_pie(id_unidad, _plantel):
+		var rival: Dictionary = _combate.rival_en(id_unidad, criatura.posicion)
+		if rival["porcentaje"] > 0:
+			var clave_rival: String = ClavesTextos.ENCONO_TOOLTIP \
+					if rival["tipo"] == ChequeoRival.TIPO_ENCONO else ClavesTextos.COBARDIA_TOOLTIP
+			lineas.append(_armador.armar(clave_rival, {"porcentaje": rival["porcentaje"]}, _sujeto(id_unidad)))
 	# Sistema.md 11.2.3: "el umbral se muestra sobre la unidad".
 	var vida_de_cambio: Variant = _combate.vida_de_cambio(id_unidad)
 	if vida_de_cambio != null:

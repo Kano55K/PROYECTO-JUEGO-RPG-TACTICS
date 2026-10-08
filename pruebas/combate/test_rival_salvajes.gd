@@ -303,3 +303,38 @@ func test_registro_del_incidente_de_una_salvaje() -> void:
 	assert_dict(lineas[turno + 3]).contains_key_value("atacante", "ocarra_s1").contains_key_value("objetivo", "ocarra_s2") \
 			.contains_key_value("eslabon", null)
 	_reproduce_igual(combate, _INCIDENTE_100)
+
+
+# T20, sesion 2 (revision 1a; Sistema.md 10.5, Tasajero enconado en Caza, y 11.4
+# paso 3; D-005): la previsualizacion del segundo golpe de Caza a la misma rival
+# lleva el punto de Encono que deja el primero, igual que el ataque real. Base 5:
+# el primero suma min(0 + 1, 3) = 1 (6) y el segundo min(0 + 2, 3) = 2 (7). La
+# rival tiene 13 de vida: solo cae si el segundo lleva el punto extra. Con el
+# contador en el maximo, los dos suman 3 (8).
+func test_segundo_golpe_de_caza_preve_el_punto_del_primero() -> void:
+	var plantel: Plantel = _plantel({"tasajero_s1": Vector2i(5, 8), "ocarra_1": Vector2i(5, 9)})
+	plantel.criatura("ocarra_1").vida = 13
+	var turno: Turno = _turno(plantel, "tasajero_s1", _BASE_100)
+	assert_bool(turno.enconada).is_true()
+	var desde: Vector2i = Vector2i(5, 8)
+	var primero: ResultadoAccion = turno.previsualizar_ataque(desde, "ocarra_1")
+	var segundo: ResultadoAccion = turno.previsualizar_ataque(desde, "ocarra_1", true)
+	assert_int(primero.danio).is_equal(6)
+	assert_int(segundo.danio).is_equal(7)
+	var aplicado: ResultadoAccion = turno.aplicar(Accion.atacar("ocarra_1"))
+	assert_int(aplicado.danio).is_equal(primero.danio)
+	# Despues del primero, la previsualizacion normal y la de tras_primer_ataque coinciden.
+	assert_int(turno.previsualizar_ataque(desde, "ocarra_1").danio).is_equal(segundo.danio)
+	assert_int(turno.previsualizar_ataque(desde, "ocarra_1", true).danio).is_equal(segundo.danio)
+	aplicado = turno.aplicar(Accion.atacar("ocarra_1"))
+	assert_int(aplicado.danio).is_equal(segundo.danio)
+	assert_int(plantel.criatura("ocarra_1").vida).is_equal(0)
+
+	var en_el_maximo: Plantel = _plantel({"tasajero_s1": Vector2i(5, 8), "ocarra_1": Vector2i(5, 9)})
+	en_el_maximo.criatura("tasajero_s1").encono = 3
+	turno = _turno(en_el_maximo, "tasajero_s1", _BASE_100)
+	assert_bool(turno.enconada).is_true()
+	assert_int(turno.previsualizar_ataque(desde, "ocarra_1").danio).is_equal(8)
+	assert_int(turno.previsualizar_ataque(desde, "ocarra_1", true).danio).is_equal(8)
+	turno.aplicar(Accion.atacar("ocarra_1"))
+	assert_int(turno.aplicar(Accion.atacar("ocarra_1")).danio).is_equal(8)

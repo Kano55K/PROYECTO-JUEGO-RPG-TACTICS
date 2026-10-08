@@ -11,6 +11,8 @@ const _COLOR_CAIDA: Color = Color(0.5, 0.5, 0.5)
 var unidad_id: String = ""
 # La vida maxima que se mostro, para mostrar_vida.
 var _vida_max: int = 0
+# Las marcas que se mostraron, para mostrar_marca.
+var _marcas_base: Array[String] = []
 
 @onready var _figura: Sprite2D = $Figura
 @onready var _aro: Sprite2D = $Aro
@@ -31,6 +33,7 @@ func mostrar(ficha: Dictionary) -> void:
 	_nombre.text = ficha["nombre"]
 	_vida_max = ficha["vida_max"]
 	mostrar_vida(ficha["vida"])
+	_marcas_base = marcas.duplicate()
 	_marcas.text = " · ".join(marcas)
 
 
@@ -41,3 +44,17 @@ func mostrar_vida(vida: int) -> void:
 
 func texto_vida() -> String:
 	return _vida.text
+
+
+# T20 (ritmo de la IA): una marca de mas, leida del registro (enconada o
+# acobardada en su turno), sobre las que se mostraron. Mostrarla otra vez no la
+# repite; el proximo `mostrar` la saca.
+func mostrar_marca(marca: String) -> void:
+	var marcas: Array[String] = _marcas_base.duplicate()
+	if not marca.is_empty():
+		marcas.append(marca)
+	_marcas.text = " · ".join(marcas)
+
+
+func texto_marcas() -> String:
+	return _marcas.text

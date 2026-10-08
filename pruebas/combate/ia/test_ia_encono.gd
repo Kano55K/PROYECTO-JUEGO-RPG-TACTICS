@@ -263,6 +263,29 @@ func test_caza_enconada_rival_tumbada() -> void:
 	_jugar(jugada["turno"], decision)
 
 
+# T20, sesion 2 (revision 1a; S-42 y la tabla de 11.8, casilla del Tasajero en
+# Caza): con la rival como unica presa, "tumba" suma los dos golpes y el segundo
+# lleva el punto de Encono del primero (lo previsualiza el Turno, D-005). La
+# rival tiene 13 de vida. Desde [5,8] (2 pasos): 6 + 7 = 13, la tumba solo con
+# el punto extra. Desde [6,9], con zancajunco_s1 afin en [7,10]: 7 + 8 = 15. Con
+# las dos tumbando, gana la de menos pasos. Sin el punto extra (6 + 6 = 12),
+# elegiria [6,9]. Lo previsto es lo aplicado.
+func test_caza_enconada_tumba_con_el_punto_del_segundo_golpe() -> void:
+	var plantel: Plantel = _plantel({"tasajero_s1": Vector2i(5, 6), "ocarra_1": Vector2i(5, 9),
+			"zancajunco_s1": Vector2i(7, 10)})
+	plantel.criatura("ocarra_1").vida = 13
+	var jugada: Dictionary = _decidir(plantel, "tasajero_s1", _BASE_100)
+	var decision: DecisionIA = jugada["decision"]
+	_assert_decision(decision, DecisionIA.Paso.ENCONO,
+			["MOVER (5, 8)", "ATACAR ocarra_1", "ATACAR ocarra_1", "TERMINAR"])
+	assert_int(decision.danio_previsto).is_equal(13)
+	var aplicado: int = 0
+	for ataque in _jugar(jugada["turno"], decision):
+		aplicado += ataque.danio
+	assert_int(aplicado).is_equal(decision.danio_previsto)
+	assert_int(plantel.criatura("ocarra_1").vida).is_equal(0)
+
+
 # (9) Sistema.md 10.5 y 11.8 (retirada de la Cuenta), D-005. Con P-038 en la
 # lectura de hoy (la restriccion de la enconada dura todo el turno), el Tasajero
 # salvaje enconado en Cuenta golpea a ocarra_1 (7 de vida, menos que la Rodauva)

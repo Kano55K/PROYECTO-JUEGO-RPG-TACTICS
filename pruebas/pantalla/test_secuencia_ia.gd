@@ -34,7 +34,7 @@ func test_pasos_de_la_ia() -> void:
 	assert_int(ataques.size()).is_equal(2)
 	assert_int(pasos.size()).is_equal(2)
 	for i in range(pasos.size()):
-		assert_dict(pasos[i]).is_equal({"tipo": SecuenciaIA.ATAQUE, "unidad": "tasajero_s1",
+		assert_dict(_sin_estado(pasos[i])).is_equal({"tipo": SecuenciaIA.ATAQUE, "unidad": "tasajero_s1",
 				"objetivo": ataques[i]["objetivo"], "vida_despues": ataques[i]["vida_despues"]})
 
 
@@ -63,7 +63,7 @@ func test_solo_la_ia_y_desde() -> void:
 	for i in range(pasos.size()):
 		var evento: Dictionary = eventos[i]
 		if evento["tipo"] == "movimiento":
-			assert_dict(pasos[i]).is_equal({"tipo": SecuenciaIA.MOVIMIENTO, "unidad": evento["unidad"],
+			assert_dict(_sin_estado(pasos[i])).is_equal({"tipo": SecuenciaIA.MOVIMIENTO, "unidad": evento["unidad"],
 					"desde": Vector2i(evento["desde"][0], evento["desde"][1]),
 					"hasta": Vector2i(evento["hasta"][0], evento["hasta"][1])})
 		else:
@@ -71,3 +71,38 @@ func test_solo_la_ia_y_desde() -> void:
 			assert_str(pasos[i]["unidad"]).is_equal(evento["atacante"])
 	# Desde el final del registro, nada.
 	assert_array(SecuenciaIA.pasos(combate.registro().lineas(), combate.registro().lineas().size())).is_empty()
+
+
+# T20: el `estado` de cada paso se mira aparte (test_estado_del_chequeo).
+func _sin_estado(paso: Dictionary) -> Dictionary:
+	var copia: Dictionary = paso.duplicate()
+	copia.erase("estado")
+	return copia
+
+
+# T20 (Sistema.md 10.5): escenario_rival_salvajes_combate con la semilla 1:
+# ocarra_s1 se encona contra ocarra_1 en su turno (chequeo_rival `enconada`),
+# asi que todos sus pasos llevan ese estado; ocarra_s2, sin chequeo, "". Un
+# `turno` nuevo de la misma unidad lo vuelve a "".
+func test_estado_del_chequeo() -> void:
+	var combate: Combate = _combate("escenario_rival_salvajes_combate")
+	var desde: int = combate.registro().lineas().size()
+	assert_bool(combate.aplicar(Accion.terminar()).valida).is_true()
+	var lineas: Array[Dictionary] = combate.registro().lineas()
+	var pasos: Array[Dictionary] = SecuenciaIA.pasos(lineas, desde)
+	var de_s1: int = 0
+	for paso in pasos:
+		if paso["unidad"] == "ocarra_s1":
+			de_s1 += 1
+			assert_str(paso["estado"]).is_equal("enconada")
+		else:
+			assert_str(paso["estado"]).is_empty()
+	assert_int(de_s1).is_greater(0)
+
+	var con_otro_turno: Array[Dictionary] = lineas.duplicate()
+	con_otro_turno.append({"tipo": "turno", "unidad": "ocarra_s1"})
+	con_otro_turno.append({"tipo": "accion", "origen": "ia"})
+	con_otro_turno.append({"tipo": "movimiento", "unidad": "ocarra_s1", "desde": [3, 5], "hasta": [3, 4]})
+	var ultimo: Dictionary = SecuenciaIA.pasos(con_otro_turno, desde).back()
+	assert_str(ultimo["unidad"]).is_equal("ocarra_s1")
+	assert_str(ultimo["estado"]).is_empty()

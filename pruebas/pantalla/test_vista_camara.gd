@@ -124,11 +124,17 @@ func test_clic_y_hover_con_la_camara_movida() -> void:
 
 	var turno: Turno = vista.combate().turno_actual()
 	var destino: Vector2i = Criatura.SIN_POSICION
+	# Otra casilla a la vista, para que el segundo hover sea un movimiento real
+	# del mouse y termine en el centro de `destino` (map_to_local).
+	var otra: Vector2i = Criatura.SIN_POSICION
 	for casilla in turno.casillas_para_mover():
 		if _clickeable(vista, casilla):
-			destino = casilla
-			break
+			if destino == Criatura.SIN_POSICION:
+				destino = casilla
+			elif otra == Criatura.SIN_POSICION:
+				otra = casilla
 	assert_vector(destino).override_failure_message("ninguna casilla para mover a la vista").is_not_equal(Criatura.SIN_POSICION)
+	assert_vector(otra).override_failure_message("una sola casilla para mover a la vista").is_not_equal(Criatura.SIN_POSICION)
 
 	# Hover sobre la casilla vacia.
 	runner.simulate_mouse_move(_en_pantalla(vista, destino))
@@ -141,8 +147,11 @@ func test_clic_y_hover_con_la_camara_movida() -> void:
 	await runner.simulate_frames(2)
 	assert_vector(_casilla_de(vista.combate().instantanea(), turno.unidad_id)).is_equal(destino)
 
-	# Hover sobre la unidad que llego: su tooltip.
-	runner.simulate_mouse_move(_en_pantalla(vista, destino) + Vector2(2, 2))
+	# Hover sobre la unidad que llego: su tooltip. El mouse sale a otra casilla y
+	# vuelve al centro de la de destino.
+	runner.simulate_mouse_move(_en_pantalla(vista, otra))
+	await runner.simulate_frames(2)
+	runner.simulate_mouse_move(_en_pantalla(vista, destino))
 	await runner.simulate_frames(2)
 	assert_vector(vista.casilla_bajo_mouse()).is_equal(destino)
 	assert_array(vista.tooltip_mostrado()).is_not_empty()
@@ -222,8 +231,9 @@ func test_arrastrar_no_sale_de_los_limites() -> void:
 	Input.parse_input_event(suelto)
 	await runner.simulate_frames(1)
 	# Arrastrar a la derecha y abajo lleva la camara arriba a la izquierda, y al reves.
-	assert_bool(posiciones[0].x < inicio.x and posiciones[0].y < inicio.y).is_true()
-	assert_bool(posiciones[1].x > inicio.x and posiciones[1].y > inicio.y).is_true()
+	var detalle: String = "inicio %s, posiciones %s, limites %s" % [inicio, posiciones, vista.limites_camara()]
+	assert_bool(posiciones[0].x < inicio.x and posiciones[0].y < inicio.y).override_failure_message(detalle).is_true()
+	assert_bool(posiciones[1].x > inicio.x and posiciones[1].y > inicio.y).override_failure_message(detalle).is_true()
 	# Suelto el boton, mover el mouse ya no arrastra.
 	var despues: InputEventMouseMotion = InputEventMouseMotion.new()
 	despues.relative = Vector2(_ENORME, 0)

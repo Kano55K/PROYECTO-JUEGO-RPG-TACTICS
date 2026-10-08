@@ -152,9 +152,11 @@ func maximo_encono() -> int:
 
 # Sistema.md 10.5 y 11.4 paso 3: el bono de la enconada, contando el punto que
 # suma ese golpe (maximo el tope). Se calcula antes de subir el contador, asi
-# validar, previsualizar y aplicar dan lo mismo.
-func aporte_encono(criatura: Criatura) -> ModificadorDanio:
-	var puntos: int = mini(criatura.encono + 1, _encono["max_puntos"])
+# validar, previsualizar y aplicar dan lo mismo. golpes_previos: los golpes a una
+# rival enemiga de este turno que todavia no subieron el contador (la
+# previsualizacion del segundo golpe de Caza, T20).
+func aporte_encono(criatura: Criatura, golpes_previos: int = 0) -> ModificadorDanio:
+	var puntos: int = mini(criatura.encono + 1 + golpes_previos, _encono["max_puntos"])
 	return ModificadorDanio.new(ModificadorDanio.Fuente.ENCONO, ModificadorDanio.Tipo.PLANO,
 			puntos * (_encono["danio_plano_por_punto"] as int))
 

@@ -559,7 +559,8 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
 
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id, por_incidente))
+	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id, por_incidente,
+			tras_primer_ataque))
 	resultado.danio = resultado.desglose.total
 	resultado.eslabon = null if por_incidente else _cadena.eslabon_para(unidad_id, objetivo_id, _plantel)
 	if aplica:
@@ -592,7 +593,11 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 # nunca en el golpe de un incidente, S-33), la cobardia (10.6: en todos sus
 # ataques, tambien el golpe del incidente) y el Encono (10.5: la enconada contra
 # una rival del chequeo). El ataque real y la previsualizacion los ven igual.
-func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false) -> Array[ModificadorDanio]:
+# tras_primer_ataque (T20): el segundo golpe de Caza previsto antes del primero.
+# La enconada que alcanza da el primero a una rival del chequeo (OBJETIVO_NO_RIVAL),
+# asi que el contador ya habra subido 1 (10.5): se cuenta, como al aplicar.
+func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false,
+		tras_primer_ataque: bool = false) -> Array[ModificadorDanio]:
 	var aportes: Array[ModificadorDanio] = []
 	var afinidad: ModificadorDanio = _afinidad.aporte(unidad_id, desde, _plantel)
 	if afinidad != null:
@@ -602,7 +607,9 @@ func _aportes(desde: Vector2i, objetivo_id: String, por_incidente: bool = false)
 	if por_incidente:
 		return aportes
 	if enconada and _rivales_chequeo.has(objetivo_id):
-		aportes.append(_chequeo.aporte_encono(_plantel.criatura(unidad_id)))
+		var golpes_previos: int = 1 if tras_primer_ataque and _ataques_hechos == 0 \
+				and obligacion == Obligacion.ATACAR else 0
+		aportes.append(_chequeo.aporte_encono(_plantel.criatura(unidad_id), golpes_previos))
 	var combo: ModificadorDanio = _cadena.aporte(unidad_id, objetivo_id, _plantel)
 	if combo != null:
 		aportes.append(combo)

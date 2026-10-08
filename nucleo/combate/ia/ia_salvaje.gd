@@ -121,9 +121,9 @@ static func _encono_acercarse(turno: Turno, plantel: Plantel) -> DecisionIA:
 # primer ataque va a la rival; el segundo, a la otra presa de esa casilla de menos
 # vida -> antes en la cola (P-026), que el Turno acepta despues del primero
 # (previsualizar_ataque con tras_primer_ataque); sin otra presa, a la rival, y si
-# el primero la tumba, se pierde. El danio del segundo golpe a la rival es el
-# previsto con el tablero de ahora, sin el punto de Encono del primero: solo
-# sirve para depurar.
+# el primero la tumba, se pierde. El segundo golpe a la rival tambien sale de
+# previsualizar_ataque con tras_primer_ataque: lleva el punto de Encono del
+# primero (T20, sesion 2), y "tumba" de la clave suma los dos.
 static func _encono_caza(turno: Turno, plantel: Plantel, de_la_rival: Array[OpcionAtaque],
 		orden: Dictionary) -> DecisionIA:
 	var mejor_golpes: Array[OpcionAtaque] = []
@@ -143,8 +143,10 @@ static func _encono_caza(turno: Turno, plantel: Plantel, de_la_rival: Array[Opci
 			presas.append(segunda)
 			golpes.append(segunda)
 		elif not primero.puede_tumbar():
-			golpes.append(primero)
-		var clave: Array = _clave_caza(presas, primero.casilla)
+			var otra_vez: OpcionAtaque = _opcion(turno, plantel, primero.casilla, primero.pasos, primero.objetivo_id, true)
+			if otra_vez != null:
+				golpes.append(otra_vez)
+		var clave: Array = _clave_caza(presas, golpes, primero.casilla)
 		if mejor_clave.is_empty() or _menor(clave, mejor_clave):
 			mejor_clave = clave
 			mejor_golpes = golpes
@@ -227,7 +229,7 @@ static func _paso_caza(turno: Turno, plantel: Plantel, opciones: Array[OpcionAta
 		# cambia nada de lo que entra en el danio, solo la vida.
 		if presas.size() == 1 and not presas[0].puede_tumbar():
 			golpes.append(presas[0])
-		var clave: Array = _clave_caza(presas, casilla)
+		var clave: Array = _clave_caza(presas, golpes, casilla)
 		if mejor_clave.is_empty() or _menor(clave, mejor_clave):
 			mejor_clave = clave
 			mejor_golpes = golpes
@@ -238,16 +240,19 @@ static func _paso_caza(turno: Turno, plantel: Plantel, opciones: Array[OpcionAta
 
 # Tabla de 11.8, Casilla del Tasajero en Caza (paso 6b): junto a 2 presas > 1 ->
 # la que tumba a alguien -> menos vida sumada -> menos pasos -> orden de lectura.
-# Con una sola presa, "tumba" mira los dos golpes. La comparten el 6b y la Caza
-# enconada (S-42).
-static func _clave_caza(presas: Array[OpcionAtaque], casilla: Vector2i) -> Array:
+# Con una sola presa, "tumba" suma el danio de sus golpes (golpes: los planeados,
+# en orden). La comparten el 6b y la Caza enconada (S-42).
+static func _clave_caza(presas: Array[OpcionAtaque], golpes: Array[OpcionAtaque], casilla: Vector2i) -> Array:
 	var tumba: bool = false
 	var vida_sumada: int = 0
 	for presa in presas:
 		tumba = tumba or presa.puede_tumbar()
 		vida_sumada += presa.vida_objetivo
 	if presas.size() == 1:
-		tumba = presas[0].danio * 2 >= presas[0].vida_objetivo
+		var suma: int = 0
+		for golpe in golpes:
+			suma += golpe.danio
+		tumba = suma >= presas[0].vida_objetivo
 	return [-presas.size(), -int(tumba), vida_sumada, presas[0].pasos, casilla.y, casilla.x]
 
 

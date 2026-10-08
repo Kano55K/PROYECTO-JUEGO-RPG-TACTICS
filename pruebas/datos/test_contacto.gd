@@ -57,24 +57,11 @@ func _jugar(datos: Dictionary, escenario_id: String, hasta_ronda: int, al_turno:
 	return combate
 
 
-# CLAUDE.md, "Test de contacto" (excepcion autorizada en T19; A.11): si una regla
-# no deja terminar el turno (una enconada, S-35), juega lo minimo que obliga:
-# ataca a la primera objetivo que acepta el nucleo o, si no puede, se mueve a la
-# primera casilla que acepta. Todo sale de las consultas del Turno.
+# CLAUDE.md, "Test de contacto" (excepcion autorizada en T19; A.11): lo minimo
+# que obliga una regla, con el ayudante comun (JugadorEsperando, T20).
 func _jugar_lo_obligado(combate: Combate, escenario_id: String) -> void:
-	var turno: Turno = combate.turno_actual()
-	while not turno.puede_terminar():
-		var accion: Accion = null
-		if not turno.objetivos_para_atacar().is_empty():
-			accion = Accion.atacar(turno.objetivos_para_atacar()[0])
-		elif not turno.casillas_para_mover().is_empty():
-			accion = Accion.mover(turno.casillas_para_mover()[0])
-		assert_object(accion).override_failure_message("%s: turno sin salida" % escenario_id).is_not_null()
-		if accion == null:
-			return
-		assert_bool(combate.aplicar(accion).valida).override_failure_message(escenario_id).is_true()
-		if combate.terminado():
-			return
+	var falla: String = JugadorEsperando.lo_obligado(combate)
+	assert_str(falla).override_failure_message("%s: %s" % [escenario_id, falla]).is_empty()
 
 
 func _eventos(combate: Combate, tipo: String) -> Array[Dictionary]:
