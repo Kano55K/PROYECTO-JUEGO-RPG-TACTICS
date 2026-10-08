@@ -315,3 +315,9 @@ func test_registro_instantanea_y_grabacion() -> void:
 	assert_str(reproduccion.error).is_empty()
 	assert_array(reproduccion.combate.registro().lineas_json()).is_equal(combate.registro().lineas_json())
 	assert_str(str(reproduccion.combate.instantanea())).is_equal(str(combate.instantanea()))
+
+
+# T19, sesion 2 (punto 14): el tope del contador para la pantalla ("Encono n/3"),
+# el mismo que usa la regla (Sistema.md 10.5: "contador de 0 a 3").
+func test_maximo_encono() -> void:
+	assert_int(DatosFixture.chequeo_rival(_BASE).maximo_encono()).is_equal(3)

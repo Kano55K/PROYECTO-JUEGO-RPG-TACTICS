@@ -64,3 +64,23 @@ func test_claves_de_rasgos_y_variantes() -> void:
 	for clave in claves:
 		assert_bool(vistas.has(clave)).override_failure_message("repetida: " + clave).is_false()
 		vistas[clave] = true
+
+
+# T19, sesion 2 (Mundo.md 9.2 v1.2 y 5): las claves del Encono y la cobardia. Las
+# reacciones por par (encono.<especie>.<rival>), por especie (cobardia.<especie>)
+# y cobardia.resiste.<especie> se piden solo si estan en el archivo; nunca
+# cobardia.resiste.maestro como variante (es otra linea).
+func test_claves_del_encono_y_la_cobardia() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"encono.ocarra.zancajunco": "x", "encono.tasajero.rodauva": "x",
+			"cobardia.rodauva": "x", "cobardia.resiste.rodauva": "x", "cobardia.resiste.maestro": "x",
+			"marca.enconada.tasajero": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["encono.tooltip", "cobardia.tooltip", "encono.inicio", "encono.sube",
+			"cobardia.inicio", "cobardia.resiste", "marca.enconada", "marca.acobardada", "panel.encono",
+			"aviso.terminar.debe_atacar_rival", "aviso.terminar.debe_acercarse"])
+	assert_array(claves).contains(["encono.ocarra.zancajunco", "encono.tasajero.rodauva", "cobardia.rodauva",
+			"cobardia.resiste.rodauva", "marca.enconada.tasajero"])
+	assert_array(claves).not_contains(["encono.ocarra.ocarra", "cobardia.ocarra", "cobardia.resiste.maestro"])

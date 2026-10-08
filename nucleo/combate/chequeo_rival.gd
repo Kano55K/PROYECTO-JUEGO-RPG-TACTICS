@@ -145,6 +145,11 @@ func sumar_golpe(atacante_id: String, objetivo_id: String, plantel: Plantel) -> 
 	return {"tipo": "encono", "unidad": atacante_id, "de": antes, "a": atacante.encono, "rival": objetivo_id}
 
 
+# Sistema.md 10.5: el tope del contador ("contador de 0 a 3"), para la pantalla.
+func maximo_encono() -> int:
+	return _encono["max_puntos"]
+
+
 # Sistema.md 10.5 y 11.4 paso 3: el bono de la enconada, contando el punto que
 # suma ese golpe (maximo el tope). Se calcula antes de subir el contador, asi
 # validar, previsualizar y aplicar dan lo mismo.

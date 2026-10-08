@@ -59,6 +59,21 @@ const ACCION_SECUNDAR: String = "accion.secundar"
 const INCIDENTE_TOOLTIP: String = "incidente.tooltip"
 const INCIDENTE_DISTRAIDA: String = "incidente.distraida"
 const INCIDENTE_ATAQUE: String = "incidente.ataque"
+# T19: el aviso del Encono y de la cobardia y sus sucesos (Mundo.md 9.2 v1.2 y
+# 5). Las reacciones por par (encono.<especie>.<rival>) y por especie
+# (cobardia.<especie>) reemplazan a la linea general si existen.
+const ENCONO_TOOLTIP: String = "encono.tooltip"
+const COBARDIA_TOOLTIP: String = "cobardia.tooltip"
+const ENCONO_INICIO: String = "encono.inicio"
+const ENCONO_SUBE: String = "encono.sube"
+const COBARDIA_INICIO: String = "cobardia.inicio"
+const COBARDIA_RESISTE: String = "cobardia.resiste"
+# T19: claves propuestas, faltan en es.json. Las marcas concuerdan con la especie.
+const MARCA_ENCONADA: String = "marca.enconada"
+const MARCA_ACOBARDADA: String = "marca.acobardada"
+const PANEL_ENCONO: String = "panel.encono"
+const AVISO_TERMINAR_DEBE_ATACAR: String = "aviso.terminar.debe_atacar_rival"
+const AVISO_TERMINAR_DEBE_ACERCARSE: String = "aviso.terminar.debe_acercarse"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -71,6 +86,8 @@ const FIJAS: Array[String] = [
 	SUCESO_OCULTO, SUCESO_PIERDE_BONO, AVISO_CUENTA_UMBRAL, AVISO_DESTAPAR,
 	PANEL_OBEDIENCIA, COMBATE_HAMBRE, PANEL_CADENA, AFINIDAD_TOOLTIP, ACCION_SECUNDAR,
 	INCIDENTE_TOOLTIP, INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE,
+	ENCONO_TOOLTIP, COBARDIA_TOOLTIP, ENCONO_INICIO, ENCONO_SUBE, COBARDIA_INICIO, COBARDIA_RESISTE,
+	MARCA_ENCONADA, MARCA_ACOBARDADA, PANEL_ENCONO, AVISO_TERMINAR_DEBE_ATACAR, AVISO_TERMINAR_DEBE_ACERCARSE,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -155,6 +172,27 @@ static func suceso_cambio(a: String) -> String:
 	return "suceso.%s.cambio" % a
 
 
+# T19 (Mundo.md 5): la reaccion de una especie al enconarse con su rival.
+static func encono_par(especie_id: String, rival_id: String) -> String:
+	return "encono.%s.%s" % [especie_id, rival_id]
+
+
+# T19 (Mundo.md 5): la linea de una especie al acobardarse.
+static func cobardia_especie(especie_id: String) -> String:
+	return "cobardia.%s" % especie_id
+
+
+# T19 (S-35): por que no puede terminar el turno, o "" si el motivo no es una
+# obligacion del Encono.
+static func motivo_terminar(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.DEBE_ATACAR_RIVAL:
+			return AVISO_TERMINAR_DEBE_ATACAR
+		ResultadoAccion.Motivo.DEBE_ACERCARSE:
+			return AVISO_TERMINAR_DEBE_ACERCARSE
+	return ""
+
+
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:
 	var claves: Array[String] = []
@@ -227,10 +265,19 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 				var variante: String = "%s.%s.%s" % [base, especie, rival]
 				if existentes.has(variante):
 					_sumar(claves, variante)
+	# T19: las reacciones del Encono por par, y las de la cobardia por especie
+	# (solo especies: cobardia.resiste.maestro es otra linea, no una variante).
+	for especie in especies:
+		for variante in [cobardia_especie(especie), "%s.%s" % [COBARDIA_RESISTE, especie]]:
+			if existentes.has(variante):
+				_sumar(claves, variante)
+		for rival in especies:
+			if existentes.has(encono_par(especie, rival)):
+				_sumar(claves, encono_par(especie, rival))
 
 
 static func _es_etiqueta(clave: String) -> bool:
-	return clave == MARCA_CAIDA or clave.begins_with("hambre.estado.") \
+	return clave in [MARCA_CAIDA, MARCA_ENCONADA, MARCA_ACOBARDADA] or clave.begins_with("hambre.estado.") \
 			or clave.begins_with("lealtad.estado.") or clave.begins_with("estado.")
 
 

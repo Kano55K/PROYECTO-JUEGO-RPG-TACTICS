@@ -526,3 +526,42 @@
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A en `Combate._registrar_chequeo_rival`, con su test (`test_registro_del_chequeo_y_del_incidente`). Cambiar el nombre es una línea y su test. La pantalla (sesión 2) y las métricas (T23) la van a leer.
 - **Respuesta:** _(la completa el staff)_
+
+## P-038 — Casillas de la enconada después del primer ataque (S-38)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T19
+- **Fecha:** 08/10/2026
+- **Fuente:** `Sistema.md` 10.5 ("Su acción queda fijada en atacar a esa rival… El jugador elige la casilla") y "Tasajero enconado en Caza" (el primero de sus dos ataques va a la rival)
+- **Duda:** la enconada que alcanza a su rival solo puede moverse a casillas desde donde la golpea. ¿Esa limitación dura todo el turno o termina con el primer ataque a la rival?
+- **Caso que la dispara:** un Tasajero en Cuenta (movimiento partido, 11.2.3) enconado golpea a su rival y quiere retirarse con los pasos que le quedan. Si la limitación dura todo el turno, solo puede ir a casillas desde donde la seguiría golpeando, y casi nunca se retira. En T20 la IA del Tasajero salvaje va a chocar con esto.
+- **Opciones:** A) dura todo el turno (lectura literal: "su acción queda fijada"). B) termina con el primer ataque a la rival: después se mueve como cualquiera. — Recomendación técnica: B, por coherencia con "Tasajero enconado en Caza", donde el segundo ataque ya es libre.
+- **Bloquea:** no (sí conviene responderla antes de T20)
+- **Mientras tanto:** programada la opción A (lectura declarada S-35 de la sesión 1): `Turno._motivo_destino_rival` rechaza con `CASILLA_SIN_RIVAL` toda casilla que no golpee a una rival del chequeo mientras `obligacion` sea `ATACAR`. Para pasar a B alcanza con que la obligación termine con el primer ataque, y con su test.
+- **Respuesta:** _(la completa el staff)_
+
+## P-039 — El −50 % de la acobardada en el golpe del incidente (S-39)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T19
+- **Fecha:** 08/10/2026
+- **Fuente:** `Sistema.md` 10.6 ("Acobardada: −50% de daño") y 10.4 (el golpe a la rival aliada con obediencia baja)
+- **Duda:** una acobardada que en el mismo turno golpea a su rival aliada por un incidente, ¿pega ese golpe con el −50 %?
+- **Caso que la dispara:** una Rodauva de la tribu con obediencia 3 queda acobardada por un Tasajero salvaje a su alcance (paso 3 de 11.3). Después le sale el incidente con un Tasajero de la tribu vecino (Rodauva–Tasajero "mal", paso 4) y lo golpea. Con daño 2, ¿le pega 1 o 2?
+- **Opciones:** A) sí: el −50 % rige en todos sus golpes del turno, también en el del incidente. B) no: el incidente es otra regla, y el golpe va sin el −50 %. — Recomendación técnica: A (lectura literal: "−50% de daño", sin excepciones).
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A: `Turno._aportes` suma `ChequeoRival.aporte_cobardia()` en todo ataque de la acobardada, también con `por_incidente`. Sin test propio: ningún escenario de la 0a tiene un Tasajero en la tribu.
+- **Respuesta:** _(la completa el staff)_
+
+## P-040 — Mínimo del 5 % del toggle de afines sin afines vecinas (S-40)
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T19
+- **Fecha:** 08/10/2026
+- **Fuente:** `Sistema.md` 10.6, toggle de afines (`PROPUESTA`): "−10 puntos por afín vecina (máximo −20), con un mínimo de 5%"
+- **Duda:** con el toggle activo en el escenario, ¿el mínimo de 5 % rige siempre, o solo cuando hay al menos una afín vecina que resta?
+- **Caso que la dispara:** con el toggle, una criatura sin afines vecinas cuya cobardía da menos de 5 % (por ejemplo, si un cambio de números deja a la leal con el Maestro vecino en 0 %). Con la tabla de 10.6 de hoy no pasa: el valor más bajo sin afines es 10 %. Así que la duda solo importa si cambian los números.
+- **Opciones:** A) rige siempre: con el toggle, la cobardía nunca baja de 5 %. B) solo cuando restó alguna afín: sin afines, el piso es 0 como sin el toggle. — Recomendación técnica: ninguna (las dos son de una línea).
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A en `ChequeoRival._pct_cobardia`: con el toggle, el piso es `afines_contra_cobardia.minimo_pct` haya o no afines. Sin test propio de ese caso.
+- **Respuesta:** _(la completa el staff)_
