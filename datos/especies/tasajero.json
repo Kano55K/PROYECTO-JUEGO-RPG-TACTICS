@@ -1,12 +1,12 @@
 {
   "$schema": "../_esquemas/especie.schema.json",
-  "_nota": "Sistema.md 4.3 (rol, rango; en el MVP no se sella ni se domestica, sin importar la balanza), 11.2 v1.3 (vida, danio 5, movimiento, alcance; la velocidad vive en cada modo), 11.7 (huida_pct)",
+  "_nota": "Sistema.md 4.3 (rol, rango; en el MVP no se sella ni se domestica, sin importar la balanza), 11.2 v1.7 (vida 300 y danio 50, escala x10 de 11.1; movimiento, alcance; la velocidad vive en cada modo), 11.7 (huida_pct)",
   "id": "tasajero",
   "rol": "combate",
   "rango": 3,
   "sellable": false,
-  "vida": 30,
-  "danio": 5,
+  "vida": 300,
+  "danio": 50,
   "movimiento": 4,
   "alcance": 1,
   "rasgo": {
@@ -17,7 +17,7 @@
     "umbral_cambio_pct": 50,
     "modos": [
       {
-        "_nota": "Sistema.md 11.2.3: Caza. Vel 8; dos ataques separados de 5; movimiento normal, sin partir; recibe +25% (paso 1 de 11.4)",
+        "_nota": "Sistema.md 11.2.3: Caza. Vel 8; dos ataques separados de 50 (11.1 v1.7); movimiento normal, sin partir; recibe +25% (paso 1 de 11.4)",
         "id": "caza",
         "velocidad": 8,
         "ataques_por_turno": 2,
@@ -26,13 +26,13 @@
         "danio_plano": 0
       },
       {
-        "_nota": "Sistema.md 11.2.3: Cuenta. Vel 3; un ataque de 4 (-1 plano, paso 3 de 11.4); movimiento partido con 4 en total; danio recibido normal",
+        "_nota": "Sistema.md 11.2.3: Cuenta. Vel 3; un ataque de 40 (-10 plano, paso 3 de 11.4; escala x10 de 11.1 v1.7); movimiento partido con 4 en total; danio recibido normal",
         "id": "cuenta",
         "velocidad": 3,
         "ataques_por_turno": 1,
         "movimiento_partido": true,
         "recibido_pct": 0,
-        "danio_plano": -1
+        "danio_plano": -10
       }
     ]
   },

@@ -1,12 +1,12 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "f_rescate",
-  "_nota": "Escenario F (Sistema.md 11.9). ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? La rescatista es la frágil (Rodauva leal, 8 de vida); la fuerte es Neutral y no rescata. Peligro concreto (Sistema.md 11.9 y 11.2.2): el Zancajunco salvaje se oculta en la ronda 1, avanza destapado con el bono en la 2 y embiste en la 3 (4 + 3 = 7 tumba al Maestro con 6), salvo que lo golpeen en la 2 (pierde el bono), se lo bloquee o se encone con la Ocarra. Tablero de 12 × 12 (Sistema.md 11.9 v1.6, T43): a distancia 8 la línea se mantiene igual.",
+  "_nota": "Escenario F (Sistema.md 11.9). ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? La rescatista es la frágil (Rodauva leal, 80 de vida); la fuerte es Neutral y no rescata. Peligro concreto (Sistema.md 11.9 y 11.2.2): el Zancajunco salvaje se oculta en la ronda 1, avanza destapado con el bono en la 2 y embiste en la 3 (40 + 30 = 70 tumba al Maestro con 60; escala x10 de Sistema.md 11.1 v1.7), salvo que lo golpeen en la 2 (pierde el bono), se lo bloquee o se encone con la Ocarra. Tablero de 12 × 12 (Sistema.md 11.9 v1.6, T43): a distancia 8 la línea se mantiene igual.",
   "tipo": "test",
   "semilla": 66001,
   "tablero": { "ancho": 12, "alto": 12 },
   "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
-               "vida": 6, "mana_entrada": null, "hambre": 3,
+               "vida": 60, "mana_entrada": null, "hambre": 3,
                "enfermedades": 0, "posicion": [5, 10],
                "_nota": "A 8 del Zancajunco salvaje, que va por él (Sistema.md 11.9 v1.6)" },
   "tribu": [

@@ -328,6 +328,8 @@ func suceso(evento: Dictionary) -> Array[String]:
 # T19 (Sistema.md 10.5 y 10.6, Mundo.md 5), con la primera de sus rivales. La
 # reaccion del par (Encono) o de la especie (cobardia) reemplaza a la linea
 # general; resistir usa la variante de la especie. No enconarse no tiene linea.
+# T44 (A.7, Mundo.md 9.2 v1.3): la resistida dice quien la sostuvo segun el
+# evento (sostenida_por y afin, P-041); sin la clave (o null), la general.
 func _suceso_chequeo_rival(evento: Dictionary) -> Array[String]:
 	var unidad: String = evento["unidad"]
 	var rival: String = evento["rivales"][0]
@@ -344,7 +346,14 @@ func _suceso_chequeo_rival(evento: Dictionary) -> Array[String]:
 			if not _armador.tiene(clave):
 				clave = ClavesTextos.COBARDIA_INICIO
 		ChequeoRival.RESULTADO_RESISTIDA:
-			return [_armador.armar(ClavesTextos.COBARDIA_RESISTE, datos, _sujeto(unidad))]
+			clave = ClavesTextos.COBARDIA_RESISTE
+			match evento.get("sostenida_por"):
+				ChequeoRival.SOSTENIDA_MAESTRO:
+					clave = ClavesTextos.COBARDIA_RESISTE_MAESTRO
+				ChequeoRival.SOSTENIDA_AFIN:
+					clave = ClavesTextos.COBARDIA_RESISTE_AFIN
+					datos["afin"] = HuecoCriatura.new(_sujeto(evento["afin"]))
+			return [_armador.armar(clave, datos, _sujeto(unidad))]
 		_:
 			return []
 	return [_armador.armar(clave, datos)]

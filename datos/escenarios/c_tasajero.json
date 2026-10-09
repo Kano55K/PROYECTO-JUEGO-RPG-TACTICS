@@ -13,7 +13,7 @@
     { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
       "vida": null, "posicion": [4, 10],
-      "_nota": "Rival del Tasajero: chequea cobardía (25%, 15% con el Maestro al lado). Si se queda, en la ronda 2 está en la zona de Caza: sola recibe 5 + 5 y cae; erizada, 2 + 2 (Sistema.md 11.2.3)" },
+      "_nota": "Rival del Tasajero: chequea cobardía (25%, 15% con el Maestro al lado). Si se queda, en la ronda 2 está en la zona de Caza: sola recibe 50 + 50 y cae; erizada, 25 + 25 (Sistema.md 11.2.3; escala ×10 de 11.1 v1.7)" },
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
       "vida": null, "posicion": [4, 11],

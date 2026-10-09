@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "g_ataque_nocturno",
-  "_nota": "Escenario G (Sistema.md 9.2, 9.3 y 11.9). Las 3 salidas: perdonar, sellar, comer · ¿Alcanza el maná para resellar? Golpe inicial de la Ocarra al Maestro antes de la ronda 1 (4 de daño, sin combo ni Encono; Arquitectura.md A.7): la vida del Maestro queda por defecto. No hay otra Ocarra suelta: no hay Centinela (12.6). Maná de entrada 4: la mitad de 8 (2.4). Resellar cuesta 2 (invocar rango 1, 2.3) y el pergamino en blanco.",
+  "_nota": "Escenario G (Sistema.md 9.2, 9.3 y 11.9). Las 3 salidas: perdonar, sellar, comer · ¿Alcanza el maná para resellar? Golpe inicial de la Ocarra al Maestro antes de la ronda 1 (40 de daño, escala ×10 de Sistema.md 11.1 v1.7, sin combo ni Encono; Arquitectura.md A.7): la vida del Maestro queda por defecto. No hay otra Ocarra suelta: no hay Centinela (12.6). Maná de entrada 4: la mitad de 8 (2.4). Resellar cuesta 2 (invocar rango 1, 2.3) y el pergamino en blanco.",
   "tipo": "nocturno",
   "semilla": 777,
   "tablero": { "ancho": 8, "alto": 8 },

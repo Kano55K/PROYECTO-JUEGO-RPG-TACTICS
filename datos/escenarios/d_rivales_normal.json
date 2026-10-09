@@ -25,7 +25,7 @@
       "_nota": "Muro lento: alarga el combate y da tiempo a que aparezcan incidentes. Cava en las rondas 1 y 2, sin cerrarle el paso a la Rodauva salvaje" },
     { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje",
       "vida": null, "posicion": [5, 2],
-      "_nota": "Afín del Surcón salvaje (+1 vecinas en 8, 10.3 v1.6). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente. A 8 del Maestro: abre el combate en la ronda 2 (Sistema.md 11.9 v1.6)" }
+      "_nota": "Afín del Surcón salvaje (+10 vecinas en 8, 10.3 v1.6; escala ×10 de 11.1 v1.7). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente. A 8 del Maestro: abre el combate en la ronda 2 (Sistema.md 11.9 v1.6)" }
   ],
   "pergaminos_en_blanco": 1,
   "golpe_inicial": null,

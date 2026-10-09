@@ -16,6 +16,9 @@ const RESULTADO_ENCONADA: String = "enconada"
 const RESULTADO_NO_ENCONADA: String = "no_enconada"
 const RESULTADO_ACOBARDADA: String = "acobardada"
 const RESULTADO_RESISTIDA: String = "resistida"
+# Arquitectura.md A.7 (T44) y Mundo.md 9.2 v1.3: quien sostuvo a la que resistio.
+const SOSTENIDA_MAESTRO: String = "maestro"
+const SOSTENIDA_AFIN: String = "afin"
 # Los nombres del enum rol del esquema especie (Sistema.md 4.3).
 const _ROL_TRABAJO: String = "trabajo"
 const _PCT_MAXIMO: int = 100
@@ -83,33 +86,41 @@ func rivales_a_su_alcance(unidad_id: String, casilla: Vector2i, plantel: Plantel
 	return resultado
 
 
-# {tipo, rivales, porcentaje, seguro} si la unidad empezara su turno en `casilla`
-# con el tablero de ahora. Sin rivales, porcentaje 0. Una sola probabilidad,
-# aunque tenga varias (S-37). seguro: Encono con el contador en el maximo ("con
-# 3, queda enconada seguro", 10.5), y entonces el porcentaje es 100. La usan la
-# tirada y la pantalla. No modifica nada.
+# {tipo, rivales, porcentaje, seguro, sostenida_por, afin} si la unidad empezara
+# su turno en `casilla` con el tablero de ahora. Sin rivales, porcentaje 0. Una
+# sola probabilidad, aunque tenga varias (S-37). seguro: Encono con el contador en
+# el maximo ("con 3, queda enconada seguro", 10.5), y entonces el porcentaje es
+# 100. sostenida_por y afin salen de la misma cuenta de la cobardia (T44); en el
+# Encono, null y "". La usan la tirada y la pantalla. No modifica nada.
 func consulta(unidad_id: String, casilla: Vector2i, plantel: Plantel) -> Dictionary:
 	var criatura: Criatura = plantel.criatura(unidad_id)
 	var rivales: Array[String] = []
 	if criatura == null:
-		return {"tipo": "", "rivales": rivales, "porcentaje": 0, "seguro": false}
+		return {"tipo": "", "rivales": rivales, "porcentaje": 0, "seguro": false, "sostenida_por": null, "afin": ""}
 	var tipo_chequeo: String = tipo(criatura)
 	rivales = rivales_a_su_alcance(unidad_id, casilla, plantel)
 	var porcentaje: int = 0
 	var seguro: bool = false
+	var sostenida_por: Variant = null
+	var afin: String = ""
 	if not rivales.is_empty():
 		if tipo_chequeo == TIPO_ENCONO:
 			seguro = criatura.encono >= (_encono["max_puntos"] as int)
 			porcentaje = _PCT_MAXIMO if seguro else _pct_encono(criatura, plantel)
 		else:
-			porcentaje = _pct_cobardia(criatura, casilla, plantel)
-	return {"tipo": tipo_chequeo, "rivales": rivales, "porcentaje": porcentaje, "seguro": seguro}
+			var cobardia: Dictionary = _pct_cobardia(criatura, casilla, plantel)
+			porcentaje = cobardia["porcentaje"]
+			sostenida_por = cobardia["sostenida_por"]
+			afin = cobardia["afin"]
+	return {"tipo": tipo_chequeo, "rivales": rivales, "porcentaje": porcentaje, "seguro": seguro,
+			"sostenida_por": sostenida_por, "afin": afin}
 
 
 # Sistema.md 10.5, 10.6 y 11.3 paso 3: la tirada del inicio del turno, desde la
 # casilla actual. {} si no tiene rivales a su alcance o si da 0 % (no toca el
 # generador). Si es seguro, enconada sin tirar. Si no, una tirada con
-# Porcentajes.tirar. Devuelve {tipo, rivales, porcentaje, tiro, resultado}.
+# Porcentajes.tirar. Devuelve {tipo, rivales, porcentaje, tiro, resultado}; si
+# resistio, tambien sostenida_por y, sostenida por una afin, cual (A.7, T44; P-041).
 func tirar(unidad_id: String, plantel: Plantel, azar: GeneradorAzar) -> Dictionary:
 	var criatura: Criatura = plantel.criatura(unidad_id)
 	if criatura == null:
@@ -126,8 +137,13 @@ func tirar(unidad_id: String, plantel: Plantel, azar: GeneradorAzar) -> Dictiona
 		resultado = RESULTADO_ENCONADA if sale else RESULTADO_NO_ENCONADA
 	else:
 		resultado = RESULTADO_ACOBARDADA if sale else RESULTADO_RESISTIDA
-	return {"tipo": datos["tipo"], "rivales": datos["rivales"], "porcentaje": datos["porcentaje"], "tiro": tiro,
-			"resultado": resultado}
+	var tirado: Dictionary = {"tipo": datos["tipo"], "rivales": datos["rivales"], "porcentaje": datos["porcentaje"],
+			"tiro": tiro, "resultado": resultado}
+	if resultado == RESULTADO_RESISTIDA:
+		tirado["sostenida_por"] = datos["sostenida_por"]
+		if datos["sostenida_por"] == SOSTENIDA_AFIN:
+			tirado["afin"] = datos["afin"]
+	return tirado
 
 
 # Sistema.md 10.5, Cada golpe a la rival: un golpe aplicado de una criatura de
@@ -176,26 +192,36 @@ func _pct_encono(criatura: Criatura, plantel: Plantel) -> int:
 	return clampi(pct, 0, _PCT_MAXIMO)
 
 
-# Sistema.md 10.6: base, Arrimo, tramo y el Maestro de pie vecino en 8 (11.3
+# Sistema.md 10.6 v1.7: base, Arrimo, tramo y el Maestro de pie vecino en 8 (11.3
 # v1.6). Con el toggle, cada afin de pie vecina en 8 sin contar al Maestro
-# (P-008), con su tope y su minimo; sin el toggle, piso 0. Lectura declarada
-# S-41 (T20): el -10 del Maestro es sosten de su tribu; una enemiga junto al
-# Maestro no lo recibe. Sus afines del toggle son de su bando (Afinidad).
-func _pct_cobardia(criatura: Criatura, casilla: Vector2i, plantel: Plantel) -> int:
+# (P-008), con su tope; el minimo no sube la cobardia (P-040):
+# max(sin_afines - afines, min(sin_afines, minimo)). Lectura declarada S-41 (T20):
+# el -10 del Maestro es sosten de su tribu; una enemiga junto al Maestro no lo
+# recibe. Sus afines del toggle son de su bando (Afinidad).
+# Devuelve {porcentaje, sostenida_por, afin} (A.7, T44): "maestro" si resto el
+# -10; si no, "afin" si el toggle conto alguna afin, con la primera en el orden
+# del Plantel (P-041); si no, null. Lectura: "resto alguna afin" = conto alguna;
+# con los numeros de hoy, sin el Maestro, sin_afines >= 20 y contar es restar.
+func _pct_cobardia(criatura: Criatura, casilla: Vector2i, plantel: Plantel) -> Dictionary:
 	var pct: int = (_cobardia["base_pct"] as int) \
 			+ _arrimo.ajuste(Arrimo.pasos_de(criatura, plantel.maestro), Arrimo.Uso.COBARDIA) \
 			+ _ajuste_tramo(criatura, plantel, "cobardia_pts")
+	var sostenida_por: Variant = null
+	var afin: String = ""
 	if criatura.bando == Criatura.Bando.TRIBU and Objetivos.de_pie(Maestro.ID, plantel) \
 			and Tablero.es_vecina_en_8(plantel.maestro.posicion, casilla):
 		pct += _cobardia["maestro_adyacente_pts"] as int
-	var piso: int = 0
+		sostenida_por = SOSTENIDA_MAESTRO
 	if _con_toggle:
 		var afines: Array[String] = _afinidad.afines_vecinas(criatura.id, casilla, plantel)
 		afines.erase(Maestro.ID)
 		# Los puntos son negativos: el tope es el mayor descuento.
-		pct += maxi(_afines["tope_pts"] as int, afines.size() * (_afines["por_afin_pts"] as int))
-		piso = _afines["minimo_pct"]
-	return clampi(pct, piso, _PCT_MAXIMO)
+		var descuento: int = maxi(_afines["tope_pts"] as int, afines.size() * (_afines["por_afin_pts"] as int))
+		pct = maxi(pct + descuento, mini(pct, _afines["minimo_pct"] as int))
+		if sostenida_por == null and not afines.is_empty():
+			sostenida_por = SOSTENIDA_AFIN
+			afin = afines[0]
+	return {"porcentaje": clampi(pct, 0, _PCT_MAXIMO), "sostenida_por": sostenida_por, "afin": afin}
 
 
 # Sistema.md 5.4: leal o baja suman lo suyo; neutral, nada.

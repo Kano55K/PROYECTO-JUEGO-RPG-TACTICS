@@ -262,8 +262,9 @@ func test_e_rival_a_su_alcance_en_la_ronda_2() -> void:
 
 
 # Sistema.md 11.9 v1.6, F: el Zancajunco salvaje se oculta en la ronda 1, avanza
-# destapado y con el bono en la 2, y en la 3 le pega 7 al Maestro (que tiene 6).
-func test_f_zancajunco_oculto_avanza_y_pega_7() -> void:
+# destapado y con el bono en la 2, y en la 3 le pega 70 al Maestro (que tiene 60).
+# T44: reescrito con la escala x10 de Sistema.md 11.1 y 11.9 v1.7 (antes, 7 y 6).
+func test_f_zancajunco_oculto_avanza_y_pega_70() -> void:
 	# Primer turno del jugador de la ronda 2: el Zancajunco (Vel 8) ya avanzo.
 	var foto_ronda_2: Dictionary = {}
 	var al_turno: Callable = func(combate: Combate) -> void:
@@ -297,8 +298,8 @@ func test_f_zancajunco_oculto_avanza_y_pega_7() -> void:
 	assert_int(ataques[0]["ronda"] as int).is_equal(3)
 	assert_str(ataques[0]["atacante"]).is_equal("zancajunco_s1")
 	assert_str(ataques[0]["objetivo"]).is_equal(Maestro.ID)
-	assert_int(ataques[0]["vida_antes"] as int).is_equal(6)
-	assert_int(ataques[0]["desglose"]["total"] as int).is_equal(7)
+	assert_int(ataques[0]["vida_antes"] as int).is_equal(60)
+	assert_int(ataques[0]["desglose"]["total"] as int).is_equal(70)
 
 
 # Sistema.md 11.9 v1.6, G: sin cambios; carga y llega al primer turno del jugador.

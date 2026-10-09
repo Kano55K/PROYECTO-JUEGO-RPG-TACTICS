@@ -1870,3 +1870,112 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   2. En cmd: `copy registros\c_tasajero_33001_7.json registros\copia.json`, después `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- res://registros/copia.json` y `fc registros\c_tasajero_33001_7.jsonl registros\copia.jsonl`. Tiene que dar sin `AVISO` y sin diferencias.
   3. F5 → A y C: mover, atacar, Secundar, activas (Erizarse, Hacerse junco, cavar) y hover de afines y rivales, todo igual que antes.
 - **Para la próxima sesión:** nada: tarea terminada. Sigue T22.
+
+## T44 · sesión 1 · 09/10/2026
+- **Rama:** tarea/T44-escala
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Preguntas.** Con la autorización del usuario (solo esta vez), copié sin cambios las respuestas de `Sistema.md` 15 v1.7 en P-030 a P-036 y P-038 a P-040, y las pasé a `CERRADA` (`Cerrada en: T44`). Ninguna cambia código, salvo P-040.
+  - **Datos ×10** (`Sistema.md` 11.1 v1.7, D-009), con la tabla de cotejo de abajo.
+    - Las `_nota` que citaban vidas o daños quedaron al día: las 5 especies, `balanza.json`, `combate.json`, la Lanzadera y los escenarios C, D (los tres), E (los dos), F, G y H.
+    - Sin cambios de esquema. La huella cambió.
+  - **P-040** (`Sistema.md` 10.6 v1.7). `ChequeoRival._pct_cobardia`, con el toggle, ahora da `max(sin_afines + descuento, min(sin_afines, minimo_pct))`, y después el recorte a 0..100. El piso ya no sube la cobardía. Sin afines, el toggle no cambia nada.
+  - **`sostenida_por`** (A.7, `Mundo.md` 9.2 v1.3). `_pct_cobardia` devuelve `{porcentaje, sostenida_por, afin}` en la misma cuenta del porcentaje:
+    - `"maestro"` si restó el −10 del Maestro vecino.
+    - Si no, `"afin"` si el toggle contó alguna afín.
+    - Si no, `null`.
+    - `consulta` suma las dos claves (`null` y `""` en el Encono).
+    - `tirar` las copia **solo** en una `resistida`. `afin` va solo si `sostenida_por` es `"afin"`.
+    - `Combate._registrar_chequeo_rival` vuelca al evento las claves que traiga. Constantes: `ChequeoRival.SOSTENIDA_MAESTRO` y `SOSTENIDA_AFIN`.
+  - **`afin`** (P-041, decisión del usuario en esta sesión): el id de la primera afín del toggle, en el orden del Plantel. Sin este dato, el hueco `{a_afin}` de `cobardia.resiste.afin` no se podía llenar.
+  - **Pantalla.** `LecturaCombate._suceso_chequeo_rival` elige la línea de la resistida según `sostenida_por`, con el sujeto de la especie (para la variante):
+    - `"maestro"` → `cobardia.resiste.maestro`.
+    - `"afin"` → `cobardia.resiste.afin`, con `{afin}` = la especie de `afin`.
+    - `null` o sin la clave (registros viejos) → `cobardia.resiste`.
+    - `ClavesTextos`: `COBARDIA_RESISTE_MAESTRO` y `COBARDIA_RESISTE_AFIN` en `FIJAS`. `usadas` suma sus variantes `.<especie>` si están en el archivo.
+  - **Números en el código que dependen de la escala:** revisé `nucleo/` y `pantalla/` con un grep. No hay ninguno: `danio_minimo`, `vida_tras_caida` y el choque ya eran dato. El único literal cerca de "vida" es el 100 de un porcentaje (`IASalvaje`, umbral de Erizarse).
+- **Tabla de cotejo ×10** (valor | archivo y campo | sección):
+
+  | Valor | Archivo y campo | Sección |
+  |---|---|---|
+  | 80 / 20 | `especies/rodauva.json` `vida` / `danio` | 11.2 v1.7 |
+  | 240 / 30 | `especies/surcon.json` `vida` / `danio` | 11.2 |
+  | 120 / 40 | `especies/ocarra.json` `vida` / `danio` | 11.2 |
+  | 120 / 40 | `especies/zancajunco.json` `vida` / `danio` | 11.2 |
+  | 30 | `especies/zancajunco.json` `rasgo.bono_plano` | 11.2.2, 11.1 |
+  | 300 / 50 | `especies/tasajero.json` `vida` / `danio` | 11.2 |
+  | −10 | `especies/tasajero.json` `rasgo.modos[cuenta].danio_plano` | 11.2.3, 11.1 |
+  | 220 / 200 / 180 / 160 / 140 | `tablas/balanza.json` `posiciones[1..5].vida_max_real` | 1.2 |
+  | 50 / 40 / 40 / 30 / 30 | `tablas/balanza.json` `posiciones[1..5].danio_cuerpo` | 1.2 |
+  | 10 | `tablas/combate.json` `danio_minimo` | 11.1, 11.4 |
+  | 10 | `tablas/combate.json` `vida_tras_caida` | 11.1, 11.5 |
+  | 10 | `tablas/combate.json` `afinidad_danio_plano` | 10.3, 11.1 |
+  | 10 | `tablas/combate.json` `encono.danio_plano_por_punto` | 10.5, 11.1 |
+  | 10 | `hechizos.json` lanzadera `danio_choque` (ya existía) | 1.6, 11.1 |
+  | 60 | `escenarios/f_rescate.json` `maestro.vida` | 11.9 |
+
+  **Derivadas reproducidas desde los datos** (`test_escala_x10.gd`):
+  - Maestro de A (balanza 2): 200 de vida y 40 de daño.
+  - F: 60.
+  - Maestro de H (balanza 5): 140 y 30.
+  - Tasajero de C: 300, y `vida_de_cambio` 150.
+  - F en `test_contacto.gd`: el Zancajunco pega 40 + 30 = 70 al Maestro con 60.
+
+  **Números leídos que no se guardaron:**
+  - La vida al guardar una caída (10) no existe en `datos/`: la crea T27.
+  - Martillazo `10 × (2 + Poder)` y Remiendo `10 × (3 + Poder)`: sus `base` en `hechizos.json` (2 y 3) siguen como estaban, porque la fórmula nueva no entra en el esquema de hoy (`base + Poder`). Los pasa T22, que los usa por primera vez.
+  - Debilidad del ritual y quebranto: 0b.
+- **Archivos:**
+  - Creados: `pruebas/combate/test_cobardia_v17.gd` y `pruebas/datos/test_escala_x10.gd`.
+  - Modificados en datos: `datos/especies/` (las 5), `datos/tablas/balanza.json`, `datos/tablas/combate.json`, `datos/hechizos.json`, y `datos/escenarios/` C, D (los tres), E (los dos), F, G y H (en F, el dato; en el resto, solo `_nota`).
+  - Modificados en código: `nucleo/combate/chequeo_rival.gd`, `nucleo/combate/combate.gd`, `pantalla/claves_textos.gd` y `pantalla/combate/lectura_combate.gd`.
+  - Modificados en pruebas: `pruebas/combate/test_combate.gd`, `pruebas/datos/test_contacto.gd`, `pruebas/unidades/test_plantel_escenarios.gd`, `pruebas/pantalla/test_claves_textos.gd` y `pruebas/pantalla/test_vista_rival.gd`.
+  - Docs: `docs/PREGUNTAS.md`, `docs/RESUMENES.md` y `CLAUDE.md` ("Estado actual").
+- **Tests:** 16 nuevos, total 508, todos pasan (suite completa: 508 de 508, 68 suites; en la consola, solo los dos `ERROR` del Remote Debugger del runner y los seis `push_error` esperados de `test_reglas_combate`, como antes).
+  - Nuevos:
+    - `test_cobardia_v17.gd`: 9.
+    - `test_escala_x10.gd`: 4.
+    - `test_combate.gd::test_resistida_registra_quien_la_sostuvo`.
+    - `test_vista_rival.gd::test_sucesos_de_quien_sostuvo`.
+    - `test_claves_textos.gd::test_claves_de_quien_sostuvo`.
+  - **Reescritos**, cada uno con su referencia en el comentario:
+    1. `pruebas/datos/test_contacto.gd::test_f_zancajunco_oculto_avanza_y_pega_7` → `..._pega_70`: `vida_antes` 6 → 60 y `total` 7 → 70 (`Sistema.md` 11.1 y 11.9 v1.7). Coordenadas y criterios sin tocar.
+    2. `pruebas/unidades/test_plantel_escenarios.gd::test_f_maestro_en_6` → `test_f_maestro_en_60`: 6 → 60 (11.1 y 11.9 v1.7).
+    3. ⚠️ `pruebas/pantalla/test_claves_textos.gd::test_claves_del_encono_y_la_cobardia`. Es un test con fixtures. Afirmaba `not_contains("cobardia.resiste.maestro")`, y T44 pide justo lo contrario (que `usadas` sume esa clave). Pasa a `contains` de `cobardia.resiste.maestro` y `cobardia.resiste.afin` (`Mundo.md` 9.2 v1.3, A.7 T44). Es la única aserción de un test con fixtures que cambió (ver el criterio 8).
+- **Criterio de terminado:**
+  - (1) Cumplido: `datos/` carga sin errores (`test_datos_completos`, `test_contenido_fijo`). La tabla de cotejo está arriba, para que el usuario la revise contra `Sistema.md` v1.7.
+  - (2) Cumplido: `test_escala_x10.gd` (A 200/40, F 60, H 140/30, Tasajero 300 y 150).
+  - (3) Cumplido: `test_contacto.gd` pasa, con F pegando 70 al Maestro con 60. Reescrito con la referencia a 11.9 v1.7, sin tocar coordenadas ni criterios.
+  - (4) Cumplido: pasan `test_robustez_ia.gd` y `test_datos_completos.gd`, sin cambios.
+  - (5) Cumplido: `test_cobardia_v17.gd`.
+    - `test_toggle_sin_afines_no_cambia_nada`: 25 y 25. Con una base de 3 %, 3 y 3 (antes, el toggle la subía a 5).
+    - `test_piso_no_sube_la_cobardia`: 3 % con una afín sigue en 3.
+    - `test_con_afines_nunca_baja_del_piso`: 12 % con dos afines da 5; 25 % con dos, 5; con una, 15.
+    - Las bases de 3 % y 12 % salen de una copia en memoria de `combate.json`, porque `pruebas/fixtures/` no se toca.
+  - (6) Cumplido, en 5 tests de `test_cobardia_v17.gd`:
+    - Maestro → `maestro`, sin `afin`.
+    - Afín sin Maestro → `afin` + `afin: rodauva_2`.
+    - Con dos afines, la primera del Plantel.
+    - Los dos → `maestro`.
+    - Ninguno → `null`; una afín sin el toggle tampoco sostiene.
+    - En `acobardada`, `enconada` y `no_enconada`, la clave no va.
+    - En el registro de un `Combate`: `test_combate.gd::test_resistida_registra_quien_la_sostuvo` (la Rodauva de la ronda de C resiste con el Maestro vecino).
+  - (7) Cumplido: `test_vista_rival.gd::test_sucesos_de_quien_sostuvo` cubre Maestro (con y sin variante de especie), afín (con el nombre), `null` y evento sin la clave.
+  - (8) **Parcial, por una contradicción del pedido:** `git diff develop -- pruebas/fixtures/` sale vacío, y ningún test de reglas cambió una aserción. Pero hubo que invertir una aserción de un test de pantalla con fixtures (`test_claves_textos.gd`, la 3 de arriba), porque afirmaba lo contrario de lo que T44 pide. La grabación de C de T21-ajustes (`registros/c_tasajero_33001_7.json`) queda para la prueba manual: tiene que dar el aviso de huella.
+  - (9) Cumplido: suite completa en verde (508). Mientras trabajé, la corrí por carpeta.
+- **Supuestos y lecturas declaradas:**
+  - "Restó alguna afín del toggle" (A.7) lo leo como "el toggle contó al menos una afín vecina". Con los números de hoy no hay diferencia: sin el Maestro vecino, la cobardía sin afines es 20 % o más, así que contar una afín siempre resta. Está en el comentario de `_pct_cobardia`.
+  - Las `base` de Martillazo y Remiendo quedan para T22 (ver arriba).
+- **Claves de texto nuevas sin texto:** ninguna. `cobardia.resiste.maestro` y `cobardia.resiste.afin` ya están en `es.json` v1.3.
+- **Preguntas:**
+  - Cerradas: P-030 a P-036 y P-038 a P-040.
+  - Nueva: P-041 (ARQUITECTO, no bloquea), sobre el campo `afin` del `chequeo_rival` resistido. Programada la opción A, que eligió el usuario.
+- **Lista de prueba manual:**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. F5 → A: el Maestro muestra 200 de vida, y el desglose de su golpe da 40 de base. El panel dice "Maná", sin `[FALTA]`.
+  3. F5 → C: el Tasajero tiene 300, y su tooltip dice que pasa a Cuenta con 150. En Caza, sus dos golpes son de 50.
+  4. F5 → F, apretando Esperar en todos los turnos: en la ronda 3, el Zancajunco pega 70 y tumba al Maestro (60).
+  5. F5 → E: si la Rodauva resiste la cobardía con el Maestro al lado, el suceso muestra "Se queda porque estás cerca.". En `e_cobardia_afines`, con otra Rodauva o el Surcón vecinos y sin el Maestro, muestra "Se queda porque tiene a la Rodauva cerca." (o "al Surcón").
+  6. `git diff develop -- pruebas/fixtures/`: vacío.
+  7. Reproducir la grabación de C de T21-ajustes (`copy registros\c_tasajero_33001_7.json registros\copia.json` y `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- res://registros/copia.json`): tiene que dar el aviso de huella, que es lo esperado (D-009).
+- **Para la próxima sesión:** nada: tarea terminada. Sigue T22.
