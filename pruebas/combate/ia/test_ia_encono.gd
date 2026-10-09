@@ -55,7 +55,7 @@ func _decidir(plantel: Plantel, unidad_id: String, combate: String) -> Dictionar
 	var azar: GeneradorAzar = GeneradorAzar.new(1)
 	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
 			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(combate),
-			DatosFixture.chequeo_rival(combate), azar)
+			DatosFixture.chequeo_rival(combate), DatosFixture.regeneracion_mana(), azar)
 	var cola: ColaIniciativa = ColaIniciativa.new()
 	cola.empezar_ronda(plantel)
 	var antes: String = _foto(plantel, cola, azar)

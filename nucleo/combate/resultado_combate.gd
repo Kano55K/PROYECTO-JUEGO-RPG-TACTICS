@@ -52,8 +52,8 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	resultado._maestro = {
 		"vida": plantel.maestro.vida,
 		"posicion": Plantel.casilla_a_lista(plantel.maestro.posicion),
-		# Lo llena T21.
-		"mana": null,
+		# Sistema.md 2.1 (T21): el mana actual al terminar.
+		"mana": plantel.maestro.mana,
 		"hambre": plantel.maestro.hambre,
 	}
 	for criatura in plantel.criaturas():

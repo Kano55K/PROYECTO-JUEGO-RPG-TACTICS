@@ -59,7 +59,7 @@ func _turno(plantel: Plantel, unidad_id: String, combate: String = _BASE_100,
 	return Turno.empezar(entrada if entrada != null else EntradaCola.new(unidad_id, "", 0), plantel, _tablero,
 			_danio, Surcos.new(), DatosFixture.afinidad(), DatosFixture.cadena(),
 			cola if cola != null else ColaIniciativa.new(), DatosFixture.incidente(combate),
-			DatosFixture.chequeo_rival(combate), azar)
+			DatosFixture.chequeo_rival(combate), DatosFixture.regeneracion_mana(), azar)
 
 
 func _motivo(turno: Turno, accion: Accion) -> String:

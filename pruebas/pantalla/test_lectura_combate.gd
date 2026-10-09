@@ -365,3 +365,34 @@ func test_t16_desglose_y_panel_de_la_cadena() -> void:
 			evento = linea
 	assert_dict(evento["desglose"]).is_equal(vista_previa.desglose.a_diccionario())
 	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.cadena]: Surcón (2)"])
+
+
+# T21 (12), Sistema.md 2.1: el panel del turno del Maestro y su tooltip muestran
+# el mana actual/tope, y cambian despues de la regeneracion; los de una criatura
+# no lo muestran. panel.mana no esta en el texto: se ve [FALTA]. El fixture baja
+# el mana a mano (en T21 nada lo gasta).
+func test_t21_mana_en_panel_y_tooltip() -> void:
+	var datos_fixture: Dictionary = DatosFixture.cargar()
+	assert_array(datos_fixture["errores"]).is_empty()
+	var datos: Dictionary = datos_fixture["datos"]
+	var escenario: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/escenario_mana_combate.json",
+			"escenario")["datos"]
+	var textos: Dictionary = LectorFixture.leer(_TEXTOS, "textos")
+	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
+	contexto.plantel.maestro.mana = 2
+	_combate = Combate.empezar(contexto)
+	assert_str(_combate.error()).is_empty()
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, ArmadorTextos.desde_datos(textos["datos"],
+			contexto.azar_textos), EstadosUnidad.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"]))
+	var tope: int = contexto.plantel.maestro.mana_entrada
+
+	# Turno de la Rodauva: el Maestro todavia no regenero.
+	assert_str(_combate.turno_actual().unidad_id).is_equal("rodauva_1")
+	for linea in lectura.panel_turno() + lectura.tooltip_unidad("rodauva_1"):
+		assert_str(linea).not_contains("panel.mana")
+	assert_array(lectura.tooltip_unidad(Maestro.ID)).contains(["[FALTA: panel.mana]: 2/%d" % tope])
+
+	_combate.aplicar(Accion.terminar())
+	assert_str(_combate.turno_actual().unidad_id).is_equal(Maestro.ID)
+	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.mana]: 3/%d" % tope])
+	assert_array(lectura.tooltip_unidad(Maestro.ID)).contains(["[FALTA: panel.mana]: 3/%d" % tope])

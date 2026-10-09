@@ -82,11 +82,9 @@
           "$ref": "comunes.schema.json#/$defs/posicion"
         },
         "mana": {
-          "description": "T12: null. Lo llena T21",
-          "type": [
-            "integer",
-            "null"
-          ]
+          "description": "Sistema.md 2.1 (T21): el mana del Maestro al terminar el combate",
+          "type": "integer",
+          "minimum": 0
         },
         "hambre": {
           "type": "integer"

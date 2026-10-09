@@ -1774,3 +1774,61 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   4. Al abrir un escenario, antes de mover el mouse, no hay tooltip ni marcas de hover.
   5. Con el mouse sobre un botón de abajo, mover la cámara con WASD: no hay errores en la consola.
 - **Para la próxima sesión:** nada: tarea terminada. Sigue T21.
+
+## T21 · sesión 1 · 08/10/2026
+- **Rama:** tarea/T21-mana
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Modelo.** `Maestro.mana_entrada` es un entero y se resuelve al crear el `Plantel`: `null` pasa a ser la reserva de la fila de su balanza. Es el tope del combate (M-04) y no cambia. `Maestro.mana` es nuevo: el maná actual, que arranca en `mana_entrada`.
+  - **Regla.** `RegeneracionMana` (`nucleo/combate/regeneracion_mana.gd`) no guarda estado y vive en `ContextoCombate.regeneracion_mana`.
+    - `aplicar(maestro, ronda)` suma la Regeneración, recortada a `mana_entrada`, y devuelve `{de, a}` solo si el valor cambia.
+    - El hambre se mira en ese momento, con `EstadosUnidad.fila_hambre(...)["regen_combate"]`: `siempre`, `rondas_pares` (`ronda % 2 == 0`) o `nunca`.
+    - El lugar del quebranto (M-09) queda marcado con un comentario, sin código. Famélico sigue S-44.
+  - **Turno.** `Turno.empezar(..., regla_chequeo, regla_mana, azar)`: `regla_mana` es **obligatoria**, y los tests con un turno suelto pasan `DatosFixture.regeneracion_mana()`. El paso 1 de `_inicio_del_turno` corre solo para el Maestro y con `_cola.ronda`. Al volver de Secundar no corre (S-31). Campo público nuevo: `Turno.mana` (`{de, a}` o `{}`).
+  - **Combate.** Registra el evento `mana` (`unidad`, `de`, `a`, `motivo: "regeneracion"`) justo después del `turno` del Maestro, solo si el valor cambia, y sin volcar tiradas. La `instantanea` suma `maestro.mana`. El resultado llena `maestro.mana` con un entero, y el esquema `resultado` ya no admite `null` en ese campo.
+  - **Cargador.** Chequeo cruzado nuevo `_chequear_mana_entrada`: un `maestro.mana_entrada` mayor que la reserva de su balanza da error con archivo, campo y valor esperado.
+  - **Pantalla.** El panel del turno del Maestro y su tooltip muestran `panel.mana: actual/tope` (`ClavesTextos.PANEL_MANA`, `LecturaCombate._linea_mana`). No hay línea de sucesos.
+- **Archivos:**
+  - Creados: `nucleo/combate/regeneracion_mana.gd`, `pruebas/combate/test_regeneracion_mana.gd`, `pruebas/fixtures/combate/escenario_mana_combate.json` y `pruebas/fixtures/cargador/escenario_mana_entrada/` (esquemas mínimos, `tablas/balanza.json`, `escenarios/mayor.json`, `igual.json` y `nulo.json`).
+  - Modificados en el núcleo: `nucleo/unidades/maestro.gd`, `plantel.gd`, `nucleo/combate/contexto_combate.gd`, `turno.gd`, `combate.gd`, `resultado_combate.gd` y `nucleo/datos/cargador.gd`.
+  - Modificados en pantalla y datos: `pantalla/claves_textos.gd`, `pantalla/combate/lectura_combate.gd` y `datos/_esquemas/resultado.schema.json`.
+  - Modificados en pruebas: `pruebas/combate/datos_fixture.gd`; las 29 llamadas a `Turno.empezar` de 17 archivos de test (cambio mecánico: agregan `DatosFixture.regeneracion_mana()`); `test_contrato.gd`, `test_plantel.gd`, `test_plantel_escenarios.gd`, `test_cargador.gd` y `test_lectura_combate.gd`.
+- **Tests:** 15 nuevos, total 491, todos pasan (suite completa en verde y sin advertencias nuevas).
+  - Reescritos, por Sistema.md 2.1 y 1.2 (M-04):
+    - `test_plantel.gd::test_null_toma_el_valor_por_defecto`: `mana_entrada` era `null` y ahora es la reserva de la fila de la balanza 2 del fixture.
+    - `test_contrato.gd::test_resultados_validan_contra_el_esquema`: `maestro.mana` era `null` y ahora es un entero igual a la reserva. Además comprueba que el esquema rechaza `null`.
+- **Criterio de terminado:** cumplido punto por punto.
+  - (1) `test_plantel.gd::test_t21_mana_entrada_se_resuelve`: balanzas 2 y 4 del fixture, y un valor explícito.
+  - (1b) `test_plantel_escenarios.gd::test_t21_mana_de_entrada_de_los_escenarios`: G con 4 y los otros 10 con la reserva de su balanza.
+  - (2) `test_normal_suma_su_regeneracion_hasta_el_tope` y `test_en_el_tope_no_hay_evento`.
+  - (3) `test_el_tope_es_el_mana_de_entrada`: entrada 4, Regeneración 3.
+  - (4) `test_regeneracion_segun_el_hambre` y `test_famelico_conserva_su_mana`.
+  - (5) `test_hambre_de_combate_cambia_la_regla_en_el_acto`: pasa de 5 a 6 al cerrar la ronda 5; regenera en la 6 y la 8 y no en la 7.
+  - (6) `test_secundar_y_volver_regenera_una_vez`.
+  - (7) `test_otros_turnos_no_tocan_el_mana`: `Turno` suelto de la Rodauva y de la Ocarra salvaje, más el registro del combate.
+  - (8) `test_el_evento_va_justo_despues_del_turno`.
+  - (9) `test_registro_instantanea_y_resultado` (evento exacto e `instantanea`), `test_contrato.gd` (resultado contra el esquema) y `test_grabacion_se_reproduce_igual`.
+    - Un combate armado desde un escenario siempre entra en el tope y en T21 nada gasta maná. Por eso la grabación reproducida no tiene eventos `mana`: el test comprueba que el registro sea igual y que no aparezca ninguno.
+  - (10) `test_cargador.gd::test_t21_mana_entrada_no_supera_la_reserva`: `mayor` da error en `maestro.mana_entrada`; `igual` y `nulo`, no.
+  - (11) Pasan `test_contacto.gd`, `test_robustez_ia.gd` y `test_datos_completos.gd`, sin cambios.
+  - (12) `test_lectura_combate.gd::test_t21_mana_en_panel_y_tooltip`.
+  - (13) Suite completa en verde. Los tests reescritos están listados arriba.
+- **Datos (tabla de cotejo):** sin cambios de datos; solo se leen campos que ya existían. La huella no cambió.
+
+  | Valor | Archivo y campo | Sección |
+  |---|---|---|
+  | Reserva 7 / 8 / 9 / 10 / 11 | `tablas/balanza.json` `posiciones[].reserva_mana` | 1.2 |
+  | Regeneración en combate: Saciado y Normal `siempre`, Hambriento `rondas_pares`, Famélico `nunca` | `tablas/hambre.json` `estados[].regen_combate` | 2.1, 2.2 |
+  | Regeneración 1 | escenario `maestro.regeneracion` (inicial en `maestro.json` `iniciales.regeneracion`) | 1.1 |
+  | G: maná de entrada 4 | `escenarios/g_ataque_nocturno.json` `maestro.mana_entrada` | 11.9, 2.4 |
+- **Lecturas declaradas:** S-31 (P-033; la regeneración corre una vez por ronda) y S-44 (Famélico solo corta la regeneración). "Turnos pares" = rondas pares (2.1, A.2.2).
+- **Claves de texto nuevas sin texto:** `panel.mana`.
+- **Preguntas:** ninguna nueva ni cerrada.
+- **Lista de prueba manual:**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: todo en verde.
+  2. F5 → G: el panel del Maestro (en su turno) y su tooltip muestran `[FALTA: panel.mana]: 4/4`.
+  3. F5 → A: el Maestro muestra `[FALTA: panel.mana]: 8/8` (reserva de la balanza 2). Con F3, ningún evento `mana` en el registro (está en el tope).
+  4. Pasar el mouse por una criatura propia y por una enemiga: su tooltip no muestra maná.
+  5. La regeneración visible (panel que cambia y evento `mana` detrás del `turno`) no se puede provocar desde un escenario en T21, porque nada gasta maná. La cubre `test_lectura_combate.gd::test_t21_mana_en_panel_y_tooltip`, que baja el maná a mano. Se verá a mano desde T22 (hechizos).
+  6. `git diff develop -- datos/`: solo `_esquemas/resultado.schema.json`.
+- **Para la próxima sesión:** nada: tarea terminada. Sigue T22.

@@ -74,7 +74,7 @@ func _turno(plantel: Plantel, unidad_id: String, azar: GeneradorAzar, combate: S
 		cadena: Cadena = null, cola: ColaIniciativa = null) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
 			DatosFixture.afinidad(), cadena if cadena != null else DatosFixture.cadena(),
-			cola if cola != null else ColaIniciativa.new(), DatosFixture.incidente(combate), DatosFixture.chequeo_rival(_SIN_RIVAL), azar)
+			cola if cola != null else ColaIniciativa.new(), DatosFixture.incidente(combate), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
 
 
 func _motivo(turno: Turno, accion: Accion) -> String:
@@ -292,13 +292,13 @@ func test_turno_que_vuelve_no_tira() -> void:
 	var entrada: EntradaCola = cola.siguiente(plantel)
 	assert_str(entrada.unidad_id).is_equal("zancajunco_1")
 	var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-			DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_20), DatosFixture.chequeo_rival(_SIN_RIVAL), azar)
+			DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_20), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
 	assert_int(azar.historial().size()).is_equal(1)
 	assert_dict(turno.incidente).is_empty()
 	assert_bool(turno.aplicar(Accion.secundar("ocarra_1")).valida).is_true()
 	# Juega la Ocarra (tira su propio incidente) y vuelve el Zancajunco.
 	var ocarra: Turno = Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_20), DatosFixture.chequeo_rival(_SIN_RIVAL), azar)
+			DatosFixture.afinidad(), DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_20), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
 	assert_str(ocarra.unidad_id).is_equal("ocarra_1")
 	ocarra.aplicar(Accion.terminar())
 	var tiradas: int = azar.historial().size()
@@ -306,7 +306,7 @@ func test_turno_que_vuelve_no_tira() -> void:
 	assert_str(vuelta.unidad_id).is_equal("zancajunco_1")
 	assert_bool(vuelta.vuelve).is_true()
 	var de_vuelta: Turno = Turno.empezar(vuelta, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-			DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_100), DatosFixture.chequeo_rival(_SIN_RIVAL), azar)
+			DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_100), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
 	assert_int(azar.historial().size()).is_equal(tiradas)
 	assert_dict(de_vuelta.incidente).is_empty()
 	assert_bool(de_vuelta.validar(Accion.atacar("ocarra_s1")).motivo == ResultadoAccion.Motivo.ACCION_USADA).is_false()

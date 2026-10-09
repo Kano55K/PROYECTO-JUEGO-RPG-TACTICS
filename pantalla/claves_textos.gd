@@ -74,6 +74,8 @@ const MARCA_ACOBARDADA: String = "marca.acobardada"
 const PANEL_ENCONO: String = "panel.encono"
 const AVISO_TERMINAR_DEBE_ATACAR: String = "aviso.terminar.debe_atacar_rival"
 const AVISO_TERMINAR_DEBE_ACERCARSE: String = "aviso.terminar.debe_acercarse"
+# T21: el mana del Maestro en el panel y el tooltip (clave propuesta, falta en es.json).
+const PANEL_MANA: String = "panel.mana"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -88,6 +90,7 @@ const FIJAS: Array[String] = [
 	INCIDENTE_TOOLTIP, INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE,
 	ENCONO_TOOLTIP, COBARDIA_TOOLTIP, ENCONO_INICIO, ENCONO_SUBE, COBARDIA_INICIO, COBARDIA_RESISTE,
 	MARCA_ENCONADA, MARCA_ACOBARDADA, PANEL_ENCONO, AVISO_TERMINAR_DEBE_ATACAR, AVISO_TERMINAR_DEBE_ACERCARSE,
+	PANEL_MANA,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [

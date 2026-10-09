@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "required": ["id", "tablero", "maestro", "tribu", "enemigas"],
+  "additionalProperties": false,
+  "properties": {
+    "_nota": { "type": "string" },
+    "id": { "type": "string" },
+    "tablero": {
+      "type": "object",
+      "required": ["ancho", "alto"],
+      "additionalProperties": false,
+      "properties": {
+        "ancho": { "type": "integer" },
+        "alto": { "type": "integer" }
+      }
+    },
+    "maestro": {
+      "type": "object",
+      "required": ["balanza", "mana_entrada"],
+      "additionalProperties": false,
+      "properties": {
+        "balanza": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "mana_entrada": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "tribu": { "type": "array", "maxItems": 0 },
+    "enemigas": { "type": "array", "maxItems": 0 }
+  }
+}

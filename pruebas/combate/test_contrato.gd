@@ -131,7 +131,13 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_object(victoria["rescatista"]).is_null()
 	assert_object(victoria["permadeath"]).is_null()
 	assert_object(victoria["metricas"]).is_null()
-	assert_object((victoria["maestro"] as Dictionary)["mana"]).is_null()
+	# Reescrito por Sistema.md 2.1 (T21): el mana del Maestro es un entero; sin
+	# gastos, el de entrada (la reserva de su balanza en el fixture).
+	assert_int((victoria["maestro"] as Dictionary)["mana"]).is_equal(
+			combate.contexto().plantel.maestro.fila_balanza()["reserva_mana"])
+	var con_mana_nulo: Dictionary = victoria.duplicate(true)
+	(con_mana_nulo["maestro"] as Dictionary)["mana"] = null
+	assert_array(_errores_esquema(con_mana_nulo, "resultado")).is_not_empty()
 	assert_array(victoria["capturas"]).is_empty()
 
 	# Derrota: la Rodauva arranca en 0 (caida) y la Ocarra tumba al Maestro: muere
