@@ -8,13 +8,11 @@ const _CARPETA_UNIDADES: String = "res://pruebas/fixtures/unidades/"
 const _ESPECIES: Array[String] = ["ocarra", "rodauva"]
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -41,13 +39,13 @@ func _plantel(escenario: Dictionary = {}) -> Plantel:
 
 # Turno suelto, sin cola: la entrada se arma a mano.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 func _siguiente_turno(cola: ColaIniciativa, plantel: Plantel) -> Turno:
-	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), cola, DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	return Turno.empezar(cola.siguiente(plantel), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), cola, DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 # Todo lo que una accion puede cambiar en el Plantel.

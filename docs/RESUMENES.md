@@ -1832,3 +1832,41 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. La regeneración visible (panel que cambia y evento `mana` detrás del `turno`) no se puede provocar desde un escenario en T21, porque nada gasta maná. La cubre `test_lectura_combate.gd::test_t21_mana_en_panel_y_tooltip`, que baja el maná a mano. Se verá a mano desde T22 (hechizos).
   6. `git diff develop -- datos/`: solo `_esquemas/resultado.schema.json`.
 - **Para la próxima sesión:** nada: tarea terminada. Sigue T22.
+
+## T21-ajustes · sesión 1 · 09/10/2026
+- **Rama:** tarea/T21-ajustes
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:** refactor puro (D-008). Las reglas sin estado llegan al `Turno` en un solo objeto. Ninguna regla cambió.
+  - `ReglasCombate` (`nucleo/combate/reglas_combate.gd`, `RefCounted`) agrupa `danio`, `afinidad`, `combo`, `incidente`, `chequeo_rival` y `regeneracion_mana`. Se crea con todas, sin valores por defecto. Si una llega nula, `falta` guarda su nombre y sale `push_error("ReglasCombate: falta la regla <nombre>")`. `REGLAS` es la lista que se revisa. Una regla nueva (desde T22) se suma como campo, en `_init` y en `REGLAS`.
+  - `combo` no estaba en la firma (el `Turno` la usa a través de la `Cadena`), pero D-008 la nombra y es una regla sin estado. El `Turno` no la lee; el `Combate` la sigue usando para crear la `Cadena`.
+  - Quedan fuera `obediencia`, `relaciones`, `hambre_combate` y `cierre`, porque no llegan al `Turno`.
+  - `ContextoCombate` arma `reglas` una sola vez en `armar`, con las mismas construcciones y en el mismo orden. Las seis propiedades sueltas quedan como **acceso de lectura** (`get`) a `reglas`, porque es lo que deja menos cambios: `Combate` (`afines_desde`, `incidente_en`, `rival_en`, `Cadena.new(contexto.combo)`), `test_combate.gd` y `test_hambre_combate.gd` siguen igual. Con el contexto no válido devuelven `null`, como antes.
+  - `Turno`: las variables privadas de cada regla se cargan desde `reglas` en `_init`. El resto del archivo no cambió.
+  - **Firma antes:** `Turno.empezar(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola, regla_incidente, regla_chequeo, regla_mana, azar)`.
+  - **Firma después:** `Turno.empezar(entrada, plantel, tablero, surcos, cadena, cola, reglas: ReglasCombate, azar)`.
+  - `danio`, `afinidad`, `regla_incidente`, `regla_chequeo` y `regla_mana` pasan a `reglas`. `entrada`, `plantel`, `tablero`, `surcos`, `cadena`, `cola` y `azar` siguen, en el mismo orden relativo.
+  - `DatosFixture.reglas(reemplazos = {})` arma las reglas con los fixtures de siempre y reemplaza las que se le pasen por nombre (`{"chequeo_rival": DatosFixture.chequeo_rival(_BASE_100)}`). Un nombre que no existe da `null` con `push_error`, nunca la regla por defecto.
+  - Las 31 llamadas a `Turno.empezar` de 18 archivos de test usan `DatosFixture.reglas(...)`. El `Danio` de cada test salía de los mismos `fixtures/combate/combate.json` + `hambre.json` que usa `DatosFixture.reglas`, así que se dejó de pasar. Se borraron los `_danio` (miembros) y `danio` (locales) que quedaron sin uso por eso. En `test_afinidad`, `test_danio`, `test_incidente` y `test_caza_y_cuenta` el `_danio` sigue, porque se usa en otras cosas.
+- **Archivos:**
+  - Creados: `nucleo/combate/reglas_combate.gd` y `pruebas/combate/test_reglas_combate.gd`.
+  - Modificados en el núcleo: `nucleo/combate/turno.gd`, `contexto_combate.gd` y `combate.gd` (solo la llamada a `Turno.empezar`).
+  - Modificados en pruebas: `pruebas/combate/datos_fixture.gd` y, solo en cómo se arma el turno, `test_turno`, `test_vida_cero`, `test_surco`, `test_secundar`, `test_rival_salvajes`, `test_regeneracion_mana`, `test_chequeo_rival`, `test_junco`, `test_incidente`, `test_enconada`, `test_danio`, `test_caza_y_cuenta`, `test_cadena`, `test_afinidad`, `test_acobardada`, `ia/test_ia_salvaje`, `ia/test_ia_encono` y `pruebas/pantalla/test_interprete_clic`.
+  - Sin cambios en `datos/`, `pantalla/` ni la IA.
+- **Tests:** 1 nuevo, total 492, todos pasan (suite completa en verde). Ningún test reescrito y ninguna aserción cambiada. En la consola, solo los dos `ERROR` del "Remote Debugger" del runner, que ya salían antes, y los seis `push_error` esperados del test nuevo (los captura `assert_error`). `--import`, sin advertencias.
+- **Criterio de terminado:** cumplido punto por punto.
+  - (1) `test_reglas_combate.gd::test_construccion_incompleta_falla_con_el_nombre_de_la_que_falta`: un solo test que recorre `ReglasCombate.REGLAS`, deja nula una regla por vez y comprueba el `push_error` con su nombre y `falta`. La completa tiene `falta` vacío.
+  - (2) `Turno.empezar` ya no recibe ninguna regla suelta (firmas arriba).
+  - (3) Las 31 llamadas a `Turno.empezar` de `pruebas/` usan `DatosFixture.reglas(...)`. Las otras llamadas a `DatosFixture.incidente(...)` y `DatosFixture.chequeo_rival(...)` son tests directos de esas reglas, sin turno.
+  - (4) `git diff develop -- pruebas/`: ninguna línea con `assert` ni `override_failure_message` cambia. Solo cambia el armado del turno, `DatosFixture.reglas` y el test nuevo.
+  - (5) La huella no cambió (sin cambios en `datos/`). Las grabaciones de C del 06/10 al 08/10 ya no se reproducen enteras en `develop`: `c_tasajero_33001_6` corta en la acción 14 con `CASILLA_NO_ALCANZABLE` por las reglas de T19 a T21. Por eso, antes de tocar código, se grabó una partida nueva de C con `develop` (`registros/c_tasajero_33001_7`, 42 acciones del jugador, combate terminado) con un script de la sesión que no queda en el repositorio. Con `develop` se reprodujo sin aviso e idéntica (`registros/c_base_develop.jsonl`). Después del refactor, la reproducción de `copia.json` da sin `AVISO` de huella, y `fc` no encuentra diferencias ni contra la línea base (`fc /b`) ni contra el `.jsonl` original.
+  - (6) Pasan `test_contacto.gd`, `test_robustez_ia.gd` y `test_datos_completos.gd`, sin cambios.
+  - (7) Suite completa: 492 en verde.
+- **Supuestos (sin pregunta, decisiones técnicas de D-008):** `combo` entra en `ReglasCombate` aunque el `Turno` no la lea. Las propiedades sueltas del `ContextoCombate` quedan como acceso de lectura. `ReglasCombate` va justo antes del `azar` en la firma.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** ninguna nueva ni cerrada.
+- **Lista de prueba manual:**
+  1. `addons/gdUnit4/runtest.cmd -a res://pruebas`: 492 en verde.
+  2. En cmd: `copy registros\c_tasajero_33001_7.json registros\copia.json`, después `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- res://registros/copia.json` y `fc registros\c_tasajero_33001_7.jsonl registros\copia.jsonl`. Tiene que dar sin `AVISO` y sin diferencias.
+  3. F5 → A y C: mover, atacar, Secundar, activas (Erizarse, Hacerse junco, cavar) y hover de afines y rivales, todo igual que antes.
+- **Para la próxima sesión:** nada: tarea terminada. Sigue T22.

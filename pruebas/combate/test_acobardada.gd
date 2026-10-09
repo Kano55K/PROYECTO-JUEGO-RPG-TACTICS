@@ -12,13 +12,11 @@ const _ESPECIES: Array[String] = ["ocarra", "rodauva", "surcon", "tasajero", "za
 const _BASE_100: String = "combate_rival_100.json"
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 12, "alto": 12}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -42,9 +40,10 @@ func _plantel(ubicar: Dictionary) -> Plantel:
 
 # La Rodauva acobardada: el Tasajero (su rival) a su alcance y la cobardia en 100.
 func _turno(plantel: Plantel) -> Turno:
-	var turno: Turno = Turno.empezar(EntradaCola.new("rodauva_1", "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(_BASE_100),
-			DatosFixture.chequeo_rival(_BASE_100), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	var turno: Turno = Turno.empezar(EntradaCola.new("rodauva_1", "", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(),
+			DatosFixture.reglas({"incidente": DatosFixture.incidente(_BASE_100),
+				"chequeo_rival": DatosFixture.chequeo_rival(_BASE_100)}), GeneradorAzar.new(1))
 	assert_bool(turno.acobardada).is_true()
 	assert_dict(turno.chequeo_rival).contains_key_value("tipo", "cobardia").contains_key_value("resultado", "acobardada")
 	return turno

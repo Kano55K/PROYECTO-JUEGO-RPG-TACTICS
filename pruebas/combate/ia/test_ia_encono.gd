@@ -17,13 +17,11 @@ const _BASE_100: String = "combate_rival_100.json"
 const _INCIDENTE_100: String = "combate_incidente_100.json"
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 12, "alto": 12}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -53,9 +51,10 @@ func _plantel(ubicar: Dictionary = {}) -> Plantel:
 # ni el generador, y decidir otra vez da lo mismo.
 func _decidir(plantel: Plantel, unidad_id: String, combate: String) -> Dictionary:
 	var azar: GeneradorAzar = GeneradorAzar.new(1)
-	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(combate),
-			DatosFixture.chequeo_rival(combate), DatosFixture.regeneracion_mana(), azar)
+	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(),
+			DatosFixture.reglas({"incidente": DatosFixture.incidente(combate),
+				"chequeo_rival": DatosFixture.chequeo_rival(combate)}), azar)
 	var cola: ColaIniciativa = ColaIniciativa.new()
 	cola.empezar_ronda(plantel)
 	var antes: String = _foto(plantel, cola, azar)

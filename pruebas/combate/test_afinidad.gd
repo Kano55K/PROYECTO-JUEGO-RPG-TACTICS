@@ -49,8 +49,9 @@ func _ubicar(plantel: Plantel, ubicar: Dictionary) -> void:
 
 
 func _turno(plantel: Plantel, unidad_id: String, afinidad: Afinidad = null) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			afinidad if afinidad != null else DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(),
+			DatosFixture.reglas({} if afinidad == null else {"afinidad": afinidad}), GeneradorAzar.new(1))
 
 
 # El danio del ataque desde donde esta, por la misma funcion que lo aplica.

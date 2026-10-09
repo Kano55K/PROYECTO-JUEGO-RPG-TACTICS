@@ -17,13 +17,11 @@ const _OBJETIVO: Vector2i = Vector2i(3, 3)
 const _DESDE: Vector2i = Vector2i(3, 4)
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -58,8 +56,8 @@ func _posicion(plantel: Plantel, unidad_id: String) -> Vector2i:
 
 
 func _turno(plantel: Plantel, unidad_id: String, cadena: Cadena) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), cadena, ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			cadena, ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 # La atacante va a `desde`, valida y aplica el ataque (lo mismo en los dos) y

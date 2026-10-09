@@ -193,14 +193,12 @@ func test_otros_turnos_no_tocan_el_mana() -> void:
 	var datos: Dictionary = _datos()
 	var plantel: Plantel = Plantel.desde_datos(datos, _escenario())
 	var tablero: Tablero = Tablero.desde_datos(_escenario()["tablero"], datos["tablas/combate.json"])
-	var danio: Danio = Danio.desde_datos(datos["tablas/combate.json"], datos["tablas/hambre.json"])
 	plantel.maestro.mana = 2
 	for unidad_id in ["rodauva_1", "ocarra_s1"]:
 		var cola: ColaIniciativa = ColaIniciativa.new()
 		cola.empezar_ronda(plantel)
-		var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, tablero, danio, Surcos.new(),
-				DatosFixture.afinidad(), DatosFixture.cadena(), cola, DatosFixture.incidente(),
-				DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+		var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, tablero, Surcos.new(),
+				DatosFixture.cadena(), cola, DatosFixture.reglas(), GeneradorAzar.new(1))
 		assert_dict(turno.mana).is_empty()
 		assert_int(plantel.maestro.mana).is_equal(2)
 

@@ -290,9 +290,8 @@ func _avanzar() -> void:
 
 
 func _empezar_turno(entrada: EntradaCola) -> Turno:
-	return Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-			_contexto.afinidad, _cadena, _cola, _contexto.incidente, _contexto.chequeo_rival,
-			_contexto.regeneracion_mana, _contexto.azar_combate)
+	return Turno.empezar(entrada, _plantel, _contexto.tablero, _surcos, _cadena, _cola, _contexto.reglas,
+			_contexto.azar_combate)
 
 
 # Sistema.md 10.5 y 10.6 (T19, A.7): el chequeo de rival enemiga, detras del

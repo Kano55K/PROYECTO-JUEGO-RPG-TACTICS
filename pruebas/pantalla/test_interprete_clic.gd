@@ -21,15 +21,14 @@ var _turno: Turno
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	var tablero: Tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	var danio: Danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 	var especies: Dictionary = {}
 	for id_especie in _ESPECIES:
 		especies[id_especie] = Especie.new(_leer(_CARPETA_UNIDADES + id_especie + ".json", "especie"))
 	var tabla: TablaBalanza = TablaBalanza.new(_leer(_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"))
 	_plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_turno.json", "escenario"), especies, tabla,
 			_leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
-	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -82,15 +81,14 @@ func test_con_el_movimiento_gastado_una_casilla_vacia_da_nada() -> void:
 func test_modo_cavar() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	var tablero: Tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	var danio: Danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 	var especies: Dictionary = {}
 	for id_especie in _ESPECIES:
 		especies[id_especie] = Especie.new(_leer(_CARPETA_UNIDADES + id_especie + ".json", "especie"))
 	var tabla: TablaBalanza = TablaBalanza.new(_leer(_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"))
 	var plantel: Plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_surco_tribu.json", "escenario"),
 			especies, tabla, _leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
-	var turno: Turno = Turno.empezar(EntradaCola.new("surcon_1", "", 0), plantel, tablero, danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	var turno: Turno = Turno.empezar(EntradaCola.new("surcon_1", "", 0), plantel, tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 	var foto: Dictionary = plantel.instantanea()
 
 	var accion: Accion = InterpreteClic.accion(turno, foto, Vector2i(3, 5), true)
