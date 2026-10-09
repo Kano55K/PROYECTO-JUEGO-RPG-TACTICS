@@ -68,6 +68,9 @@ const ENCONO_INICIO: String = "encono.inicio"
 const ENCONO_SUBE: String = "encono.sube"
 const COBARDIA_INICIO: String = "cobardia.inicio"
 const COBARDIA_RESISTE: String = "cobardia.resiste"
+# T44 (Mundo.md 9.2 v1.3, A.7): la resistida que sostuvo el Maestro o una afin.
+const COBARDIA_RESISTE_MAESTRO: String = "cobardia.resiste.maestro"
+const COBARDIA_RESISTE_AFIN: String = "cobardia.resiste.afin"
 # T19: claves propuestas, faltan en es.json. Las marcas concuerdan con la especie.
 const MARCA_ENCONADA: String = "marca.enconada"
 const MARCA_ACOBARDADA: String = "marca.acobardada"
@@ -89,6 +92,7 @@ const FIJAS: Array[String] = [
 	PANEL_OBEDIENCIA, COMBATE_HAMBRE, PANEL_CADENA, AFINIDAD_TOOLTIP, ACCION_SECUNDAR,
 	INCIDENTE_TOOLTIP, INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE,
 	ENCONO_TOOLTIP, COBARDIA_TOOLTIP, ENCONO_INICIO, ENCONO_SUBE, COBARDIA_INICIO, COBARDIA_RESISTE,
+	COBARDIA_RESISTE_MAESTRO, COBARDIA_RESISTE_AFIN,
 	MARCA_ENCONADA, MARCA_ACOBARDADA, PANEL_ENCONO, AVISO_TERMINAR_DEBE_ATACAR, AVISO_TERMINAR_DEBE_ACERCARSE,
 	PANEL_MANA,
 ]
@@ -270,8 +274,10 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 					_sumar(claves, variante)
 	# T19: las reacciones del Encono por par, y las de la cobardia por especie
 	# (solo especies: cobardia.resiste.maestro es otra linea, no una variante).
+	# T44: las de quien la sostuvo tambien tienen variante por especie.
 	for especie in especies:
-		for variante in [cobardia_especie(especie), "%s.%s" % [COBARDIA_RESISTE, especie]]:
+		for variante in [cobardia_especie(especie), "%s.%s" % [COBARDIA_RESISTE, especie],
+				"%s.%s" % [COBARDIA_RESISTE_MAESTRO, especie], "%s.%s" % [COBARDIA_RESISTE_AFIN, especie]]:
 			if existentes.has(variante):
 				_sumar(claves, variante)
 		for rival in especies:

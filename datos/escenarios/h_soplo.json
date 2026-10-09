@@ -1,7 +1,7 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "h_soplo",
-  "_nota": "C con balanza 5 y Poder 3 (Sistema.md 11.9). ¿El Soplo es una build trampa? Vida 14, daño 3, reserva 11, Martillazo 5, Remiendo 6, Arrimo 0: incidente Ocarra–Zancajunco 20%, cobardía de la Rodauva leal 40%. Lealtades iguales a C (8 = leal con umbral 8) para aislar el efecto de la balanza. Con rango máximo sellable 3, el Tasajero se puede sellar. Tablero de 12 × 12 (Sistema.md 11.9 v1.6, T43). Misma semilla y posiciones que C.",
+  "_nota": "C con balanza 5 y Poder 3 (Sistema.md 11.9). ¿El Soplo es una build trampa? Vida 140, daño 30, reserva 11, Martillazo 50, Remiendo 60 (escala ×10 de Sistema.md 11.1 v1.7), Arrimo 0: incidente Ocarra–Zancajunco 20%, cobardía de la Rodauva leal 40%. Lealtades iguales a C (8 = leal con umbral 8) para aislar el efecto de la balanza. Con rango máximo sellable 3, el Tasajero se puede sellar. Tablero de 12 × 12 (Sistema.md 11.9 v1.6, T43). Misma semilla y posiciones que C.",
   "tipo": "test",
   "semilla": 33001,
   "tablero": { "ancho": 12, "alto": 12 },
@@ -13,7 +13,7 @@
     { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
       "vida": null, "posicion": [4, 10],
-      "_nota": "Rival del Tasajero: chequea cobardía (40%, 30% con el Maestro al lado). Si se queda, en la ronda 2 está en la zona de Caza: sola recibe 5 + 5 y cae; erizada, 2 + 2 (Sistema.md 11.2.3)" },
+      "_nota": "Rival del Tasajero: chequea cobardía (40%, 30% con el Maestro al lado). Si se queda, en la ronda 2 está en la zona de Caza: sola recibe 50 + 50 y cae; erizada, 25 + 25 (Sistema.md 11.2.3; escala ×10 de 11.1 v1.7)" },
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
       "vida": null, "posicion": [4, 11],

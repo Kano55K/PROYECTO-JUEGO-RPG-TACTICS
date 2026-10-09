@@ -271,6 +271,15 @@ func _jugar_ronda_c() -> Combate:
 	return combate
 
 
+# T44 (Arquitectura.md A.7, Mundo.md 9.2 v1.3): en la ronda de C, la Rodauva leal
+# resiste la cobardia (15 %) con el Maestro vecino: el evento lo dice.
+func test_resistida_registra_quien_la_sostuvo() -> void:
+	var chequeo: Dictionary = _de_tipo(_jugar_ronda_c(), "chequeo_rival")[0]
+	assert_dict(chequeo).contains_key_value("unidad", "rodauva_1").contains_key_value("resultado", "resistida") \
+			.contains_key_value("sostenida_por", "maestro")
+	assert_bool(chequeo.has("afin")).is_false()
+
+
 # (7) Registro de una ronda de C: orden de los eventos, Tasajero con caza, fin_turno
 # con la posicion, sin float. La tirada queda justo antes de la accion que siguio.
 # Reescrito por Sistema.md 11.2.3 v1.3: un solo turno del Tasajero por ronda (en

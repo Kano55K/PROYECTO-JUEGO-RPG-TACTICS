@@ -14,7 +14,7 @@
       "es_ataque": true
     },
     {
-      "_nota": "Sistema.md 1.6: costo 2, linea recta <= 2 que no atraviesa enemigas, empuja o atrae 1 casilla a una unidad no caida; choque de 1 fijo (casos borde del 03/10/2026). No es ataque",
+      "_nota": "Sistema.md 1.6: costo 2, linea recta <= 2 que no atraviesa enemigas, empuja o atrae 1 casilla a una unidad no caida; choque de 10 fijo (casos borde del 03/10/2026; escala x10 de 11.1 v1.7). No es ataque",
       "id": "lanzadera",
       "costo": 2,
       "alcance": 2,
@@ -25,7 +25,7 @@
         "atraer"
       ],
       "casillas": 1,
-      "danio_choque": 1,
+      "danio_choque": 10,
       "afecta_caidas": false,
       "es_ataque": false
     },

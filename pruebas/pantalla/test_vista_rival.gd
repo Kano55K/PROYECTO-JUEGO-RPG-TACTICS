@@ -208,6 +208,41 @@ func test_sucesos_del_chequeo_y_del_encono() -> void:
 			.is_equal(["Sube el encono de la Ocarra."])
 
 
+# T44 (A.7, Mundo.md 9.2 v1.3, P-041): la resistida muestra la linea de quien la
+# sostuvo segun sostenida_por, con la variante de la especie si existe; con null
+# (o sin la clave, un registro viejo), la general.
+func test_sucesos_de_quien_sostuvo() -> void:
+	var datos: Dictionary = _datos()
+	(datos["textos/es.json"] as Dictionary).merge({
+		"cobardia.resiste.maestro": "Se queda porque estás cerca.",
+		"cobardia.resiste.maestro.surcon": "El Surcón se planta a tu lado.",
+		"cobardia.resiste.afin": "Se queda porque tiene {a_afin} cerca.",
+	}, true)
+	var contexto: ContextoCombate = ContextoCombate.armar(_escenario(_ESCENARIO_TODAS), datos)
+	assert_bool(contexto.valido).is_true()
+	var combate: Combate = Combate.empezar(contexto)
+	assert_str(combate.error()).is_empty()
+	var lectura: LecturaCombate = LecturaCombate.new(combate,
+			ArmadorTextos.desde_datos(datos["textos/es.json"], contexto.azar_textos),
+			EstadosUnidad.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"]))
+
+	var maestro: Dictionary = _chequeo("rodauva_1", "cobardia", ["tasajero_s1"], "resistida")
+	maestro["sostenida_por"] = "maestro"
+	assert_array(lectura.suceso(maestro)).is_equal(["Se queda porque estás cerca."])
+	var maestro_surcon: Dictionary = _chequeo("surcon_1", "cobardia", ["tasajero_s1"], "resistida")
+	maestro_surcon["sostenida_por"] = "maestro"
+	assert_array(lectura.suceso(maestro_surcon)).is_equal(["El Surcón se planta a tu lado."])
+	var afin: Dictionary = _chequeo("rodauva_1", "cobardia", ["tasajero_s1"], "resistida")
+	afin["sostenida_por"] = "afin"
+	afin["afin"] = "surcon_1"
+	assert_array(lectura.suceso(afin)).is_equal(["Se queda porque tiene al Surcón cerca."])
+	var nadie: Dictionary = _chequeo("rodauva_1", "cobardia", ["tasajero_s1"], "resistida")
+	nadie["sostenida_por"] = null
+	assert_array(lectura.suceso(nadie)).is_equal(["La Rodauva se queda."])
+	assert_array(lectura.suceso(_chequeo("surcon_1", "cobardia", ["tasajero_s1"], "resistida"))) \
+			.is_equal(["El Surcón tiembla."])
+
+
 func _chequeo(unidad: String, tipo: String, rivales: Array, resultado: String) -> Dictionary:
 	return {"tipo": "chequeo_rival", "unidad": unidad, "tipo_chequeo": tipo, "rivales": rivales, "porcentaje": 25,
 			"tiro": true, "resultado": resultado}

@@ -26,7 +26,7 @@
   "enemigas": [
     { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
       "vida": null, "posicion": [8, 2],
-      "_nota": "Si el combate frustra por duración, bajar la vida a 20 en el panel: E mide la cobardía, no la victoria. En la fila del frente, a 10 de las Rodauvas (excepción de E, Sistema.md 11.9 v1.6): ronda 1 a [6,4], ronda 2 a [6,8]" }
+      "_nota": "Si el combate frustra por duración, bajar la vida a 200 en el panel (escala ×10 de Sistema.md 11.1 v1.7): E mide la cobardía, no la victoria. En la fila del frente, a 10 de las Rodauvas (excepción de E, Sistema.md 11.9 v1.6): ronda 1 a [6,4], ronda 2 a [6,8]" }
   ],
   "pergaminos_en_blanco": 0,
   "golpe_inicial": null,

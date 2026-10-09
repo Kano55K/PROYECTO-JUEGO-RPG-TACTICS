@@ -408,7 +408,7 @@
 - **Cerrada en:** T41
 
 ## P-030 — Coordenadas de los escenarios en 12 × 12
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T43
 - **Fecha:** 07/10/2026
@@ -434,10 +434,11 @@
 - **Opciones:** A) aprobar las coordenadas tal como están. B) pedir cambios por escenario, que se verifican de nuevo con el test. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** las coordenadas están en `datos/escenarios/` (T43) y el test de contacto queda como regresión permanente.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 11.9 v1.7: opción A. Coordenadas de 12 × 12 aprobadas tal como están, como provisorias (P-007). Se reescribe la línea de referencia de 11.6 B (cada Ocarra va por la unidad que tiene más cerca) y se asienta que en C y H la Ocarra empieza detrás de la Rodauva. No cambia código ni datos.
+- **Cerrada en:** T44
 
 ## P-031 — Cuándo se declara Secundar (S-29)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T17
 - **Fecha:** 07/10/2026
@@ -447,10 +448,11 @@
 - **Opciones:** A) solo con el turno sin usar: Secundar aplaza el turno entero, no lo parte. B) también después de moverse, guardando la acción para después. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
 - **Bloquea:** no
 - **Mientras tanto:** programada la lectura A: `Turno` rechaza Secundar con `YA_SE_MOVIO` o `ACCION_USADA` (`nucleo/combate/turno.gd`, `_motivo_puede_secundar`). Tests en `pruebas/combate/test_secundar.gd`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.1 v1.7: opción A. Secundar solo con el turno sin usar: aplaza el turno entero. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-032 — Secundar dos veces en la misma ronda (S-30)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T17
 - **Fecha:** 07/10/2026
@@ -460,10 +462,11 @@
 - **Opciones:** A) vale si al volver queda otra aliada pendiente detrás; la entrada siempre avanza en la cola, así que la ronda termina. B) una sola vez por ronda. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
 - **Bloquea:** no
 - **Mientras tanto:** programada la lectura A (`ColaIniciativa.secundar`, `Turno._secundar`). Tests en `pruebas/combate/test_secundar.gd`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.1 v1.7: opción A. Al volver, puede Secundar otra vez si queda otra aliada pendiente detrás. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-033 — Inicio del turno al volver de Secundar (S-31)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T17
 - **Fecha:** 07/10/2026
@@ -473,10 +476,11 @@
 - **Opciones:** A) los chequeos de 11.3 (maná, huida, Encono o cobardía, incidente), el borrado de Erizarse y el cambio de modo corren una sola vez por ronda, la primera vez que le toca; al volver, el turno sigue. B) corren cada vez que le toca. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
 - **Bloquea:** no (antes de T18 y T21)
 - **Mientras tanto:** programada la lectura A: la entrada que vuelve lleva `EntradaCola.vuelve` y `Turno.empezar` no corre `_inicio_del_turno` con ella. Tests en `pruebas/combate/test_secundar.gd`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.1 y 11.3 v1.7: opción A. El inicio del turno, el borrado de Erizarse y el cambio de modo corren una vez por ronda; al volver de Secundar el turno sigue. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-034 — Incidente con una rival oculta (S-32)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T18
 - **Fecha:** 07/10/2026
@@ -486,10 +490,11 @@
 - **Opciones:** A) provoca la tirada, pero el golpe no puede ir a ella; si es la única rival a su alcance, la criatura se distrae. B) la oculta no provoca la tirada. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
 - **Bloquea:** no
 - **Mientras tanto:** programada la lectura A: `Incidente.rivales_vecinas` cuenta a la oculta (`Objetivos.de_pie`) y `Turno._chequear_incidente` elige el golpe con la validación del ataque (`Objetivos`, clase `HOSTIL`). Test `test_oculta_provoca_pero_no_se_golpea` en `pruebas/combate/test_incidente.gd`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.4 y 11.2.2 v1.7: opción A. La rival oculta provoca la tirada pero no recibe el golpe; si es la única a su alcance, la criatura se distrae. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-035 — El golpe del incidente y la cadena (S-33)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T18
 - **Fecha:** 07/10/2026
@@ -499,10 +504,11 @@
 - **Opciones:** A) corta la cadena que había, no empieza otra y no recibe bono de combo (`eslabon` nulo en el evento `ataque`). B) empieza una cadena nueva sobre la aliada, en el eslabón 1. — Recomendación técnica: A (lectura declarada de `Arquitectura.md` 10.5).
 - **Bloquea:** no
 - **Mientras tanto:** programada la lectura A: `Turno._atacar_desde(..., por_incidente)` no pide el combo, deja `eslabon` en nulo y corta con `otro_objetivo` en lugar de avanzar la cadena. Test `test_golpe_corta_la_cadena_sin_empezar_otra` en `pruebas/combate/test_incidente.gd`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.2 v1.7: opción A. El golpe del incidente corta la cadena, no empieza otra y no recibe combo. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-036 — Incidente de un Tasajero de la tribu en Caza (S-34)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T18
 - **Fecha:** 07/10/2026
@@ -512,7 +518,8 @@
 - **Opciones:** A) "la acción" son todos los ataques del turno: la distraída pierde los dos y el golpe gasta los dos (no hay segundo ataque). B) el golpe gasta solo uno: el segundo queda para otra objetivo. — Recomendación técnica: A, lectura literal con la acción de T36 (`accion_usada` = "usó alguna acción").
 - **Bloquea:** no
 - **Mientras tanto:** programada la lectura A: el golpe del incidente deja `ataques_restantes` en 0 y la distraída también. Sin test propio: el caso no aparece en ningún escenario de la 0a.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.4 v1.7: opción A. 'La acción' son todos los ataques del turno: la distraída pierde los dos y el golpe gasta los dos. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-037 — Nombre del campo "tipo" del evento chequeo_rival
 - **Estado:** CERRADA
@@ -529,7 +536,7 @@
 - **Cerrada en:** T20
 
 ## P-038 — Casillas de la enconada después del primer ataque (S-38)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T19
 - **Fecha:** 08/10/2026
@@ -539,10 +546,11 @@
 - **Opciones:** A) dura todo el turno (lectura literal: "su acción queda fijada"). B) termina con el primer ataque a la rival: después se mueve como cualquiera. — Recomendación técnica: B, por coherencia con "Tasajero enconado en Caza", donde el segundo ataque ya es libre.
 - **Bloquea:** no (sí conviene responderla antes de T20)
 - **Mientras tanto:** programada la opción A (lectura declarada S-35 de la sesión 1): `Turno._motivo_destino_rival` rechaza con `CASILLA_SIN_RIVAL` toda casilla que no golpee a una rival del chequeo mientras `obligacion` sea `ATACAR`. Para pasar a B alcanza con que la obligación termine con el primer ataque, y con su test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.5 v1.7: opción A. La restricción de casillas de la enconada dura todo el turno. Consecuencia aceptada: el Tasajero enconado en Cuenta casi nunca se retira (riesgo en 14, con la opción B como palanca). Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-039 — El −50 % de la acobardada en el golpe del incidente (S-39)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T19
 - **Fecha:** 08/10/2026
@@ -552,10 +560,11 @@
 - **Opciones:** A) sí: el −50 % rige en todos sus golpes del turno, también en el del incidente. B) no: el incidente es otra regla, y el golpe va sin el −50 %. — Recomendación técnica: A (lectura literal: "−50% de daño", sin excepciones).
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A: `Turno._aportes` suma `ChequeoRival.aporte_cobardia()` en todo ataque de la acobardada, también con `por_incidente`. Sin test propio: ningún escenario de la 0a tiene un Tasajero en la tribu.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.4 y 10.6 v1.7: opción A. El −50 % de la acobardada rige en todos sus ataques del turno, también en el golpe del incidente. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T44
 
 ## P-040 — Mínimo del 5 % del toggle de afines sin afines vecinas (S-40)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T19
 - **Fecha:** 08/10/2026
@@ -565,4 +574,18 @@
 - **Opciones:** A) rige siempre: con el toggle, la cobardía nunca baja de 5 %. B) solo cuando restó alguna afín: sin afines, el piso es 0 como sin el toggle. — Recomendación técnica: ninguna (las dos son de una línea).
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A en `ChequeoRival._pct_cobardia`: con el toggle, el piso es `afines_contra_cobardia.minimo_pct` haya o no afines. Sin test propio de ese caso.
+- **Respuesta:** Sistemas (`Sistema.md` 15 v1.7): `Sistema.md` 10.6 v1.7: opción B, precisada. Las afines no bajan la cobardía por debajo de 5 %, pero el piso no la sube: `max(sin_afines − afines, min(sin_afines, 5))`. Sin afines, el toggle no cambia nada. Cambia `ChequeoRival._pct_cobardia` y se suma un test.
+- **Cerrada en:** T44
+
+## P-041 — Qué afín sostuvo a la que resiste (campo `afin` de `chequeo_rival`)
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T44
+- **Fecha:** 09/10/2026
+- **Fuente:** `Arquitectura.md` A.7, "Eventos de 0a.2" (T44: `sostenida_por` = `maestro` / `afin` / `null`) y `datos/textos/es.json` `cobardia.resiste.afin` ("Se queda porque tiene {a_afin} cerca.", `Mundo.md` 5 v1.3)
+- **Duda:** el evento `chequeo_rival` resistido con `sostenida_por: "afin"`, ¿trae también qué afín la sostuvo, para llenar el hueco `{a_afin}`?
+- **Caso que la dispara:** en `e_cobardia_afines`, la Rodauva leal resiste con la otra Rodauva y el Surcón vecinos. A.7 dice solo `"afin"`, y la pantalla no puede recalcular después cuál era (no tiene reglas y el tablero ya cambió). Sin el dato, la línea sale "Se queda porque tiene [FALTA: afin] cerca."
+- **Opciones:** A) con `sostenida_por: "afin"`, el evento suma `afin` con el id de la primera afín del toggle, en el orden del Plantel (la misma cuenta del porcentaje). B) sin campo nuevo: la línea queda con `[FALTA: afin]` hasta que el Worldbuilder cambie el texto. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programada la opción A, que eligió el usuario en la sesión 1 de T44: `ChequeoRival._pct_cobardia` devuelve también `afin`, y `Combate._registrar_chequeo_rival` lo suma al evento solo en una resistida sostenida por una afín. Si se elige B, se borra el campo y su test.
 - **Respuesta:** _(la completa el staff)_

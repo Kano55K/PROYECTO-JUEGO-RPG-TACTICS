@@ -39,11 +39,12 @@ func test_once_escenarios_crean_plantel() -> void:
 	assert_int(cantidad).is_equal(11)
 
 
-# Sistema.md 11.9, F: el Maestro empieza en 6, con la vida maxima de su balanza.
-func test_f_maestro_en_6() -> void:
+# Sistema.md 11.9, F: el Maestro empieza en 60, con la vida maxima de su balanza.
+# T44: reescrito con la escala x10 de Sistema.md 11.1 y 11.9 v1.7 (antes, 6).
+func test_f_maestro_en_60() -> void:
 	var datos: Dictionary = _datos()
 	var plantel: Plantel = Plantel.desde_datos(datos, datos["escenarios/f_rescate.json"])
-	assert_int(plantel.maestro.vida).is_equal(6)
+	assert_int(plantel.maestro.vida).is_equal(60)
 	var tabla: TablaBalanza = TablaBalanza.new(datos["tablas/balanza.json"])
 	var fila: Dictionary = tabla.fila(plantel.maestro.balanza)
 	assert_int(plantel.maestro.vida_max_real()).is_equal(fila["vida_max_real"] as int)

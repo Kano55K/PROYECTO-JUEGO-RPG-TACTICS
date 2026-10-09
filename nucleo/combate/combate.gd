@@ -296,14 +296,19 @@ func _empezar_turno(entrada: EntradaCola) -> Turno:
 
 # Sistema.md 10.5 y 10.6 (T19, A.7): el chequeo de rival enemiga, detras del
 # `turno` (y del `cambio_modo`) y de su propia `tirada`, si tiro; antes de todo
-# lo del incidente, cuya tirada queda sin volcar hasta su evento.
+# lo del incidente, cuya tirada queda sin volcar hasta su evento. T44: la
+# resistida suma sostenida_por (y afin, P-041), solo si ChequeoRival los trae.
 func _registrar_chequeo_rival() -> void:
 	var chequeo: Dictionary = _turno.chequeo_rival
 	if chequeo.is_empty():
 		return
-	_registrar({"tipo": "chequeo_rival", "unidad": _turno.unidad_id, "tipo_chequeo": chequeo["tipo"],
+	var evento: Dictionary = {"tipo": "chequeo_rival", "unidad": _turno.unidad_id, "tipo_chequeo": chequeo["tipo"],
 			"rivales": (chequeo["rivales"] as Array).duplicate(), "porcentaje": chequeo["porcentaje"],
-			"tiro": chequeo["tiro"], "resultado": chequeo["resultado"]}, 1 if chequeo["tiro"] else 0)
+			"tiro": chequeo["tiro"], "resultado": chequeo["resultado"]}
+	for clave in ["sostenida_por", "afin"]:
+		if chequeo.has(clave):
+			evento[clave] = chequeo[clave]
+	_registrar(evento, 1 if chequeo["tiro"] else 0)
 
 
 # Sistema.md 10.4 (T18, A.7): el incidente del inicio del turno, detras del

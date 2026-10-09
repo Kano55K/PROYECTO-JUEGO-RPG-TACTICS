@@ -1,20 +1,20 @@
 {
   "$schema": "../_esquemas/especie.schema.json",
-  "_nota": "Sistema.md 4.3 (rol, rango, sellable), 11.2 (vida, danio, movimiento, alcance, velocidad), 11.7 (huida_pct: 50%, prefiere huir)",
+  "_nota": "Sistema.md 4.3 (rol, rango, sellable), 11.2 v1.7 (vida y danio en la escala x10 de 11.1, movimiento, alcance, velocidad), 11.7 (huida_pct: 50%, prefiere huir)",
   "id": "zancajunco",
   "rol": "mixto",
   "rango": 2,
   "sellable": true,
-  "vida": 12,
-  "danio": 4,
+  "vida": 120,
+  "danio": 40,
   "movimiento": 4,
   "alcance": 1,
   "velocidad": 8,
   "rasgo": {
-    "_nota": "Sistema.md 11.2.2: Hacerse junco (activa). Queda oculto y su proximo ataque suma +3 (plano, 11.4 paso 3). Reemplaza a la pasiva de primer ataque",
+    "_nota": "Sistema.md 11.2.2: Hacerse junco (activa). Queda oculto y su proximo ataque suma +30 (plano, escala x10 de 11.1 v1.7, 11.4 paso 3). Reemplaza a la pasiva de primer ataque",
     "id": "hacerse_junco",
     "efecto": "ocultarse",
-    "bono_plano": 3
+    "bono_plano": 30
   },
   "huida_pct": 50
 }

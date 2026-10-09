@@ -68,8 +68,10 @@ func test_claves_de_rasgos_y_variantes() -> void:
 
 # T19, sesion 2 (Mundo.md 9.2 v1.2 y 5): las claves del Encono y la cobardia. Las
 # reacciones por par (encono.<especie>.<rival>), por especie (cobardia.<especie>)
-# y cobardia.resiste.<especie> se piden solo si estan en el archivo; nunca
-# cobardia.resiste.maestro como variante (es otra linea).
+# y cobardia.resiste.<especie> se piden solo si estan en el archivo.
+# Reescrito en T44 por Mundo.md 9.2 v1.3 y Arquitectura.md A.7 (sostenida_por):
+# cobardia.resiste.maestro y cobardia.resiste.afin pasan a ser claves fijas (antes
+# se afirmaba que no se pedian); siguen sin ser variantes de cobardia.resiste.
 func test_claves_del_encono_y_la_cobardia() -> void:
 	var lectura: Dictionary = DatosFixture.cargar()
 	assert_array(lectura["errores"]).is_empty()
@@ -80,7 +82,21 @@ func test_claves_del_encono_y_la_cobardia() -> void:
 	var claves: Array[String] = ClavesTextos.usadas(datos)
 	assert_array(claves).contains(["encono.tooltip", "cobardia.tooltip", "encono.inicio", "encono.sube",
 			"cobardia.inicio", "cobardia.resiste", "marca.enconada", "marca.acobardada", "panel.encono",
-			"aviso.terminar.debe_atacar_rival", "aviso.terminar.debe_acercarse"])
+			"aviso.terminar.debe_atacar_rival", "aviso.terminar.debe_acercarse", "cobardia.resiste.maestro",
+			"cobardia.resiste.afin"])
 	assert_array(claves).contains(["encono.ocarra.zancajunco", "encono.tasajero.rodauva", "cobardia.rodauva",
 			"cobardia.resiste.rodauva", "marca.enconada.tasajero"])
-	assert_array(claves).not_contains(["encono.ocarra.ocarra", "cobardia.ocarra", "cobardia.resiste.maestro"])
+	assert_array(claves).not_contains(["encono.ocarra.ocarra", "cobardia.ocarra"])
+
+
+# T44 (Mundo.md 9.2 v1.3, A.7): las variantes por especie de quien la sostuvo se
+# piden solo si estan en el archivo.
+func test_claves_de_quien_sostuvo() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"cobardia.resiste.maestro.surcon": "x", "cobardia.resiste.afin.rodauva": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["cobardia.resiste.maestro", "cobardia.resiste.afin",
+			"cobardia.resiste.maestro.surcon", "cobardia.resiste.afin.rodauva"])
+	assert_array(claves).not_contains(["cobardia.resiste.maestro.rodauva", "cobardia.resiste.afin.surcon"])
