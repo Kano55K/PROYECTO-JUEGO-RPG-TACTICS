@@ -16,13 +16,11 @@ const _BASE_100: String = "combate_rival_100.json"
 const _BASE_0: String = "combate_rival_0.json"
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 12, "alto": 12}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -57,9 +55,9 @@ func _turno(plantel: Plantel, unidad_id: String, combate: String = _BASE_100,
 		azar: GeneradorAzar = GeneradorAzar.new(1), entrada: EntradaCola = null,
 		cola: ColaIniciativa = null) -> Turno:
 	return Turno.empezar(entrada if entrada != null else EntradaCola.new(unidad_id, "", 0), plantel, _tablero,
-			_danio, Surcos.new(), DatosFixture.afinidad(), DatosFixture.cadena(),
-			cola if cola != null else ColaIniciativa.new(), DatosFixture.incidente(combate),
-			DatosFixture.chequeo_rival(combate), DatosFixture.regeneracion_mana(), azar)
+			Surcos.new(), DatosFixture.cadena(), cola if cola != null else ColaIniciativa.new(),
+			DatosFixture.reglas({"incidente": DatosFixture.incidente(combate),
+				"chequeo_rival": DatosFixture.chequeo_rival(combate)}), azar)
 
 
 func _motivo(turno: Turno, accion: Accion) -> String:

@@ -12,13 +12,11 @@ const _JUNCO: String = "zancajunco_1"
 const _JUNCO_SALVAJE: String = "zancajunco_s1"
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -42,8 +40,8 @@ func _plantel(nombre: String = "escenario_junco") -> Plantel:
 
 # Turno suelto, sin cola y sin surcos.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 # Un turno entero que se oculta y termina.

@@ -72,9 +72,11 @@ func _baja(plantel: Plantel, id_unidad: String) -> void:
 # El turno de la unidad, como lo empieza el Combate (corre el paso 4).
 func _turno(plantel: Plantel, unidad_id: String, azar: GeneradorAzar, combate: String = _BASE_100,
 		cadena: Cadena = null, cola: ColaIniciativa = null) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), cadena if cadena != null else DatosFixture.cadena(),
-			cola if cola != null else ColaIniciativa.new(), DatosFixture.incidente(combate), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			cadena if cadena != null else DatosFixture.cadena(),
+			cola if cola != null else ColaIniciativa.new(),
+			DatosFixture.reglas({"incidente": DatosFixture.incidente(combate),
+				"chequeo_rival": DatosFixture.chequeo_rival(_SIN_RIVAL)}), azar)
 
 
 func _motivo(turno: Turno, accion: Accion) -> String:
@@ -291,22 +293,25 @@ func test_turno_que_vuelve_no_tira() -> void:
 	var azar: GeneradorAzar = GeneradorAzar.new(semilla)
 	var entrada: EntradaCola = cola.siguiente(plantel)
 	assert_str(entrada.unidad_id).is_equal("zancajunco_1")
-	var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-			DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_20), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
+	var turno: Turno = Turno.empezar(entrada, plantel, _tablero, Surcos.new(), DatosFixture.cadena(), cola,
+			DatosFixture.reglas({"incidente": DatosFixture.incidente(_BASE_20),
+				"chequeo_rival": DatosFixture.chequeo_rival(_SIN_RIVAL)}), azar)
 	assert_int(azar.historial().size()).is_equal(1)
 	assert_dict(turno.incidente).is_empty()
 	assert_bool(turno.aplicar(Accion.secundar("ocarra_1")).valida).is_true()
 	# Juega la Ocarra (tira su propio incidente) y vuelve el Zancajunco.
-	var ocarra: Turno = Turno.empezar(cola.siguiente(plantel), plantel, _tablero, _danio, Surcos.new(),
-			DatosFixture.afinidad(), DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_20), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
+	var ocarra: Turno = Turno.empezar(cola.siguiente(plantel), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), cola, DatosFixture.reglas({"incidente": DatosFixture.incidente(_BASE_20),
+				"chequeo_rival": DatosFixture.chequeo_rival(_SIN_RIVAL)}), azar)
 	assert_str(ocarra.unidad_id).is_equal("ocarra_1")
 	ocarra.aplicar(Accion.terminar())
 	var tiradas: int = azar.historial().size()
 	var vuelta: EntradaCola = cola.siguiente(plantel)
 	assert_str(vuelta.unidad_id).is_equal("zancajunco_1")
 	assert_bool(vuelta.vuelve).is_true()
-	var de_vuelta: Turno = Turno.empezar(vuelta, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-			DatosFixture.cadena(), cola, DatosFixture.incidente(_BASE_100), DatosFixture.chequeo_rival(_SIN_RIVAL), DatosFixture.regeneracion_mana(), azar)
+	var de_vuelta: Turno = Turno.empezar(vuelta, plantel, _tablero, Surcos.new(), DatosFixture.cadena(), cola,
+			DatosFixture.reglas({"incidente": DatosFixture.incidente(_BASE_100),
+				"chequeo_rival": DatosFixture.chequeo_rival(_SIN_RIVAL)}), azar)
 	assert_int(azar.historial().size()).is_equal(tiradas)
 	assert_dict(de_vuelta.incidente).is_empty()
 	assert_bool(de_vuelta.validar(Accion.atacar("ocarra_s1")).motivo == ResultadoAccion.Motivo.ACCION_USADA).is_false()

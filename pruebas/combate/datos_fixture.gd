@@ -85,6 +85,25 @@ static func regeneracion_mana() -> RegeneracionMana:
 	return RegeneracionMana.desde_datos(cargar()["datos"]["tablas/hambre.json"])
 
 
+# Las ReglasCombate de los fixtures (D-008), armadas como en ContextoCombate, para
+# los tests que crean un Turno suelto. reemplazos: {nombre de ReglasCombate.REGLAS:
+# regla} para cambiar alguna (por ejemplo, el chequeo de rival con
+# combate_rival_100.json). Un nombre que no existe da null, nunca la de siempre.
+static func reglas(reemplazos: Dictionary = {}) -> ReglasCombate:
+	for nombre in reemplazos.keys():
+		if not ReglasCombate.REGLAS.has(nombre):
+			push_error("DatosFixture.reglas: no existe la regla " + str(nombre))
+			return null
+	var datos: Dictionary = cargar()["datos"]
+	return ReglasCombate.new(
+			reemplazos.get("danio", Danio.desde_datos(datos["tablas/combate.json"], datos["tablas/hambre.json"])),
+			reemplazos.get("afinidad", afinidad()),
+			reemplazos.get("combo", combo()),
+			reemplazos.get("incidente", incidente()),
+			reemplazos.get("chequeo_rival", chequeo_rival()),
+			reemplazos.get("regeneracion_mana", regeneracion_mana()))
+
+
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
 static func combo(relaciones: Dictionary = {}) -> Combo:
 	var datos: Dictionary = cargar()["datos"]

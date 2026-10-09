@@ -82,41 +82,36 @@ var _regla_mana: RegeneracionMana
 var _azar: GeneradorAzar
 
 
-func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
-		afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
-		regla_chequeo: ChequeoRival, regla_mana: RegeneracionMana, azar: GeneradorAzar) -> void:
+func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Surcos, cadena: Cadena,
+		cola: ColaIniciativa, reglas: ReglasCombate, azar: GeneradorAzar) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
 	_tablero = tablero
-	_danio = danio
 	_surcos = surcos
-	_afinidad = afinidad
 	_cadena = cadena
 	_cola = cola
-	_incidente = regla_incidente
-	_chequeo = regla_chequeo
-	_regla_mana = regla_mana
+	_danio = reglas.danio
+	_afinidad = reglas.afinidad
+	_incidente = reglas.incidente
+	_chequeo = reglas.chequeo_rival
+	_regla_mana = reglas.regeneracion_mana
 	_azar = azar
 
 
 # Crea el turno de la entrada y corre el inicio del turno. surcos: los del
-# combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
-# ContextoCombate. cadena: la del combate (un turno suelto, una nueva). cola: la
-# del combate (un turno suelto, una vacia: no puede Secundar). regla_incidente:
-# la del ContextoCombate. regla_chequeo: la del ContextoCombate (T19).
-# regla_mana: la del ContextoCombate (T21). azar: el generador de combate (un
-# turno suelto, uno propio).
+# combate (un turno suelto de los tests pasa unos vacios). cadena: la del combate
+# (un turno suelto, una nueva). cola: la del combate (un turno suelto, una vacia:
+# no puede Secundar). reglas: las del ContextoCombate (D-008; un turno suelto,
+# DatosFixture.reglas). azar: el generador de combate (un turno suelto, uno propio).
 # Sistema.md 11.3 y S-31 (P-033): el inicio del turno corre una sola vez por
 # ronda. La entrada que vuelve despues de Secundar (EntradaCola.vuelve) sigue el
 # turno sin repetirlo; por S-29 ese turno estaba sin usar, asi que se prepara igual.
 # La obligacion del Encono (S-35) y el incidente (paso 4) van despues de
 # preparar: miran los pasos y los ataques del modo.
-static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
-		surcos: Surcos, afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
-		regla_chequeo: ChequeoRival, regla_mana: RegeneracionMana, azar: GeneradorAzar) -> Turno:
-	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola,
-			regla_incidente, regla_chequeo, regla_mana, azar)
+static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Surcos,
+		cadena: Cadena, cola: ColaIniciativa, reglas: ReglasCombate, azar: GeneradorAzar) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, surcos, cadena, cola, reglas, azar)
 	if not entrada.vuelve:
 		turno._inicio_del_turno()
 	turno._preparar()

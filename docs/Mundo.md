@@ -1,8 +1,8 @@
-# MUNDO — Mundo, regiones y criaturas (v1.2)
+# MUNDO — Mundo, regiones y criaturas (v1.3)
 
-07/10/2026 · @Joaquín
+08/10/2026 · @Joaquín
 
-**Estado:** v1.2 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1). **v1.2:** etiquetas de T14 y T16, relaciones con vecinas en 8 (Visión v1.3) y cierre de las derivaciones ya resueltas · Sincronizado con `00_Vision.md` v1.3, `Sistema.md` v1.6 y `Arquitectura.md` v0.27 · **Dueño:** Worldbuilder y Diseñador Narrativo
+**Estado:** v1.3 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1). **v1.2:** etiquetas de T14 y T16, relaciones con vecinas en 8 (Visión v1.3) y cierre de las derivaciones ya resueltas. **v1.3:** etiquetas y avisos de T19 a T21 (Encono, cobardía y maná) y textos revisados contra la escala ×10 de vida y daño (`Sistema.md` 11.1 v1.7) · Sincronizado con `00_Vision.md` v1.3, `Sistema.md` v1.7 y `Arquitectura.md` v0.37 · **Dueño:** Worldbuilder y Diseñador Narrativo
 
 Este documento define la identidad del mundo. Si algo acá contradice `00_Vision.md`, manda la Visión: se propone el cambio y se registra en `Decisiones.md`. Los números (rangos, apetito, efectos, costos) viven en `Sistema.md`.
 
@@ -170,6 +170,33 @@ Claves que dejaron T14 y T16 sin texto (`RESUMENES.md`). Mismo criterio que T13:
 
 > Sin números de reglas: el porcentaje es lo que se muestra antes, no la regla. *"Al lado o en diagonal"* es la forma más corta de decir "las 8 vecinas" sin la palabra técnica.
 > Las líneas de Hacerse junco (*"se le planta al lado"*, `aviso.destapar`) **no cambian**: su contacto sigue siendo ortogonal (`Sistema.md` 11.2.2 v1.6), y "al lado" dice justo eso.
+
+#### Textos de la pantalla de T19 a T21 — `DECIDIDO` (v1.3, aprobados por el usuario el 08/10/2026)
+
+Claves que dejaron T19 a T21 sin texto (`RESUMENES.md`; `Sistema.md` 15 v1.7). Mismo criterio que T13: etiquetas cortas y avisos que se entienden sin abrir el tooltip.
+
+| Qué | Claves | Texto |
+| --- | --- | --- |
+| Marca de la enconada (ficha y tooltip) | `marca.enconada` · `.zancajunco` · `.tasajero` | Enconada · *Enconado* (Zancajunco y Tasajero) |
+| Marca de la acobardada (ficha y tooltip) | `marca.acobardada` · `.surcon` | Acobardada · *Acobardado* (Surcón) |
+| Contador del Encono | `panel.encono` | Encono (se ve como "Encono: 2/3") |
+| Maná del Maestro (panel y tooltip) | `panel.mana` | Maná (se ve como "Maná: 8/8") |
+| No puede terminar: debe golpear a su rival | `aviso.terminar.debe_atacar_rival` | *"Primero tiene que pegarle a su rival. Este turno no se le despega."* |
+| No puede terminar: debe acercarse | `aviso.terminar.debe_acercarse` | *"No llega a su rival, pero tiene que acercarse todo lo que pueda antes de terminar."* |
+
+> **Concordancia:** las marcas siguen la regla de 1.5 (variante por especie de nombre masculino). Solo llevan variante las especies que pueden quedar en ese estado: se enconan las de combate y mixtas (Ocarra, Zancajunco, Tasajero); se acobardan las de trabajo (Rodauva, Surcón).
+> **Los avisos van sin género:** la rival puede ser el Zancajunco o el Tasajero. *"No se le despega"* cubre P-038 en la opción A (`Sistema.md` 10.5 v1.7): la enconada no se aleja de su rival en todo el turno, también después del primer golpe.
+> **Maná** con tilde: es palabra del juego (2.2) y la pantalla la lee pegada al número.
+
+#### Textos y escala ×10 — `DECIDIDO` (v1.3)
+
+`Sistema.md` 11.1 v1.7 multiplica por 10 la vida y el daño. Se revisaron `es.json` y este documento: los textos de reglas ya no citan vida ni daño desde la v1.1, salvo uno.
+
+| Clave | Antes | Ahora |
+| --- | --- | --- |
+| `guardar_caida.tooltip` | *"Guardada con 1 de vida. No se cura hasta que salga."* | *"Guardada con lo justo para respirar. No se cura hasta que salga."* |
+
+> **Regla desde la v1.3:** ningún texto escribe un número de vida, daño o curación. Si la pantalla tiene que mostrar uno, va por hueco (`{n}`, `{vida}`, `{porcentaje}`) y lo llena desde los datos, como `aviso.cuenta.umbral` y `rio.crecido.tooltip`. Así un cambio de balance nunca deja un texto mintiendo. Los números de distancia, días o cantidades de lore (*"dos casillas"*, *"Tres días de [tipo]"*, *"tres gotas"*, *"cuarenta y una rayas"*) no son de balance y se quedan.
 
 ## 2. La magia y los Nueve
 
@@ -1165,7 +1192,7 @@ Al ganar el combate: *"[Criatura] se levanta. Despacio, pero se levanta."*
 #### Guardar a una caída
 
 *"Tendés el pergamino hacia [caída]. El hilo la encuentra donde cayó y la recoge."*
-Tooltip: *"Guardada con 1 de vida. No se cura hasta que salga."*
+Tooltip: *"Guardada con lo justo para respirar. No se cura hasta que salga."* (v1.3: sin número, por la escala ×10)
 
 #### Huida del Maestro
 
@@ -1232,6 +1259,8 @@ Las reacciones por par de rivales (tabla de Encono y cobardía) sirven como lín
 | Resiste: Rodauva | `cobardia.resiste.rodauva` | *"La Rodauva se desenrolla. Le tiemblan las púas, pero se queda."* |
 | Resiste por una afín vecina (toggle del escenario E) | `cobardia.resiste.afin` | *"Se queda porque tiene a [afín] cerca."* (v1.2) |
 | Resiste con el Maestro vecino | `cobardia.resiste.maestro` | *"Se queda porque estás cerca."* (v1.2) |
+
+> **v1.3 — las dos líneas de quién la sostiene todavía no se ven** (hallazgo de T19): el evento `chequeo_rival` no dice si la sostuvieron el Maestro o una afín, y la pantalla no puede recalcularlo después. Son la cara visible de la regla de oro en el coraje (Visión 6.4), así que se piden al Arquitecto (9.2): que el evento traiga quién la sostuvo. Mientras tanto, la resistida usa `cobardia.resiste` y su variante de especie.
 
 #### Tooltips de los rasgos (T08, T09, T13; reescritos en la v1.1)
 
@@ -1349,7 +1378,7 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 
 ## 9. Pendientes
 
-**v1.2:** las etiquetas de T14 y T16 y los tooltips de relaciones con diagonales están en `es.json` (577 claves). Los nombres de la v1.1 siguen esperando al Director (1.2.1), pero ya tienen texto: **el Worldbuilder no tiene pendientes que bloqueen la 0a.2 ni la 0b.**
+**v1.3:** las etiquetas y avisos de T19 a T21 están en `es.json` (586 claves), y el único texto con un número de vida pasó a no tenerlo (1.5). Los nombres de la v1.1 siguen esperando al Director (1.2.1), pero ya tienen texto: **el Worldbuilder no tiene pendientes que bloqueen la 0a.2 ni la 0b.**
 
 ### 9.1 Preguntas abiertas de reglas
 
@@ -1373,17 +1402,20 @@ Todas cerradas.
 - [ ] Decidir si la hostilidad **Cazando** pasa a **Rastreando** (1.2.1). Es 0b: no bloquea.
 - [ ] Aprobar los textos nuevos de la v1.1 (pantalla de T13, las que miran, la atacante que se va, la emboscada del Robledal y los rasgos en acción) y de la v1.2 (etiquetas de T14 y T16, tooltips de relaciones y las dos líneas de cobardía) (1.5 y sección 5).
 - [ ] Registrar en `Decisiones.md` que las etiquetas de estado concuerdan con el género de la especie, y que las de obediencia no (1.5).
+- [ ] **v1.3:** registrar en `Decisiones.md` los textos de T19 a T21 y la regla "ningún texto escribe un número de vida, daño o curación" (1.5), aprobados por el usuario el 08/10/2026.
 
 **PARA SISTEMAS:**
 
-- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder ya entregados: los de la v1.1 (tooltips nuevos y retiro de Lomo de tierra; textos de las claves de la v1.3; fichas de la sección 5; preguntas de 9.1 y retiro de `comer.sacar_guardada`; la atacante que se va; las que miran y la Centinela no leal; claves de pantalla de T13) y el de la v1.6 (tooltips de relaciones con diagonales), que entrega esta v1.2. Queda abierto solo el de los nombres, que espera al Director.
+- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder ya entregados. **Sigue pendiente desde la v1.2:** `Sistema.md` v1.7 todavía los lista. Son los de la v1.1 (tooltips nuevos y retiro de Lomo de tierra; textos de las claves de la v1.3; fichas de la sección 5; preguntas de 9.1 y retiro de `comer.sacar_guardada`; la atacante que se va; las que miran y la Centinela no leal; claves de pantalla de T13), el de la v1.6 (tooltips de relaciones con diagonales, entregado en la v1.2) y los dos de la v1.7 (escala ×10 y claves sin texto de T13 a T21), que entrega esta v1.3. Queda abierto solo el de los nombres, que espera al Director.
 - [ ] Si el Director aprueba **Rastreando**, cambiar el nombre del estado en 12.10.
 
 **PARA ARQUITECTO:**
 
-- [ ] Copiar `es.json` v1.2 a `juego/datos/textos/` (Claude Code no edita esa carpeta). Claves: 568 → 577. La huella de los datos no cambia (excluye `textos/`, A.7).
-- [ ] Confirmar o renombrar las claves propuestas de los tooltips de relaciones (`afinidad.tooltip`, `incidente.tooltip`, `cobardia.tooltip`, `encono.tooltip`) antes de T18 y T19. Si la pantalla arma el porcentaje por su cuenta, se quita `{porcentaje}` del texto.
-- [ ] `panel.cadena` se muestra como "Cadena: Tasajero (2)". Si en la prueba manual de T16 el número se lee como vida o como cantidad, pedir una clave para el eslabón (por ejemplo, `panel.cadena.eslabon`: "{n}.º golpe").
+- [ ] **v1.3:** copiar `es.json` v1.3 a `juego/datos/textos/` (Claude Code no edita esa carpeta). Claves: 577 → 586. La huella de los datos no cambia (excluye `textos/`, A.7). Desaparecen los `[FALTA]` de `marca.enconada`, `marca.acobardada`, `panel.encono`, `panel.mana` y los dos `aviso.terminar.*`.
+- [ ] **v1.3, quién sostuvo a la que resiste** (`PROPUESTA` aprobada por el usuario): que el evento `chequeo_rival` resistido traiga quién la sostuvo (el Maestro, una afín o nadie), para mostrar `cobardia.resiste.maestro` y `cobardia.resiste.afin` (sección 5). Si las dos aplican, se muestra la del Maestro. Alternativa: dejarlas sin uso hasta la 0b. No bloquea.
+- [x] ~~Copiar `es.json` v1.2~~ → copiado en la sincronización previa a T41 (`Arquitectura.md` B.3.1).
+- [x] ~~Confirmar las claves de los tooltips de relaciones~~ → confirmadas con esos nombres, con `{porcentaje}` (`Arquitectura.md` 10.5, 07/10/2026).
+- [x] ~~`panel.cadena.eslabon`~~ → no hizo falta: las pruebas manuales de T16 y T41 no lo marcaron.
 - [x] ~~Copiar `es.json` v1.1~~ → copiado en la sincronización previa a T35 (`Arquitectura.md` A.2.1).
 - [x] ~~Claves retiradas (`rasgo.lomo_de_tierra.*`, `comer.sacar_guardada`)~~ → retiradas en T35.
 - [x] ~~Concordancia de las etiquetas~~ → `DECIDIDO` (A.2.1), programada en T40.
@@ -1393,6 +1425,8 @@ Todas cerradas.
 
 **PARA ARTE / UI:**
 
+- [ ] **v1.3, escala ×10:** los números de vida y daño llegan a tres cifras (Tasajero, 300). Prever el ancho en la ficha, la cola y el desglose (`Sistema.md` 15 v1.7). Los textos no tienen números de balance: no cambian el ancho.
+- [ ] **v1.3, marcas de Encono:** "Enconada" y "Acobardada" sobre la ficha, más el contador "Encono: n/3". Que la acobardada se lea por la silueta (bola floja, sección 5) y no solo por la palabra.
 - [ ] **v1.2, tablero de 12 × 12 con cámara móvil:** las posturas que cambian una regla (Rodauva erizada y acobardada, Zancajunco hecho junco y con la embestida, Tasajero en Caza y en Cuenta) se tienen que leer por la silueta también con la cámara alejada (1.4).
 - [ ] **v1.2, relaciones:** al mover una unidad, marcar qué vecinas (las 8) le darían afinidad o riesgo de incidente en el destino (`Sistema.md` 15). El texto ya dice "al lado o en diagonal"; el tablero lo tiene que mostrar.
 - [ ] **v1.1, rasgos:** el surco (tierra removida con un lomo de terrones a cada lado, simétrico, que se lea como pozo), con el color del bando de su dueño; el Surcón arando; el Zancajunco **hecho junco** (silueta de mata de juncos) y con la **embestida** pendiente (cuello en S tenso); el Tasajero en **Caza** (largo y pegado al suelo) y en **Cuenta** (recogido, cola enroscada). Todo se distingue por la silueta (sección 5). Reemplaza al pedido "marcas Caza y Cuenta en la barra de iniciativa": ahora el modo se ve también en su ficha.
@@ -1439,6 +1473,7 @@ Todas cerradas.
 
 | Versión | Fecha | Cambio |
 | --- | --- | --- |
+| v1.3 | 08/10/2026 | **Sincronización con `Sistema.md` v1.7 y `Arquitectura.md` v0.37 (T17 a T21, escala ×10).** 1.5: textos de pantalla de T19 a T21 (`marca.enconada`, `marca.acobardada` con concordancia, `panel.encono`, `panel.mana`, `aviso.terminar.debe_atacar_rival` según P-038 opción A y `aviso.terminar.debe_acercarse`), aprobados por el usuario; revisión contra la escala ×10, con la regla "ningún texto escribe un número de vida, daño o curación". Sección 5: `guardar_caida.tooltip` sin número; nota sobre `cobardia.resiste.afin` y `.maestro`, que esperan un dato en el evento. 9.2: derivaciones al día (cerradas las de la v1.2 ya resueltas; nuevas para el Arquitecto, Sistemas, el Director y Arte). `es.json`: 577 → 586 claves |
 | v1.2 | 07/10/2026 | **Sincronización con la Visión v1.3 y `Sistema.md` v1.6 (vecinas en 8, tablero de 12 × 12).** 1.4: siluetas legibles con la cámara alejada. 1.5: etiquetas de T14 (obediencia y sus tramos, sin concordancia) y T16 (cadena); tooltips de afinidad, incidente, cobardía y Encono con las diagonales (claves propuestas al Arquitecto); concordancia de etiquetas cerrada (T40). Sección 5: hecho junco se destapa solo por los lados; las presas del Tasajero en los huecos de la formación; sostén de la cobardía en 8, con dos líneas que pasan de "al lado" a "cerca"; incidente con la rival en diagonal; combos sin posición; hambre de combate cada 6 rondas. Sección 6: el vínculo mira 8, el cuerpo mira 4. 9.2: derivaciones cerradas y nuevas. `es.json`: 568 → 577 claves |
 | v1.1 | 05/10/2026 | **Sincronización con la Visión v1.2 y `Sistema.md` v1.5 (rasgos reescritos tras el playtest 0a.1).** Nueva 1.2.1: nombres en `PROPUESTA` (Arar, Hecho junco, Embestida; Rastreando para la hostilidad). 1.5: huecos `DECIDIDO`, hueco `{n}`, concordancia de las etiquetas de estado con la especie y textos de la pantalla de T13. 2.6: la prenda sin consecuencias. 4.6: las que miran (ya estaban en `es.json`) y la atacante que se va. 4.7: emboscada del Robledal sin "mirando a una sola". 4.11: perdida por abandono tras atacarte. 4.12: solo se come a una suelta; sale "sacar a una guardada". Sección 5: Surcón con Arar (sale Lomo de tierra), Zancajunco con Hacerse junco activo, Tasajero con Caza y cuenta en dos modos; posturas nuevas para arte; nota del Encono con un Zancajunco hecho junco; tooltips nuevos y rasgos en acción. 8: la prenda en el epílogo. Sección 9 reescrita: 9.1 cerrada; derivaciones al Director, Sistemas, Arquitecto y Arte. `es.json`: 496 → 568 claves |
 | v1.0 | 03/10/2026 | **Sincronización con la Visión v1.0. El Worldbuilder no tiene pendientes que bloqueen el MVP.** Pasan a `DECIDIDO` el ritmo del día (4.15) y los textos nuevos de la entrega (1.5). 4.12: cuándo se come a una criatura (solo en el reparto de la noche, junto al fuego). Centinela unificado entre 1.5 y 4.6, sin hueco (actualizar `nocturno.centinela` en `es.json`). Sección 9: se cierra la pregunta de cuándo comer; pedidos a Sistemas para poner al día `Sistema.md` 15; prioridad de los huecos gramaticales para el Arquitecto |

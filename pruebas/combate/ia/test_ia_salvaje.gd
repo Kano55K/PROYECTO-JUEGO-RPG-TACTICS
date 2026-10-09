@@ -16,13 +16,11 @@ const _FUENTES: Array[String] = [
 const _AZAR_PROHIBIDO: Array[String] = ["GeneradorAzar", "randi", "randf", "RandomNumberGenerator"]
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -54,8 +52,8 @@ func _cola(plantel: Plantel) -> ColaIniciativa:
 # surcos: los del combate (sin pasarlos, unos vacios).
 func _decidir(plantel: Plantel, unidad_id: String, surcos: Surcos = null) -> Dictionary:
 	var del_combate: Surcos = surcos if surcos != null else Surcos.new()
-	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, del_combate,
-			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	var turno: Turno = Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, del_combate,
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 	return {"turno": turno, "decision": IASalvaje.decidir(turno, plantel, _cola(plantel))}
 
 
@@ -267,8 +265,8 @@ func test_tasajero_decide_en_cada_turno() -> void:
 		cola.empezar_ronda(plantel)
 		var entrada: EntradaCola = cola.siguiente(plantel)
 		while entrada != null:
-			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-					DatosFixture.cadena(), cola, DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, Surcos.new(), DatosFixture.cadena(), cola,
+					DatosFixture.reglas(), GeneradorAzar.new(1))
 			if entrada.unidad_id == "tasajero_s1":
 				assert_str(entrada.marca).is_equal("caza")
 				var decision: DecisionIA = IASalvaje.decidir(turno, plantel, cola)
@@ -324,8 +322,8 @@ func test_escenario_a_la_ocarra_va_por_la_rodauva() -> void:
 		cola.empezar_ronda(plantel)
 		var entrada: EntradaCola = cola.siguiente(plantel)
 		while entrada != null:
-			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-					DatosFixture.cadena(), cola, DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+			var turno: Turno = Turno.empezar(entrada, plantel, _tablero, Surcos.new(), DatosFixture.cadena(), cola,
+					DatosFixture.reglas(), GeneradorAzar.new(1))
 			if entrada.unidad_id == "ocarra_s1":
 				var decision: DecisionIA = IASalvaje.decidir(turno, plantel, cola)
 				decisiones.append(decision)

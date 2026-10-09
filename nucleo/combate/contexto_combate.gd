@@ -32,23 +32,33 @@ var toggles: Dictionary = {}
 # Generadores separados: una frase nueva no cambia las tiradas del combate (A.2.1).
 var azar_combate: GeneradorAzar
 var azar_textos: GeneradorAzar
-var danio: Danio
 var cierre: Cierre
 var relaciones: Relaciones
 # Sistema.md 5.4 (T14): se pregunta, nunca se guarda. La leen la pantalla y T15 a T20.
 var obediencia: Obediencia
 # Sistema.md 7.2 (T14): la usa el Combate al cerrar cada ronda.
 var hambre_combate: HambreCombate
+# D-008 (T21-ajustes): las reglas sin estado, armadas una vez. Las recibe el Turno.
+var reglas: ReglasCombate
+# Acceso de lectura a cada regla de `reglas`, para el Combate y los tests. Con
+# el contexto sin armar (no valido), null, como antes de D-008.
+var danio: Danio:
+	get: return null if reglas == null else reglas.danio
 # Sistema.md 2.1 y 2.2 (T21): la regeneracion de mana del Maestro. La aplica el Turno.
-var regeneracion_mana: RegeneracionMana
+var regeneracion_mana: RegeneracionMana:
+	get: return null if reglas == null else reglas.regeneracion_mana
 # Sistema.md 10.3 (T15): la usa el Turno para el aporte de afinidad.
-var afinidad: Afinidad
+var afinidad: Afinidad:
+	get: return null if reglas == null else reglas.afinidad
 # Sistema.md 10.2 y 1.3 (T16): la regla del bono de combo. La cadena es del Combate.
-var combo: Combo
+var combo: Combo:
+	get: return null if reglas == null else reglas.combo
 # Sistema.md 10.4 y 1.3 (T18): la regla del incidente. La aplica el Turno con azar_combate.
-var incidente: Incidente
+var incidente: Incidente:
+	get: return null if reglas == null else reglas.incidente
 # Sistema.md 10.5, 10.6 y 1.3 (T19): el chequeo de rival enemiga. Lo aplica el Turno con azar_combate.
-var chequeo_rival: ChequeoRival
+var chequeo_rival: ChequeoRival:
+	get: return null if reglas == null else reglas.chequeo_rival
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -73,18 +83,21 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	contexto.toggles = escenario.get("toggles", {}).duplicate(true)
 	contexto.azar_combate = GeneradorAzar.derivado(contexto.semilla, SISTEMA_COMBATE)
 	contexto.azar_textos = GeneradorAzar.derivado(contexto.semilla, SISTEMA_TEXTOS)
-	contexto.danio = Danio.desde_datos(tabla_combate, datos["tablas/hambre.json"])
+	var regla_danio: Danio = Danio.desde_datos(tabla_combate, datos["tablas/hambre.json"])
 	contexto.relaciones = Relaciones.new(datos["relaciones.json"])
 	contexto.cierre = Cierre.desde_datos(tabla_combate, datos["tablas/lealtad.json"], contexto.relaciones)
 	contexto.obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"], tabla_combate)
 	contexto.hambre_combate = HambreCombate.desde_datos(datos["tablas/hambre.json"])
-	contexto.regeneracion_mana = RegeneracionMana.desde_datos(datos["tablas/hambre.json"])
-	contexto.afinidad = Afinidad.desde_datos(tabla_combate, contexto.relaciones, contexto.obediencia)
+	var regla_mana: RegeneracionMana = RegeneracionMana.desde_datos(datos["tablas/hambre.json"])
+	var regla_afinidad: Afinidad = Afinidad.desde_datos(tabla_combate, contexto.relaciones, contexto.obediencia)
 	var arrimo: Arrimo = Arrimo.desde_datos(datos["tablas/arrimo.json"])
-	contexto.combo = Combo.desde_datos(tabla_combate, arrimo, contexto.afinidad)
-	contexto.incidente = Incidente.desde_datos(tabla_combate, arrimo, contexto.relaciones, contexto.obediencia)
-	contexto.chequeo_rival = ChequeoRival.desde_datos(tabla_combate, arrimo, contexto.relaciones, contexto.obediencia,
-			contexto.afinidad, contexto.toggles.get("afines_contra_cobardia", false))
+	var regla_combo: Combo = Combo.desde_datos(tabla_combate, arrimo, regla_afinidad)
+	var regla_incidente: Incidente = Incidente.desde_datos(tabla_combate, arrimo, contexto.relaciones,
+			contexto.obediencia)
+	var regla_chequeo: ChequeoRival = ChequeoRival.desde_datos(tabla_combate, arrimo, contexto.relaciones,
+			contexto.obediencia, regla_afinidad, contexto.toggles.get("afines_contra_cobardia", false))
+	contexto.reglas = ReglasCombate.new(regla_danio, regla_afinidad, regla_combo, regla_incidente, regla_chequeo,
+			regla_mana)
 	contexto.valido = true
 	return contexto
 

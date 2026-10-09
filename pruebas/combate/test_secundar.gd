@@ -20,13 +20,11 @@ const _AZAR_PROHIBIDO: Array[String] = ["GeneradorAzar.new", "GeneradorAzar.deri
 		"randi", "randf", "RandomNumberGenerator"]
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -61,8 +59,8 @@ func _siguiente(cola: ColaIniciativa, plantel: Plantel) -> Turno:
 	var entrada: EntradaCola = cola.siguiente(plantel)
 	if entrada == null:
 		return null
-	return Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-			DatosFixture.cadena(), cola, DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	return Turno.empezar(entrada, plantel, _tablero, Surcos.new(), DatosFixture.cadena(), cola,
+			DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 # "id" o "id:marca", en el orden de la cola.
@@ -285,8 +283,8 @@ func test_s31_cambio_de_modo_una_vez() -> void:
 	assert_str(criatura.modo).is_equal("caza")
 	assert_int(vuelta.ataques_restantes).is_equal(criatura.especie.ataques_por_turno("caza"))
 
-	var nueva: Turno = Turno.empezar(EntradaCola.new("tasajero_1", "caza", 0), plantel, _tablero, _danio,
-			Surcos.new(), DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
+	var nueva: Turno = Turno.empezar(EntradaCola.new("tasajero_1", "caza", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 	assert_dict(nueva.cambio_modo).is_equal({"de": "caza", "a": "cuenta"})
 
 
