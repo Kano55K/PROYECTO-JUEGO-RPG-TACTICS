@@ -69,3 +69,22 @@ func test_once_escenarios_crean_tablero() -> void:
 				assert_bool(tablero.dentro(posicion)).override_failure_message("%s %s" % [ruta, posicion]).is_true()
 		assert_array(tablero.despliegue(Criatura.Bando.TRIBU)).override_failure_message(ruta).is_not_empty()
 	assert_int(cantidad).is_equal(11)
+
+
+# Arquitectura.md B.3 (T21, 1b), Sistema.md 11.9 y 2.1: G entra con 4 de mana
+# (sueno interrumpido, 2.4) y los otros 10 con la reserva de su balanza, leida
+# de la tabla cargada. El mana actual arranca en el de entrada.
+func test_t21_mana_de_entrada_de_los_escenarios() -> void:
+	var datos: Dictionary = _datos()
+	var tabla: TablaBalanza = TablaBalanza.new(datos["tablas/balanza.json"])
+	var cantidad: int = 0
+	for ruta in datos.keys():
+		if not (ruta as String).begins_with("escenarios/"):
+			continue
+		cantidad += 1
+		var maestro: Maestro = Plantel.desde_datos(datos, datos[ruta]).maestro
+		var esperado: int = 4 if ruta == "escenarios/g_ataque_nocturno.json" \
+				else tabla.fila(maestro.balanza)["reserva_mana"] as int
+		assert_int(maestro.mana_entrada).override_failure_message(ruta).is_equal(esperado)
+		assert_int(maestro.mana).override_failure_message(ruta).is_equal(esperado)
+	assert_int(cantidad).is_equal(11)

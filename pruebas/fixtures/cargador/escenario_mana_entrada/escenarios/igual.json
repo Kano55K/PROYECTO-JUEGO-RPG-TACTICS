@@ -1,0 +1,8 @@
+{
+  "_nota": "T21 (10): balanza 4, reserva 10; igual a la reserva no es error",
+  "id": "igual",
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 4, "mana_entrada": 10 },
+  "tribu": [],
+  "enemigas": []
+}

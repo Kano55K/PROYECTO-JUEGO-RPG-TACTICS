@@ -62,7 +62,7 @@ func _pct_incidente(incidente: Incidente, plantel: Plantel, id_unidad: String) -
 func _turno(plantel: Plantel, unidad_id: String, combate: String, azar: GeneradorAzar = GeneradorAzar.new(1)) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
 			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(combate),
-			DatosFixture.chequeo_rival(combate), azar)
+			DatosFixture.chequeo_rival(combate), DatosFixture.regeneracion_mana(), azar)
 
 
 # El combate de escenario_rival_salvajes_combate.json con las posiciones de `ubicar`.

@@ -1,0 +1,10 @@
+{
+  "_nota": "Sistema.md 1.2: reserva de mana por posicion (solo la columna que mira el chequeo de T21)",
+  "posiciones": [
+    { "posicion": 1, "reserva_mana": 7 },
+    { "posicion": 2, "reserva_mana": 8 },
+    { "posicion": 3, "reserva_mana": 9 },
+    { "posicion": 4, "reserva_mana": 10 },
+    { "posicion": 5, "reserva_mana": 11 }
+  ]
+}

@@ -62,7 +62,7 @@ func _siguiente(cola: ColaIniciativa, plantel: Plantel) -> Turno:
 	if entrada == null:
 		return null
 	return Turno.empezar(entrada, plantel, _tablero, _danio, Surcos.new(), DatosFixture.afinidad(),
-			DatosFixture.cadena(), cola, DatosFixture.incidente(), DatosFixture.chequeo_rival(), GeneradorAzar.new(1))
+			DatosFixture.cadena(), cola, DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
 
 
 # "id" o "id:marca", en el orden de la cola.
@@ -286,7 +286,7 @@ func test_s31_cambio_de_modo_una_vez() -> void:
 	assert_int(vuelta.ataques_restantes).is_equal(criatura.especie.ataques_por_turno("caza"))
 
 	var nueva: Turno = Turno.empezar(EntradaCola.new("tasajero_1", "caza", 0), plantel, _tablero, _danio,
-			Surcos.new(), DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), GeneradorAzar.new(1))
+			Surcos.new(), DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(), DatosFixture.chequeo_rival(), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
 	assert_dict(nueva.cambio_modo).is_equal({"de": "caza", "a": "cuenta"})
 
 

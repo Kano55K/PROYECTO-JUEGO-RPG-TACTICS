@@ -102,6 +102,19 @@ func test_escenario_posiciones_dentro_del_tablero() -> void:
 	assert_array(errores[0]["recibido"] as Array).is_equal([9, 9])
 
 
+# T21 (10), Sistema.md 2.1 y M-04: el mana de entrada de un escenario no supera
+# la reserva de la balanza de su Maestro. Igual a la reserva, o null, no es error.
+func test_t21_mana_entrada_no_supera_la_reserva() -> void:
+	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + "escenario_mana_entrada")
+	var errores: Array[Dictionary] = resultado["errores"]
+
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("escenarios/mayor.json")
+	assert_str(errores[0]["campo"] as String).is_equal("maestro.mana_entrada")
+	assert_str(errores[0]["esperado"] as String).contains("8")
+	assert_int(errores[0]["recibido"] as int).is_equal(9)
+
+
 func test_textos_formato_de_clave() -> void:
 	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + "textos_formato_clave")
 	var errores: Array[Dictionary] = resultado["errores"]

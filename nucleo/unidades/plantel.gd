@@ -124,6 +124,8 @@ func instantanea() -> Dictionary:
 		"maestro": {
 			"vida": maestro.vida,
 			"hambre": maestro.hambre,
+			# Arquitectura.md A.7 (T21, D-007): el mana actual.
+			"mana": maestro.mana,
 			"posicion": casilla_a_lista(maestro.posicion),
 			"caido": maestro.caido,
 		},
@@ -168,8 +170,13 @@ static func _crear_maestro(datos_maestro: Dictionary, tabla_balanza: TablaBalanz
 	nuevo.alcance = ficha_maestro["alcance"]
 	nuevo.velocidad = ficha_maestro["velocidad"]
 	nuevo.posicion = _posicion(datos_maestro.get("posicion"))
-	# Tal cual llega: se resuelve en T21.
-	nuevo.mana_entrada = datos_maestro.get("mana_entrada")
+	# Sistema.md 1.2 y 2.1 (T21, M-04): null = la reserva de la fila de su
+	# balanza. Es el tope del combate; el mana actual arranca ahi.
+	if datos_maestro.get("mana_entrada") != null:
+		nuevo.mana_entrada = datos_maestro["mana_entrada"]
+	else:
+		nuevo.mana_entrada = nuevo.fila_balanza()["reserva_mana"]
+	nuevo.mana = nuevo.mana_entrada
 	return nuevo
 
 

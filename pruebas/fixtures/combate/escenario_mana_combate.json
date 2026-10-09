@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "mana_combate",
+  "_nota": "Arquitectura.md B.3 (T21). Sistema.md 2.1 y 2.2: regeneracion de mana del Maestro. Tablero de 3 x 40, como escenario_hambre_combate: la Ocarra salvaje (Movimiento 3) empieza en la fila 39 y no alcanza a nadie antes de la ronda 10. Maestro con hambre 5 (Normal): con el hambre de combate del fixture (cada 5 rondas) pasa a 6 (Hambriento) al cerrar la ronda 5. La Rodauva (Velocidad 6) juega antes que el Maestro (5) y el Surcon (2) despues: el Maestro puede Secundarlo. Los tests bajan el mana a mano: nada lo gasta en T21",
+  "tipo": "test",
+  "semilla": 21,
+  "tablero": { "ancho": 3, "alto": 40 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 5, "enfermedades": 0, "posicion": [1, 0] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 0] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 0] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [1, 39] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

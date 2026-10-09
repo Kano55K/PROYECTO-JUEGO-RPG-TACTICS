@@ -273,6 +273,12 @@ func _avanzar() -> void:
 		var estados_antes: Dictionary = _estados()
 		_turno = _empezar_turno(entrada)
 		_junco_volcados = 0
+		# Sistema.md 2.1 y 11.3 paso 1 (T21, D-007): la regeneracion del Maestro,
+		# justo detras de su `turno` y solo si el mana cambio. Paso antes que toda
+		# tirada del inicio del turno: no las vuelca.
+		if not _turno.mana.is_empty():
+			_registrar({"tipo": "mana", "unidad": entrada.unidad_id, "de": _turno.mana["de"],
+					"a": _turno.mana["a"], "motivo": RegeneracionMana.MOTIVO_REGENERACION}, 0)
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7). Paso
 		# antes que las tiradas de los pasos 3 y 4 de 11.3: se registra sin
 		# volcarlas, asi el orden del registro es el de lo que paso.
@@ -285,7 +291,8 @@ func _avanzar() -> void:
 
 func _empezar_turno(entrada: EntradaCola) -> Turno:
 	return Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos,
-			_contexto.afinidad, _cadena, _cola, _contexto.incidente, _contexto.chequeo_rival, _contexto.azar_combate)
+			_contexto.afinidad, _cadena, _cola, _contexto.incidente, _contexto.chequeo_rival,
+			_contexto.regeneracion_mana, _contexto.azar_combate)
 
 
 # Sistema.md 10.5 y 10.6 (T19, A.7): el chequeo de rival enemiga, detras del

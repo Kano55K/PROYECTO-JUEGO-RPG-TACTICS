@@ -19,8 +19,12 @@ var alcance: int = 0
 var velocidad: int = 0
 # Coordenadas de grilla [x, y], con y = 0 arriba.
 var posicion: Vector2i = Criatura.SIN_POSICION
-# int o null, tal cual llega del escenario; se resuelve en T21.
-var mana_entrada: Variant = null
+# Sistema.md 2.1 y M-04 (T21): el mana con el que entro al combate, resuelto al
+# crear el Plantel (null en el escenario = la reserva de su balanza). Es el tope
+# de la regeneracion y no cambia durante el combate.
+var mana_entrada: int = 0
+# El mana actual: estado del combate, arranca en mana_entrada (D-007).
+var mana: int = 0
 # Sistema.md 11.5: llego a 0 y el combate termino (T10). Estado del combate: no
 # viene del escenario.
 var caido: bool = false

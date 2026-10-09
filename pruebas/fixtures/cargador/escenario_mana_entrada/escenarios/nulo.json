@@ -1,0 +1,8 @@
+{
+  "_nota": "T21 (10): null es la reserva; no se revisa",
+  "id": "nulo",
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 1, "mana_entrada": null },
+  "tribu": [],
+  "enemigas": []
+}

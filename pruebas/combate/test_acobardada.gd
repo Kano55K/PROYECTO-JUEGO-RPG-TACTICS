@@ -44,7 +44,7 @@ func _plantel(ubicar: Dictionary) -> Plantel:
 func _turno(plantel: Plantel) -> Turno:
 	var turno: Turno = Turno.empezar(EntradaCola.new("rodauva_1", "", 0), plantel, _tablero, _danio, Surcos.new(),
 			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(_BASE_100),
-			DatosFixture.chequeo_rival(_BASE_100), GeneradorAzar.new(1))
+			DatosFixture.chequeo_rival(_BASE_100), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
 	assert_bool(turno.acobardada).is_true()
 	assert_dict(turno.chequeo_rival).contains_key_value("tipo", "cobardia").contains_key_value("resultado", "acobardada")
 	return turno

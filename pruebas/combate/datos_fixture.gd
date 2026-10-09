@@ -79,6 +79,12 @@ static func chequeo_rival(combate: String = "combate.json", toggle: bool = false
 			obediencia, Afinidad.desde_datos(tabla_combate, tabla_relaciones, obediencia), toggle)
 
 
+# La RegeneracionMana de los fixtures (T21), armada como en ContextoCombate,
+# para los tests que crean un Turno suelto.
+static func regeneracion_mana() -> RegeneracionMana:
+	return RegeneracionMana.desde_datos(cargar()["datos"]["tablas/hambre.json"])
+
+
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
 static func combo(relaciones: Dictionary = {}) -> Combo:
 	var datos: Dictionary = cargar()["datos"]

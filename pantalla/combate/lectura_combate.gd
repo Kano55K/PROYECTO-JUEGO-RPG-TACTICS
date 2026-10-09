@@ -204,6 +204,7 @@ func _panel_unidad(id_unidad: String) -> Array[String]:
 	if id_unidad == Maestro.ID:
 		var maestro: Maestro = _plantel.maestro
 		lineas.append("%s: %d/%d" % [etiqueta_vida, maestro.vida, maestro.vida_max_real()])
+		lineas.append(_linea_mana(maestro.mana))
 		lineas.append(_linea_hambre(etiqueta_hambre, maestro.hambre, Maestro.ID))
 		return lineas
 	var criatura: Criatura = _plantel.criatura(id_unidad)
@@ -217,6 +218,12 @@ func _panel_unidad(id_unidad: String) -> Array[String]:
 		lineas.append(_linea_obediencia(criatura))
 		lineas.append(_linea_hambre(etiqueta_hambre, criatura.hambre, criatura.especie.id()))
 	return lineas
+
+
+# T21 (Sistema.md 2.1): el mana del Maestro, actual/tope. El tope es el mana con
+# el que entro (Maestro.mana_entrada), tal como lo resolvio el nucleo.
+func _linea_mana(actual: int) -> String:
+	return "%s: %d/%d" % [_armador.armar(ClavesTextos.PANEL_MANA), actual, _plantel.maestro.mana_entrada]
 
 
 # T14 (Sistema.md 5.4): la obediencia de una criatura de la tribu, numero y
@@ -451,7 +458,7 @@ func tooltip_unidad(id_unidad: String) -> Array[String]:
 	var etiqueta_vida: String = _armador.armar(ClavesTextos.PANEL_VIDA)
 	if id_unidad == Maestro.ID:
 		return [nombre(Maestro.ID), "%s: %d/%d" % [etiqueta_vida, foto["maestro"]["vida"],
-				_plantel.maestro.vida_max_real()]]
+				_plantel.maestro.vida_max_real()], _linea_mana(foto["maestro"]["mana"])]
 	var criatura: Criatura = _plantel.criatura(id_unidad)
 	var foto_criatura: Dictionary = {}
 	for entrada in foto["criaturas"]:

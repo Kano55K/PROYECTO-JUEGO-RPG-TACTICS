@@ -74,7 +74,7 @@ func _pct(chequeo: ChequeoRival, plantel: Plantel, id_unidad: String) -> int:
 func _turno(plantel: Plantel, unidad_id: String, azar: GeneradorAzar, combate: String = _BASE_100) -> Turno:
 	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new(),
 			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(combate),
-			DatosFixture.chequeo_rival(combate), azar)
+			DatosFixture.chequeo_rival(combate), DatosFixture.regeneracion_mana(), azar)
 
 
 func _combate(combate: String) -> Combate:
@@ -232,7 +232,7 @@ func test_rama_por_rol() -> void:
 	assert_int(consulta["porcentaje"]).is_equal(60)
 	var turno: Turno = Turno.empezar(EntradaCola.new("ocarra_1", "", 0), otra, _tablero, _danio, Surcos.new(),
 			DatosFixture.afinidad(), DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.incidente(_BASE_100),
-			DatosFixture.chequeo_rival(_BASE_100, false, relaciones), GeneradorAzar.new(1))
+			DatosFixture.chequeo_rival(_BASE_100, false, relaciones), DatosFixture.regeneracion_mana(), GeneradorAzar.new(1))
 	assert_bool(turno.acobardada).is_true()
 	assert_bool(turno.enconada).is_false()
 

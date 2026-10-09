@@ -211,6 +211,7 @@ func _chequear_cruzados(datos_por_archivo: Dictionary, errores: Array[Dictionary
 	_chequear_ids_escenario(datos_por_archivo, errores)
 	_chequear_posiciones_en_tablero(datos_por_archivo, errores)
 	_chequear_rasgos(datos_por_archivo, errores)
+	_chequear_mana_entrada(datos_por_archivo, errores)
 
 
 # Arquitectura.md A.2.2 (Rasgos y modos). Cada efecto trae sus parametros y ninguno ajeno; la ficha lleva velocidad si
@@ -378,6 +379,31 @@ func _chequear_posiciones_en_tablero(datos_por_archivo: Dictionary, errores: Arr
 			for criatura in (datos.get(lista_nombre, []) as Array):
 				var criatura_dic: Dictionary = criatura as Dictionary
 				_chequear_posicion(ruta_str, "%s.%s.posicion" % [lista_nombre, criatura_dic["id"]], criatura_dic.get("posicion"), ancho, alto, errores)
+
+
+# Sistema.md 2.1 y M-04 (T21): el mana de entrada de un escenario no supera la
+# reserva de la balanza de su Maestro (tablas/balanza.json). null es la reserva.
+# Sin la tabla o sin la fila, no se revisa (fixtures parciales).
+func _chequear_mana_entrada(datos_por_archivo: Dictionary, errores: Array[Dictionary]) -> void:
+	if not datos_por_archivo.has("tablas/balanza.json"):
+		return
+	var reservas: Dictionary = {}
+	for fila in ((datos_por_archivo["tablas/balanza.json"] as Dictionary).get("posiciones", []) as Array):
+		var fila_dic: Dictionary = fila as Dictionary
+		if fila_dic.has("reserva_mana"):
+			reservas[fila_dic["posicion"] as int] = fila_dic["reserva_mana"] as int
+	for ruta in datos_por_archivo.keys():
+		var ruta_str: String = ruta as String
+		if not ruta_str.begins_with("escenarios/"):
+			continue
+		var maestro: Dictionary = (datos_por_archivo[ruta] as Dictionary).get("maestro", {}) as Dictionary
+		var mana_entrada: Variant = maestro.get("mana_entrada")
+		if mana_entrada == null or not reservas.has(maestro.get("balanza")):
+			continue
+		var reserva: int = reservas[maestro["balanza"]]
+		if (mana_entrada as int) > reserva:
+			errores.append(_error(ruta_str, "maestro.mana_entrada", "como mucho %d (reserva de la balanza %d, tablas/balanza.json)"
+					% [reserva, maestro["balanza"] as int], mana_entrada))
 
 
 func _chequear_posicion(ruta: String, campo: String, posicion: Variant, ancho: int, alto: int, errores: Array[Dictionary]) -> void:

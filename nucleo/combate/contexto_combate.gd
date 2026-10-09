@@ -39,6 +39,8 @@ var relaciones: Relaciones
 var obediencia: Obediencia
 # Sistema.md 7.2 (T14): la usa el Combate al cerrar cada ronda.
 var hambre_combate: HambreCombate
+# Sistema.md 2.1 y 2.2 (T21): la regeneracion de mana del Maestro. La aplica el Turno.
+var regeneracion_mana: RegeneracionMana
 # Sistema.md 10.3 (T15): la usa el Turno para el aporte de afinidad.
 var afinidad: Afinidad
 # Sistema.md 10.2 y 1.3 (T16): la regla del bono de combo. La cadena es del Combate.
@@ -76,6 +78,7 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	contexto.cierre = Cierre.desde_datos(tabla_combate, datos["tablas/lealtad.json"], contexto.relaciones)
 	contexto.obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"], tabla_combate)
 	contexto.hambre_combate = HambreCombate.desde_datos(datos["tablas/hambre.json"])
+	contexto.regeneracion_mana = RegeneracionMana.desde_datos(datos["tablas/hambre.json"])
 	contexto.afinidad = Afinidad.desde_datos(tabla_combate, contexto.relaciones, contexto.obediencia)
 	var arrimo: Arrimo = Arrimo.desde_datos(datos["tablas/arrimo.json"])
 	contexto.combo = Combo.desde_datos(tabla_combate, arrimo, contexto.afinidad)

@@ -43,6 +43,9 @@ var golpe_incidente: Dictionary = {}
 # Sistema.md 10.5 y 10.6 (T19): {tipo, rivales, porcentaje, tiro, resultado} si el
 # inicio de este turno tuvo chequeo de rival enemiga (tirada o enconada segura); si no, {}.
 var chequeo_rival: Dictionary = {}
+# Sistema.md 2.1 (T21): {de, a} si el inicio de este turno le cambio el mana al
+# Maestro (paso 1 de 11.3); si no, {}.
+var mana: Dictionary = {}
 # Estados del turno (duran este turno): los ven las consultas, nunca se guardan.
 var enconada: bool = false
 var acobardada: bool = false
@@ -74,12 +77,14 @@ var _cola: ColaIniciativa
 # 11.3. El chequeo de rival enemiga (T19), como _incidente.
 var _incidente: Incidente
 var _chequeo: ChequeoRival
+# La regla de la regeneracion de mana (T21), como _incidente.
+var _regla_mana: RegeneracionMana
 var _azar: GeneradorAzar
 
 
 func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio, surcos: Surcos,
 		afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
-		regla_chequeo: ChequeoRival, azar: GeneradorAzar) -> void:
+		regla_chequeo: ChequeoRival, regla_mana: RegeneracionMana, azar: GeneradorAzar) -> void:
 	unidad_id = entrada.unidad_id
 	marca = entrada.marca
 	_plantel = plantel
@@ -91,6 +96,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 	_cola = cola
 	_incidente = regla_incidente
 	_chequeo = regla_chequeo
+	_regla_mana = regla_mana
 	_azar = azar
 
 
@@ -98,8 +104,9 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 # combate (un turno suelto de los tests pasa unos vacios). afinidad: la del
 # ContextoCombate. cadena: la del combate (un turno suelto, una nueva). cola: la
 # del combate (un turno suelto, una vacia: no puede Secundar). regla_incidente:
-# la del ContextoCombate. regla_chequeo: la del ContextoCombate (T19). azar: el
-# generador de combate (un turno suelto, uno propio).
+# la del ContextoCombate. regla_chequeo: la del ContextoCombate (T19).
+# regla_mana: la del ContextoCombate (T21). azar: el generador de combate (un
+# turno suelto, uno propio).
 # Sistema.md 11.3 y S-31 (P-033): el inicio del turno corre una sola vez por
 # ronda. La entrada que vuelve despues de Secundar (EntradaCola.vuelve) sigue el
 # turno sin repetirlo; por S-29 ese turno estaba sin usar, asi que se prepara igual.
@@ -107,9 +114,9 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Dani
 # preparar: miran los pasos y los ataques del modo.
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, danio: Danio,
 		surcos: Surcos, afinidad: Afinidad, cadena: Cadena, cola: ColaIniciativa, regla_incidente: Incidente,
-		regla_chequeo: ChequeoRival, azar: GeneradorAzar) -> Turno:
+		regla_chequeo: ChequeoRival, regla_mana: RegeneracionMana, azar: GeneradorAzar) -> Turno:
 	var turno: Turno = Turno.new(entrada, plantel, tablero, danio, surcos, afinidad, cadena, cola,
-			regla_incidente, regla_chequeo, azar)
+			regla_incidente, regla_chequeo, regla_mana, azar)
 	if not entrada.vuelve:
 		turno._inicio_del_turno()
 	turno._preparar()
@@ -274,12 +281,15 @@ func cola_si_secunda(aliado_id: String) -> Array[EntradaCola]:
 # Sistema.md 11.3, Inicio del turno. Primero se borra la marca de erizada: dura
 # hasta el inicio de su proximo turno (11.2, S-15). Despues van los chequeos de
 # 11.3, en este orden:
-#   1. Regeneracion de mana del Maestro (2.1): T21.
+#   1. Regeneracion de mana del Maestro (2.1, T21): RegeneracionMana, con la ronda
+#      del turno y el hambre de ahora (7.2).
 #   2. Huida de las salvajes con vida <= 25% (11.7): T25. Si sale, el turno termina ahi.
 #   Cambio de modo (11.2.3, 11.8 paso 2): una regla, no una decision de la IA.
 #   3. Rival enemiga a su alcance: Encono (10.5) o cobardia (10.6): _chequear_rival.
 #   4. Incidente con rival aliada (10.4): _chequear_incidente, despues de _preparar.
 func _inicio_del_turno() -> void:
+	if unidad_id == Maestro.ID:
+		mana = _regla_mana.aplicar(_plantel.maestro, _cola.ronda)
 	var criatura: Criatura = _plantel.criatura(unidad_id)
 	if criatura != null:
 		criatura.erizada = false

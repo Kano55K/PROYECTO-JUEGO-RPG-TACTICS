@@ -1,0 +1,8 @@
+{
+  "_nota": "T21 (10): balanza 2, reserva 8; 9 la supera (Sistema.md 2.1, M-04)",
+  "id": "mayor",
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "mana_entrada": 9 },
+  "tribu": [],
+  "enemigas": []
+}
