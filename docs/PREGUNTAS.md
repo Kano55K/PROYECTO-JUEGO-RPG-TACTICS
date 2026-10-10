@@ -578,7 +578,7 @@
 - **Cerrada en:** T44
 
 ## P-041 — Qué afín sostuvo a la que resiste (campo `afin` de `chequeo_rival`)
-- **Estado:** ABIERTA
+- **Estado:** RESPONDIDA
 - **Para:** ARQUITECTO
 - **Tarea:** T44
 - **Fecha:** 09/10/2026
@@ -588,4 +588,4 @@
 - **Opciones:** A) con `sostenida_por: "afin"`, el evento suma `afin` con el id de la primera afín del toggle, en el orden del Plantel (la misma cuenta del porcentaje). B) sin campo nuevo: la línea queda con `[FALTA: afin]` hasta que el Worldbuilder cambie el texto. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A, que eligió el usuario en la sesión 1 de T44: `ChequeoRival._pct_cobardia` devuelve también `afin`, y `Combate._registrar_chequeo_rival` lo suma al evento solo en una resistida sostenida por una afín. Si se elige B, se borra el campo y su test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto (09/10/2026): opción A, ya programada en T44. En un chequeo_rival resistido con sostenida_por: "afin", el evento suma afin con el id de la primera afín del toggle, en el orden del Plantel (la misma cuenta del porcentaje). Se cierra al empezar T22, sin cambios de código.
