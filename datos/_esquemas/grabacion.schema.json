@@ -43,7 +43,7 @@
             "$ref": "comunes.schema.json#/$defs/id"
           },
           "accion": {
-            "description": "Accion.a_diccionario(). casilla: la de mover y la de cavar (Sistema.md 11.2.1, T37). hacerse_junco, sin campos (Sistema.md 11.2.2, T38). aliado: la de secundar (Sistema.md 10.1, T17). hechizo: el id del hechizo (hechizos.json), con su objetivo y, en la Lanzadera, sentido (Sistema.md 1.6, T22). Los tipos de T24 a T28 se suman a este enum",
+            "description": "Accion.a_diccionario(). casilla: la de mover y la de cavar (Sistema.md 11.2.1, T37). hacerse_junco, sin campos (Sistema.md 11.2.2, T38). aliado: la de secundar (Sistema.md 10.1, T17). hechizo: el id del hechizo (hechizos.json), con su objetivo y, en la Lanzadera, sentido (Sistema.md 1.6, T22). sellar: con su objetivo (Sistema.md 4.1, T24). Los tipos de T26 a T28 se suman a este enum",
             "type": "object",
             "required": [
               "tipo"
@@ -59,7 +59,8 @@
                   "cavar",
                   "hacerse_junco",
                   "secundar",
-                  "hechizo"
+                  "hechizo",
+                  "sellar"
                 ]
               },
               "casilla": {

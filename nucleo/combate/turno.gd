@@ -15,6 +15,21 @@ enum Obligacion { NINGUNA, ATACAR, ACERCARSE }
 # Arquitectura.md A.7 (T18): el resultado del evento incidente.
 const RESULTADO_DISTRAIDA: String = "distraida"
 const RESULTADO_GOLPE: String = "golpe"
+# T24: los motivos de una objetivo de _motivo_sellar, en el orden en que los
+# revisa (despues de los del Maestro). Lo usa motivo_sellar para decir el que
+# mas lejos llego; el test del orden lo comprueba contra _motivo_sellar.
+const _ORDEN_SELLAR: Array[ResultadoAccion.Motivo] = [
+	ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE,
+	ResultadoAccion.Motivo.OBJETIVO_ALIADO,
+	ResultadoAccion.Motivo.OBJETIVO_FUERA_DEL_TABLERO,
+	ResultadoAccion.Motivo.OBJETIVO_CAIDO,
+	ResultadoAccion.Motivo.OBJETIVO_OCULTO,
+	ResultadoAccion.Motivo.OBJETIVO_NO_SALVAJE,
+	ResultadoAccion.Motivo.FUERA_DE_ALCANCE,
+	ResultadoAccion.Motivo.NO_SELLABLE,
+	ResultadoAccion.Motivo.RANGO_ALTO,
+	ResultadoAccion.Motivo.MANA_INSUFICIENTE,
+]
 
 var unidad_id: String
 # La de la entrada: "caza", "cuenta" o "". Es el modo al armar la ronda; el
@@ -81,6 +96,8 @@ var _chequeo: ChequeoRival
 var _regla_mana: RegeneracionMana
 # Los hechizos del Maestro (T22), como _incidente.
 var _hechizos: Hechizos
+# La regla de sellar (T24), como _hechizos.
+var _sellado: Sellado
 var _azar: GeneradorAzar
 
 
@@ -99,6 +116,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Sur
 	_chequeo = reglas.chequeo_rival
 	_regla_mana = reglas.regeneracion_mana
 	_hechizos = reglas.hechizos
+	_sellado = reglas.sellado
 	_azar = azar
 
 
@@ -319,6 +337,46 @@ func previsualizar_hechizo(hechizo_id: String, objetivo_id: String, sentido: Str
 	return validar(Accion.hechizo(hechizo_id, objetivo_id, sentido))
 
 
+# Sistema.md 4.1 (T24, D-005): las unidades que se pueden sellar ahora, en el
+# orden del Plantel.
+func objetivos_para_sellar() -> Array[String]:
+	var resultado: Array[String] = []
+	for criatura in _plantel.criaturas():
+		if _motivo_sellar(criatura.id) == ResultadoAccion.Motivo.NINGUNO:
+			resultado.append(criatura.id)
+	return resultado
+
+
+# T24 (calcular sin aplicar): por que el Maestro no puede sellar ahora, con el
+# mismo chequeo que la accion (_motivo_sellar). NINGUNO si alguna enemiga se
+# puede sellar. Si no, el motivo de la enemiga que mas lejos llego en el orden de
+# _motivo_sellar (empate: la primera del Plantel), asi la pantalla dice por que
+# (fuera de alcance, mana); sin enemigas, SIN_OBJETIVOS.
+func motivo_sellar() -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_puede_sellar()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	var mejor: ResultadoAccion.Motivo = ResultadoAccion.Motivo.SIN_OBJETIVOS
+	var mejor_paso: int = -1
+	for criatura in _plantel.criaturas():
+		if criatura.bando != Criatura.Bando.ENEMIGA:
+			continue
+		var de_esta: ResultadoAccion.Motivo = _motivo_sellar(criatura.id)
+		if de_esta == ResultadoAccion.Motivo.NINGUNO:
+			return de_esta
+		var paso: int = _ORDEN_SELLAR.find(de_esta)
+		if paso > mejor_paso:
+			mejor = de_esta
+			mejor_paso = paso
+	return mejor
+
+
+# Calcular sin aplicar (A.6, D-005): lo mismo que validar el sellado. Trae el
+# porcentaje, el costo y el mana; el motivo si no vale.
+func previsualizar_sellar(objetivo_id: String) -> ResultadoAccion:
+	return validar(Accion.sellar(objetivo_id))
+
+
 # Sistema.md 11.3, Inicio del turno. Primero se borra la marca de erizada: dura
 # hasta el inicio de su proximo turno (11.2, S-15). Despues van los chequeos de
 # 11.3, en este orden:
@@ -502,6 +560,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _secundar(accion.aliado_id, aplica)
 		Accion.Tipo.HECHIZO:
 			resultado = _hechizo(accion, aplica)
+		Accion.Tipo.SELLAR:
+			resultado = _sellar(accion.objetivo_id, aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -979,6 +1039,91 @@ func _remiendo(hechizo_id: String, objetivo_id: String, aplica: bool) -> Resulta
 	if aplica:
 		_poner_vida(objetivo_id, a)
 	return resultado
+
+
+# Sistema.md 4.1 a 4.3 y 2.3 (T24): el Maestro sella a una salvaje de pie. Gasta
+# la accion y conserva el movimiento. El % sale de la vida de ahora (Sellado);
+# erizada no lo cambia (S-51). Se paga el mana; con % > 0, una tirada del
+# generador de combate; con 0, sin tirada y falla (S-50). Si falla, el pergamino
+# no se gasta (S-49). Si sale, el primer pergamino en blanco queda ocupado por
+# ella y deja el tablero como fuera (sus surcos se cierran). La cadena (10.2) y
+# el fin (11.5) los mira _resolver despues, como en cualquier accion.
+func _sellar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_sellar(objetivo_id)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	var maestro: Maestro = _plantel.maestro
+	var criatura: Criatura = _plantel.criatura(objetivo_id)
+	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
+	resultado.porcentaje = _sellado.porcentaje_de(criatura)
+	resultado.costo = _sellado.costo(criatura.especie, maestro)
+	if resultado.costo != 0:
+		resultado.mana = {"de": maestro.mana, "a": maestro.mana - resultado.costo}
+	if not aplica:
+		return resultado
+	maestro.mana -= resultado.costo
+	accion_usada = true
+	ataques_restantes = 0
+	var tiro: Variant = null
+	var logrado: bool = false
+	if (resultado.porcentaje as int) > 0:
+		tiro = Porcentajes.tiro(_azar)
+		logrado = Porcentajes.sale(tiro, resultado.porcentaje)
+	var pergamino_id: Variant = null
+	if logrado:
+		var pergamino: Pergamino = _plantel.pergamino_en_blanco()
+		pergamino.ocupar(objetivo_id)
+		criatura.pergamino_id = pergamino.id
+		pergamino_id = pergamino.id
+		VidaCero.sacar_del_tablero(criatura, _surcos)
+	resultado.evento = {"tipo": "sellado", "objetivo": objetivo_id, "porcentaje": resultado.porcentaje, "tiro": tiro,
+			"resultado": Sellado.RESULTADO_LOGRADO if logrado else Sellado.RESULTADO_FALLIDO, "pergamino": pergamino_id}
+	return resultado
+
+
+# Sistema.md 4.1 (T24): el unico chequeo de sellar, compartido por la accion, las
+# consultas y la pantalla. Primero lo del Maestro (_motivo_puede_sellar); despues
+# la objetivo, en el orden de _ORDEN_SELLAR: la consulta unica (Objetivos HOSTIL:
+# de pie y no oculta, S-21; el bando lo mira la accion), salvaje, distancia
+# Manhattan <= alcance, ficha sellable, rango <= el maximo de la balanza y, al
+# final, el mana del costo de esa objetivo. Nada se decide por el id.
+func _motivo_sellar(objetivo_id: String) -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_puede_sellar()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	motivo = Objetivos.motivo(objetivo_id, Objetivos.Clase.HOSTIL, _plantel)
+	if motivo == ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE:
+		return motivo
+	if _bando(objetivo_id) == _bando(unidad_id):
+		return ResultadoAccion.Motivo.OBJETIVO_ALIADO
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	var criatura: Criatura = _plantel.criatura(objetivo_id)
+	if criatura.comportamiento != Criatura.Comportamiento.SALVAJE:
+		return ResultadoAccion.Motivo.OBJETIVO_NO_SALVAJE
+	if Tablero.distancia(_posicion(unidad_id), criatura.posicion) > _sellado.alcance():
+		return ResultadoAccion.Motivo.FUERA_DE_ALCANCE
+	if not criatura.especie.sellable():
+		return ResultadoAccion.Motivo.NO_SELLABLE
+	if not _sellado.rango_permitido(criatura.especie, _plantel.maestro):
+		return ResultadoAccion.Motivo.RANGO_ALTO
+	if _plantel.maestro.mana < _sellado.costo(criatura.especie, _plantel.maestro):
+		return ResultadoAccion.Motivo.MANA_INSUFICIENTE
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Lo de sellar que no depende de la objetivo, en este orden: turno terminado,
+# solo el Maestro, la accion sin usar y un pergamino en blanco (4.1).
+func _motivo_puede_sellar() -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if unidad_id != Maestro.ID:
+		return ResultadoAccion.Motivo.SOLO_MAESTRO
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	if _plantel.pergamino_en_blanco() == null:
+		return ResultadoAccion.Motivo.SIN_PERGAMINO
+	return ResultadoAccion.Motivo.NINGUNO
 
 
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es

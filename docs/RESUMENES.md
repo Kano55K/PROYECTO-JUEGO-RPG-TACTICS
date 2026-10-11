@@ -2254,3 +2254,108 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
      - en PowerShell: `& $env:GODOT_BIN --headless --path . --script res://herramientas/reproducir.gd -- registros/c_tasajero_33001_1.json`.
      - Puede salir el AVISO de huella. Si el combate había terminado, tiene que escribir `registros/c_tasajero_33001_1_resultado.json` (lo dice la línea "Resultado:").
   5. Anotar cualquier métrica que no coincida con lo que se vio en pantalla.
+
+## T24 · sesión 1 · 11/10/2026
+- **Rama:** tarea/T24-sellar
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera y es la descripción del PR. Primera tarea del hito 0a.3.
+- **Hecho:**
+  - **Al empezar:** P-043 pasa a `CERRADA`. Por pedido del usuario, su Respuesta copia la resolución del Arquitecto de `Arquitectura.md`. Sin cambios de código.
+  - **Datos: ninguno nuevo** (la huella no cambió). Se leen `tablas/sellado.json`, `tablas/costos_mana.json`, `tablas/balanza.json`, `tablas/lealtad.json`, `tablas/combate.json` (`alcance_sellar`) y `rango`/`sellable` de la ficha.
+  - **Regla `Sellado`** (`nucleo/combate/sellado.gd`, sin estado; D-008: en `ReglasCombate`, `ContextoCombate.armar` y `DatosFixture.reglas`). Funciones:
+    - `porcentaje(vida, vida_max, rango)`: compara en enteros (`vida × 100 ≤ límite × vida_max`);
+    - `costo(especie, maestro)` = `max(mínimo, costo del rango − descuento)`;
+    - `lealtad_inicial(maestro)` = base de combate + ajuste de la balanza, nunca menos que el mínimo de la escala;
+    - `rango_permitido(especie, maestro)` y `alcance()`.
+    - Sin `tablas/sellado.json`, el contexto se rechaza con `REGLA_FALTANTE` y el nombre `sellado`.
+  - **Apoyos** (reuso, sin reglas nuevas):
+    - `Plantel.pergamino_en_blanco()`;
+    - `VidaCero.sacar_del_tablero(criatura, surcos)`: la usan la salvaje en 0 y el sellado, y T25 la va a reusar;
+    - `Porcentajes.tiro` y `sale`: `tirar` sigue haciendo una sola llamada al generador.
+  - **Acción `Accion.sellar(objetivo)`**: tipo `sellar` en el esquema `grabacion`.
+    - Motivos nuevos en `ResultadoAccion`: `SIN_PERGAMINO`, `OBJETIVO_NO_SALVAJE`, `NO_SELLABLE` y `RANGO_ALTO`.
+    - Campos nuevos `porcentaje` y `costo` (al validar y al aplicar), y `mana` `{de, a}`.
+  - **`Turno._motivo_sellar(id)`** es el único chequeo. Orden:
+    1. turno terminado; 2. solo el Maestro; 3. acción usada; 4. sin pergamino;
+    5. inexistente; 6. de la tribu; 7. fuera / caída / oculta (`Objetivos` `HOSTIL`, S-21);
+    8. no salvaje; 9. fuera de alcance; 10. no sellable; 11. rango alto; 12. maná.
+  - **Consultas:**
+    - `objetivos_para_sellar()` y `previsualizar_sellar(id)` (= `validar`);
+    - `motivo_sellar()`: los pasos 1 a 4, y si no hay ninguna objetivo válida, el motivo de la enemiga que más lejos llegó en el orden (así el tooltip dice "fuera de alcance" o "maná");
+    - `Combate.porcentaje_sellado(id)` y `costo_sellado(id)`: para cualquier salvaje de pie, sin mirar distancia, maná ni pergaminos.
+  - **Resolución:** gasta la acción y conserva el movimiento. Se paga el maná.
+    - Con % > 0 hay una tirada del generador de combate; con 0 no hay tirada y falla (S-50).
+    - Si falla, el pergamino no se gasta (S-49), y erizada no cambia el % (S-51).
+    - Si sale, el primer pergamino en blanco queda ocupado por ella, pasa a `fuera` y sus surcos se cierran. La cadena se corta por `objetivo_fuera` y la victoria la da `FinCombate`, sin código nuevo (P-029).
+  - **Registro** (A.7): `accion` → `mana` (motivo `sellar`) → `tirada` → `sellado` → `estado` → `surco_cerrado` → `cadena_cortada`.
+    - El evento `sellado` lleva `objetivo`, `porcentaje`, `tiro` (el número, o `null`), `resultado` (`logrado` / `fallido`) y `pergamino` (o `null`).
+    - El `mana` del hechizo y del sellado se registra sin volcar tiradas. Ningún evento existente cambió de forma.
+  - **Resultado:** `capturas` = `[{unidad, especie, pergamino, lealtad}]`, sacada de los pergaminos ocupados por salvajes.
+    - En el esquema salen `id` y `camino`, que nunca se llenaban (T30 suma lo suyo).
+    - La capturada es enemiga: el Cierre no le da el +1 de victoria.
+  - **Métrica 7:** `sellados` = `[{objetivo, porcentaje, logrado}]`, en orden (`[]` sin intentos). Su `description` del esquema ya no dice "la llena T24".
+  - **Pantalla:**
+    - botón **Sellar** con los costos (`Sellar (3/5 Maná)`), solo en el turno del Maestro; deshabilitado, con el motivo en el tooltip;
+    - modo "elegir objetivo", excluyente con cavar, Secundar y los hechizos: marca `objetivos_para_sellar`, y el clic izquierdo da `Accion.sellar`;
+    - hover en el modo: `sellar.tooltip` y "Maná: de → a";
+    - el % sobre cada salvaje, como marca `NN%` en la ficha y como `sellar.tooltip` en su tooltip;
+    - sucesos: `sellar.exito`; `sellar.fallo.erizada` si la objetivo está erizada en la `instantanea`; si no, `sellar.fallo` con la variante de la especie;
+    - `ClavesTextos.usadas` suma las claves de sellar y las variantes `sellar.fallo.<especie>` que existen.
+- **Archivos:**
+  - Creados:
+    - `nucleo/combate/sellado.gd`;
+    - `pruebas/combate/mesa_sellar.gd`, `test_sellado.gd`, `test_sellar.gd` y `test_sellar_combate.gd`;
+    - `pruebas/pantalla/test_lectura_sellar.gd` y `test_vista_sellar.gd`;
+    - `pruebas/datos/test_sellar_a.gd`;
+    - fixtures en `pruebas/fixtures/combate/`: `sellado.json`, `costos_mana.json`, `costos_mana_chico.json`, `especie_sellar_r2.json`, `especie_no_sellable.json`, `escenario_sellar.json` y `escenario_sellar_combate.json`.
+  - Modificados:
+    - `nucleo/combate/`: `reglas_combate.gd`, `contexto_combate.gd`, `accion.gd`, `resultado_accion.gd`, `turno.gd`, `combate.gd`, `resultado_combate.gd`, `metricas_combate.gd`, `vida_cero.gd` y `porcentajes.gd`;
+    - `nucleo/unidades/plantel.gd`;
+    - `datos/_esquemas/grabacion.schema.json` y `resultado.schema.json`;
+    - `pantalla/claves_textos.gd`, `pantalla/combate/lectura_combate.gd`, `vista_combate.gd` e `interprete_clic.gd`;
+    - `pruebas/combate/datos_fixture.gd`, `test_reglas_combate.gd` y `test_metricas_combate.gd`;
+    - `pruebas/pantalla/test_claves_textos.gd` y `test_lectura_combate.gd`;
+    - `docs/PREGUNTAS.md` y `CLAUDE.md` ("Estado actual").
+- **Tests:** 31 nuevos, total 630. Última suite completa del 11/10/2026: 630/630 en verde.
+  - **Tests viejos reescritos:**
+    - `test_metricas_combate.gd::test_metricas_9_y_11`: `sellados` deja de estar en `null` y pasa a `[]` (D-011, T24);
+    - `test_reglas_combate.gd` (`_armar`): `ReglasCombate.new` suma la regla `sellado` (D-008);
+    - `test_lectura_combate.gd::test_t40_tooltip_de_una_enemiga`: la ficha del Zancajunco salvaje suma `0%` (`Sistema.md` 4.1: % sobre la salvaje, T24).
+  - **Intermitentes:** en dos suites completas fallaron 8 tests de mouse (a veces 9):
+    - `test_principal.gd::test_clic_del_mouse_llega_al_tablero`;
+    - los 3 de mouse de `test_vista_camara.gd`;
+    - 2 de `test_vista_hechizos.gd`;
+    - 2 de `test_vista_sellar.gd`.
+    - La casilla del mouse salía con coordenadas de pantalla reales: (41,34) donde se esperaba (1,7), y (164,9). Pasan corriendo `pruebas/pantalla` sola, y la tercera suite completa salió en verde sin cambiar código. Parece que eventos del cursor real de la máquina llegan a la ventana de los tests.
+    - No se tocó ningún test. Queda para una tarea propia.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. `test_sellado.gd`: vida máx. 140 con 35/36, 70/71 y 105/106, y vida máx. 33 sin ningún borde entero, en los 3 rangos.
+  2. `test_sellado.gd`: costo con balanza 2, 3 y 5; mínimo 1 con `costos_mana_chico.json`; lealtad 2, 1 (3 y 4) y 0.
+  3. `test_sellar.gd::test_un_caso_por_motivo_en_orden`: los 12 motivos en orden, sin cambiar nada. `motivo_sellar` coincide salvo en inexistente, de la tribu, fuera y caída: no tienen objetivo, o el combate ya habría terminado. También `test_motivo_sellar_dice_la_que_mas_lejos_llego`.
+  4. `test_quienes_no_son_objetivo`: oculta, caída (la atacante), de la tribu, atacante, no sellable, rango alto (balanza 1) y distancia 3.
+  5. `test_fallo` (maná, pergamino en blanco, acción usada, movimiento entero y `mover` válido) y `test_erizada_da_el_mismo_porcentaje`.
+  6. `test_exito`: fuera, pergamino ocupado, 2 surcos cerrados por `duenio_fuera`, cadena por `objetivo_fuera` y victoria. También `test_exito_sin_ser_la_ultima_sigue_el_combate`.
+  7. `test_cero_por_ciento_sin_tirada`.
+  8. `test_sellar_combate.gd`: orden del registro, y la grabación con un fallido y un logrado valida y se reproduce igual. El `surco_cerrado` en el orden se comprueba en el turno suelto (6): en el fixture de combate, el Surcón no cava.
+  9. `test_resultado_con_capturas_valida` (lealtad 1, sin anotación para la capturada), y la métrica 7 con dos intentos y vacía.
+  10. `test_vista_sellar.gd` (botón, motivo, modo, % de la ficha, hover = evento, clic por evento) y `test_lectura_sellar.gd` (fallo, fallo de especie, fallo erizada, logrado, y botón con dos costos).
+  11. `test_sellar_a.gd` (`datos/` real): el % mostrado = el del evento = la celda de `tablas/sellado.json`.
+  12. `test_contacto`, `test_robustez_ia`, el permanente, `test_lanzadera_b` y `test_metricas_escenarios` pasan.
+  13. Suite completa en verde (ver "Intermitentes").
+- **Lecturas declaradas:**
+  - S-49, S-50 y S-51, ya declaradas en `Arquitectura.md`.
+  - Técnicas, sin pregunta:
+    - `motivo_sellar` da el motivo más avanzado;
+    - `tiro` es el número de la tirada;
+    - con % > 0 se tira (la convención de `Porcentajes`).
+- **Claves de texto nuevas sin texto:** `aviso.sellar.accion_usada`, `aviso.sellar.mana_insuficiente`, `aviso.sellar.fuera_de_alcance`, `aviso.sellar.no_sellable`, `aviso.sellar.oculta`, `aviso.sellar.no_salvaje` y `aviso.sellar.sin_objetivos`.
+- **Preguntas:** nuevas: ninguna. Cerradas: P-043.
+- **Para la próxima sesión:** nada: tarea terminada.
+- **Prueba manual:**
+  1. Tests. En `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas`; en PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`. Todo en verde (unos 10 minutos). No muevas el mouse sobre la ventana de Godot mientras corre (ver "Intermitentes").
+  2. Abrir el juego: F5, o en PowerShell `& $env:GODOT_BIN --path .` (en `cmd`: `"%GODOT_BIN%" --path .`). Jugar A. La ficha de la Ocarra muestra `5%` desde el principio, y su tooltip dice el %. Al golpearla, baja de tramo (≤ 75 %: 20 %; ≤ 50 %: 50 %; ≤ 25 %: 80 %).
+  3. Botón Sellar: gris con la Ocarra lejos, y el tooltip dice por qué (`[FALTA: aviso.sellar.fuera_de_alcance]`). Con el Maestro a 2 o menos, el modo marca a la Ocarra, y el hover dice el % y "Maná: 8 → 5".
+  4. Un sellado fallido: el maná baja y el pergamino sigue en blanco (panel F3). Uno logrado: la Ocarra sale del tablero y el combate termina en victoria.
+  5. Abrir el `registros/a_dia_1_<semilla>_<n>_resultado.json` más nuevo: `capturas` con la Ocarra y lealtad 2, y `metricas.sellados` con cada intento y su %.
+  6. D normal: sellar al Surcón salvaje cierra sus surcos. Si la Rodauva salvaje está erizada y el sellado falla, el suceso es "El hilo resbala entre las púas.".
+  7. **H no sirve para esto:** su única enemiga es el Tasajero, que no es sellable (no muestra %). Para ver la balanza en el costo, usar D balanza 4: descuento 1 (Surcón 4, Rodauva 2) y lealtad de la capturada 1.
+  8. Anotar los `[FALTA]` que aparezcan.

@@ -3,15 +3,16 @@
 class_name Accion
 extends RefCounted
 
-# Sellar, guardar, invocar y huir son tipos nuevos en T24 y T26 a T28.
+# Guardar, invocar y huir son tipos nuevos en T26 a T28. SELLAR (T24): el Maestro
+# sella a una salvaje (Sistema.md 4.1).
 # HECHIZO (T22): un solo tipo para todos; el hechizo es un parametro (su id de
 # hechizos.json), asi la pantalla los arma desde los datos.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO }
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco.
 var casilla: Vector2i = Criatura.SIN_POSICION
-# Para ATACAR y HECHIZO: el id de la unidad objetivo.
+# Para ATACAR, HECHIZO y SELLAR: el id de la unidad objetivo.
 var objetivo_id: String = ""
 # Solo para HECHIZO: el id del hechizo (hechizos.json) y, en la Lanzadera, el
 # sentido ("empujar" o "atraer"; "" en los demas).
@@ -71,6 +72,13 @@ static func hechizo(id_hechizo: String, id_objetivo: String, sentido_hechizo: St
 	return accion
 
 
+# Sistema.md 4.1 (T24): el Maestro sella a la salvaje `id_objetivo`.
+static func sellar(id_objetivo: String) -> Accion:
+	var accion: Accion = Accion.new(Tipo.SELLAR)
+	accion.objetivo_id = id_objetivo
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -83,7 +91,7 @@ func a_diccionario() -> Dictionary:
 	match tipo:
 		Tipo.MOVER, Tipo.CAVAR:
 			resultado["casilla"] = [casilla.x, casilla.y]
-		Tipo.ATACAR:
+		Tipo.ATACAR, Tipo.SELLAR:
 			resultado["objetivo"] = objetivo_id
 		Tipo.SECUNDAR:
 			resultado["aliado"] = aliado_id
@@ -116,6 +124,10 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 			if datos.size() != 2 or not datos.get("objetivo") is String:
 				return null
 			return atacar(datos["objetivo"])
+		Tipo.SELLAR:
+			if datos.size() != 2 or not datos.get("objetivo") is String:
+				return null
+			return sellar(datos["objetivo"])
 		Tipo.SECUNDAR:
 			if datos.size() != 2 or not datos.get("aliado") is String:
 				return null

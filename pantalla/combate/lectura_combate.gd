@@ -22,6 +22,8 @@ const ACTIVA_HACERSE_JUNCO: String = "hacerse_junco"
 const ACTIVA_CAVAR: String = "cavar"
 # A.7: el tipo de la accion `hechizo` en el registro.
 const _ACCION_HECHIZO: String = "hechizo"
+# A.7 (T24): el tipo de la accion `sellar` en el registro.
+const _ACCION_SELLAR: String = "sellar"
 
 var _combate: Combate
 var _plantel: Plantel
@@ -65,6 +67,10 @@ func fichas() -> Array[Dictionary]:
 		var linea_encono: String = _linea_encono(foto_criatura)
 		if (foto_criatura["encono"] as int) > 0 and not linea_encono.is_empty():
 			marcas.append(linea_encono)
+		# T24 (Sistema.md 4.1): el % de sellado sobre la salvaje (Combate.porcentaje_sellado).
+		var porcentaje: Variant = _combate.porcentaje_sellado(criatura.id)
+		if porcentaje != null:
+			marcas.append(marca_sellado(porcentaje))
 		var ficha: Dictionary = _ficha(criatura.id, foto_criatura["posicion"], criatura.bando == Criatura.Bando.TRIBU,
 				false, estado == _ESTADO_CAIDA, foto_criatura["vida"], criatura.vida_max_real(), marcas)
 		ficha["oculta"] = foto_criatura["oculta"]
@@ -282,6 +288,11 @@ func suceso(evento: Dictionary) -> Array[String]:
 			if evento["accion"]["tipo"] == _ACCION_HECHIZO:
 				return [_SEPARADOR.join([nombre(evento["unidad"]),
 						_armador.armar(ClavesTextos.nombre_hechizo(evento["accion"]["hechizo"]))])]
+			# T24: quien sella, antes de su `sellado`.
+			if evento["accion"]["tipo"] == _ACCION_SELLAR:
+				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_SELLAR)])]
+		"sellado":
+			return [_suceso_sellado(evento)]
 		"lanzadera":
 			return [_suceso_lanzadera(evento)]
 		# T22 (Sistema.md 1.6): la vida de la curada, de -> a.
@@ -543,6 +554,67 @@ func vista_previa_hechizo(previas: Dictionary) -> Array[String]:
 	return lineas
 
 
+# T24 (Sistema.md 4.1 y 2.3): el boton Sellar, {texto, tooltip, habilitado}, o {}
+# fuera del turno del Maestro. El texto lleva los costos distintos de las
+# salvajes que se podrian sellar (Combate.costo_sellado, de menor a mayor);
+# habilitado y el motivo del tooltip salen de Turno.motivo_sellar.
+func boton_sellar() -> Dictionary:
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.unidad_id != Maestro.ID:
+		return {}
+	var costos: Array[int] = []
+	for criatura in _plantel.criaturas():
+		var costo: Variant = _combate.costo_sellado(criatura.id)
+		if costo != null and not costos.has(costo):
+			costos.append(costo)
+	costos.sort()
+	var texto: String = _armador.armar(ClavesTextos.ACCION_SELLAR)
+	if not costos.is_empty():
+		texto += " (%s %s)" % ["/".join(costos.map(func(costo: int) -> String: return str(costo))),
+				_armador.armar(ClavesTextos.PANEL_MANA)]
+	var motivo: ResultadoAccion.Motivo = turno.motivo_sellar()
+	var clave_motivo: String = ClavesTextos.motivo_sellar(motivo)
+	return {"texto": texto, "habilitado": motivo == ResultadoAccion.Motivo.NINGUNO,
+			"tooltip": "" if clave_motivo.is_empty() else _armador.armar(clave_motivo)}
+
+
+# T24: lo que haria el sellado sobre la objetivo (Turno.previsualizar_sellar): el %
+# con sellar.tooltip y el mana de -> a que paga. [] si no vale.
+func vista_previa_sellar(previa: ResultadoAccion, objetivo_id: String) -> Array[String]:
+	var lineas: Array[String] = []
+	if not previa.valida:
+		return lineas
+	lineas.append(linea_sellado(objetivo_id, previa.porcentaje))
+	if not previa.mana.is_empty():
+		lineas.append("%s: %d → %d" % [_armador.armar(ClavesTextos.PANEL_MANA), previa.mana["de"], previa.mana["a"]])
+	return lineas
+
+
+# T24: el % de sellado como marca de la ficha.
+func marca_sellado(porcentaje: int) -> String:
+	return "%d%%" % porcentaje
+
+
+# T24: sellar.tooltip con el % que da el nucleo y la objetivo como hueco.
+func linea_sellado(objetivo_id: String, porcentaje: int) -> String:
+	var datos: Dictionary = _hueco(objetivo_id)
+	datos["porcentaje"] = porcentaje
+	return _armador.armar(ClavesTextos.SELLAR_TOOLTIP, datos, _sujeto(objetivo_id))
+
+
+# T24 (Sistema.md 4.1, Mundo.md 5): logrado, sellar.exito; fallido con la objetivo
+# erizada ahora (instantanea del nucleo, S-51), sellar.fallo.erizada; si no,
+# sellar.fallo con la especie como sujeto (su variante, si existe).
+func _suceso_sellado(evento: Dictionary) -> String:
+	var objetivo: String = evento["objetivo"]
+	if evento["resultado"] == Sellado.RESULTADO_LOGRADO:
+		return _armador.armar(ClavesTextos.SELLAR_EXITO, _hueco(objetivo), _sujeto(objetivo))
+	for foto_criatura in _combate.instantanea()["criaturas"]:
+		if foto_criatura["id"] == objetivo and foto_criatura["erizada"]:
+			return _armador.armar(ClavesTextos.SELLAR_FALLO_ERIZADA, _hueco(objetivo))
+	return _armador.armar(ClavesTextos.SELLAR_FALLO, _hueco(objetivo), _sujeto(objetivo))
+
+
 func _boton(tipo: String, texto: String, tooltip: String, habilitado: bool) -> Dictionary:
 	return {"tipo": tipo, "texto": texto, "tooltip": tooltip, "habilitado": habilitado}
 
@@ -583,6 +655,10 @@ func tooltip_unidad(id_unidad: String) -> Array[String]:
 			var clave_rival: String = ClavesTextos.ENCONO_TOOLTIP \
 					if rival["tipo"] == ChequeoRival.TIPO_ENCONO else ClavesTextos.COBARDIA_TOOLTIP
 			lineas.append(_armador.armar(clave_rival, {"porcentaje": rival["porcentaje"]}, _sujeto(id_unidad)))
+	# T24 (Sistema.md 4.1): el % de sellado de una salvaje, desde el principio.
+	var porcentaje: Variant = _combate.porcentaje_sellado(id_unidad)
+	if porcentaje != null:
+		lineas.append(linea_sellado(id_unidad, porcentaje))
 	# Sistema.md 11.2.3: "el umbral se muestra sobre la unidad".
 	var vida_de_cambio: Variant = _combate.vida_de_cambio(id_unidad)
 	if vida_de_cambio != null:

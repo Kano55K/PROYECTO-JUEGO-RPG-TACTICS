@@ -38,6 +38,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 	var cobardia: Dictionary = {BANDO_TRIBU: {_ACOBARDADA: 0, _RESISTIDA: 0},
 			BANDO_ENEMIGAS: {_ACOBARDADA: 0, _RESISTIDA: 0}}
 	var caidas: Array = []
+	# 7 (T24): {objetivo, porcentaje, logrado} de cada evento sellado, en orden.
+	var sellados: Array = []
 	var muertas: Array = []
 	var desenlace: Variant = null
 	# [ronda, distancia] de cada distancia_maestro no nula: se filtran al final,
@@ -105,6 +107,9 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 						"a": linea["a"], "ronda": ronda})
 			"encierro":
 				encierros[linea["unidad"]] = encierros.get(linea["unidad"], 0) + 1
+			"sellado":
+				sellados.append({"objetivo": linea["objetivo"], "porcentaje": linea["porcentaje"],
+						"logrado": linea["resultado"] == Sellado.RESULTADO_LOGRADO})
 
 	var distancia_maestro: Dictionary = {"turnos": 0, "suma": 0}
 	if primer_ataque != null:
@@ -130,8 +135,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 		"incidentes": incidentes,
 		"encono": encono,
 		"cobardia": cobardia,
-		# 7: la llena T24 (sellar)
-		"sellados": null,
+		# 7 (T24): sellados intentados y logrados, con el % mostrado
+		"sellados": sellados,
 		# 8: la llena T25 (huida)
 		"capturas_perdidas": null,
 		# 9 (P-043: tambien el Maestro)

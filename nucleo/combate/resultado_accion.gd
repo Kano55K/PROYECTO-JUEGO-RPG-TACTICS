@@ -86,6 +86,15 @@ enum Motivo {
 	SENTIDO_INVALIDO,
 	# Turno.motivo_hechizo (T22, sesion 2): el hechizo no vale sobre ninguna unidad ahora.
 	SIN_OBJETIVOS,
+	# Sistema.md 4.1 (T24): toda captura exige un pergamino en blanco en el Plantel.
+	SIN_PERGAMINO,
+	# Sistema.md 4.1: se sella a una salvaje; la atacante nocturna se resella despues
+	# del combate (9.3, T30).
+	OBJETIVO_NO_SALVAJE,
+	# Sistema.md 4.3: la ficha no es sellable (el Tasajero).
+	NO_SELLABLE,
+	# Sistema.md 4.1: el rango de la especie pasa el maximo sellable de la balanza.
+	RANGO_ALTO,
 }
 
 var valida: bool
@@ -97,12 +106,17 @@ var desglose: DesgloseDanio = null
 # Solo al atacar (Sistema.md 10.2, T16): el eslabon de la cadena que es (o seria)
 # el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
 var eslabon: Variant = null
-# Solo en un hechizo (Sistema.md 1.6, T22): {de, a} del mana que paga, o {} si
-# no cambia (D-007).
+# Solo en un hechizo o un sellado (Sistema.md 1.6 y 4.1, T22 y T24): {de, a} del
+# mana que paga, o {} si no cambia (D-007).
 var mana: Dictionary = {}
 # Solo en un hechizo que no es ataque: el evento de A.7 que produce (`lanzadera`
-# o `remiendo`), con su tipo. Lo mismo al validar y al aplicar.
+# o `remiendo`), con su tipo. Lo mismo al validar y al aplicar. En un sellado
+# (T24), el evento `sellado`, solo al aplicar: la tirada existe solo al aplicar.
 var evento: Dictionary = {}
+# Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24): el % que se muestra antes
+# de gastar el mana y el costo. Lo mismo al validar y al aplicar.
+var porcentaje: Variant = null
+var costo: int = 0
 # Solo en la Lanzadera: las ocultas que la movida destaparia por contacto al
 # llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
 var destaparia: Array[String] = []

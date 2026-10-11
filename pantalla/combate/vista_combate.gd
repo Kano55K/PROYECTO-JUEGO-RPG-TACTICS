@@ -38,6 +38,8 @@ const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
 # mouse sobre una, los destinos de la Lanzadera (la marca de destino).
 const _MARCA_OBJETIVO_HECHIZO: Vector2i = _MARCA_CAVAR
 const _MARCA_DESTINO_HECHIZO: Vector2i = _MARCA_DESTINO
+# T24: las objetivos del sellado (la misma marca de "elegir").
+const _MARCA_OBJETIVO_SELLAR: Vector2i = _MARCA_CAVAR
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
@@ -58,6 +60,7 @@ const _ACCION_CAMARA_ARRASTRAR: String = "camara_arrastrar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
 const _NOMBRE_BOTON_SECUNDAR: String = "Secundar"
 const _PREFIJO_BOTON_HECHIZO: String = "Hechizo_"
+const _NOMBRE_BOTON_SELLAR: String = "Sellar"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -109,6 +112,10 @@ var _aliada_previa: String = ""
 # que se muestra con el mouse sobre una objetivo: {sentido: {evento, destaparia}}.
 var _hechizo_elegido: String = ""
 var _hechizo_mostrado: Dictionary = {}
+# T24: el modo "elegir objetivo" de Sellar y lo que se muestra con el mouse sobre
+# una objetivo: {objetivo, porcentaje, costo, previa}, o {}.
+var _sellando: bool = false
+var _sellado_mostrado: Dictionary = {}
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -238,7 +245,7 @@ func clic_casilla(casilla: Vector2i, alterno: bool = false) -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
 	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar,
-			_eligiendo_aliada, _hechizo_elegido, alterno)
+			_eligiendo_aliada, _hechizo_elegido, alterno, _sellando)
 	if accion == null:
 		return false
 	return _aplicar(accion)
@@ -255,6 +262,7 @@ func clic_casilla(casilla: Vector2i, alterno: bool = false) -> bool:
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
 	_hechizo_mostrado = {}
+	_sellado_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_capa_afines.clear()
@@ -275,6 +283,8 @@ func sobre_casilla(casilla: Vector2i) -> void:
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
 		if not _hechizo_elegido.is_empty():
 			_mostrar_hechizo(turno, foto, casilla)
+		elif _sellando:
+			_mostrar_sellado(turno, foto, casilla)
 		elif _eligiendo_aliada:
 			# T17: sobre una aliada valida, la cola muestra el orden que quedaria.
 			var aliada: String = InterpreteClic.aliada_en(turno, foto, casilla)
@@ -397,6 +407,7 @@ func pulsar_activa(tipo: String) -> bool:
 			_eligiendo_aliada = false
 			_aliada_previa = ""
 			_hechizo_elegido = ""
+			_sellando = false
 			redibujar()
 			return true
 	return false
@@ -417,8 +428,49 @@ func pulsar_hechizo(hechizo_id: String) -> bool:
 	_eligiendo_cavar = false
 	_eligiendo_aliada = false
 	_aliada_previa = ""
+	_sellando = false
 	redibujar()
 	return true
+
+
+# T24: el boton Sellar no aplica nada: entra (o sale) del modo "elegir objetivo".
+# Solo si Turno.motivo_sellar lo deja (salir, siempre). Devuelve true si hizo algo.
+func pulsar_sellar() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if not _sellando and _combate.turno_actual().motivo_sellar() != ResultadoAccion.Motivo.NINGUNO:
+		return false
+	_sellando = not _sellando
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	redibujar()
+	return true
+
+
+func eligiendo_sellar() -> bool:
+	return _sellando
+
+
+# T24: lo que se muestra con el mouse sobre una objetivo del sellado
+# (Turno.previsualizar_sellar): {objetivo, porcentaje, costo}, o {}.
+func sellado_mostrado() -> Dictionary:
+	if _sellado_mostrado.is_empty():
+		return {}
+	return {"objetivo": _sellado_mostrado["objetivo"], "porcentaje": _sellado_mostrado["porcentaje"],
+			"costo": _sellado_mostrado["costo"]}
+
+
+# T24: con el mouse sobre una objetivo del sellado, el % y el costo que da el nucleo.
+func _mostrar_sellado(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
+	var objetivo: String = InterpreteClic.objetivo_sellar_en(turno, foto, casilla)
+	if objetivo.is_empty():
+		return
+	var previa: ResultadoAccion = turno.previsualizar_sellar(objetivo)
+	if previa.valida:
+		_sellado_mostrado = {"objetivo": objetivo, "porcentaje": previa.porcentaje, "costo": previa.costo,
+				"previa": previa}
 
 
 # T22: el hechizo cuyo modo esta puesto, o "".
@@ -440,6 +492,7 @@ func pulsar_secundar() -> bool:
 	_eligiendo_aliada = not _eligiendo_aliada
 	_eligiendo_cavar = false
 	_hechizo_elegido = ""
+	_sellando = false
 	_aliada_previa = ""
 	redibujar()
 	return true
@@ -597,6 +650,8 @@ func _aplicar(accion: Accion) -> bool:
 	_eligiendo_aliada = false
 	_aliada_previa = ""
 	_hechizo_elegido = ""
+	_sellando = false
+	_sellado_mostrado = {}
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
 	if pausa_ia > 0.0 and not pasos.is_empty():
@@ -728,6 +783,12 @@ func _dibujar_marcas() -> void:
 		var foto_hechizo: Dictionary = _combate.instantanea()
 		for objetivo in turno.objetivos_para_hechizo(_hechizo_elegido):
 			_marcas.set_cell(_casilla_de(foto_hechizo, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_HECHIZO)
+		return
+	# T24: eligiendo la objetivo del sellado, solo las de objetivos_para_sellar.
+	if _sellando:
+		var foto_sellar: Dictionary = _combate.instantanea()
+		for objetivo in turno.objetivos_para_sellar():
+			_marcas.set_cell(_casilla_de(foto_sellar, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_SELLAR)
 		return
 	if _eligiendo_cavar:
 		for casilla in turno.casillas_para_cavar():
@@ -869,6 +930,19 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		_botones.add_child(boton_hechizo)
 		_botones.move_child(boton_hechizo, _boton_terminar.get_index())
 	# T17: Secundar, solo si hay alguna aliada a la que se pueda Secundar.
+	# T24: el boton Sellar, solo en el turno del Maestro (LecturaCombate.boton_sellar).
+	var datos_sellar: Dictionary = lectura.boton_sellar()
+	if not datos_sellar.is_empty():
+		var boton_sellar: Button = Button.new()
+		boton_sellar.name = _NOMBRE_BOTON_SELLAR
+		boton_sellar.text = datos_sellar["texto"]
+		boton_sellar.tooltip_text = datos_sellar["tooltip"]
+		boton_sellar.disabled = not datos_sellar["habilitado"] and not _sellando
+		boton_sellar.toggle_mode = true
+		boton_sellar.button_pressed = _sellando
+		boton_sellar.pressed.connect(pulsar_sellar)
+		_botones.add_child(boton_sellar)
+		_botones.move_child(boton_sellar, _boton_terminar.get_index())
 	var datos_secundar: Dictionary = lectura.boton_secundar()
 	if not datos_secundar.is_empty():
 		var boton_secundar: Button = Button.new()
@@ -883,10 +957,16 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 
 # El desglose de un ataque o, T22, lo que haria el hechizo (LecturaCombate.vista_previa_hechizo).
 func _dibujar_desglose() -> void:
-	_panel_desglose.visible = not _desglose_mostrado.is_empty() or not _hechizo_mostrado.is_empty()
+	_panel_desglose.visible = not _desglose_mostrado.is_empty() or not _hechizo_mostrado.is_empty() \
+			or not _sellado_mostrado.is_empty()
 	if not _panel_desglose.visible:
 		return
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	# T24: el % y el mana del sellado (LecturaCombate.vista_previa_sellar).
+	if not _sellado_mostrado.is_empty():
+		_panel_desglose.text = "\n".join(lectura.vista_previa_sellar(_sellado_mostrado["previa"],
+				_sellado_mostrado["objetivo"]))
+		return
 	if not _desglose_mostrado.is_empty():
 		_panel_desglose.text = "\n".join(lectura.desglose(_desglose_mostrado, _combate.turno_actual().unidad_id))
 		return

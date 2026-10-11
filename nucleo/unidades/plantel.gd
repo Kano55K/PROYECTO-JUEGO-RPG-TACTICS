@@ -89,6 +89,15 @@ func pergaminos() -> Array[Pergamino]:
 	return _pergaminos.duplicate()
 
 
+# Sistema.md 4.1 (T24): el primer pergamino en blanco, en el orden del Plantel, o
+# null si no queda ninguno. Es el que ocupa una captura.
+func pergamino_en_blanco() -> Pergamino:
+	for p in _pergaminos:
+		if p.estado == Pergamino.Estado.EN_BLANCO:
+			return p
+	return null
+
+
 # Foto del estado para comparar (tests, reproductor de T12): solo enteros,
 # textos, booleanos, null, listas y diccionarios. Criaturas en el orden del Plantel.
 func instantanea() -> Dictionary:
