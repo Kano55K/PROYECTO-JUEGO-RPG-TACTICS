@@ -606,7 +606,7 @@
 - **Cerrada en:** T22
 
 ## P-043 — ¿La métrica 9 (caídas) cuenta la caída del Maestro?
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T23
 - **Fecha:** 11/10/2026
@@ -616,4 +616,5 @@
 - **Opciones:** A) incluirla: la lista suma `{unidad: "maestro", ronda}` cuando `a` es `caido`. B) solo criaturas (`a == "caida"`); la caída del Maestro se lee del desenlace. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** programada con la opción A, por decisión del usuario en el plan de T23 (lectura declarada en el resumen). Si la respuesta es B, se cambia una constante (`MetricasCombate._A_CAIDA`) y su test.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** Arquitecto (11/10/2026; copiada por pedido del usuario de `Arquitectura.md`, "Resuelta por el Arquitecto"): se acepta la lectura que eligió el usuario y ya programó T23: la métrica 9 incluye la caída del Maestro (`caido`). Motivo: 11.9 cuenta las caídas "por id de unidad", y el umbral de F mira "las partidas en que el Maestro cae" con las métricas 9 y 12. Se cierra al empezar T24, sin cambios de código.
+- **Cerrada en:** T24

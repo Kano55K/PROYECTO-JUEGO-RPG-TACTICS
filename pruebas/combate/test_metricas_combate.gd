@@ -184,7 +184,7 @@ func test_metrica_14_activas_y_terreno() -> void:
 
 
 # (7) Metricas 9 y 11 en una victoria (con una caida que se levanta) y en una
-# derrota con muertas (el Maestro cae: P-043); 7, 8, 10 y 12 en null.
+# derrota con muertas (el Maestro cae: P-043); 8, 10 y 12 en null, y 7 vacia (T24).
 func test_metricas_9_y_11() -> void:
 	var victoria: Dictionary = _calcular([{"tipo": "ronda"}, {"tipo": "fin_ronda"}, {"tipo": "ronda"},
 			{"tipo": "estado", "unidad": "ocarra_1", "de": "suelta", "a": "caida"},
@@ -205,7 +205,9 @@ func test_metricas_9_y_11() -> void:
 	assert_array(derrota["caidas"]).is_equal([{"unidad": "cardo_1", "ronda": 1}, {"unidad": Maestro.ID, "ronda": 2}])
 	assert_array(derrota["muertes"]).is_equal([{"unidad": "cardo_1", "causa": "derrota_por_caida"},
 			{"unidad": "ocarra_1", "causa": "derrota_por_caida"}])
+	# T24 (D-011): la metrica 7 deja de estar en null; sin eventos sellado, lista vacia.
 	for metricas in [victoria, derrota]:
-		for clave in ["sellados", "capturas_perdidas", "caidas_guardadas", "rescate"]:
+		assert_array(metricas["sellados"]).is_empty()
+		for clave in ["capturas_perdidas", "caidas_guardadas", "rescate"]:
 			assert_bool(metricas.has(clave)).override_failure_message(clave).is_true()
 			assert_object(metricas[clave]).override_failure_message(clave).is_null()

@@ -175,32 +175,30 @@
       }
     },
     "capturas": {
-      "description": "T12: lista vacía. La llenan T24 (sellar) y T30 (resellar)",
+      "description": "Sistema.md 4.1 y 4.2 (T24): las salvajes selladas en este combate, en el orden de sus pergaminos, con la lealtad inicial del camino de combate (con el ajuste de la balanza). Salen guardadas: no reciben el +1 de victoria (5.2). T30 suma el resellado",
       "type": "array",
       "items": {
         "type": "object",
         "required": [
-          "id",
+          "unidad",
           "especie",
-          "camino",
+          "pergamino",
           "lealtad"
         ],
         "additionalProperties": false,
         "properties": {
-          "id": {
+          "unidad": {
             "$ref": "comunes.schema.json#/$defs/id"
           },
           "especie": {
             "$ref": "comunes.schema.json#/$defs/id"
           },
-          "camino": {
-            "enum": [
-              "combate",
-              "resellado"
-            ]
+          "pergamino": {
+            "$ref": "comunes.schema.json#/$defs/id"
           },
           "lealtad": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "_nota": {
             "$ref": "comunes.schema.json#/$defs/nota"
@@ -392,8 +390,19 @@
           }
         },
         "sellados": {
-          "description": "Métrica 7 (sellados intentados y logrados, con la probabilidad mostrada). T23: null. La llena T24",
-          "type": "null"
+          "description": "Métrica 7 (T24): cada evento sellado, en orden, con la probabilidad mostrada y si salió. Lista vacía sin intentos",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["objetivo", "porcentaje", "logrado"],
+            "additionalProperties": false,
+            "properties": {
+              "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+              "objetivo": { "$ref": "comunes.schema.json#/$defs/id" },
+              "porcentaje": { "$ref": "comunes.schema.json#/$defs/pct" },
+              "logrado": { "type": "boolean" }
+            }
+          }
         },
         "capturas_perdidas": {
           "description": "Métrica 8 (por huida en su turno y por llegar a 0). T23: null. La llena T25",

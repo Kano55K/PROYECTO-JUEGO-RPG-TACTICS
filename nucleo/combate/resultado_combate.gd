@@ -24,6 +24,10 @@ var atacante_pendiente: String = ""
 # Sistema.md 11.9 (T23, D-011): MetricasCombate.calcular sobre el registro
 # completo. La llena el Combate despues del evento `cierre`.
 var metricas: Dictionary = {}
+# Sistema.md 4.1 y 4.2 (T24): las salvajes selladas en este combate, en el orden de
+# sus pergaminos: {unidad, especie, pergamino, lealtad} (lealtad inicial del
+# camino de combate). Salen guardadas: el Cierre no les da el +1 (5.2).
+var capturas: Array = []
 # Estado final, en el orden del Plantel (diccionarios del esquema).
 var _maestro: Dictionary = {}
 var _unidades: Array = []
@@ -46,6 +50,12 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	for pergamino in plantel.pergaminos():
 		if pergamino.estado == Pergamino.Estado.EN_BLANCO:
 			resultado.pergaminos_en_blanco += 1
+		# Un pergamino ocupado por una salvaje es una captura de este combate (T24).
+		elif pergamino.estado == Pergamino.Estado.OCUPADO:
+			var ocupante: Criatura = plantel.criatura(pergamino.ocupante_id)
+			if ocupante != null and ocupante.comportamiento == Criatura.Comportamiento.SALVAJE:
+				resultado.capturas.append({"unidad": ocupante.id, "especie": ocupante.especie.id(),
+						"pergamino": pergamino.id, "lealtad": contexto.sellado.lealtad_inicial(plantel.maestro)})
 	# Lectura literal de B.2 (T12): la atacante caida, sea cual sea el desenlace (P-024, S-20).
 	for criatura in plantel.criaturas():
 		if criatura.comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA \
@@ -76,7 +86,7 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 
 
 # Arquitectura.md A.7. Los campos de tareas futuras van en null o lista vacia:
-# rescatista y permadeath (T29) y capturas (T24, T30).
+# rescatista y permadeath (T29). capturas: las de T24 (T30 suma el resellado).
 func a_diccionario() -> Dictionary:
 	return {
 		"contexto_id": contexto_id,
@@ -90,7 +100,7 @@ func a_diccionario() -> Dictionary:
 		"unidades": _unidades.duplicate(true),
 		"levantadas": levantadas.duplicate(),
 		"muertas": muertas.duplicate(),
-		"capturas": [],
+		"capturas": capturas.duplicate(true),
 		"lealtad_cambios": cambios_a_lista(lealtad),
 		"pergaminos": {"en_blanco": pergaminos_en_blanco, "ardidos": pergaminos_ardidos.duplicate()},
 		"atacante_pendiente": null if atacante_pendiente.is_empty() else atacante_pendiente,

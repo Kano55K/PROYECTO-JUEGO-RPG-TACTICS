@@ -67,6 +67,9 @@ var chequeo_rival: ChequeoRival:
 # Sistema.md 1.6 (T22): los hechizos del Maestro. Los lanza el Turno.
 var hechizos: Hechizos:
 	get: return null if reglas == null else reglas.hechizos
+# Sistema.md 4.1 a 4.3 (T24): sellar en combate. La aplica el Turno con azar_combate.
+var sellado: Sellado:
+	get: return null if reglas == null else reglas.sellado
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -105,8 +108,10 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	var regla_chequeo: ChequeoRival = ChequeoRival.desde_datos(tabla_combate, arrimo, contexto.relaciones,
 			contexto.obediencia, regla_afinidad, contexto.toggles.get("afines_contra_cobardia", false))
 	var regla_hechizos: Hechizos = Hechizos.desde_datos(datos.get("hechizos.json", {}), datos["maestro.json"])
+	var regla_sellado: Sellado = Sellado.desde_datos(datos.get("tablas/sellado.json", {}),
+			datos.get("tablas/costos_mana.json", {}), datos["tablas/lealtad.json"], tabla_combate)
 	contexto.reglas = ReglasCombate.new(regla_danio, regla_afinidad, regla_combo, regla_incidente, regla_chequeo,
-			regla_mana, regla_hechizos)
+			regla_mana, regla_hechizos, regla_sellado)
 	# D-008: sin todas las reglas el combate no se arma (hallazgo de la revision de T21-ajustes).
 	if not contexto.reglas.falta.is_empty():
 		contexto.motivo = Motivo.REGLA_FALTANTE

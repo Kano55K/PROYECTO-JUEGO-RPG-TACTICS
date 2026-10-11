@@ -24,6 +24,8 @@ static func cargar(combate: String = "combate.json") -> Dictionary:
 		"maestro.json": [_CARPETA_UNIDADES + "maestro.json", "maestro"],
 		"relaciones.json": [_CARPETA_UNIDADES + "relaciones.json", "relaciones"],
 		"hechizos.json": [_CARPETA_COMBATE + "hechizos.json", "hechizos"],
+		"tablas/sellado.json": [_CARPETA_COMBATE + "sellado.json", "sellado"],
+		"tablas/costos_mana.json": [_CARPETA_COMBATE + "costos_mana.json", "costos_mana"],
 	}
 	for id_especie in _ESPECIES:
 		archivos["especies/%s.json" % id_especie] = [_CARPETA_UNIDADES + id_especie + ".json", "especie"]
@@ -110,7 +112,8 @@ static func reglas(reemplazos: Dictionary = {}) -> ReglasCombate:
 			reemplazos.get("incidente", incidente()),
 			reemplazos.get("chequeo_rival", chequeo_rival()),
 			reemplazos.get("regeneracion_mana", regeneracion_mana()),
-			reemplazos.get("hechizos", hechizos()))
+			reemplazos.get("hechizos", hechizos()),
+			reemplazos.get("sellado", sellado()))
 
 
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
@@ -118,3 +121,12 @@ static func combo(relaciones: Dictionary = {}) -> Combo:
 	var datos: Dictionary = cargar()["datos"]
 	return Combo.desde_datos(datos["tablas/combate.json"], Arrimo.desde_datos(datos["tablas/arrimo.json"]),
 			afinidad(relaciones))
+
+
+# El Sellado de los fixtures (T24), armado como en ContextoCombate. costos: otro
+# fixture de tablas/costos_mana.json en la carpeta de combate (costos_mana_chico.json).
+static func sellado(costos: String = "costos_mana.json") -> Sellado:
+	var datos: Dictionary = cargar()["datos"]
+	var tabla_costos: Dictionary = LectorFixture.leer(_CARPETA_COMBATE + costos, "costos_mana")["datos"]
+	return Sellado.desde_datos(datos["tablas/sellado.json"], tabla_costos, datos["tablas/lealtad.json"],
+			datos["tablas/combate.json"])

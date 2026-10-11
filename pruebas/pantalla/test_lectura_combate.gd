@@ -224,7 +224,9 @@ func test_t40_tooltip_de_una_enemiga() -> void:
 	var tooltip: Array[String] = lectura.tooltip_unidad("zancajunco_s1")
 	assert_array(tooltip).contains(["Zancajunco", "Hacerse junco", "Hecho junco", "Embestida"])
 	assert_bool(_ficha_de(lectura, "zancajunco_s1")["oculta"]).is_true()
-	assert_array(_ficha_de(lectura, "zancajunco_s1")["marcas"]).is_equal(["Hecho junco", "Embestida"])
+	# T24 (Sistema.md 4.1): la ficha de una salvaje sellable suma su % de sellado (rango 2
+	# con la vida completa: 0 %).
+	assert_array(_ficha_de(lectura, "zancajunco_s1")["marcas"]).is_equal(["Hecho junco", "Embestida", "0%"])
 
 	# escenario_surco_tribu: el Maestro juega primero; despues el Surcon de la tribu cava.
 	lectura = _lectura_rasgos("escenario_surco_tribu")

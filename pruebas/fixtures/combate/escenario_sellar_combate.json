@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "sellar_combate",
+  "_nota": "Arquitectura.md B.4 (T24): sellar dentro del Combate (registro, mana, resultado, metrica 7 y grabacion). Sistema.md 4.1, 4.2, 2.3 y 2.1. Balanza 3: reserva 9, descuento 1 (sellar al Surcon, rango 2, cuesta 4) y lealtad inicial 1. La Rodauva de la tribu (Velocidad 6) juega antes que el Maestro (5) y el Surcon salvaje (2) despues; Rodauva y Surcon se llevan bien (10.8): nadie tira Encono, cobardia ni incidente. El Surcon con 5 de 24 (<= 25 %: 65 %) esta a 2 del Maestro y junto a la Rodauva. Semilla 3: el primer sellado (ronda 1) falla y el segundo (ronda 2) sale",
+  "tipo": "test",
+  "semilla": 3,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 3, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [4, 5] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 3] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": 5, "posicion": [4, 3] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

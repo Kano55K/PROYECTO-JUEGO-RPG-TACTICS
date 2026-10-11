@@ -22,4 +22,14 @@ static func aplicar(valor: int, porcentaje: int) -> int:
 # (el de combate, A.8). Sale si el entero de 1 a 100 es <= porcentaje. Una sola
 # tirada: quien llama decide no tirar con 0 % (no consume el generador).
 static func tirar(azar: GeneradorAzar, porcentaje: int) -> bool:
-	return azar.entero(1, _CIEN) <= porcentaje
+	return sale(tiro(azar), porcentaje)
+
+
+# La tirada sola (T24: el sellado registra el numero): un entero de 1 a 100 del
+# generador. tirar es tiro + sale, con una sola llamada al generador.
+static func tiro(azar: GeneradorAzar) -> int:
+	return azar.entero(1, _CIEN)
+
+
+static func sale(valor_tiro: int, porcentaje: int) -> bool:
+	return valor_tiro <= porcentaje

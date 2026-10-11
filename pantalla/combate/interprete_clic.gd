@@ -17,12 +17,18 @@ extends RefCounted
 # (`seleccionar_alterno`). Un hechizo sin modos va con el clic izquierdo; uno con
 # modos, el izquierdo empuja y el derecho atrae, si ese sentido esta en
 # Turno.sentidos_para_hechizo. Fuera del modo hechizo, el clic derecho no hace nada.
+# T24: con modo_sellar (el jugador pulso Sellar), solo una objetivo de
+# Turno.objetivos_para_sellar da la accion, con el clic izquierdo.
 static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i, modo_cavar: bool = false,
-		modo_secundar: bool = false, hechizo_id: String = "", alterno: bool = false) -> Accion:
+		modo_secundar: bool = false, hechizo_id: String = "", alterno: bool = false,
+		modo_sellar: bool = false) -> Accion:
 	if not hechizo_id.is_empty():
 		return _accion_hechizo(turno, foto, casilla, hechizo_id, alterno)
 	if alterno:
 		return null
+	if modo_sellar:
+		var objetivo_sellar: String = objetivo_sellar_en(turno, foto, casilla)
+		return null if objetivo_sellar.is_empty() else Accion.sellar(objetivo_sellar)
 	if modo_cavar:
 		return Accion.cavar(casilla) if turno.casillas_para_cavar().has(casilla) else null
 	if modo_secundar:
@@ -49,6 +55,11 @@ static func aliada_en(turno: Turno, foto: Dictionary, casilla: Vector2i) -> Stri
 # T22: el id de la objetivo del hechizo que esta en la casilla, o "".
 static func objetivo_hechizo_en(turno: Turno, foto: Dictionary, casilla: Vector2i, hechizo_id: String) -> String:
 	return _unidad_de(turno.objetivos_para_hechizo(hechizo_id), foto, casilla)
+
+
+# T24: el id de la objetivo del sellado que esta en la casilla, o "".
+static func objetivo_sellar_en(turno: Turno, foto: Dictionary, casilla: Vector2i) -> String:
+	return _unidad_de(turno.objetivos_para_sellar(), foto, casilla)
 
 
 static func _accion_hechizo(turno: Turno, foto: Dictionary, casilla: Vector2i, hechizo_id: String,

@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../datos/_esquemas/costos_mana.schema.json",
+  "_nota": "Arquitectura.md B.4 (T24, test 2): costos de sellar inventados y chicos para que el descuento de la balanza 5 (2) baje del minimo (Sistema.md 2.3: minimo 1). El resto, como la copia de 2.3",
+  "sellar": [1, 2, 3],
+  "invocar": [2, 3, 4],
+  "resellar": [2, 3, 4],
+  "guardar_caida": [2, 3, 4],
+  "costo_minimo": 1
+}

@@ -187,6 +187,22 @@ func rival_en(unidad_id: String, casilla: Vector2i) -> Dictionary:
 	return _contexto.chequeo_rival.consulta(unidad_id, casilla, _plantel)
 
 
+# Sistema.md 4.1 (T24, "el porcentaje se muestra antes de gastar el mana"): el %
+# de sellado de una salvaje con su vida de ahora (Sellado), sin mirar distancia,
+# mana ni pergaminos. null si no es una salvaje de pie (oculta incluida), si no
+# es sellable o si su rango no alcanza con la balanza del Maestro.
+func porcentaje_sellado(unidad_id: String) -> Variant:
+	var criatura: Criatura = _sellable(unidad_id)
+	return null if criatura == null else _contexto.sellado.porcentaje_de(criatura)
+
+
+# Sistema.md 2.3 (T24): el costo de sellarla, con las mismas condiciones que
+# porcentaje_sellado.
+func costo_sellado(unidad_id: String) -> Variant:
+	var criatura: Criatura = _sellable(unidad_id)
+	return null if criatura == null else _contexto.sellado.costo(criatura.especie, _plantel.maestro)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -389,12 +405,16 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	if not resultado.valida:
 		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
 		return resultado
-	# Sistema.md 1.6 y D-007 (T22): el mana que paga un hechizo, justo detras de su
-	# `accion`. Despues, el Martillazo es un `ataque` normal (es un ataque) y la
-	# Lanzadera y el Remiendo, su propio evento.
+	# Sistema.md 1.6 y 4.1, D-007 (T22 y T24): el mana que paga un hechizo o un
+	# sellado, justo detras de su `accion`. Se registra sin volcar tiradas: la del
+	# sellado va despues, detras de la que se pago (A.7). Despues, el Martillazo es
+	# un `ataque` normal (es un ataque) y la Lanzadera, el Remiendo y el sellado,
+	# su propio evento.
 	if not resultado.mana.is_empty():
+		var motivo_mana: String = Sellado.MOTIVO_SELLAR if accion.tipo == Accion.Tipo.SELLAR \
+				else Hechizos.MOTIVO_HECHIZO
 		_registrar({"tipo": "mana", "unidad": unidad_id, "de": resultado.mana["de"], "a": resultado.mana["a"],
-				"motivo": Hechizos.MOTIVO_HECHIZO})
+				"motivo": motivo_mana}, 0)
 	if accion.tipo == Accion.Tipo.HECHIZO:
 		if resultado.desglose != null:
 			_registrar_ataque(unidad_id, accion.objetivo_id, resultado, vida_antes)
@@ -411,6 +431,9 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 		Accion.Tipo.SECUNDAR:
 			_registrar({"tipo": "secundar", "unidad": unidad_id, "detras_de": accion.aliado_id,
 					"lugar": _cola.lugar_de(unidad_id)})
+		# Sistema.md 4.1 (T24, A.7): el `sellado`, detras de su `tirada` (se vuelca sola).
+		Accion.Tipo.SELLAR:
+			_registrar(resultado.evento.duplicate(true))
 	_registrar_eventos_turno()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
@@ -562,3 +585,14 @@ func _vida(unidad_id: String) -> int:
 	if unidad_id == Maestro.ID:
 		return _plantel.maestro.vida
 	return _plantel.criatura(unidad_id).vida
+
+
+# T24: la criatura si es una salvaje de pie, sellable y de un rango que la
+# balanza alcanza; si no, null.
+func _sellable(unidad_id: String) -> Criatura:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.comportamiento != Criatura.Comportamiento.SALVAJE \
+			or not Objetivos.de_pie(unidad_id, _plantel) or not criatura.especie.sellable() \
+			or not _contexto.sellado.rango_permitido(criatura.especie, _plantel.maestro):
+		return null
+	return criatura

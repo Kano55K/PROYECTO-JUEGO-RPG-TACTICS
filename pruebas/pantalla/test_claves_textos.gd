@@ -127,3 +127,18 @@ func test_claves_de_hechizos_desde_los_datos() -> void:
 	# Con una variante en el archivo de textos, se pide.
 	datos["textos/es.json"] = {"lanzadera.choque.ocarra": "La Ocarra sale volando."}
 	assert_array(ClavesTextos.usadas(datos)).contains(["lanzadera.choque.ocarra"])
+
+
+# T24 (Sistema.md 4.1, Mundo.md 5): las claves de sellar son fijas; el fallo por
+# especie se pide solo si la variante esta en los textos (la erizada es otra clave).
+func test_claves_de_sellar() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"sellar.fallo.surcon": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["accion.sellar", "sellar.tooltip", "sellar.exito", "sellar.fallo",
+			"sellar.fallo.erizada", "sellar.rango_alto", "pergamino.sin_blanco", "aviso.sellar.accion_usada",
+			"aviso.sellar.mana_insuficiente", "aviso.sellar.fuera_de_alcance", "aviso.sellar.no_sellable",
+			"aviso.sellar.oculta", "aviso.sellar.no_salvaje", "aviso.sellar.sin_objetivos", "sellar.fallo.surcon"])
+	assert_array(claves).not_contains(["sellar.fallo.ocarra"])

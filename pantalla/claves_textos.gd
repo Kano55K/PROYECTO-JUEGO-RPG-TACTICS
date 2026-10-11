@@ -89,6 +89,25 @@ const LANZADERA_CHOQUE_OBSTACULO: String = "lanzadera.choque.obstaculo"
 const AVISO_HECHIZO_MANA: String = "aviso.hechizo.mana_insuficiente"
 const AVISO_HECHIZO_ACCION_USADA: String = "aviso.hechizo.accion_usada"
 const AVISO_HECHIZO_SIN_OBJETIVOS: String = "aviso.hechizo.sin_objetivos"
+# T24 (Sistema.md 4.1, Mundo.md 5): el boton, el % previo, los sucesos del
+# sellado (sellar.fallo tiene variante por especie; la erizada es otra clave,
+# A.2) y por que el boton esta deshabilitado. pergamino.sin_blanco la comparte
+# Mundo.md con el sellado en combate; sellar.rango_alto, la del rango.
+const ACCION_SELLAR: String = "accion.sellar"
+const SELLAR_TOOLTIP: String = "sellar.tooltip"
+const SELLAR_EXITO: String = "sellar.exito"
+const SELLAR_FALLO: String = "sellar.fallo"
+const SELLAR_FALLO_ERIZADA: String = "sellar.fallo.erizada"
+const SELLAR_RANGO_ALTO: String = "sellar.rango_alto"
+const PERGAMINO_SIN_BLANCO: String = "pergamino.sin_blanco"
+# T24: claves propuestas, faltan en es.json.
+const AVISO_SELLAR_ACCION_USADA: String = "aviso.sellar.accion_usada"
+const AVISO_SELLAR_MANA: String = "aviso.sellar.mana_insuficiente"
+const AVISO_SELLAR_FUERA_DE_ALCANCE: String = "aviso.sellar.fuera_de_alcance"
+const AVISO_SELLAR_NO_SELLABLE: String = "aviso.sellar.no_sellable"
+const AVISO_SELLAR_OCULTA: String = "aviso.sellar.oculta"
+const AVISO_SELLAR_NO_SALVAJE: String = "aviso.sellar.no_salvaje"
+const AVISO_SELLAR_SIN_OBJETIVOS: String = "aviso.sellar.sin_objetivos"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -107,6 +126,9 @@ const FIJAS: Array[String] = [
 	PANEL_MANA,
 	LANZADERA_CHOQUE, LANZADERA_CHOQUE_MAESTRO, LANZADERA_CHOQUE_OBSTACULO,
 	AVISO_HECHIZO_MANA, AVISO_HECHIZO_ACCION_USADA, AVISO_HECHIZO_SIN_OBJETIVOS,
+	ACCION_SELLAR, SELLAR_TOOLTIP, SELLAR_EXITO, SELLAR_FALLO, SELLAR_FALLO_ERIZADA, SELLAR_RANGO_ALTO,
+	PERGAMINO_SIN_BLANCO, AVISO_SELLAR_ACCION_USADA, AVISO_SELLAR_MANA, AVISO_SELLAR_FUERA_DE_ALCANCE,
+	AVISO_SELLAR_NO_SELLABLE, AVISO_SELLAR_OCULTA, AVISO_SELLAR_NO_SALVAJE, AVISO_SELLAR_SIN_OBJETIVOS,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -242,6 +264,31 @@ static func motivo_hechizo(motivo: ResultadoAccion.Motivo) -> String:
 	return ""
 
 
+# T24: por que el boton Sellar esta deshabilitado (Turno.motivo_sellar), o "" si
+# el motivo no se muestra (los demas no se dan en el turno del Maestro con el
+# combate en curso).
+static func motivo_sellar(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_SELLAR_ACCION_USADA
+		ResultadoAccion.Motivo.SIN_PERGAMINO:
+			return PERGAMINO_SIN_BLANCO
+		ResultadoAccion.Motivo.OBJETIVO_OCULTO:
+			return AVISO_SELLAR_OCULTA
+		ResultadoAccion.Motivo.OBJETIVO_NO_SALVAJE:
+			return AVISO_SELLAR_NO_SALVAJE
+		ResultadoAccion.Motivo.FUERA_DE_ALCANCE:
+			return AVISO_SELLAR_FUERA_DE_ALCANCE
+		ResultadoAccion.Motivo.NO_SELLABLE:
+			return AVISO_SELLAR_NO_SELLABLE
+		ResultadoAccion.Motivo.RANGO_ALTO:
+			return SELLAR_RANGO_ALTO
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_SELLAR_MANA
+		ResultadoAccion.Motivo.SIN_OBJETIVOS:
+			return AVISO_SELLAR_SIN_OBJETIVOS
+	return ""
+
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:
 	var claves: Array[String] = []
@@ -341,6 +388,10 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 		for rival in especies:
 			if existentes.has(encono_par(especie, rival)):
 				_sumar(claves, encono_par(especie, rival))
+		# T24: el fallo del sellado se pide con la especie de la objetivo.
+		var variante_fallo: String = "%s.%s" % [SELLAR_FALLO, especie]
+		if existentes.has(variante_fallo):
+			_sumar(claves, variante_fallo)
 		# T22: el choque de la Lanzadera se pide con la especie de la movida.
 		var variante_choque: String = "%s.%s" % [LANZADERA_CHOQUE, especie]
 		if existentes.has(variante_choque):
