@@ -34,11 +34,17 @@ const _MARCA_RIVAL: Vector2i = Vector2i(8, 0)
 const _MARCA_RIVAL_ENEMIGA: Vector2i = Vector2i(9, 0)
 # T17: las aliadas que se pueden Secundar (la misma marca de "elegir" que cavar).
 const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
+# T22: las objetivos del hechizo elegido (la misma marca de "elegir") y, con el
+# mouse sobre una, los destinos de la Lanzadera (la marca de destino).
+const _MARCA_OBJETIVO_HECHIZO: Vector2i = _MARCA_CAVAR
+const _MARCA_DESTINO_HECHIZO: Vector2i = _MARCA_DESTINO
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
 const _ACCION_DEPURACION: String = "depuracion"
 const _ACCION_SELECCIONAR: String = "seleccionar"
+# T22: el clic derecho (atraer con la Lanzadera).
+const _ACCION_SELECCIONAR_ALTERNO: String = "seleccionar_alterno"
 const _ACCION_ZONA: String = "zona"
 const _ACCION_SALTAR: String = "saltar"
 # T42: la camara (D-003).
@@ -51,6 +57,7 @@ const _ACCION_CAMARA_ALEJAR: String = "camara_alejar"
 const _ACCION_CAMARA_ARRASTRAR: String = "camara_arrastrar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
 const _NOMBRE_BOTON_SECUNDAR: String = "Secundar"
+const _PREFIJO_BOTON_HECHIZO: String = "Hechizo_"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -98,6 +105,10 @@ var _eligiendo_cavar: bool = false
 # ninguna), cuya cola resultante se muestra.
 var _eligiendo_aliada: bool = false
 var _aliada_previa: String = ""
+# T22: el hechizo cuyo modo "elegir objetivo" esta puesto ("" si ninguno) y lo
+# que se muestra con el mouse sobre una objetivo: {sentido: {evento, destaparia}}.
+var _hechizo_elegido: String = ""
+var _hechizo_mostrado: Dictionary = {}
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -115,6 +126,7 @@ var _limites: Rect2 = Rect2()
 @onready var _capa_afines: TileMapLayer = $Tablero/Afines
 @onready var _capa_rivales: TileMapLayer = $Tablero/Rivales
 @onready var _capa_rivales_enemigas: TileMapLayer = $Tablero/RivalesEnemigas
+@onready var _capa_destinos: TileMapLayer = $Tablero/DestinosHechizo
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -221,12 +233,12 @@ func filas_cola() -> Array[Label]:
 
 
 # Un clic en una casilla: la Accion que da el InterpreteClic, si hay alguna.
-# Devuelve true si se aplico.
-func clic_casilla(casilla: Vector2i) -> bool:
+# Devuelve true si se aplico. T22: alterno es el clic derecho (`seleccionar_alterno`).
+func clic_casilla(casilla: Vector2i, alterno: bool = false) -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
 	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar,
-			_eligiendo_aliada)
+			_eligiendo_aliada, _hechizo_elegido, alterno)
 	if accion == null:
 		return false
 	return _aplicar(accion)
@@ -242,11 +254,13 @@ func clic_casilla(casilla: Vector2i) -> bool:
 # T19: y las rivales enemigas del Encono o la cobardia (Combate.rival_en).
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
+	_hechizo_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_capa_afines.clear()
 	_capa_rivales.clear()
 	_capa_rivales_enemigas.clear()
+	_capa_destinos.clear()
 	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
 	# las fichas todavia no.
 	if _combate == null or _en_secuencia:
@@ -259,7 +273,9 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	if _combate.esperando_jugador():
 		var turno: Turno = _combate.turno_actual()
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
-		if _eligiendo_aliada:
+		if not _hechizo_elegido.is_empty():
+			_mostrar_hechizo(turno, foto, casilla)
+		elif _eligiendo_aliada:
 			# T17: sobre una aliada valida, la cola muestra el orden que quedaria.
 			var aliada: String = InterpreteClic.aliada_en(turno, foto, casilla)
 			if aliada != _aliada_previa:
@@ -304,6 +320,43 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	_dibujar_tooltip()
 
 
+# T22: con el mouse sobre una objetivo del hechizo elegido, lo que haria en cada
+# sentido (Turno.previsualizar_hechizo): el desglose si es un ataque; si no, su
+# evento y las ocultas que destaparia, y el destino sin choque marcado.
+func _mostrar_hechizo(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
+	var objetivo: String = InterpreteClic.objetivo_hechizo_en(turno, foto, casilla, _hechizo_elegido)
+	if objetivo.is_empty():
+		return
+	for sentido in turno.sentidos_para_hechizo(_hechizo_elegido, objetivo):
+		var previa: ResultadoAccion = turno.previsualizar_hechizo(_hechizo_elegido, objetivo, sentido)
+		if not previa.valida:
+			continue
+		if previa.desglose != null:
+			_desglose_mostrado = previa.desglose.a_diccionario()
+			continue
+		_hechizo_mostrado[sentido] = {"evento": previa.evento.duplicate(true), "destaparia": previa.destaparia.duplicate(),
+				"previa": previa}
+		var hasta: Variant = previa.evento.get("hasta")
+		if hasta != null:
+			_capa_destinos.set_cell(Vector2i(hasta[0], hasta[1]), _FUENTE_MARCAS, _MARCA_DESTINO_HECHIZO)
+
+
+# T22: lo que se muestra del hechizo con el mouse sobre una objetivo, por
+# sentido ("" si no tiene): {evento, destaparia}, o {}. El desglose de un ataque
+# va en desglose_mostrado().
+func hechizo_mostrado() -> Dictionary:
+	var mostrado: Dictionary = {}
+	for sentido in _hechizo_mostrado.keys():
+		mostrado[sentido] = {"evento": _hechizo_mostrado[sentido]["evento"].duplicate(true),
+				"destaparia": _hechizo_mostrado[sentido]["destaparia"].duplicate()}
+	return mostrado
+
+
+# T22: las casillas marcadas como destino de la Lanzadera ahora.
+func casillas_destino_hechizo() -> Array[Vector2i]:
+	return _capa_destinos.get_used_cells()
+
+
 # Las lineas del tooltip que se ve ahora, o [].
 func tooltip_mostrado() -> Array[String]:
 	return _tooltip_mostrado.duplicate()
@@ -343,9 +396,34 @@ func pulsar_activa(tipo: String) -> bool:
 			_eligiendo_cavar = not _eligiendo_cavar
 			_eligiendo_aliada = false
 			_aliada_previa = ""
+			_hechizo_elegido = ""
 			redibujar()
 			return true
 	return false
+
+
+# T22: el boton de un hechizo no aplica nada: entra (o sale) del modo "elegir
+# objetivo" de ese hechizo. Solo si Turno.motivo_hechizo lo deja (salir, siempre).
+# Devuelve true si hizo algo.
+func pulsar_hechizo(hechizo_id: String) -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if _hechizo_elegido == hechizo_id:
+		_hechizo_elegido = ""
+	elif _combate.turno_actual().motivo_hechizo(hechizo_id) == ResultadoAccion.Motivo.NINGUNO:
+		_hechizo_elegido = hechizo_id
+	else:
+		return false
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	redibujar()
+	return true
+
+
+# T22: el hechizo cuyo modo esta puesto, o "".
+func hechizo_elegido() -> String:
+	return _hechizo_elegido
 
 
 func eligiendo_cavar() -> bool:
@@ -361,6 +439,7 @@ func pulsar_secundar() -> bool:
 		return false
 	_eligiendo_aliada = not _eligiendo_aliada
 	_eligiendo_cavar = false
+	_hechizo_elegido = ""
 	_aliada_previa = ""
 	redibujar()
 	return true
@@ -438,6 +517,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(_ACCION_SELECCIONAR):
 		clic_casilla(_casilla_del_mouse())
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_SELECCIONAR_ALTERNO):
+		clic_casilla(_casilla_del_mouse(), true)
+		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion:
 		var casilla: Vector2i = _casilla_del_mouse()
 		if casilla != _casilla_mouse:
@@ -508,11 +590,13 @@ func _aplicar(accion: Accion) -> bool:
 	if not _combate.aplicar(accion).valida:
 		return false
 	_desglose_mostrado = {}
+	_hechizo_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_eligiendo_cavar = false
 	_eligiendo_aliada = false
 	_aliada_previa = ""
+	_hechizo_elegido = ""
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
 	if pausa_ia > 0.0 and not pasos.is_empty():
@@ -548,6 +632,7 @@ func _empezar_secuencia(pasos: Array[Dictionary]) -> void:
 	_capa_afines.clear()
 	_capa_rivales.clear()
 	_capa_rivales_enemigas.clear()
+	_capa_destinos.clear()
 	_capa_zona.clear()
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -634,9 +719,16 @@ func _dibujar_marcas() -> void:
 	_capa_afines.clear()
 	_capa_rivales.clear()
 	_capa_rivales_enemigas.clear()
+	_capa_destinos.clear()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()
+	# T22: eligiendo la objetivo de un hechizo, solo las de objetivos_para_hechizo.
+	if not _hechizo_elegido.is_empty():
+		var foto_hechizo: Dictionary = _combate.instantanea()
+		for objetivo in turno.objetivos_para_hechizo(_hechizo_elegido):
+			_marcas.set_cell(_casilla_de(foto_hechizo, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_HECHIZO)
+		return
 	if _eligiendo_cavar:
 		for casilla in turno.casillas_para_cavar():
 			_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_CAVAR)
@@ -763,6 +855,19 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		boton.pressed.connect(pulsar_activa.bind(tipo))
 		_botones.add_child(boton)
 		_botones.move_child(boton, _boton_terminar.get_index())
+	# T22: un boton por hechizo, armados desde los datos (LecturaCombate).
+	for datos_hechizo in lectura.botones_hechizos():
+		var id_hechizo: String = datos_hechizo["id"]
+		var boton_hechizo: Button = Button.new()
+		boton_hechizo.name = _PREFIJO_BOTON_HECHIZO + id_hechizo
+		boton_hechizo.text = datos_hechizo["texto"]
+		boton_hechizo.tooltip_text = datos_hechizo["tooltip"]
+		boton_hechizo.disabled = not datos_hechizo["habilitado"]
+		boton_hechizo.toggle_mode = true
+		boton_hechizo.button_pressed = _hechizo_elegido == id_hechizo
+		boton_hechizo.pressed.connect(pulsar_hechizo.bind(id_hechizo))
+		_botones.add_child(boton_hechizo)
+		_botones.move_child(boton_hechizo, _boton_terminar.get_index())
 	# T17: Secundar, solo si hay alguna aliada a la que se pueda Secundar.
 	var datos_secundar: Dictionary = lectura.boton_secundar()
 	if not datos_secundar.is_empty():
@@ -776,11 +881,19 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		_botones.move_child(boton_secundar, _boton_terminar.get_index())
 
 
+# El desglose de un ataque o, T22, lo que haria el hechizo (LecturaCombate.vista_previa_hechizo).
 func _dibujar_desglose() -> void:
-	_panel_desglose.visible = not _desglose_mostrado.is_empty()
-	if _panel_desglose.visible:
-		var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	_panel_desglose.visible = not _desglose_mostrado.is_empty() or not _hechizo_mostrado.is_empty()
+	if not _panel_desglose.visible:
+		return
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	if not _desglose_mostrado.is_empty():
 		_panel_desglose.text = "\n".join(lectura.desglose(_desglose_mostrado, _combate.turno_actual().unidad_id))
+		return
+	var previas: Dictionary = {}
+	for sentido in _hechizo_mostrado.keys():
+		previas[sentido] = _hechizo_mostrado[sentido]["previa"]
+	_panel_desglose.text = "\n".join(lectura.vista_previa_hechizo(previas))
 
 
 # A.7: la pantalla de resultado desde ResultadoCombate.a_diccionario().

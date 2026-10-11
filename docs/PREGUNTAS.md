@@ -592,7 +592,7 @@
 - **Cerrada en:** T22
 
 ## P-042 — Contra quién choca la Lanzadera (evento `lanzadera`)
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T22
 - **Fecha:** 10/10/2026
@@ -602,4 +602,5 @@
 - **Opciones:** A) con `choque: true`, el evento suma `contra`: el id de la unidad (de pie o caída) de la casilla de destino, o `null` si es el borde o un surco. B) sin campo nuevo: la línea del choque contra una unidad sale con `[FALTA: a_otra]` hasta que cambie el texto. — Recomendación técnica: A.
 - **Bloquea:** no (afecta a los sucesos de la sesión 2 de T22)
 - **Mientras tanto:** el evento `lanzadera` lleva exactamente los campos de A.7.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** - Arquitecto (10/10/2026): opción A. Con `choque: true`, el evento `lanzadera` suma `contra`: el id de la unidad (de pie o caída) que ocupa la casilla de destino, o `null` si el choque es contra el borde o un surco. Sin choque, el campo no va. La previsualización (`ResultadoAccion.evento`) lo trae igual. Se aplica y se cierra en T22, sesión 2.
+- **Cerrada en:** T22

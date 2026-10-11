@@ -101,3 +101,41 @@ func test_modo_cavar() -> void:
 	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 8), true)).is_null()
 	# Sin el modo, la misma casilla es un movimiento.
 	assert_int(InterpreteClic.accion(turno, foto, Vector2i(3, 5)).tipo).is_equal(Accion.Tipo.MOVER)
+
+
+# T22 (sesion 2, criterio 3): en el modo Lanzadera, el clic izquierdo empuja y el
+# derecho atrae, con los sentidos de Turno.sentidos_para_hechizo (MesaHechizos:
+# fixtures de los tests de hechizos). Atraer a una adyacente no hace nada.
+func test_modo_lanzadera_izquierdo_empuja_y_derecho_atrae() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 3),
+			"rodauva_1": Vector2i(2, 5)})
+	var turno: Turno = mesa.turno()
+	var foto: Dictionary = mesa.plantel.instantanea()
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 3), false, false, "lanzadera").a_diccionario()) \
+			.is_equal(Accion.hechizo("lanzadera", "ocarra_s1", "empujar").a_diccionario())
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 3), false, false, "lanzadera", true).a_diccionario()) \
+			.is_equal(Accion.hechizo("lanzadera", "ocarra_s1", "atraer").a_diccionario())
+	# La Rodauva aliada esta adyacente: empujarla si, atraerla no.
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(2, 5), false, false, "lanzadera").a_diccionario()) \
+			.is_equal(Accion.hechizo("lanzadera", "rodauva_1", "empujar").a_diccionario())
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(2, 5), false, false, "lanzadera", true)).is_null()
+	# Una casilla sin objetivo del hechizo, nada (aunque se pueda mover ahi).
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "lanzadera")).is_null()
+
+
+# T22: un hechizo sin modos va con el clic izquierdo; el derecho no hace nada.
+# Fuera del modo hechizo, el clic derecho no hace nada (ni atacar ni mover).
+func test_hechizo_sin_modos_y_clic_derecho_fuera_del_modo() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 4)})
+	var turno: Turno = mesa.turno()
+	var foto: Dictionary = mesa.plantel.instantanea()
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "martillazo").a_diccionario()) \
+			.is_equal(Accion.hechizo("martillazo", "ocarra_s1").a_diccionario())
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "martillazo", true)).is_null()
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 5), false, false, "remiendo").a_diccionario()) \
+			.is_equal(Accion.hechizo("remiendo", Maestro.ID).a_diccionario())
+	# Fuera del modo: el izquierdo ataca a la adyacente, el derecho nada.
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 4)).a_diccionario()) \
+			.is_equal(Accion.atacar("ocarra_s1").a_diccionario())
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "", true)).is_null()
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(2, 5), false, false, "", true)).is_null()

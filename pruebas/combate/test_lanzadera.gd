@@ -38,11 +38,13 @@ func _lanzar(turno: Turno, objetivo_id: String, sentido: String) -> ResultadoAcc
 	return aplicado
 
 
+# P-042 (T22, sesion 2): el choque dice contra quien fue (`contra`: el id de la
+# unidad de la casilla de destino, de pie o caida, o null contra el borde o un surco).
 func _assert_choca(resultado: ResultadoAccion, objetivo_id: String, desde: Vector2i, danio: int,
-		vida_antes: int) -> void:
+		vida_antes: int, contra: Variant) -> void:
 	assert_dict(resultado.evento).is_equal({"tipo": "lanzadera", "objetivo": objetivo_id, "sentido":
 			resultado.evento["sentido"], "desde": [desde.x, desde.y], "hasta": null, "choque": true, "danio": danio,
-			"vida_antes": vida_antes, "vida_despues": maxi(0, vida_antes - danio)})
+			"vida_antes": vida_antes, "vida_despues": maxi(0, vida_antes - danio), "contra": contra})
 
 
 # Criterio 4: en linea a 1 y a 2, si; en diagonal o a 3, no (1.6, D-001).
@@ -106,7 +108,7 @@ func test_choque_contra_el_borde() -> void:
 	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 1), "ocarra_s1": Vector2i(3, 0)})
 	var turno: Turno = mesa.turno()
 	var resultado: ResultadoAccion = _lanzar(turno, "ocarra_s1", _EMPUJAR)
-	_assert_choca(resultado, "ocarra_s1", Vector2i(3, 0), 1, 12)
+	_assert_choca(resultado, "ocarra_s1", Vector2i(3, 0), 1, 12, null)
 	assert_int(mesa.plantel.criatura("ocarra_s1").vida).is_equal(11)
 	assert_that(mesa.plantel.criatura("ocarra_s1").posicion).is_equal(Vector2i(3, 0))
 	assert_int(mesa.plantel.maestro.mana).is_equal(6)
@@ -116,21 +118,21 @@ func test_choque_contra_el_borde() -> void:
 func test_choque_contra_una_unidad_de_pie_o_caida() -> void:
 	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 4),
 			"rodauva_s1": Vector2i(3, 3)})
-	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 4), 1, 12)
+	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 4), 1, 12, "rodauva_s1")
 	assert_int(mesa.plantel.criatura("rodauva_s1").vida).is_equal(8)
 
 	mesa = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 4), "rodauva_1": Vector2i(3, 3)})
 	var caida: Criatura = mesa.plantel.criatura("rodauva_1")
 	caida.estado = Criatura.Estado.CAIDA
 	caida.vida = 0
-	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 4), 1, 12)
+	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 4), 1, 12, "rodauva_1")
 
 
 # Criterio 5 y 11.2.1: un surco cuenta como ocupada para la que no es Surcon.
 func test_choque_contra_un_surco() -> void:
 	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 4)})
 	mesa.surcos.cavar(Vector2i(3, 3), "surcon_s1", 2)
-	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 4), 1, 12)
+	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 4), 1, 12, null)
 	assert_that(mesa.plantel.criatura("ocarra_s1").posicion).is_equal(Vector2i(3, 4))
 
 
@@ -138,7 +140,7 @@ func test_choque_contra_un_surco() -> void:
 func test_atraer_a_2_con_una_aliada_en_el_medio_choca() -> void:
 	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "rodauva_1": Vector2i(3, 4),
 			"ocarra_s1": Vector2i(3, 3)})
-	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _ATRAER), "ocarra_s1", Vector2i(3, 3), 1, 12)
+	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _ATRAER), "ocarra_s1", Vector2i(3, 3), 1, 12, "rodauva_1")
 	assert_int(mesa.plantel.criatura("rodauva_1").vida).is_equal(8)
 
 
@@ -148,13 +150,13 @@ func test_choque_entero_a_una_erizada_y_al_tasajero() -> void:
 	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 1), "rodauva_s1": Vector2i(3, 0)})
 	mesa.reglas = DatosFixture.reglas({"hechizos": DatosFixture.hechizos("hechizos_choque_4.json")})
 	mesa.plantel.criatura("rodauva_s1").erizada = true
-	_assert_choca(_lanzar(mesa.turno(), "rodauva_s1", _EMPUJAR), "rodauva_s1", Vector2i(3, 0), 4, 8)
+	_assert_choca(_lanzar(mesa.turno(), "rodauva_s1", _EMPUJAR), "rodauva_s1", Vector2i(3, 0), 4, 8, null)
 	assert_int(mesa.plantel.criatura("rodauva_s1").vida).is_equal(4)
 	assert_bool(mesa.plantel.criatura("rodauva_s1").erizada).is_true()
 
 	mesa = MesaHechizos.new({Maestro.ID: Vector2i(3, 1), "tasajero_s1": Vector2i(3, 0)})
 	mesa.reglas = DatosFixture.reglas({"hechizos": DatosFixture.hechizos("hechizos_choque_4.json")})
-	_assert_choca(_lanzar(mesa.turno(), "tasajero_s1", _EMPUJAR), "tasajero_s1", Vector2i(3, 0), 4, 30)
+	_assert_choca(_lanzar(mesa.turno(), "tasajero_s1", _EMPUJAR), "tasajero_s1", Vector2i(3, 0), 4, 30, null)
 	assert_int(mesa.plantel.criatura("tasajero_s1").vida).is_equal(26)
 
 
@@ -172,11 +174,21 @@ func test_un_surcon_sobre_un_surco_se_mueve() -> void:
 	assert_array(mesa.surcos.instantanea()).is_equal(surcos_antes)
 
 
+# P-042: sin choque, el evento no lleva `contra`, al empujar ni al atraer (lo
+# previsto es lo aplicado: _lanzar).
+func test_p042_sin_choque_no_hay_contra() -> void:
+	for sentido in [_EMPUJAR, _ATRAER]:
+		var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 3)})
+		var resultado: ResultadoAccion = _lanzar(mesa.turno(), "ocarra_s1", sentido)
+		assert_bool(resultado.evento["choque"]).is_false()
+		assert_bool(resultado.evento.has("contra")).is_false()
+
+
 # Criterio 5 y 11.5: un choque que tumba a una salvaje la saca del tablero.
 func test_choque_que_tumba_a_una_salvaje() -> void:
 	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 1), "ocarra_s1": Vector2i(3, 0)})
 	mesa.plantel.criatura("ocarra_s1").vida = 1
-	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 0), 1, 1)
+	_assert_choca(_lanzar(mesa.turno(), "ocarra_s1", _EMPUJAR), "ocarra_s1", Vector2i(3, 0), 1, 1, null)
 	assert_int(mesa.plantel.criatura("ocarra_s1").estado).is_equal(Criatura.Estado.FUERA)
 	assert_that(mesa.plantel.criatura("ocarra_s1").posicion).is_equal(Criatura.SIN_POSICION)
 

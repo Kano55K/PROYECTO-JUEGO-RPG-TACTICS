@@ -302,6 +302,16 @@ func sentidos_para_hechizo(hechizo_id: String, objetivo_id: String) -> Array[Str
 	return resultado
 
 
+# T22, sesion 2 (calcular sin aplicar): por que el hechizo no se puede lanzar
+# ahora, con los mismos chequeos que _hechizo y en el mismo orden; si pasan y no
+# vale sobre ninguna unidad, SIN_OBJETIVOS. NINGUNO si se puede.
+func motivo_hechizo(hechizo_id: String) -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_lanzar(hechizo_id)
+	if motivo == ResultadoAccion.Motivo.NINGUNO and objetivos_para_hechizo(hechizo_id).is_empty():
+		return ResultadoAccion.Motivo.SIN_OBJETIVOS
+	return motivo
+
+
 # Calcular sin aplicar (A.6, D-005): lo mismo que validar el hechizo. Trae el
 # desglose del Martillazo, el evento de la Lanzadera (destino o choque, danio y
 # vida resultante) y del Remiendo, las ocultas que destaparia y el mana.
@@ -809,20 +819,13 @@ func _secundar(aliado_id: String, aplica: bool) -> ResultadoAccion:
 # efecto) y por la geometria del hechizo. Gasta la accion y conserva el
 # movimiento. El comportamiento sale del efecto, nunca del id.
 func _hechizo(accion: Accion, aplica: bool) -> ResultadoAccion:
-	if terminado:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.TURNO_TERMINADO)
-	if unidad_id != Maestro.ID:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.SOLO_MAESTRO)
+	var motivo: ResultadoAccion.Motivo = _motivo_lanzar(accion.hechizo_id)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
 	var hechizo: Dictionary = _hechizos.hechizo(accion.hechizo_id)
-	if hechizo.is_empty():
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.HECHIZO_INEXISTENTE)
-	if accion_usada:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ACCION_USADA)
 	var maestro: Maestro = _plantel.maestro
 	var costo: int = hechizo["costo"]
-	if maestro.mana < costo:
-		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.MANA_INSUFICIENTE)
-	var motivo: ResultadoAccion.Motivo = _motivo_objetivo_hechizo(hechizo, accion.objetivo_id)
+	motivo = _motivo_objetivo_hechizo(hechizo, accion.objetivo_id)
 	if motivo == ResultadoAccion.Motivo.NINGUNO:
 		motivo = _motivo_sentido(hechizo, accion.sentido)
 	if motivo != ResultadoAccion.Motivo.NINGUNO:
@@ -846,6 +849,24 @@ func _hechizo(accion: Accion, aplica: bool) -> ResultadoAccion:
 		accion_usada = true
 		ataques_restantes = 0
 	return resultado
+
+
+# Lo que se chequea antes de mirar la objetivo, en este orden: turno terminado,
+# solo el Maestro, que tenga el hechizo, la accion sin usar y el mana del costo.
+# Lo comparten _hechizo y motivo_hechizo.
+func _motivo_lanzar(hechizo_id: String) -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if unidad_id != Maestro.ID:
+		return ResultadoAccion.Motivo.SOLO_MAESTRO
+	var hechizo: Dictionary = _hechizos.hechizo(hechizo_id)
+	if hechizo.is_empty():
+		return ResultadoAccion.Motivo.HECHIZO_INEXISTENTE
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	if _plantel.maestro.mana < (hechizo["costo"] as int):
+		return ResultadoAccion.Motivo.MANA_INSUFICIENTE
+	return ResultadoAccion.Motivo.NINGUNO
 
 
 # La objetivo del hechizo, sin mirar el sentido. Sistema.md 1.6 y S-47: el
@@ -930,7 +951,10 @@ func _lanzadera(hechizo: Dictionary, objetivo_id: String, sentido: String, aplic
 	resultado.evento = {"tipo": "lanzadera", "objetivo": objetivo_id, "sentido": sentido,
 			"desde": Plantel.casilla_a_lista(desde), "hasta": null if choque else Plantel.casilla_a_lista(hasta),
 			"choque": choque, "danio": danio, "vida_antes": vida_antes, "vida_despues": maxi(0, vida_antes - danio)}
-	if not choque:
+	# P-042: contra quien choco (de pie o caida), o null si fue el borde o un surco.
+	if choque:
+		resultado.evento["contra"] = _ocupante_en(hasta)
+	else:
 		resultado.destaparia = Junco.destaparia(objetivo_id, hasta, _plantel)
 	if aplica:
 		if choque:
@@ -994,6 +1018,17 @@ func _posicion(id_unidad: String) -> Vector2i:
 	if id_unidad == Maestro.ID:
 		return _plantel.maestro.posicion
 	return _plantel.criatura(id_unidad).posicion
+
+
+# P-042: el id de la unidad que ocupa la casilla (el Maestro o una criatura en
+# el tablero, de pie o caida: el mismo criterio que Tablero._ocupantes), o null.
+func _ocupante_en(casilla: Vector2i) -> Variant:
+	if _plantel.maestro.posicion == casilla:
+		return Maestro.ID
+	for criatura in _plantel.criaturas():
+		if criatura.estado != Criatura.Estado.GUARDADA and criatura.posicion == casilla:
+			return criatura.id
+	return null
 
 
 func _poner_posicion(id_unidad: String, casilla: Vector2i) -> void:

@@ -100,3 +100,30 @@ func test_claves_de_quien_sostuvo() -> void:
 	assert_array(claves).contains(["cobardia.resiste.maestro", "cobardia.resiste.afin",
 			"cobardia.resiste.maestro.surcon", "cobardia.resiste.afin.rodauva"])
 	assert_array(claves).not_contains(["cobardia.resiste.maestro.rodauva", "cobardia.resiste.afin.surcon"])
+
+
+# T22 (sesion 2): por cada hechizo del Maestro (maestro.json), su nombre y su
+# tooltip, y el rotulo de cada modo de hechizos.json; con el fixture de otro id,
+# las de ese id. Los choques de la Lanzadera y los motivos de los botones son fijos.
+func test_claves_de_hechizos_desde_los_datos() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	for hechizo in ["martillazo", "lanzadera", "remiendo"]:
+		assert_array(claves).contains(["hechizo.%s.nombre" % hechizo, "hechizo.%s.tooltip" % hechizo])
+	assert_array(claves).contains(["hechizo.sentido.empujar", "hechizo.sentido.atraer", "lanzadera.choque",
+			"lanzadera.choque.contra_maestro", "lanzadera.choque.obstaculo", "aviso.hechizo.mana_insuficiente",
+			"aviso.hechizo.accion_usada", "aviso.hechizo.sin_objetivos"])
+	# Ninguna variante por especie del choque esta en los textos: no se pide.
+	assert_array(claves).not_contains(["lanzadera.choque.ocarra"])
+
+	datos["hechizos.json"] = LectorFixture.leer("res://pruebas/fixtures/pantalla/hechizos.json", "hechizos")["datos"]
+	datos["maestro.json"] = LectorFixture.leer("res://pruebas/fixtures/pantalla/maestro_hechizos.json",
+			"maestro")["datos"]
+	claves = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["hechizo.pedrada.nombre", "hechizo.pedrada.tooltip"])
+	assert_array(claves).not_contains(["hechizo.martillazo.nombre"])
+	# Con una variante en el archivo de textos, se pide.
+	datos["textos/es.json"] = {"lanzadera.choque.ocarra": "La Ocarra sale volando."}
+	assert_array(ClavesTextos.usadas(datos)).contains(["lanzadera.choque.ocarra"])

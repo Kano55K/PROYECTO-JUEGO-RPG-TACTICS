@@ -84,6 +84,8 @@ enum Motivo {
 	ATRAER_ADYACENTE,
 	# Sistema.md 1.6: la Lanzadera lleva un sentido de sus modos; los demas, ninguno.
 	SENTIDO_INVALIDO,
+	# Turno.motivo_hechizo (T22, sesion 2): el hechizo no vale sobre ninguna unidad ahora.
+	SIN_OBJETIVOS,
 }
 
 var valida: bool
