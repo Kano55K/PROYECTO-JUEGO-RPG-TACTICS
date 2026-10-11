@@ -23,6 +23,7 @@ static func cargar(combate: String = "combate.json") -> Dictionary:
 		"tablas/balanza.json": [_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"],
 		"maestro.json": [_CARPETA_UNIDADES + "maestro.json", "maestro"],
 		"relaciones.json": [_CARPETA_UNIDADES + "relaciones.json", "relaciones"],
+		"hechizos.json": [_CARPETA_COMBATE + "hechizos.json", "hechizos"],
 	}
 	for id_especie in _ESPECIES:
 		archivos["especies/%s.json" % id_especie] = [_CARPETA_UNIDADES + id_especie + ".json", "especie"]
@@ -85,6 +86,13 @@ static func regeneracion_mana() -> RegeneracionMana:
 	return RegeneracionMana.desde_datos(cargar()["datos"]["tablas/hambre.json"])
 
 
+# Los Hechizos de los fixtures (T22), armados como en ContextoCombate. archivo:
+# otro fixture de hechizos.json en la carpeta de combate (hechizos_choque_4.json).
+static func hechizos(archivo: String = "hechizos.json") -> Hechizos:
+	var tabla: Dictionary = LectorFixture.leer(_CARPETA_COMBATE + archivo, "hechizos")["datos"]
+	return Hechizos.desde_datos(tabla, cargar()["datos"]["maestro.json"])
+
+
 # Las ReglasCombate de los fixtures (D-008), armadas como en ContextoCombate, para
 # los tests que crean un Turno suelto. reemplazos: {nombre de ReglasCombate.REGLAS:
 # regla} para cambiar alguna (por ejemplo, el chequeo de rival con
@@ -101,7 +109,8 @@ static func reglas(reemplazos: Dictionary = {}) -> ReglasCombate:
 			reemplazos.get("combo", combo()),
 			reemplazos.get("incidente", incidente()),
 			reemplazos.get("chequeo_rival", chequeo_rival()),
-			reemplazos.get("regeneracion_mana", regeneracion_mana()))
+			reemplazos.get("regeneracion_mana", regeneracion_mana()),
+			reemplazos.get("hechizos", hechizos()))
 
 
 # El Combo de los fixtures (T16), armado como en ContextoCombate.

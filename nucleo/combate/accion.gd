@@ -3,14 +3,20 @@
 class_name Accion
 extends RefCounted
 
-# Hechizo, sellar, guardar, invocar y huir son tipos nuevos en T22, T24 y T26 a T28.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR }
+# Sellar, guardar, invocar y huir son tipos nuevos en T24 y T26 a T28.
+# HECHIZO (T22): un solo tipo para todos; el hechizo es un parametro (su id de
+# hechizos.json), asi la pantalla los arma desde los datos.
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco.
 var casilla: Vector2i = Criatura.SIN_POSICION
-# Solo para ATACAR: el id de la unidad objetivo.
+# Para ATACAR y HECHIZO: el id de la unidad objetivo.
 var objetivo_id: String = ""
+# Solo para HECHIZO: el id del hechizo (hechizos.json) y, en la Lanzadera, el
+# sentido ("empujar" o "atraer"; "" en los demas).
+var hechizo_id: String = ""
+var sentido: String = ""
 # Solo para SECUNDAR: el id de la aliada detras de la que va a actuar.
 var aliado_id: String = ""
 
@@ -55,6 +61,16 @@ static func secundar(id_aliado: String) -> Accion:
 	return accion
 
 
+# Sistema.md 1.6 (T22): el Maestro lanza `id_hechizo` sobre `id_objetivo`. sentido: el
+# de la Lanzadera; "" para los demas.
+static func hechizo(id_hechizo: String, id_objetivo: String, sentido_hechizo: String = "") -> Accion:
+	var accion: Accion = Accion.new(Tipo.HECHIZO)
+	accion.hechizo_id = id_hechizo
+	accion.objetivo_id = id_objetivo
+	accion.sentido = sentido_hechizo
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -71,6 +87,11 @@ func a_diccionario() -> Dictionary:
 			resultado["objetivo"] = objetivo_id
 		Tipo.SECUNDAR:
 			resultado["aliado"] = aliado_id
+		Tipo.HECHIZO:
+			resultado["hechizo"] = hechizo_id
+			resultado["objetivo"] = objetivo_id
+			if not sentido.is_empty():
+				resultado["sentido"] = sentido
 	return resultado
 
 
@@ -99,6 +120,14 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 			if datos.size() != 2 or not datos.get("aliado") is String:
 				return null
 			return secundar(datos["aliado"])
+		Tipo.HECHIZO:
+			var con_sentido: bool = datos.has("sentido")
+			if datos.size() != (4 if con_sentido else 3) or not datos.get("hechizo") is String \
+					or not datos.get("objetivo") is String:
+				return null
+			if con_sentido and (not datos["sentido"] is String or (datos["sentido"] as String).is_empty()):
+				return null
+			return hechizo(datos["hechizo"], datos["objetivo"], datos.get("sentido", ""))
 	if datos.size() != 1:
 		return null
 	return Accion.new(tipo_accion)

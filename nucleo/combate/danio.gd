@@ -31,8 +31,15 @@ static func desde_datos(tabla_combate: Dictionary, tabla_hambre: Dictionary) -> 
 # No modifica el Plantel: sirve igual para validar y para aplicar un ataque.
 func calcular(atacante_id: String, objetivo_id: String, plantel: Plantel,
 		aportes: Array[ModificadorDanio] = []) -> DesgloseDanio:
+	return calcular_con_base(_base(atacante_id, plantel), atacante_id, objetivo_id, plantel, aportes)
+
+
+# El mismo calculo con otro Danio base: el del Martillazo (Sistema.md 1.6, T22),
+# que reemplaza al de la ficha o la balanza. El resto de 11.4 es el del ataque.
+func calcular_con_base(base: int, atacante_id: String, objetivo_id: String, plantel: Plantel,
+		aportes: Array[ModificadorDanio] = []) -> DesgloseDanio:
 	var desglose: DesgloseDanio = DesgloseDanio.new()
-	desglose.base = _base(atacante_id, plantel)
+	desglose.base = base
 	var objetivo: Criatura = plantel.criatura(objetivo_id)
 
 	var porcentajes: Array[ModificadorDanio] = []

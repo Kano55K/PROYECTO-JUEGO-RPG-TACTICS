@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../datos/_esquemas/hechizos.schema.json",
+  "_nota": "Como hechizos.json, con choque 4: con 1, el choque entero y el -50 % con minimo 1 dan lo mismo (T22, criterio 5; Sistema.md 1.6 y S-46)",
+  "hechizos": [
+    {
+      "_nota": "Sistema.md 1.6 en la escala vieja (D-009, D-010): danio 2 + 1 x Poder",
+      "id": "martillazo",
+      "costo": 2,
+      "alcance": 3,
+      "geometria": "distancia_libre",
+      "efecto": "danio",
+      "base": 2,
+      "por_poder": 1,
+      "es_ataque": true
+    },
+    {
+      "_nota": "Sistema.md 1.6 en la escala vieja (D-009): choque 4 (solo para distinguir el choque entero del -50 % con minimo)",
+      "id": "lanzadera",
+      "costo": 2,
+      "alcance": 2,
+      "geometria": "linea_bloqueo_enemigas",
+      "efecto": "empuje",
+      "modos": [
+        "empujar",
+        "atraer"
+      ],
+      "casillas": 1,
+      "danio_choque": 4,
+      "afecta_caidas": false,
+      "es_ataque": false
+    },
+    {
+      "_nota": "Sistema.md 1.6 en la escala vieja (D-009, D-010): cura 3 + 1 x Poder",
+      "id": "remiendo",
+      "costo": 4,
+      "alcance": 1,
+      "incluye_si_mismo": true,
+      "geometria": "adyacente",
+      "efecto": "cura",
+      "base": 3,
+      "por_poder": 1,
+      "afecta_caidas": false,
+      "es_ataque": false
+    }
+  ]
+}

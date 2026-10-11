@@ -578,7 +578,7 @@
 - **Cerrada en:** T44
 
 ## P-041 — Qué afín sostuvo a la que resiste (campo `afin` de `chequeo_rival`)
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T44
 - **Fecha:** 09/10/2026
@@ -589,3 +589,17 @@
 - **Bloquea:** no
 - **Mientras tanto:** programada la opción A, que eligió el usuario en la sesión 1 de T44: `ChequeoRival._pct_cobardia` devuelve también `afin`, y `Combate._registrar_chequeo_rival` lo suma al evento solo en una resistida sostenida por una afín. Si se elige B, se borra el campo y su test.
 - **Respuesta:** Arquitecto (09/10/2026): opción A, ya programada en T44. En un chequeo_rival resistido con sostenida_por: "afin", el evento suma afin con el id de la primera afín del toggle, en el orden del Plantel (la misma cuenta del porcentaje). Se cierra al empezar T22, sin cambios de código.
+- **Cerrada en:** T22
+
+## P-042 — Contra quién choca la Lanzadera (evento `lanzadera`)
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T22
+- **Fecha:** 10/10/2026
+- **Fuente:** `Arquitectura.md` A.7, "Eventos de 0a.2" (T22: `lanzadera` con objetivo, sentido, desde, hasta o `null`, `choque`, `danio`, `vida_antes`, `vida_despues`) y `datos/textos/es.json` `lanzadera.choque` ("{unidad} sale despedid{unidad_o} y se lleva por delante {a_otra}.") y `lanzadera.choque.contra_maestro`
+- **Duda:** el evento `lanzadera` con `choque: true`, ¿suma un campo con la unidad que ocupaba la casilla de destino, para llenar `{a_otra}`?
+- **Caso que la dispara:** el Maestro empuja a la Ocarra salvaje contra la Rodauva salvaje. El texto nombra a la Rodauva, pero el evento solo dice que hubo choque; la pantalla no puede recalcular después quién estaba en el destino (no tiene reglas y el tablero puede haber cambiado). Un choque contra el borde o contra un surco no tiene otra unidad.
+- **Opciones:** A) con `choque: true`, el evento suma `contra`: el id de la unidad (de pie o caída) de la casilla de destino, o `null` si es el borde o un surco. B) sin campo nuevo: la línea del choque contra una unidad sale con `[FALTA: a_otra]` hasta que cambie el texto. — Recomendación técnica: A.
+- **Bloquea:** no (afecta a los sucesos de la sesión 2 de T22)
+- **Mientras tanto:** el evento `lanzadera` lleva exactamente los campos de A.7.
+- **Respuesta:** _(la completa el staff)_

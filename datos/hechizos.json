@@ -3,14 +3,14 @@
   "_nota": "Sistema.md 1.6. Costos tambien en 2.3: los hechizos no tienen descuento de la balanza",
   "hechizos": [
     {
-      "_nota": "Sistema.md 1.6: costo 2, distancia Manhattan <= 3 sin bloqueo, danio 2 + Poder. Es ataque (eslabon y modificadores, 11.4)",
+      "_nota": "Sistema.md 1.6 y 11.1 v1.7: costo 2, distancia Manhattan <= 3 sin bloqueo, danio 10 x (2 + Poder) = 20 + 10 x Poder (D-010). Es ataque (eslabon y modificadores, 11.4)",
       "id": "martillazo",
       "costo": 2,
       "alcance": 3,
       "geometria": "distancia_libre",
       "efecto": "danio",
-      "base": 2,
-      "escala_poder": true,
+      "base": 20,
+      "por_poder": 10,
       "es_ataque": true
     },
     {
@@ -30,15 +30,15 @@
       "es_ataque": false
     },
     {
-      "_nota": "Sistema.md 1.6: costo 4, adyacente o si mismo, cura 3 + Poder. No afecta a las caidas (11.5)",
+      "_nota": "Sistema.md 1.6 y 11.1 v1.7: costo 4, adyacente (4 ortogonales, 11.3) o si mismo, cura 10 x (3 + Poder) = 30 + 10 x Poder (D-010). No afecta a las caidas (11.5)",
       "id": "remiendo",
       "costo": 4,
       "alcance": 1,
       "incluye_si_mismo": true,
       "geometria": "adyacente",
       "efecto": "cura",
-      "base": 3,
-      "escala_poder": true,
+      "base": 30,
+      "por_poder": 10,
       "afecta_caidas": false,
       "es_ataque": false
     }
