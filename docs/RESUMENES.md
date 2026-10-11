@@ -2359,3 +2359,36 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   6. D normal: sellar al Surcón salvaje cierra sus surcos. Si la Rodauva salvaje está erizada y el sellado falla, el suceso es "El hilo resbala entre las púas.".
   7. **H no sirve para esto:** su única enemiga es el Tasajero, que no es sellable (no muestra %). Para ver la balanza en el costo, usar D balanza 4: descuento 1 (Surcón 4, Rodauva 2) y lealtad de la capturada 1.
   8. Anotar los `[FALTA]` que aparezcan.
+
+## T24-ajustes · sesión 1 · 11/10/2026
+- **Rama:** tarea/T24-ajustes
+- **Estado:** EN CURSO, **bloqueada por P-044** (Arquitecto). La causa de los intermitentes no es la que supone la tarea, y el prompt pide parar en ese caso.
+- **Hecho:**
+  - **Diagnóstico con evidencia** (registros temporales en `VistaCombate._input` y en los `_mandar` de los tests; ya borrados):
+    - Corrida de `pruebas/pantalla` sin tocar el mouse (113/113): la vista recibió 186 movimientos y los tests mandaron 13. Los otros son movimientos en `(0,0)`, uno por frame y por vista viva, con `device=32`. Vienen del `Input.warp_mouse(Vector2.ZERO)` que hace el runner de escenas de GdUnit4 al crearse (`GdUnitSceneRunnerImpl.gd`, líneas 82 a 88).
+    - Corrida con el usuario moviendo el mouse sobre la ventana (113/113): 22 eventos reales con la posición del cursor (por ejemplo `(213,88)`) y un clic real en `(1,3)`, todos con `device=32`. Los eventos del test traen también `device=32` (el valor por defecto de un `InputEvent` nuevo).
+    - Corrida siguiente de `pruebas/pantalla` (con la opción B puesta): 25 fallas y 2 errores con el síntoma de T24, `(93,80)` donde se esperaba `(1,7)`. También falló el test nuevo con el filtro **desactivado**, y la casilla sí seguía a los eventos del test: el evento llegaba, con otra escala. La corrida siguiente salió 115/115, con la ventana siempre en 1152 × 648 y la transformación final en identidad.
+    - **Causa:**
+      - Los tests calculan la posición en coordenadas del viewport, y `Input.parse_input_event` la toma en coordenadas de la ventana: le aplica la inversa de `Viewport.get_final_transform()`. Con `canvas_items` + `expand`, esa transformación es la identidad solo si la ventana mide 1152 × 648.
+      - GdUnit4 minimiza la ventana al liberar cada runner y la restaura al crear el siguiente (`move_window_to_background` / `move_window_to_foreground`).
+      - Test temporal (borrado): con la ventana en 200 × 120, el evento del test para `(1,7)` en `(351,398)` llega como `(2025,2296)` y da `(35,45)`. Minimizar en el mismo frame no cambia nada: el tamaño se actualiza después.
+      - Los eventos reales existen y llegan a la vista (hasta un clic), pero no producen las casillas enormes.
+  - **Opción A descartada:** `runtest.cmd --headless --ignoreHeadlessMode -a res://pruebas/pantalla` da 10 fallas y 1 error. Ejemplos: `test_principal.gd:114` (el clic no movió a la unidad), `test_vista_camara.gd:180` (`(27,126)`), `test_vista_hechizos.gd:224` (error de script: no hubo vista previa). GdUnit4 avisa que en headless no transporta los `InputEvent`.
+  - **Opción B escrita y probada, pero no corrige la causa:**
+    - En `VistaCombate`: `dispositivo_mouse` (por defecto `DISPOSITIVO_CUALQUIERA` = −1000) y el filtro al principio de `_input` (otro device → `set_input_as_handled`).
+    - `pruebas/pantalla/mouse_prueba.gd` (`MousePrueba.DISPOSITIVO` = 7, `preparar`, `marcar`) y los `_mandar` de los 4 archivos con su device.
+    - `test_vista_dispositivo_mouse.gd` (2 tests, pasan).
+    - **Queda en `git stash`** ("T24-ajustes: opcion B (costura de device), en pausa por P-044"), no en la rama.
+- **Archivos:** modificados `docs/PREGUNTAS.md` y `docs/RESUMENES.md`. Código: ninguno (la rama está igual que `develop`; la opción B, en el stash).
+- **Tests:** 0 nuevos en la rama, total 630. Suite completa: no se corrió (no hay cambios de código). `pruebas/pantalla` con la opción B: 115/115 en la última corrida, 25 fallas en la anterior (la falla de ventana).
+- **Criterio de terminado:** parcial.
+  - Cumplido: 1 (diagnóstico con evidencia, arriba).
+  - Faltan 2 a 6: dependen de P-044.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nueva P-044 (ARQUITECTO, bloquea sí). Cerradas: ninguna.
+- **Texto propuesto para D-012** (si se toma la recomendación de P-044): "Los tests de pantalla mandan el mouse en coordenadas de ventana: el ayudante de los tests (`MousePrueba`) multiplica la posición del viewport por `Viewport.get_final_transform()` antes de `Input.parse_input_event`, y marca el evento con su propio `device`. La vista acepta solo el `device` configurado en `dispositivo_mouse` (por defecto, cualquiera). Así la casilla no depende del tamaño que tenga la ventana cuando GdUnit4 la restaura, y el cursor real de la máquina no pisa los eventos del test. El comando de tests no cambia."
+- **Para la próxima sesión:**
+  - Con la respuesta de P-044: `git stash pop` en esta rama si sirve la opción B.
+  - Con la opción A de P-044: conversión a coordenadas de ventana en `MousePrueba`, y un test que reproduzca la ventana chica (como el experimento de 200 × 120) sin cambiar las aserciones de los 9 tests.
+  - Después, las tres suites completas (una con el mouse en movimiento), `CLAUDE.md` y la prueba manual.
