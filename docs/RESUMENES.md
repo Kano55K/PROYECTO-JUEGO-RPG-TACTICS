@@ -1979,3 +1979,194 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   6. `git diff develop -- pruebas/fixtures/`: vacío.
   7. Reproducir la grabación de C de T21-ajustes (`copy registros\c_tasajero_33001_7.json registros\copia.json` y `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- res://registros/copia.json`): tiene que dar el aviso de huella, que es lo esperado (D-009).
 - **Para la próxima sesión:** nada: tarea terminada. Sigue T22.
+
+## T22 · sesión 1 · 10/10/2026
+- **Rama:** tarea/T22-hechizos
+- **Estado:** EN CURSO (sigue en la sesión 2: pantalla y `test_lanzadera_b.gd`)
+- **Hecho:**
+  - **Preguntas.** P-041 pasó a `CERRADA` (`Cerrada en: T22`), sin cambios de código. Nueva P-042 (Arquitecto): el evento `lanzadera` no dice contra quién chocó y `lanzadera.choque` necesita `{a_otra}`.
+  - **Datos (D-010).** Esquema `hechizos`: sale `escala_poder` y entra `por_poder`. `datos/hechizos.json`: Martillazo `base` 20 y `por_poder` 10, Remiendo 30 y 10. La huella cambió. Fixtures nuevos en la escala vieja (D-009): `pruebas/fixtures/combate/hechizos.json` (2/1, 3/1, choque 1) y `hechizos_choque_4.json` (choque 4, para distinguir "entero" de "−50 % con mínimo 1").
+  - **Regla `Hechizos`** (`nucleo/combate/hechizos.gd`, sin estado): `desde_datos(hechizos.json, maestro.json)` (null si falta la tabla, un hechizo del Maestro o un parámetro de su efecto), `ids()`, `hechizo(id)` y `valor(id, poder)` = `base + por_poder × Poder`, el único lugar de la fórmula. Está en `ReglasCombate` (campo, `_init` y `REGLAS`), `ContextoCombate.armar` y `DatosFixture.reglas`. La firma de `Turno.empezar` no cambió.
+  - **`ContextoCombate.armar`** rechaza un contexto con `ReglasCombate.falta` no vacío: `Motivo.REGLA_FALTANTE` y `regla_faltante` con el nombre.
+  - **Una sola fórmula de 11.4.** `Danio.calcular_con_base(base, ...)` hace el cálculo; `calcular` la llama con la base de la ficha o la balanza. En el `Turno`, `_atacar_desde` quedó en los chequeos del ataque y `_golpear` es el golpe compartido con el Martillazo: aportes (afinidad desde la casilla del Maestro, combo, cobardía, Encono), eslabón, vida, cadena, Encono, Junco y `VidaCero`.
+  - **Acción.** Un solo tipo con parámetro: `Accion.hechizo(hechizo_id, objetivo_id, sentido = "")` → `{"tipo": "hechizo", "hechizo", "objetivo"[, "sentido"]}`, con ida y vuelta exacta. En el esquema `grabacion`: el tipo `hechizo` y las propiedades `hechizo` y `sentido` (`empujar` | `atraer`). Así la pantalla arma los botones desde los datos (criterio 13).
+  - **`Turno._hechizo`** (por `_resolver`, la misma función valida y aplica). Chequea en este orden: turno terminado, `SOLO_MAESTRO`, `HECHIZO_INEXISTENTE`, `ACCION_USADA`, `MANA_INSUFICIENTE`, la objetivo y el sentido. La objetivo: `OBJETIVO_PROPIO` si no `incluye_si_mismo`; `Objetivos` (`HOSTIL` para daño y empuje, `ALIADA` para la cura); bando (`OBJETIVO_ALIADO` en el daño, `OBJETIVO_ENEMIGO` en la cura); geometría por `geometria` (Manhattan libre, línea con `linea_bloqueada`, 4 ortogonales). El sentido: `SENTIDO_INVALIDO` si no está en `modos` o si sobra. Al aplicar: paga el maná, gasta la acción (`ataques_restantes = 0`) y conserva el movimiento. El comportamiento sale de `efecto`, nunca del id.
+    - Martillazo (`danio`): `_golpear` con `Hechizos.valor`.
+    - Lanzadera (`empuje`): empujar o atraer `casillas` en la línea; `ATRAER_ADYACENTE` si la llevaría hasta el Maestro. Choque con `Tablero.bloquea_desplazamiento`: `danio_choque` fijo, piso 0 y `VidaCero`. Si se mueve: posición nueva y `Junco.revisar_contacto`. No toca cadena, Encono, bono, erizada ni surcos.
+    - Remiendo (`cura`): `min(vida máxima, vida + valor)` (Maestro: `vida_max_real` de su balanza; criatura: su ficha). Con la vida completa cura 0 y vale (S-45).
+  - **Consultas** (D-005): `objetivos_para_hechizo(id)`, `sentidos_para_hechizo(id, objetivo)` y `previsualizar_hechizo(id, objetivo, sentido)` (= `validar`). `ResultadoAccion` suma `mana` (`{de, a}`), `evento` (el de `lanzadera` o `remiendo`) y `destaparia`.
+  - **Registro** (`Combate._ejecutar`): `accion` → `mana` (`motivo: "hechizo"`) → `ataque` (Martillazo, con `eslabon`; `_registrar_ataque` compartido con el ataque) o `lanzadera` / `remiendo` → destape / bono_perdido → estado → surco → cadena_cortada. Ningún evento existente cambió de forma.
+- **Tabla de cotejo** (valor | archivo y campo | sección):
+
+  | Valor | Archivo y campo | Sección |
+  |---|---|---|
+  | 2 / 3 / 20 / 10 | `hechizos.json` martillazo `costo` / `alcance` / `base` / `por_poder` | 1.6, 2.3, 11.1 v1.7, D-010 |
+  | 2 / 2 / 1 / 10 | lanzadera `costo` / `alcance` / `casillas` / `danio_choque` | 1.6 (casos borde), 11.1 v1.7 |
+  | 4 / 1 / 30 / 10 | remiendo `costo` / `alcance` / `base` / `por_poder` | 1.6, 2.3, 11.1 v1.7 |
+
+  Derivadas (`test_escala_x10.gd::test_hechizos_desde_datos`, con `datos/`): A (Poder 1) Martillazo 30 y Remiendo 40; H (Poder 3) Martillazo 50 y Remiendo 60. Números leídos que no se guardaron: ninguno (los hechizos no tienen descuento de la balanza, 2.3).
+- **Archivos:** creados `nucleo/combate/hechizos.gd`, `pruebas/combate/mesa_hechizos.gd`, `test_martillazo.gd`, `test_lanzadera.gd`, `test_remiendo.gd`, `test_hechizos.gd`, `test_hechizos_combate.gd`, `pruebas/fixtures/combate/hechizos.json`, `hechizos_choque_4.json`, `escenario_hechizos.json` y `escenario_hechizos_combate.json`; modificados `datos/_esquemas/hechizos.schema.json`, `datos/_esquemas/grabacion.schema.json`, `datos/hechizos.json`, `nucleo/combate/accion.gd`, `combate.gd`, `contexto_combate.gd`, `danio.gd`, `reglas_combate.gd`, `resultado_accion.gd`, `turno.gd`, `pruebas/combate/datos_fixture.gd`, `test_reglas_combate.gd`, `pruebas/datos/test_escala_x10.gd`, `docs/PREGUNTAS.md` y `CLAUDE.md` (Estado actual).
+- **Tests:** 51 nuevos, total 559. Todos los de T22 y todos los de `nucleo/` y `datos/` pasan. En la suite completa fallaron 4 tests de pantalla que no toqué; corridos solos (sus dos archivos enteros) pasan todos: son intermitentes (ver abajo). Test viejo tocado: solo el ayudante `_armar` de `test_reglas_combate.gd`, que pasa a 7 reglas por la firma de `ReglasCombate.new` (ninguna aserción cambió). Ningún test reescrito por una regla.
+- **Criterio de terminado (sesión 1):** cumplido punto por punto:
+  1. Esquema → datos → fixtures; `datos/` carga (permanente); cotejo arriba; derivadas en `test_escala_x10`.
+  2. `test_martillazo.gd`: alcance 3 sí y 4 no; por encima de una enemiga y de un surco; aliada, caída, oculta, fuera, el Maestro y un id inexistente con su motivo; mover antes y después; sin maná, sin cambios.
+  3. Base 3 / 5 según Poder; erizada 2; Tasajero en Caza 6; afinidad +1; combo eslabón 2 (+70 %) = 5; `otro_objetivo`; `bono_perdido`; tumba (`FUERA`); previsto = aplicado.
+  4. a 7. `test_lanzadera.gd` (geometría, choques, Surcón, tumbar, erizada, destape por contacto, cadena / Encono / bono intactos) y `test_remiendo.gd` (Maestro 10 → 14, aliada 2 → 6, diagonal / enemiga / caída no, oculta sí, Poder 3, topes 20 y 8, vida completa cura 0).
+  8. y 11. `test_hechizos_combate.gd`: maná 8 → 6, 7 → 3, 4 → 2 con `mana` `hechizo` justo después de la `accion`; con 1 y con 3 se rechaza sin registrar; eventos `ataque` (eslabón 1), `remiendo` y `lanzadera` iguales a lo previsto; la grabación con los tres valida, pasa por JSON y se reproduce igual (registro e instantánea).
+  9. En los tres archivos: después del hechizo, atacar u otro hechizo `ACCION_USADA` y mover vale.
+  10. Previsualizar = aplicar en los tres (con choque, sin choque y con destapes); no cambia la instantánea, el maná ni el generador.
+  12. `test_contacto`, `test_robustez_ia`, `test_datos_completos` y `test_escala_x10` pasan; suite completa: 555 de 559, con 4 fallas intermitentes de pantalla (abajo).
+  12b. `test_reglas_combate.gd::test_contexto_sin_una_regla_se_rechaza`.
+- **Tests intermitentes** (suite completa del 10/10/2026; no se tocaron, CLAUDE.md "Tests intermitentes"). Los cuatro leen la casilla del mouse por evento (D-006). Pasan al correr solos `test_principal.gd` (6/6) y `test_vista_camara.gd` (11/11). T22 no toca `pantalla/`.
+  - `test_principal.gd::test_clic_del_mouse_llega_al_tablero`: "Expecting true but is false" (línea 114).
+  - `test_vista_camara.gd::test_clic_y_hover_con_la_camara_movida`: casilla (41, 34) y (1, 11) en vez de la esperada (líneas 178 y 183). Ya había fallado una vez en T20.
+  - `test_vista_camara.gd::test_hover_sigue_al_mover_la_camara`: casilla (87, 44) (línea 208).
+  - `test_vista_camara.gd::test_el_cursor_real_no_cambia_la_casilla`: casilla (164, 9) y lista vacía (líneas 246 y 248).
+- **Lecturas declaradas:** S-45 (Remiendo con la vida completa vale y cura 0), S-46 (choque entero a la erizada), S-47 (Martillazo solo a enemigas; Lanzadera a los dos bandos, nunca a una oculta) y S-48 (sentido en el eje de la línea; empujar a una adyacente vale). Lectura técnica: la Lanzadera mueve `casillas` (1 en los datos) y solo mira la casilla de destino; con 1 es la regla literal.
+- **Claves de texto nuevas sin texto:** ninguna (la sesión 1 no toca la pantalla).
+- **Preguntas:** nueva P-042 (Arquitecto, no bloquea la sesión 1; afecta a los sucesos de la sesión 2); cerrada P-041.
+- **Para la próxima sesión:** sesión 2 según el plan: botones de hechizos desde `Hechizos.ids()` con su costo y su motivo (consulta nueva `Turno.motivo_hechizo`), modo "elegir objetivo" con marcas, Lanzadera con clic izquierdo = empujar y una acción nueva del InputMap (clic derecho) = atraer, hover (desglose, cura, destinos / choque y destapes), sucesos `lanzadera` (según P-042) y `remiendo`, fixture con un hechizo de otro id, `pruebas/datos/test_lanzadera_b.gd` con `datos/` real y la lista de prueba manual.
+
+## T22 · sesión 2 · 11/10/2026
+- **Rama:** tarea/T22-hechizos
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera y es la descripción del PR.
+- **Hecho (sesión 1, detalle en su entrada):**
+  - Datos (D-010): `por_poder` en el esquema `hechizos` y en `datos/hechizos.json` (Martillazo 20 + 10 × Poder, Remiendo 30 + 10 × Poder). La huella cambió.
+  - Regla `Hechizos` en `ReglasCombate`. `ContextoCombate.armar` rechaza un contexto con una regla faltante (`REGLA_FALTANTE`).
+  - `Danio.calcular_con_base` y `Turno._golpear`, compartidos por el ataque y el Martillazo.
+  - `Accion.hechizo(hechizo_id, objetivo_id, sentido)` y `Turno._hechizo` (Martillazo, Lanzadera y Remiendo, según `efecto` y `geometria`).
+  - Consultas `objetivos_para_hechizo`, `sentidos_para_hechizo` y `previsualizar_hechizo`.
+  - Eventos `mana` (`hechizo`), `ataque`, `lanzadera` y `remiendo`.
+  - P-041 cerrada.
+- **Hecho (sesión 2):**
+  - **P-042 (opción A).**
+    - Con `choque: true`, el evento `lanzadera` suma `contra`: el id de la unidad de la casilla de destino (de pie o caída), o `null` si el choque es contra el borde o un surco.
+    - Sin choque, el campo no va. La previsualización lo trae igual porque sale de la misma función.
+    - Lo calcula `Turno._ocupante_en`, con el criterio de `Tablero._ocupantes`.
+    - P-042 pasa a `CERRADA`.
+  - **`Turno.motivo_hechizo(hechizo_id)`.**
+    - Los chequeos previos a la objetivo (turno terminado, `SOLO_MAESTRO`, `HECHIZO_INEXISTENTE`, `ACCION_USADA`, `MANA_INSUFICIENTE`) pasaron a `_motivo_lanzar`, que usan `_hechizo` y la consulta.
+    - Si los pasa y no hay objetivos, devuelve el motivo nuevo `SIN_OBJETIVOS`.
+  - **Botones.** `LecturaCombate.botones_hechizos()` arma uno por cada id de `Hechizos.ids()`, solo en el turno del Maestro:
+    - texto: "nombre (costo Maná)";
+    - tooltip: el del hechizo y, si está deshabilitado, una línea con el motivo (`ClavesTextos.motivo_hechizo`).
+  - **Modo "elegir objetivo".** En `VistaCombate`:
+    - botones `Hechizo_<id>` (toggle), `pulsar_hechizo(id)` y `hechizo_elegido()`;
+    - se marcan las objetivos de `objetivos_para_hechizo`;
+    - cavar, Secundar y hechizo se excluyen entre sí.
+  - **Clic.** `InterpreteClic.accion(..., hechizo_id, alterno)` y `objetivo_hechizo_en`.
+    - Un hechizo sin modos va con el clic izquierdo.
+    - La Lanzadera empuja con el izquierdo y atrae con el derecho, si ese sentido está en `sentidos_para_hechizo`.
+    - Fuera del modo hechizo, el clic derecho no hace nada.
+    - Acción nueva del InputMap: `seleccionar_alterno` (clic derecho).
+  - **Hover.** Todo sale de `previsualizar_hechizo`:
+    - si el resultado trae desglose (Martillazo), se muestra el desglose de T13;
+    - si trae evento, se guarda por sentido en `hechizo_mostrado()`:
+      - Lanzadera: el destino (capa `Tablero/DestinosHechizo`, marca 6:0) o el choque con su daño y la vida, y `aviso.destapar` si destaparía;
+      - Remiendo: "Vida: de → a".
+    - `LecturaCombate.vista_previa_hechizo` arma las líneas del panel del desglose.
+  - **Sucesos.**
+    - `accion` de un hechizo: "Maestro · <nombre del hechizo>".
+    - `lanzadera` sin choque: "<objetivo> · Mover".
+    - `lanzadera` con choque, con "(−daño · Vida: antes → después)" al final:
+      - contra una criatura: `lanzadera.choque`, con `{unidad}` = la objetivo y `{otra}` = la de `contra`;
+      - contra el Maestro: `lanzadera.choque.contra_maestro`;
+      - contra `null`: `lanzadera.choque.obstaculo` (falta en `es.json`).
+    - `remiendo`: "<objetivo> · Vida: de → a".
+  - **`ClavesTextos.usadas`** suma:
+    - el nombre y el tooltip de cada hechizo de `maestro.json`;
+    - el rótulo de cada modo de `hechizos.json`;
+    - las claves fijas nuevas;
+    - las variantes `lanzadera.choque.<especie>`, solo si están en el archivo.
+  - **B con datos reales.** `test_lanzadera_b.gd` encuentra la jugada con las consultas del `Turno` (no está escrita a mano). Con el jugador esperando, en el segundo turno del Maestro (ronda 2):
+    - el Maestro se mueve a [4,8] (1 paso);
+    - atrae a `ocarra_s2` de [6,8] a [5,8];
+    - queda en diagonal con `ocarra_s1` [4,7]: vecinas en 8, como dice la `_nota` de B.
+- **Archivos (tarea entera):**
+  - Creados en la sesión 1:
+    - `nucleo/combate/hechizos.gd`;
+    - en `pruebas/combate/`: `mesa_hechizos.gd`, `test_martillazo.gd`, `test_lanzadera.gd`, `test_remiendo.gd`, `test_hechizos.gd` y `test_hechizos_combate.gd`;
+    - en `pruebas/fixtures/combate/`: `hechizos.json`, `hechizos_choque_4.json`, `escenario_hechizos.json` y `escenario_hechizos_combate.json`.
+  - Creados en la sesión 2:
+    - `pruebas/combate/test_motivo_hechizo.gd` y `pruebas/datos/test_lanzadera_b.gd`;
+    - `pruebas/pantalla/test_vista_hechizos.gd` y `test_lectura_hechizos.gd`;
+    - en `pruebas/fixtures/pantalla/`: `hechizos.json` (`pedrada`, efecto `danio`) y `maestro_hechizos.json`.
+  - Modificados en la sesión 1:
+    - esquemas `hechizos` y `grabacion`, y `datos/hechizos.json`;
+    - en `nucleo/combate/`: `accion.gd`, `combate.gd`, `contexto_combate.gd`, `danio.gd`, `reglas_combate.gd`, `resultado_accion.gd` y `turno.gd`;
+    - `pruebas/combate/datos_fixture.gd`, `test_reglas_combate.gd` y `pruebas/datos/test_escala_x10.gd`.
+  - Modificados en la sesión 2:
+    - `nucleo/combate/turno.gd` y `resultado_accion.gd`;
+    - `pantalla/claves_textos.gd`;
+    - en `pantalla/combate/`: `interprete_clic.gd`, `lectura_combate.gd`, `vista_combate.gd` y `vista_combate.tscn`;
+    - `project.godot`;
+    - `pruebas/combate/test_lanzadera.gd`, `pruebas/pantalla/test_interprete_clic.gd` y `test_claves_textos.gd`.
+  - Documentación: `docs/PREGUNTAS.md` y `CLAUDE.md` ("Estado actual").
+- **Tests:**
+  - Nuevos: 51 en la sesión 1 y 21 en la sesión 2. Total: 580.
+  - Suite completa del 11/10/2026: 580/580 en verde, sin intermitentes.
+  - **Tests viejos reescritos:** uno, el ayudante `_assert_choca` de `test_lanzadera.gd`, por P-042.
+    - Ahora recibe `contra` y compara el evento con ese campo.
+    - Sus 9 llamadas pasan el id esperado o `null`; ninguna otra aserción cambió.
+  - En la sesión 1 también se tocó el ayudante `_armar` de `test_reglas_combate.gd`, por la firma de `ReglasCombate.new`, sin cambiar aserciones.
+- **Criterio de terminado:** cumplido punto por punto. Sesión 1 (B.3, criterios 1 a 12b): ver su entrada. Sesión 2:
+  - (0) P-042 (`test_lanzadera.gd`):
+    - un choque contra una unidad de pie (`rodauva_s1`) o caída (`rodauva_1`) trae su id;
+    - contra el borde o un surco, `null`;
+    - sin choque no hay clave (`test_p042_sin_choque_no_hay_contra`);
+    - lo previsto es igual a lo aplicado en todos (`_lanzar`).
+  - (1) Botones y motivos:
+    - `test_motivo_hechizo.gd`: `NINGUNO`, `SIN_OBJETIVOS` (con todas las objetivos rechazadas), `MANA_INSUFICIENTE`, `ACCION_USADA`, `SOLO_MAESTRO` y `TURNO_TERMINADO`, cada uno igual al motivo de `validar`;
+    - `test_lectura_hechizos.gd` y `test_vista_hechizos.gd`, con `pedrada`: su botón muestra su costo y su modo marca justo los objetivos de la consulta;
+    - sin maná, con la acción usada o sin objetivos, el botón está deshabilitado y su tooltip lleva el motivo.
+  - (2) Hover = evento (`test_vista_hechizos.gd`):
+    - el desglose del Martillazo es igual al del `ataque` registrado;
+    - la Lanzadera muestra empujar y atraer con los destinos marcados, y lo de atraer es igual al evento registrado;
+    - con una adyacente contra el borde, solo empujar, con choque, igual al evento;
+    - lo del Remiendo es igual al `remiendo` registrado.
+    - Que lo previsto en los destapes sea lo aplicado lo prueba el núcleo (`test_lanzadera.gd::test_destapa_por_contacto`). La vista los copia de `previsualizar_hechizo`; en el test de la vista vienen vacíos.
+  - (3) Clics:
+    - `test_interprete_clic.gd`: el izquierdo empuja y el derecho atrae; el derecho sobre una adyacente da `null`, y fuera del modo también;
+    - `test_vista_hechizos.gd`: clic derecho real (`parse_input_event` + `flush`), y fuera del modo no hace nada;
+    - una partida con los tres hechizos jugada por la vista, guardada con `GuardadoCombate`, da una grabación que valida y se reproduce igual.
+  - (4) `test_lectura_hechizos.gd`: una línea con su clave por cada caso de `lanzadera` (sin choque, contra criatura, contra el Maestro, `null`), por `remiendo` y por el nombre en la `accion`.
+  - (5) `test_lanzadera_b.gd`: ver arriba.
+  - (6) Pasan `test_contacto`, `test_robustez_ia`, el permanente de datos y `test_escala_x10`.
+  - (7) Suite completa en verde. Los únicos `push_error` del log son los que los tests provocan a propósito (`is_push_error`): no hay errores ni advertencias nuevas.
+- **Lecturas declaradas:** S-45 a S-48 (sesión 1).
+- **Supuestos (no bloquean):**
+  - `contra` usa el criterio de ocupante de `Tablero._ocupantes`, copiado en un ayudante privado del `Turno`, porque el alcance de la sesión no dejaba tocar `Tablero`.
+  - Con 1 casilla de Lanzadera, el choque contra el Maestro no puede pasar. La línea `lanzadera.choque.contra_maestro` está programada y se probó con un evento armado a mano.
+  - El PR no lo abro yo: `CLAUDE.md` prohíbe el push y deja el PR al usuario.
+- **Claves de texto nuevas sin texto** (propuestas; hoy se ven como `[FALTA]`):
+  - `aviso.hechizo.mana_insuficiente`, `aviso.hechizo.accion_usada` y `aviso.hechizo.sin_objetivos`: tooltip del botón deshabilitado;
+  - `hechizo.sentido.empujar` y `hechizo.sentido.atraer`: rótulos del hover de la Lanzadera;
+  - `lanzadera.choque.obstaculo`: choque contra el borde o un surco.
+- **Preguntas:** ninguna nueva en la sesión 2 (P-042 fue de la sesión 1). Cerradas en la tarea: P-041 (sesión 1) y P-042 (sesión 2).
+- **Lista de prueba manual** (Windows):
+  1. Correr los tests:
+     - cmd: `addons\gdUnit4\runtest.cmd -a res://pruebas`
+     - PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`
+
+     Todo en verde; tarda unos 10 minutos.
+  2. Abrir el juego con F5 en el editor, o:
+     - cmd: `"%GODOT_BIN%" --path .`
+     - PowerShell: `& $env:GODOT_BIN --path .`
+
+     Elegir A. En el turno del Maestro:
+     - se ven tres botones con su costo: "Martillazo (2 Maná)", "Lanzadera (2 Maná)" y "Remiendo (4 Maná)";
+     - al pulsar Martillazo se marcan las objetivos;
+     - con el mouse sobre la Ocarra se ve el desglose;
+     - con clic izquierdo, la vida baja lo que decía el total y el maná baja 2 en el panel.
+  3. En el turno siguiente del Maestro, el maná subió 1 (la regeneración de T21).
+  4. Remiendo sobre la Rodauva herida o sobre el Maestro: la "Vida: de → a" del hover es la que queda.
+  5. Elegir B y jugar "Esperar" hasta el segundo turno del Maestro. Mover al Maestro a [4,8] (un paso hacia arriba) y pulsar Lanzadera:
+     - sobre una Ocarra se ven los destinos de empujar y atraer, o el choque con su daño;
+     - el clic izquierdo empuja y el derecho atrae;
+     - atraer a la Ocarra de la derecha la deja junto a la otra.
+  6. Probar dos choques:
+     - contra el borde (una unidad pegada al borde, empujada hacia afuera): da "[FALTA: lanzadera.choque.obstaculo] (−10 · Vida: …)";
+     - contra otra unidad: da "La … sale despedida y se lleva por delante a …".
+  7. Con poco maná, los botones que no alcanzan quedan grises y su tooltip suma el motivo (hoy `[FALTA: aviso.hechizo.mana_insuficiente]`). Con la acción usada, quedan todos grises.
+  8. Anotar los `[FALTA]` que aparezcan además de los de la lista de arriba.
+- **Para la próxima sesión:** nada: tarea terminada. Falta el commit de la sesión 2 y el PR a `develop`, los dos con la confirmación del usuario.

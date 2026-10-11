@@ -79,6 +79,16 @@ const AVISO_TERMINAR_DEBE_ATACAR: String = "aviso.terminar.debe_atacar_rival"
 const AVISO_TERMINAR_DEBE_ACERCARSE: String = "aviso.terminar.debe_acercarse"
 # T21: el mana del Maestro en el panel y el tooltip (clave propuesta, falta en es.json).
 const PANEL_MANA: String = "panel.mana"
+# T22: los choques de la Lanzadera (Mundo.md, "Hechizos, hambre y cierre del
+# combate"), segun contra quien fue (P-042).
+const LANZADERA_CHOQUE: String = "lanzadera.choque"
+const LANZADERA_CHOQUE_MAESTRO: String = "lanzadera.choque.contra_maestro"
+# T22: claves propuestas, faltan en es.json. El choque contra el borde o un
+# surco, y por que un boton de hechizo esta deshabilitado.
+const LANZADERA_CHOQUE_OBSTACULO: String = "lanzadera.choque.obstaculo"
+const AVISO_HECHIZO_MANA: String = "aviso.hechizo.mana_insuficiente"
+const AVISO_HECHIZO_ACCION_USADA: String = "aviso.hechizo.accion_usada"
+const AVISO_HECHIZO_SIN_OBJETIVOS: String = "aviso.hechizo.sin_objetivos"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -95,6 +105,8 @@ const FIJAS: Array[String] = [
 	COBARDIA_RESISTE_MAESTRO, COBARDIA_RESISTE_AFIN,
 	MARCA_ENCONADA, MARCA_ACOBARDADA, PANEL_ENCONO, AVISO_TERMINAR_DEBE_ATACAR, AVISO_TERMINAR_DEBE_ACERCARSE,
 	PANEL_MANA,
+	LANZADERA_CHOQUE, LANZADERA_CHOQUE_MAESTRO, LANZADERA_CHOQUE_OBSTACULO,
+	AVISO_HECHIZO_MANA, AVISO_HECHIZO_ACCION_USADA, AVISO_HECHIZO_SIN_OBJETIVOS,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -112,6 +124,8 @@ const _PREFIJO_ESPECIES: String = "especies/"
 const _PREFIJO_TEXTOS: String = "textos/"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
+const _MAESTRO: String = "maestro.json"
+const _HECHIZOS: String = "hechizos.json"
 
 
 static func nombre_especie(especie_id: String) -> String:
@@ -200,6 +214,34 @@ static func motivo_terminar(motivo: ResultadoAccion.Motivo) -> String:
 	return ""
 
 
+# T22: el nombre y el tooltip de un hechizo (por su id de hechizos.json).
+static func nombre_hechizo(hechizo_id: String) -> String:
+	return "hechizo.%s.nombre" % hechizo_id
+
+
+static func tooltip_hechizo(hechizo_id: String) -> String:
+	return "hechizo.%s.tooltip" % hechizo_id
+
+
+# T22: el rotulo de un sentido de la Lanzadera (los `modos` de hechizos.json).
+# Clave propuesta, falta en es.json.
+static func sentido_hechizo(modo: String) -> String:
+	return "hechizo.sentido.%s" % modo
+
+
+# T22: por que un boton de hechizo esta deshabilitado (Turno.motivo_hechizo), o
+# "" si el motivo no se muestra (los demas no se dan en el turno del Maestro).
+static func motivo_hechizo(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_HECHIZO_MANA
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_HECHIZO_ACCION_USADA
+		ResultadoAccion.Motivo.SIN_OBJETIVOS:
+			return AVISO_HECHIZO_SIN_OBJETIVOS
+	return ""
+
+
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:
 	var claves: Array[String] = []
@@ -242,8 +284,24 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		for evento in ((datos[_TABLA_LEALTAD] as Dictionary)["eventos"] as Dictionary).keys():
 			if not (evento as String).begins_with("_"):
 				_sumar(claves, motivo_lealtad(evento))
+	_sumar_hechizos(claves, datos)
 	_sumar_variantes(claves, datos, especies)
 	return claves
+
+
+# T22: por cada hechizo del Maestro (maestro.json, en su orden), su nombre y su
+# tooltip; por cada uno de sus `modos` (hechizos.json), el rotulo del sentido.
+static func _sumar_hechizos(claves: Array[String], datos: Dictionary) -> void:
+	if not datos.has(_MAESTRO) or not datos.has(_HECHIZOS):
+		return
+	var ids: Array = (datos[_MAESTRO] as Dictionary).get("hechizos", [])
+	for hechizo_id in ids:
+		_sumar(claves, nombre_hechizo(hechizo_id))
+		_sumar(claves, tooltip_hechizo(hechizo_id))
+	for hechizo in (datos[_HECHIZOS] as Dictionary).get("hechizos", []):
+		if ids.has(hechizo["id"]):
+			for modo in (hechizo as Dictionary).get("modos", []):
+				_sumar(claves, sentido_hechizo(modo))
 
 
 # Arquitectura.md A.2.1, concordancia de las etiquetas: hambre.estado.*,
@@ -283,6 +341,10 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 		for rival in especies:
 			if existentes.has(encono_par(especie, rival)):
 				_sumar(claves, encono_par(especie, rival))
+		# T22: el choque de la Lanzadera se pide con la especie de la movida.
+		var variante_choque: String = "%s.%s" % [LANZADERA_CHOQUE, especie]
+		if existentes.has(variante_choque):
+			_sumar(claves, variante_choque)
 
 
 static func _es_etiqueta(clave: String) -> bool:

@@ -70,6 +70,22 @@ enum Motivo {
 	# Sistema.md 10.6 y S-36: la acobardada no termina un movimiento mas cerca de
 	# ninguna rival del chequeo que donde empezo el turno.
 	MAS_CERCA_DE_RIVAL,
+	# Sistema.md 1.6 (T22): solo el Maestro lanza hechizos.
+	SOLO_MAESTRO,
+	# El Maestro no tiene ese hechizo (maestro.json, hechizos.json).
+	HECHIZO_INEXISTENTE,
+	# Sistema.md 1.6 y 2.3: el maná actual no alcanza el costo.
+	MANA_INSUFICIENTE,
+	# Sistema.md 1.6: el hechizo no vale sobre el Maestro mismo (la Lanzadera).
+	OBJETIVO_PROPIO,
+	# Sistema.md 1.6: el Remiendo es para el Maestro o una aliada.
+	OBJETIVO_ENEMIGO,
+	# Sistema.md 1.6, casos borde de la Lanzadera: atraer a una unidad adyacente.
+	ATRAER_ADYACENTE,
+	# Sistema.md 1.6: la Lanzadera lleva un sentido de sus modos; los demas, ninguno.
+	SENTIDO_INVALIDO,
+	# Turno.motivo_hechizo (T22, sesion 2): el hechizo no vale sobre ninguna unidad ahora.
+	SIN_OBJETIVOS,
 }
 
 var valida: bool
@@ -81,6 +97,15 @@ var desglose: DesgloseDanio = null
 # Solo al atacar (Sistema.md 10.2, T16): el eslabon de la cadena que es (o seria)
 # el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
 var eslabon: Variant = null
+# Solo en un hechizo (Sistema.md 1.6, T22): {de, a} del mana que paga, o {} si
+# no cambia (D-007).
+var mana: Dictionary = {}
+# Solo en un hechizo que no es ataque: el evento de A.7 que produce (`lanzadera`
+# o `remiendo`), con su tipo. Lo mismo al validar y al aplicar.
+var evento: Dictionary = {}
+# Solo en la Lanzadera: las ocultas que la movida destaparia por contacto al
+# llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
+var destaparia: Array[String] = []
 # Solo al terminar: true si el turno se cierra sin haber usado la accion (P-015).
 var espero: bool = false
 # Como esta el combate: despues de aplicar, o el motivo de un rechazo por

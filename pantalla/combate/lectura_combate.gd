@@ -20,6 +20,8 @@ const _SEPARADOR: String = " · "
 const ACTIVA_ERIZARSE: String = "erizarse"
 const ACTIVA_HACERSE_JUNCO: String = "hacerse_junco"
 const ACTIVA_CAVAR: String = "cavar"
+# A.7: el tipo de la accion `hechizo` en el registro.
+const _ACCION_HECHIZO: String = "hechizo"
 
 var _combate: Combate
 var _plantel: Plantel
@@ -276,6 +278,15 @@ func suceso(evento: Dictionary) -> Array[String]:
 		"accion":
 			if evento["accion"]["tipo"] == "erizarse":
 				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(_clave_rasgo(evento["unidad"]))])]
+			# T22: el hechizo se nombra antes de su ataque, lanzadera o remiendo.
+			if evento["accion"]["tipo"] == _ACCION_HECHIZO:
+				return [_SEPARADOR.join([nombre(evento["unidad"]),
+						_armador.armar(ClavesTextos.nombre_hechizo(evento["accion"]["hechizo"]))])]
+		"lanzadera":
+			return [_suceso_lanzadera(evento)]
+		# T22 (Sistema.md 1.6): la vida de la curada, de -> a.
+		"remiendo":
+			return [_SEPARADOR.join([nombre(evento["objetivo"]), _linea_vida(evento["de"], evento["a"])])]
 		"estado":
 			return _suceso_estado(evento["unidad"], evento["a"])
 		"fin":
@@ -357,6 +368,31 @@ func _suceso_chequeo_rival(evento: Dictionary) -> Array[String]:
 		_:
 			return []
 	return [_armador.armar(clave, datos)]
+
+
+# T22 (Sistema.md 1.6, A.7): sin choque, la movida se mueve; con choque, la
+# linea segun contra quien fue (P-042: una criatura, el Maestro, o null si fue
+# el borde o un surco), con el danio y la vida que da el evento.
+func _suceso_lanzadera(evento: Dictionary) -> String:
+	var objetivo: String = evento["objetivo"]
+	if not evento["choque"]:
+		return _SEPARADOR.join([nombre(objetivo), _armador.armar(ClavesTextos.ACCION_MOVER)])
+	var datos: Dictionary = {"unidad": HuecoCriatura.new(_sujeto(objetivo))}
+	var contra: Variant = evento.get("contra")
+	var linea: String
+	if contra == null:
+		linea = _armador.armar(ClavesTextos.LANZADERA_CHOQUE_OBSTACULO, datos)
+	elif contra == Maestro.ID:
+		linea = _armador.armar(ClavesTextos.LANZADERA_CHOQUE_MAESTRO, datos)
+	else:
+		datos["otra"] = HuecoCriatura.new(_sujeto(contra))
+		linea = _armador.armar(ClavesTextos.LANZADERA_CHOQUE, datos, _sujeto(objetivo))
+	return "%s (−%d · %s)" % [linea, evento["danio"], _linea_vida(evento["vida_antes"], evento["vida_despues"])]
+
+
+# "Vida: antes → despues", con los numeros que da el nucleo.
+func _linea_vida(antes: int, despues: int) -> String:
+	return "%s: %d → %d" % [_armador.armar(ClavesTextos.PANEL_VIDA), antes, despues]
 
 
 # T14 (Sistema.md 7.2, A.7): la linea del hambre de combate y, por cada unidad
@@ -453,6 +489,58 @@ func botones_activas() -> Array[Dictionary]:
 			botones.append(_boton(ACTIVA_CAVAR, _armador.armar(ClavesTextos.ACCION_CAVAR), tooltip,
 					not turno.casillas_para_cavar().is_empty()))
 	return botones
+
+
+# T22 (Sistema.md 1.6): un boton por hechizo del Maestro, en el orden de
+# Hechizos.ids() (maestro.json): [{id, texto, tooltip, habilitado}]. El texto
+# lleva el costo de hechizos.json; habilitado y el motivo del tooltip salen de
+# Turno.motivo_hechizo. Nada se decide por el id. Vacio fuera del turno del Maestro.
+func botones_hechizos() -> Array[Dictionary]:
+	var botones: Array[Dictionary] = []
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.unidad_id != Maestro.ID:
+		return botones
+	var hechizos: Hechizos = _combate.contexto().hechizos
+	for hechizo_id in hechizos.ids():
+		var motivo: ResultadoAccion.Motivo = turno.motivo_hechizo(hechizo_id)
+		var tooltip: Array[String] = [_armador.armar(ClavesTextos.tooltip_hechizo(hechizo_id))]
+		var clave_motivo: String = ClavesTextos.motivo_hechizo(motivo)
+		if not clave_motivo.is_empty():
+			tooltip.append(_armador.armar(clave_motivo))
+		botones.append({"id": hechizo_id, "tooltip": "\n".join(tooltip),
+				"habilitado": motivo == ResultadoAccion.Motivo.NINGUNO,
+				"texto": "%s (%d %s)" % [_armador.armar(ClavesTextos.nombre_hechizo(hechizo_id)),
+						hechizos.hechizo(hechizo_id)["costo"] as int, _armador.armar(ClavesTextos.PANEL_MANA)]})
+	return botones
+
+
+# T22: las lineas de lo que haria el hechizo sobre una objetivo, desde las
+# previsualizaciones del Turno ({sentido: ResultadoAccion}, en el orden de sus
+# modos). Lo que se muestra sale de lo que trae cada una: el desglose (un ataque),
+# o el evento `lanzadera` (por sentido: el destino o el choque con su danio y la
+# vida, y el aviso de destapar) o `remiendo` (la vida de -> a).
+func vista_previa_hechizo(previas: Dictionary) -> Array[String]:
+	var lineas: Array[String] = []
+	for sentido in previas.keys():
+		var previa: ResultadoAccion = previas[sentido]
+		if previa.desglose != null:
+			lineas.append_array(desglose(previa.desglose.a_diccionario(), Maestro.ID))
+			continue
+		var evento: Dictionary = previa.evento
+		var prefijo: String = "" if (sentido as String).is_empty() \
+				else _armador.armar(ClavesTextos.sentido_hechizo(sentido)) + ": "
+		match evento.get("tipo"):
+			"lanzadera":
+				if evento["choque"]:
+					lineas.append("%s−%d · %s" % [prefijo, evento["danio"],
+							_linea_vida(evento["vida_antes"], evento["vida_despues"])])
+				else:
+					lineas.append(prefijo + _armador.armar(ClavesTextos.ACCION_MOVER))
+				if not previa.destaparia.is_empty():
+					lineas.append(_armador.armar(ClavesTextos.AVISO_DESTAPAR))
+			"remiendo":
+				lineas.append(prefijo + _linea_vida(evento["de"], evento["a"]))
+	return lineas
 
 
 func _boton(tipo: String, texto: String, tooltip: String, habilitado: bool) -> Dictionary:

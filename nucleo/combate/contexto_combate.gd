@@ -9,6 +9,9 @@ enum Motivo {
 	NINGUNO,
 	# Una unidad del tablero sin posicion: el despliegue manual no es de 0a (A-1).
 	DESPLIEGUE_NO_IMPLEMENTADO,
+	# D-008 (T22): una regla de ReglasCombate no se pudo armar (falta su archivo o un
+	# dato); su nombre queda en regla_faltante.
+	REGLA_FALTANTE,
 }
 
 # Arquitectura.md A.8: nombres de sistema para derivar los generadores.
@@ -17,6 +20,8 @@ const SISTEMA_TEXTOS: String = "textos"
 
 var valido: bool = false
 var motivo: Motivo = Motivo.NINGUNO
+# Con REGLA_FALTANTE, el nombre de la regla (ReglasCombate.falta); si no, "".
+var regla_faltante: String = ""
 
 var escenario_id: String
 # Copia del escenario tal como se juega: lo guarda la Grabacion (A.7).
@@ -59,6 +64,9 @@ var incidente: Incidente:
 # Sistema.md 10.5, 10.6 y 1.3 (T19): el chequeo de rival enemiga. Lo aplica el Turno con azar_combate.
 var chequeo_rival: ChequeoRival:
 	get: return null if reglas == null else reglas.chequeo_rival
+# Sistema.md 1.6 (T22): los hechizos del Maestro. Los lanza el Turno.
+var hechizos: Hechizos:
+	get: return null if reglas == null else reglas.hechizos
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -96,8 +104,14 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 			contexto.obediencia)
 	var regla_chequeo: ChequeoRival = ChequeoRival.desde_datos(tabla_combate, arrimo, contexto.relaciones,
 			contexto.obediencia, regla_afinidad, contexto.toggles.get("afines_contra_cobardia", false))
+	var regla_hechizos: Hechizos = Hechizos.desde_datos(datos.get("hechizos.json", {}), datos["maestro.json"])
 	contexto.reglas = ReglasCombate.new(regla_danio, regla_afinidad, regla_combo, regla_incidente, regla_chequeo,
-			regla_mana)
+			regla_mana, regla_hechizos)
+	# D-008: sin todas las reglas el combate no se arma (hallazgo de la revision de T21-ajustes).
+	if not contexto.reglas.falta.is_empty():
+		contexto.motivo = Motivo.REGLA_FALTANTE
+		contexto.regla_faltante = contexto.reglas.falta
+		return contexto
 	contexto.valido = true
 	return contexto
 

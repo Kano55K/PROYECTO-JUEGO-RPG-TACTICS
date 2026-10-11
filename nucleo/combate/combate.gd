@@ -382,21 +382,30 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	var estados_antes: Dictionary = _estados()
 	var desde: Vector2i = _posicion(unidad_id)
 	var vida_antes: int = 0
-	if accion.tipo == Accion.Tipo.ATACAR:
+	if accion.tipo == Accion.Tipo.ATACAR or accion.tipo == Accion.Tipo.HECHIZO:
 		vida_antes = _vida(accion.objetivo_id)
 
 	var resultado: ResultadoAccion = _turno.aplicar(accion)
 	if not resultado.valida:
 		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
 		return resultado
+	# Sistema.md 1.6 y D-007 (T22): el mana que paga un hechizo, justo detras de su
+	# `accion`. Despues, el Martillazo es un `ataque` normal (es un ataque) y la
+	# Lanzadera y el Remiendo, su propio evento.
+	if not resultado.mana.is_empty():
+		_registrar({"tipo": "mana", "unidad": unidad_id, "de": resultado.mana["de"], "a": resultado.mana["a"],
+				"motivo": Hechizos.MOTIVO_HECHIZO})
+	if accion.tipo == Accion.Tipo.HECHIZO:
+		if resultado.desglose != null:
+			_registrar_ataque(unidad_id, accion.objetivo_id, resultado, vida_antes)
+		else:
+			_registrar(resultado.evento.duplicate(true))
 	match accion.tipo:
 		Accion.Tipo.MOVER:
 			_registrar({"tipo": "movimiento", "unidad": unidad_id,
 					"desde": Plantel.casilla_a_lista(desde), "hasta": Plantel.casilla_a_lista(accion.casilla)})
 		Accion.Tipo.ATACAR:
-			_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": accion.objetivo_id,
-					"desglose": resultado.desglose.a_diccionario(), "eslabon": resultado.eslabon,
-					"vida_antes": vida_antes, "vida_despues": _vida(accion.objetivo_id)})
+			_registrar_ataque(unidad_id, accion.objetivo_id, resultado, vida_antes)
 		# Sistema.md 10.1 (T17, A.7): detras de quien y en que lugar de la cola
 		# quedo (desde 0). El turno no termino: no hay fin_turno.
 		Accion.Tipo.SECUNDAR:
@@ -415,6 +424,13 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 		_registrar({"tipo": "fin_turno", "unidad": unidad_id,
 				"posicion": Plantel.casilla_a_lista(_posicion(unidad_id))})
 	return resultado
+
+
+# Arquitectura.md A.7: el evento `ataque` de un ataque o del Martillazo.
+func _registrar_ataque(atacante_id: String, objetivo_id: String, resultado: ResultadoAccion, vida_antes: int) -> void:
+	_registrar({"tipo": "ataque", "atacante": atacante_id, "objetivo": objetivo_id,
+			"desglose": resultado.desglose.a_diccionario(), "eslabon": resultado.eslabon,
+			"vida_antes": vida_antes, "vida_despues": _vida(objetivo_id)})
 
 
 # Sistema.md 11.5: el combate termino. Se registra el desenlace y el Cierre

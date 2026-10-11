@@ -1,7 +1,8 @@
 # Arquitectura.md B.2 (T13, sesion 2): traduce la casilla clicada en la Accion
 # que corresponde, sin nodos. No tiene reglas propias: usa las consultas del
 # Turno (T08) y las posiciones de instantanea(). Casilla con una objetivo
-# atacable -> atacar; casilla alcanzable -> mover; cualquier otra -> null.
+# atacable -> atacar; casilla alcanzable -> mover; cualquier otra -> null. En el
+# modo de un hechizo (T22), la objetivo -> hechizo.
 class_name InterpreteClic
 extends RefCounted
 
@@ -11,8 +12,17 @@ extends RefCounted
 # vale (Turno.casillas_para_cavar) da la accion; cualquier otra, null.
 # T17: con modo_secundar (el jugador pulso Secundar), solo una aliada a la que
 # `secundar` vale (Turno.aliadas_para_secundar) da la accion; cualquier otra, null.
+# T22: con hechizo_id (el jugador pulso el boton de un hechizo), solo una objetivo
+# de Turno.objetivos_para_hechizo da la accion. alterno: el clic derecho
+# (`seleccionar_alterno`). Un hechizo sin modos va con el clic izquierdo; uno con
+# modos, el izquierdo empuja y el derecho atrae, si ese sentido esta en
+# Turno.sentidos_para_hechizo. Fuera del modo hechizo, el clic derecho no hace nada.
 static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i, modo_cavar: bool = false,
-		modo_secundar: bool = false) -> Accion:
+		modo_secundar: bool = false, hechizo_id: String = "", alterno: bool = false) -> Accion:
+	if not hechizo_id.is_empty():
+		return _accion_hechizo(turno, foto, casilla, hechizo_id, alterno)
+	if alterno:
+		return null
 	if modo_cavar:
 		return Accion.cavar(casilla) if turno.casillas_para_cavar().has(casilla) else null
 	if modo_secundar:
@@ -34,6 +44,23 @@ static func objetivo_en(turno: Turno, foto: Dictionary, casilla: Vector2i) -> St
 # T17: el id de la aliada que se puede Secundar en la casilla, o "".
 static func aliada_en(turno: Turno, foto: Dictionary, casilla: Vector2i) -> String:
 	return _unidad_de(turno.aliadas_para_secundar(), foto, casilla)
+
+
+# T22: el id de la objetivo del hechizo que esta en la casilla, o "".
+static func objetivo_hechizo_en(turno: Turno, foto: Dictionary, casilla: Vector2i, hechizo_id: String) -> String:
+	return _unidad_de(turno.objetivos_para_hechizo(hechizo_id), foto, casilla)
+
+
+static func _accion_hechizo(turno: Turno, foto: Dictionary, casilla: Vector2i, hechizo_id: String,
+		alterno: bool) -> Accion:
+	var objetivo: String = objetivo_hechizo_en(turno, foto, casilla, hechizo_id)
+	if objetivo.is_empty():
+		return null
+	var sentidos: Array[String] = turno.sentidos_para_hechizo(hechizo_id, objetivo)
+	if sentidos.has(""):
+		return null if alterno else Accion.hechizo(hechizo_id, objetivo)
+	var sentido: String = Hechizos.SENTIDO_ATRAER if alterno else Hechizos.SENTIDO_EMPUJAR
+	return Accion.hechizo(hechizo_id, objetivo, sentido) if sentidos.has(sentido) else null
 
 
 # La unidad de `ids` que esta en la casilla, o "".

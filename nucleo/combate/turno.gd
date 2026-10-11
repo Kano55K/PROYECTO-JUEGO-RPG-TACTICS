@@ -79,6 +79,8 @@ var _incidente: Incidente
 var _chequeo: ChequeoRival
 # La regla de la regeneracion de mana (T21), como _incidente.
 var _regla_mana: RegeneracionMana
+# Los hechizos del Maestro (T22), como _incidente.
+var _hechizos: Hechizos
 var _azar: GeneradorAzar
 
 
@@ -96,6 +98,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Sur
 	_incidente = reglas.incidente
 	_chequeo = reglas.chequeo_rival
 	_regla_mana = reglas.regeneracion_mana
+	_hechizos = reglas.hechizos
 	_azar = azar
 
 
@@ -271,6 +274,49 @@ func cola_si_secunda(aliado_id: String) -> Array[EntradaCola]:
 	if not validar(Accion.secundar(aliado_id)).valida:
 		return []
 	return _cola.orden_si_secunda(unidad_id, aliado_id)
+
+
+# Sistema.md 1.6 (T22, D-005): las unidades sobre las que el hechizo vale ahora,
+# en el orden del Plantel (el Maestro y despues las criaturas). La Lanzadera
+# vale si vale en algun sentido.
+func objetivos_para_hechizo(hechizo_id: String) -> Array[String]:
+	var resultado: Array[String] = []
+	var ids: Array[String] = [Maestro.ID]
+	for criatura in _plantel.criaturas():
+		ids.append(criatura.id)
+	for id_objetivo in ids:
+		if not sentidos_para_hechizo(hechizo_id, id_objetivo).is_empty():
+			resultado.append(id_objetivo)
+	return resultado
+
+
+# Los sentidos en los que el hechizo vale sobre la objetivo, en el orden de sus
+# `modos` (hechizos.json). Un hechizo sin modos: [""] si vale, [] si no.
+func sentidos_para_hechizo(hechizo_id: String, objetivo_id: String) -> Array[String]:
+	var sentidos: Array[String] = []
+	sentidos.assign(_hechizos.hechizo(hechizo_id).get("modos", [""]))
+	var resultado: Array[String] = []
+	for sentido in sentidos:
+		if validar(Accion.hechizo(hechizo_id, objetivo_id, sentido)).valida:
+			resultado.append(sentido)
+	return resultado
+
+
+# T22, sesion 2 (calcular sin aplicar): por que el hechizo no se puede lanzar
+# ahora, con los mismos chequeos que _hechizo y en el mismo orden; si pasan y no
+# vale sobre ninguna unidad, SIN_OBJETIVOS. NINGUNO si se puede.
+func motivo_hechizo(hechizo_id: String) -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_lanzar(hechizo_id)
+	if motivo == ResultadoAccion.Motivo.NINGUNO and objetivos_para_hechizo(hechizo_id).is_empty():
+		return ResultadoAccion.Motivo.SIN_OBJETIVOS
+	return motivo
+
+
+# Calcular sin aplicar (A.6, D-005): lo mismo que validar el hechizo. Trae el
+# desglose del Martillazo, el evento de la Lanzadera (destino o choque, danio y
+# vida resultante) y del Remiendo, las ocultas que destaparia y el mana.
+func previsualizar_hechizo(hechizo_id: String, objetivo_id: String, sentido: String = "") -> ResultadoAccion:
+	return validar(Accion.hechizo(hechizo_id, objetivo_id, sentido))
 
 
 # Sistema.md 11.3, Inicio del turno. Primero se borra la marca de erizada: dura
@@ -454,6 +500,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _hacerse_junco(aplica)
 		Accion.Tipo.SECUNDAR:
 			resultado = _secundar(accion.aliado_id, aplica)
+		Accion.Tipo.HECHIZO:
+			resultado = _hechizo(accion, aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -562,10 +610,21 @@ func _atacar_desde(desde: Vector2i, objetivo_id: String, aplica: bool, por_incid
 				and _tablero.linea_bloqueada(desde, hasta, bando, _plantel):
 			return ResultadoAccion.rechazada(ResultadoAccion.Motivo.LINEA_BLOQUEADA)
 		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.FUERA_DE_ALCANCE)
+	return _golpear(desde, objetivo_id, null, aplica, por_incidente, tras_primer_ataque)
 
+
+# Sistema.md 11.4: el golpe ya validado, desde el danio. Lo comparten el ataque y
+# el Martillazo (1.6, T22: "es un ataque"), asi el resto de 11.4, la cadena, el
+# Encono, Hacerse junco y la vida en 0 existen una sola vez. base: null para el
+# Danio base de la ficha o la balanza; el del hechizo, si no.
+func _golpear(desde: Vector2i, objetivo_id: String, base: Variant, aplica: bool, por_incidente: bool = false,
+		tras_primer_ataque: bool = false) -> ResultadoAccion:
 	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
-	resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, _aportes(desde, objetivo_id, por_incidente,
-			tras_primer_ataque))
+	var aportes: Array[ModificadorDanio] = _aportes(desde, objetivo_id, por_incidente, tras_primer_ataque)
+	if base == null:
+		resultado.desglose = _danio.calcular(unidad_id, objetivo_id, _plantel, aportes)
+	else:
+		resultado.desglose = _danio.calcular_con_base(base, unidad_id, objetivo_id, _plantel, aportes)
 	resultado.danio = resultado.desglose.total
 	resultado.eslabon = null if por_incidente else _cadena.eslabon_para(unidad_id, objetivo_id, _plantel)
 	if aplica:
@@ -754,6 +813,174 @@ func _secundar(aliado_id: String, aplica: bool) -> ResultadoAccion:
 	return ResultadoAccion.aceptada()
 
 
+# Sistema.md 1.6 y 11.3 (T22): solo el Maestro, con la accion sin usar y el mana
+# del costo (sin descuento de la balanza, 2.3). La objetivo pasa por Objetivos
+# (HOSTIL para danio y empuje, ALIADA para la cura; el bando lo mira cada
+# efecto) y por la geometria del hechizo. Gasta la accion y conserva el
+# movimiento. El comportamiento sale del efecto, nunca del id.
+func _hechizo(accion: Accion, aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_lanzar(accion.hechizo_id)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	var hechizo: Dictionary = _hechizos.hechizo(accion.hechizo_id)
+	var maestro: Maestro = _plantel.maestro
+	var costo: int = hechizo["costo"]
+	motivo = _motivo_objetivo_hechizo(hechizo, accion.objetivo_id)
+	if motivo == ResultadoAccion.Motivo.NINGUNO:
+		motivo = _motivo_sentido(hechizo, accion.sentido)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+
+	var resultado: ResultadoAccion
+	match hechizo["efecto"]:
+		Hechizos.EFECTO_DANIO:
+			resultado = _golpear(_posicion(unidad_id), accion.objetivo_id,
+					_hechizos.valor(accion.hechizo_id, maestro.poder), aplica)
+		Hechizos.EFECTO_EMPUJE:
+			resultado = _lanzadera(hechizo, accion.objetivo_id, accion.sentido, aplica)
+		_:
+			resultado = _remiendo(accion.hechizo_id, accion.objetivo_id, aplica)
+	if not resultado.valida:
+		return resultado
+	if costo != 0:
+		resultado.mana = {"de": maestro.mana, "a": maestro.mana - costo}
+	if aplica:
+		maestro.mana -= costo
+		accion_usada = true
+		ataques_restantes = 0
+	return resultado
+
+
+# Lo que se chequea antes de mirar la objetivo, en este orden: turno terminado,
+# solo el Maestro, que tenga el hechizo, la accion sin usar y el mana del costo.
+# Lo comparten _hechizo y motivo_hechizo.
+func _motivo_lanzar(hechizo_id: String) -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if unidad_id != Maestro.ID:
+		return ResultadoAccion.Motivo.SOLO_MAESTRO
+	var hechizo: Dictionary = _hechizos.hechizo(hechizo_id)
+	if hechizo.is_empty():
+		return ResultadoAccion.Motivo.HECHIZO_INEXISTENTE
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	if _plantel.maestro.mana < (hechizo["costo"] as int):
+		return ResultadoAccion.Motivo.MANA_INSUFICIENTE
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# La objetivo del hechizo, sin mirar el sentido. Sistema.md 1.6 y S-47: el
+# danio solo va a enemigas; el empuje, a cualquier bando salvo el Maestro mismo
+# (y nunca a una oculta: HOSTIL); la cura, al Maestro mismo (incluye_si_mismo) o
+# a una aliada (ALIADA: una oculta vale, S-22; una caida no, 11.5).
+func _motivo_objetivo_hechizo(hechizo: Dictionary, objetivo_id: String) -> ResultadoAccion.Motivo:
+	var efecto: String = hechizo["efecto"]
+	if objetivo_id == unidad_id and not hechizo.get("incluye_si_mismo", false):
+		return ResultadoAccion.Motivo.OBJETIVO_PROPIO
+	var clase: Objetivos.Clase = Objetivos.Clase.ALIADA if efecto == Hechizos.EFECTO_CURA else Objetivos.Clase.HOSTIL
+	var motivo: ResultadoAccion.Motivo = Objetivos.motivo(objetivo_id, clase, _plantel)
+	if motivo == ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE:
+		return motivo
+	var mismo_bando: bool = _bando(objetivo_id) == _bando(unidad_id)
+	if efecto == Hechizos.EFECTO_DANIO and mismo_bando:
+		return ResultadoAccion.Motivo.OBJETIVO_ALIADO
+	if efecto == Hechizos.EFECTO_CURA and not mismo_bando:
+		return ResultadoAccion.Motivo.OBJETIVO_ENEMIGO
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	return _motivo_geometria(hechizo, objetivo_id)
+
+
+# D-001: la geometria del hechizo es codigo; el alcance, dato. Distancia libre:
+# Manhattan <= alcance, sin bloqueo (ni enemigas ni surcos, 11.2.1). Linea: misma
+# fila o columna a <= alcance, sin una enemiga en el medio (la linea de Tablero).
+# Adyacente: las 4 ortogonales (11.3 v1.6); el Maestro mismo, si el hechizo lo incluye.
+func _motivo_geometria(hechizo: Dictionary, objetivo_id: String) -> ResultadoAccion.Motivo:
+	var desde: Vector2i = _posicion(unidad_id)
+	var hasta: Vector2i = _posicion(objetivo_id)
+	var alcance: int = hechizo["alcance"]
+	var distancia: int = Tablero.distancia(desde, hasta)
+	match hechizo["geometria"]:
+		Hechizos.GEOMETRIA_DISTANCIA_LIBRE:
+			if distancia > alcance:
+				return ResultadoAccion.Motivo.FUERA_DE_ALCANCE
+		Hechizos.GEOMETRIA_LINEA:
+			if not _tablero.en_linea(desde, hasta) or distancia > alcance:
+				return ResultadoAccion.Motivo.FUERA_DE_ALCANCE
+			if _tablero.linea_bloqueada(desde, hasta, _bando(unidad_id), _plantel):
+				return ResultadoAccion.Motivo.LINEA_BLOQUEADA
+		Hechizos.GEOMETRIA_ADYACENTE:
+			if objetivo_id != unidad_id and (not _tablero.en_linea(desde, hasta) or distancia > alcance):
+				return ResultadoAccion.Motivo.FUERA_DE_ALCANCE
+		_:
+			return ResultadoAccion.Motivo.FUERA_DE_ALCANCE
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Sistema.md 1.6: la Lanzadera lleva uno de sus `modos`; un hechizo sin modos, ninguno.
+func _motivo_sentido(hechizo: Dictionary, sentido: String) -> ResultadoAccion.Motivo:
+	var modos: Array = hechizo.get("modos", [])
+	if (modos.is_empty() and not sentido.is_empty()) or (not modos.is_empty() and not modos.has(sentido)):
+		return ResultadoAccion.Motivo.SENTIDO_INVALIDO
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Sistema.md 1.6, Lanzadera, y sus casos borde. Empujar aleja `casillas` en la
+# linea Maestro-objetivo; atraer acerca (S-48), y no vale si la llevaria hasta el
+# Maestro o mas alla (atraer a una adyacente). Si el destino esta fuera, ocupado
+# (de pie o caida) o en un surco que no pisa (Tablero.bloquea_desplazamiento),
+# no se mueve y recibe danio_choque fijo: sin Danio ni modificadores, tambien
+# erizada (S-46); vida con piso 0 y VidaCero. Si se mueve, una erizada conserva
+# la marca y se revisa el contacto con las ocultas (S-24). No es un ataque: no
+# toca la cadena, el Encono ni el bono de Hacerse junco.
+func _lanzadera(hechizo: Dictionary, objetivo_id: String, sentido: String, aplica: bool) -> ResultadoAccion:
+	var maestro_en: Vector2i = _posicion(unidad_id)
+	var desde: Vector2i = _posicion(objetivo_id)
+	var casillas: int = hechizo["casillas"]
+	if sentido == Hechizos.SENTIDO_ATRAER and Tablero.distancia(maestro_en, desde) <= casillas:
+		return ResultadoAccion.rechazada(ResultadoAccion.Motivo.ATRAER_ADYACENTE)
+	var direccion: Vector2i = (desde - maestro_en).sign()
+	if sentido == Hechizos.SENTIDO_ATRAER:
+		direccion = -direccion
+	var hasta: Vector2i = desde + direccion * casillas
+	var choque: bool = _tablero.bloquea_desplazamiento(hasta, objetivo_id, _plantel, _surcos)
+	var vida_antes: int = _vida(objetivo_id)
+	var danio: int = hechizo["danio_choque"] if choque else 0
+	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
+	resultado.danio = danio
+	resultado.evento = {"tipo": "lanzadera", "objetivo": objetivo_id, "sentido": sentido,
+			"desde": Plantel.casilla_a_lista(desde), "hasta": null if choque else Plantel.casilla_a_lista(hasta),
+			"choque": choque, "danio": danio, "vida_antes": vida_antes, "vida_despues": maxi(0, vida_antes - danio)}
+	# P-042: contra quien choco (de pie o caida), o null si fue el borde o un surco.
+	if choque:
+		resultado.evento["contra"] = _ocupante_en(hasta)
+	else:
+		resultado.destaparia = Junco.destaparia(objetivo_id, hasta, _plantel)
+	if aplica:
+		if choque:
+			_poner_vida(objetivo_id, maxi(0, vida_antes - danio))
+			VidaCero.resolver(objetivo_id, _plantel, _surcos)
+		else:
+			_poner_posicion(objetivo_id, hasta)
+			_eventos.append_array(Junco.revisar_contacto(objetivo_id, _plantel))
+	return resultado
+
+
+# Sistema.md 1.6, Remiendo: cura base + por_poder x Poder (D-010), con tope en la
+# vida maxima (el Maestro, la de su balanza; una criatura, la de su ficha). Con
+# la vida completa vale y cura 0 (S-45). No es un ataque.
+func _remiendo(hechizo_id: String, objetivo_id: String, aplica: bool) -> ResultadoAccion:
+	var maximo: int = _plantel.maestro.vida_max_real() if objetivo_id == Maestro.ID \
+			else _plantel.criatura(objetivo_id).vida_max_real()
+	var de: int = _vida(objetivo_id)
+	var a: int = maxi(de, mini(maximo, de + _hechizos.valor(hechizo_id, _plantel.maestro.poder)))
+	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
+	resultado.evento = {"tipo": "remiendo", "objetivo": objetivo_id, "de": de, "a": a}
+	if aplica:
+		_poner_vida(objetivo_id, a)
+	return resultado
+
+
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es
 # "esperar" (10.2, P-015): el resultado lo dice para el registro. No corta la cadena.
 func _terminar(aplica: bool) -> ResultadoAccion:
@@ -791,6 +1018,17 @@ func _posicion(id_unidad: String) -> Vector2i:
 	if id_unidad == Maestro.ID:
 		return _plantel.maestro.posicion
 	return _plantel.criatura(id_unidad).posicion
+
+
+# P-042: el id de la unidad que ocupa la casilla (el Maestro o una criatura en
+# el tablero, de pie o caida: el mismo criterio que Tablero._ocupantes), o null.
+func _ocupante_en(casilla: Vector2i) -> Variant:
+	if _plantel.maestro.posicion == casilla:
+		return Maestro.ID
+	for criatura in _plantel.criaturas():
+		if criatura.estado != Criatura.Estado.GUARDADA and criatura.posicion == casilla:
+			return criatura.id
+	return null
 
 
 func _poner_posicion(id_unidad: String, casilla: Vector2i) -> void:

@@ -60,11 +60,14 @@
             ]
           },
           "base": {
+            "description": "D-010: el efecto vale base + por_poder × Poder",
             "type": "integer",
             "minimum": 0
           },
-          "escala_poder": {
-            "type": "boolean"
+          "por_poder": {
+            "description": "D-010: lo que suma cada punto de Poder. Solo en los hechizos que escalan con Poder (Sistema.md 1.6)",
+            "type": "integer",
+            "minimum": 0
           },
           "es_ataque": {
             "type": "boolean",
