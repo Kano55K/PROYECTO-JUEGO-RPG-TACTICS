@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "eventos_metricas",
+  "_nota": "Arquitectura.md B.3 (T23) y A.7: eventos distancia_maestro y encierro (Sistema.md 11.9, metricas 13 y 14). Tablero de 3 x 40, como escenario_mana_combate: las enemigas empiezan lejos y nadie pelea en las primeras rondas. El Maestro en [1,0] tiene arriba el borde y en sus otras 3 ortogonales a la tribu: termina encerrado aunque sus diagonales [0,1] y [2,1] esten libres. La Rodauva en la esquina [0,0] tiene libre [0,1]: no lo esta. Las enemigas (Ocarra y Zancajunco, Velocidad 7 y 8) juegan antes que el Maestro (5); el Surcon (2), despues: al terminar el Maestro, el combate espera al Surcon sin mover a nadie",
+  "tipo": "test",
+  "semilla": 23,
+  "tablero": { "ancho": 3, "alto": 40 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [1, 0] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 0] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 0] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 1] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [1, 39] },
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [0, 30] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

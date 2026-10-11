@@ -36,3 +36,31 @@ func test_crea_la_carpeta_si_no_existe() -> void:
 	assert_bool(DirAccess.dir_exists_absolute(carpeta)).is_false()
 	assert_str(GuardadoCombate.guardar(_combate(), carpeta)).is_not_empty()
 	assert_bool(DirAccess.dir_exists_absolute(carpeta)).is_true()
+
+
+# (10) T23 (D-011): un combate terminado guarda tambien su resultado, con las
+# metricas, en <escenario>_<semilla>_<n>_resultado.json, y valida contra el
+# esquema. Uno sin terminar no lo escribe.
+func test_t23_guarda_el_resultado() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	var escenario: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/contrato/contrato_victoria.json",
+			"escenario")["datos"]
+	var combate: Combate = Combate.empezar(ContextoCombate.armar(escenario, lectura["datos"]))
+	assert_bool(combate.aplicar(Accion.mover(Vector2i(2, 5))).valida).is_true()
+	assert_bool(combate.aplicar(Accion.atacar("ocarra_s1")).valida).is_true()
+	assert_bool(combate.terminado()).is_true()
+	var carpeta: String = create_temp_dir("t23_guardado")
+	var base: String = GuardadoCombate.guardar(combate, carpeta)
+	assert_str(base).is_not_empty()
+	var ruta: String = base + GuardadoCombate.SUFIJO_RESULTADO
+	assert_str(ruta.get_file()).is_equal("contrato_victoria_%d_1_resultado.json" % combate.contexto().semilla)
+	var leido: Variant = JSON.parse_string(FileAccess.get_file_as_string(ruta))
+	var esquema: Dictionary = Cargador.new().esquema_resuelto("res://datos", "resultado")["esquema"]
+	var validacion: Dictionary = Validador.new().validar(leido, esquema, "resultado")
+	assert_array(validacion["errores"] as Array).override_failure_message(str(validacion["errores"])).is_empty()
+	assert_dict(validacion["datos"]).is_equal(combate.resultado().a_diccionario())
+
+	# Sin terminar: grabacion y registro, sin resultado.
+	var a_medias: String = GuardadoCombate.guardar(_combate(), carpeta)
+	assert_bool(FileAccess.file_exists(a_medias + ".json")).is_true()
+	assert_bool(FileAccess.file_exists(a_medias + GuardadoCombate.SUFIJO_RESULTADO)).is_false()

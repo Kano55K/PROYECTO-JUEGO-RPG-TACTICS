@@ -2170,3 +2170,87 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   7. Con poco maná, los botones que no alcanzan quedan grises y su tooltip suma el motivo (hoy `[FALTA: aviso.hechizo.mana_insuficiente]`). Con la acción usada, quedan todos grises.
   8. Anotar los `[FALTA]` que aparezcan además de los de la lista de arriba.
 - **Para la próxima sesión:** nada: tarea terminada. Falta el commit de la sesión 2 y el PR a `develop`, los dos con la confirmación del usuario.
+
+## T23 · sesión 1 · 11/10/2026
+- **Rama:** tarea/T23-metricas
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera y es la descripción del PR. Cierra el hito 0a.2 cuando pase la prueba manual de abajo.
+- **Hecho:**
+  - **Deuda de T22.** `Tablero.ocupante_en(casilla, plantel)` es pública y pura: devuelve el id del Maestro o de la criatura que ocupa la casilla (de pie o caída), o `null`.
+    - El criterio vive en un solo lugar (`Tablero._ids_por_casilla`), del que sale también `_ocupantes`.
+    - Se borró `Turno._ocupante_en` y la Lanzadera (P-042) usa la consulta. Los tests de P-042 pasan sin tocarlos.
+  - **Consultas nuevas de `Tablero`** (las usa el `Combate` para los eventos):
+    - `distancia_a_enemiga_de_pie(desde, bando, plantel)`: Manhattan a la unidad del otro bando más cercana con `Objetivos.de_pie` (una oculta cuenta), o `null` si no queda ninguna;
+    - `encerrada(casilla, plantel, surcos)`: ninguna de las 4 ortogonales es `es_casilla_libre` (fuera del tablero no es libre; por S-25, un surco tampoco).
+  - **Eventos nuevos** (A.7, D-011), escritos por el `Combate` justo detrás del `fin_turno`:
+    - `distancia_maestro` (`distancia`): en cada `fin_turno` del Maestro;
+    - `encierro` (`unidad`, `casilla`): detrás del `fin_turno` de cualquier unidad que termina encerrada, solo cuando pasa.
+    - Si el combate termina a mitad de un turno, no hay `fin_turno` ni estos eventos (como antes). Ningún evento existente cambió de forma.
+  - **`MetricasCombate.calcular(escenario, lineas)`** (`nucleo/combate/metricas_combate.gd`, sin estado).
+    - Del escenario toma solo de qué bando es cada id; nunca mira especies ni reconstruye estados. Solo enteros, `null`, listas y diccionarios.
+    - Claves, por número de `Sistema.md` 11.9:
+      - 1 `rondas`: `totales` (la última `ronda`), `primer_ataque` (ronda del primer `ataque`, Martillazo y golpe de incidente incluidos, no el choque de la Lanzadera; `null` sin ataques) y `de_pelea` (de esa ronda a la última, inclusive; 0 sin ataques);
+      - 2 `secundar.usos`;
+      - 3 `eslabones`: `cadenas`, `suma` y `maximo` de las `cadena_cortada` de 2 o más (promedio = suma / cadenas);
+      - 4 `incidentes.{tribu,enemigas}.{distraida,golpe}`;
+      - 5 `encono.{tribu,enemigas}` (`chequeo_rival` con `enconada`, también las seguras);
+      - 6 `cobardia.{tribu,enemigas}.{acobardada,resistida}`;
+      - 7 `sellados`, 8 `capturas_perdidas`, 10 `caidas_guardadas` y 12 `rescate`: `null` (los llenan T24, T25, T27 y T29);
+      - 9 `caidas`: `[{unidad, ronda}]` de los `estado` que pasan a `caida`, y también a `caido` (el Maestro, P-043);
+      - 11 `muertes`: `[{unidad, causa}]` desde el `cierre`, con la causa = el desenlace del `fin`;
+      - 13 `distancia_maestro`: `turnos` y `suma` de los no nulos desde la ronda del primer ataque (promedio = suma / turnos);
+      - 14 `activas`: `usos` (`[{unidad, erizarse, cavar, hacerse_junco}]`, por el tipo de la `accion`), `surcos`, `ocultos`, `destapes_contacto`, `bonos_cobrados` (ataques con un modificador `rasgo_atacante`), `bonos_perdidos`, `cambios_modo` (`[{unidad, de, a, ronda}]`) y `encierros` (`[{unidad, turnos}]`).
+  - **Resultado.** `ResultadoCombate.metricas` lo llena `Combate._terminar` con el registro completo (después del `cierre`). El esquema `resultado` define el objeto entero (con `$defs` locales) y deja 7, 8, 10 y 12 en `null`, cada una con su `description`.
+  - **Guardado.**
+    - `GuardadoCombate.guardar` escribe además `<escenario>_<semilla>_<n>_resultado.json` si el combate terminó (`guardar_resultado`, `SUFIJO_RESULTADO`).
+    - `herramientas/reproducir.gd` escribe `registros/<nombre>_resultado.json` (o `<nombre>_hasta_N_resultado.json`) si el combate reproducido terminó.
+    - La escritura pasó a `herramientas/salida_reproduccion.gd` (`SalidaReproduccion.escribir`), que se prueba sin lanzar Godot. El comando no cambió.
+- **Archivos:**
+  - Creados:
+    - `nucleo/combate/metricas_combate.gd` y `herramientas/salida_reproduccion.gd`;
+    - `pruebas/combate/test_metricas_combate.gd`, `pruebas/combate/test_eventos_metricas.gd`, `pruebas/herramientas/test_salida_reproduccion.gd` y `pruebas/datos/test_metricas_escenarios.gd`;
+    - `pruebas/fixtures/combate/escenario_eventos_metricas.json`.
+  - Modificados:
+    - `nucleo/combate/tablero.gd`, `turno.gd`, `combate.gd` y `resultado_combate.gd`;
+    - `datos/_esquemas/resultado.schema.json` (la huella no cambia: los esquemas no entran);
+    - `pantalla/combate/guardado_combate.gd` y `herramientas/reproducir.gd`;
+    - `pruebas/combate/test_tablero.gd`, `test_combate.gd` y `test_contrato.gd`, y `pruebas/pantalla/test_guardado_combate.gd`;
+    - `docs/PREGUNTAS.md` y `CLAUDE.md` ("Estado actual").
+- **Tests:** 19 nuevos, total 599. Suite completa del 11/10/2026: 599/599 en verde (10 min 56 s), sin intermitentes.
+  - **Tests viejos reescritos** (A.7, T23):
+    - `test_combate.gd::test_registro_de_una_ronda_de_c`: detrás del `fin_turno` del Maestro van `distancia_maestro` y `encierro`. En el fixture de C, el Maestro en [3,6] queda con la tribu en [2,6], [4,6] y [3,7] y el Tasajero en [3,5].
+    - `test_contrato.gd::test_resultados_validan_contra_el_esquema`: `metricas` ya no es `null` (comprueba `rondas.totales`).
+- **Criterio de terminado:** cumplido punto por punto:
+  1. `distancia_maestro`: `test_eventos_metricas.gd` (detrás de cada `fin_turno` del Maestro, con el valor de `Tablero`; la oculta cuenta; ningún turno de criatura lo escribe). El `null` está en `test_tablero.gd`: en un combate, sin enemigas de pie hay victoria antes del `fin_turno`.
+  2. `encierro`: `test_eventos_metricas.gd` (el Maestro en el borde, rodeado por la tribu con una caída, con las diagonales libres; sin encierro con una ortogonal libre) y `test_tablero.gd` (surco, esquina, diagonal).
+  3. a 7. `test_metricas_combate.gd`, con registros armados a mano.
+  8. y 9. `test_contrato.gd`: `test_t23_metricas_de_victoria_y_derrota` y `test_t23_metricas_en_vivo_y_reproducidas`.
+  10. `test_guardado_combate.gd::test_t23_guarda_el_resultado` y `test_salida_reproduccion.gd`.
+  11. `test_metricas_escenarios.gd`: los 11 escenarios con `JugadorEsperando` hasta el fin o la ronda 12 dan métricas válidas y sin `float`; A, B, C, las tres D y H tienen el primer ataque en la ronda 2.
+  12. `test_contacto`, `test_robustez_ia`, `test_datos_completos` y `test_lanzadera_b` pasan.
+  13. `test_tablero.gd::test_t23_ocupante_en` (también comprueba que `turno.gd` ya no tiene `_ocupante_en`).
+  14. Suite completa: ver "Tests".
+- **Lecturas declaradas:**
+  - P-043: la métrica 9 incluye la caída del Maestro (`caido`). Lo decidió el usuario en el plan; queda ABIERTA para el Arquitecto.
+  - Técnicas, sin pregunta:
+    - con los dos eventos, `distancia_maestro` va antes que `encierro`;
+    - `eslabones.maximo` vale 0 sin cadenas de 2 o más;
+    - `activas.usos` y `activas.encierros` listan solo las unidades con al menos uno, en el orden del escenario (Maestro, tribu, enemigas);
+    - la causa de una muerte es el texto del desenlace (`derrota_por_caida`).
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nueva P-043 (ARQUITECTO, no bloquea). Cerradas: ninguna.
+- **Para la próxima sesión:** nada: tarea terminada. Falta la prueba manual de cierre del hito 0a.2.
+- **Prueba manual (cierre del hito 0a.2):**
+  1. Tests. En `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas`; en PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`. Todo en verde (tarda unos 10 minutos).
+  2. Abrir el juego: F5 en el editor, o en PowerShell `& $env:GODOT_BIN --path .` (en `cmd`: `"%GODOT_BIN%" --path .`). Jugar con el mouse, de punta a punta: C, D normal, D hambriento, E, E con afines y H.
+  3. Después de cada uno, abrir el `registros/<escenario>_<semilla>_<n>_resultado.json` más nuevo y mirar `metricas`:
+     - `rondas.totales`, `rondas.primer_ataque` y `rondas.de_pelea`: las rondas del combate, la del primer golpe (de quien sea) y las que hubo desde ahí;
+     - `incidentes.tribu` (D): distracciones y golpes entre la Ocarra y el Zancajunco;
+     - `encono.tribu` y `encono.enemigas`: veces que una criatura quedó enconada;
+     - `cobardia.tribu` (E): tiradas acobardadas y resistidas (con el toggle de afines deberían cambiar);
+     - `distancia_maestro.suma` dividido `distancia_maestro.turnos`: la distancia media del Maestro a la enemiga más cercana desde el primer ataque;
+     - además: `caidas`, `muertes`, `activas` (Erizarse, cavar, Hacerse junco, surcos, cambio a Cuenta del Tasajero en C y H) y `secundar.usos`.
+  4. Reproducir por consola una grabación vieja de C (de antes de T23), con el nombre del archivo que tengas:
+     - en `cmd`: `"%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- registros\c_tasajero_33001_1.json`;
+     - en PowerShell: `& $env:GODOT_BIN --headless --path . --script res://herramientas/reproducir.gd -- registros/c_tasajero_33001_1.json`.
+     - Puede salir el AVISO de huella. Si el combate había terminado, tiene que escribir `registros/c_tasajero_33001_1_resultado.json` (lo dice la línea "Resultado:").
+  5. Anotar cualquier métrica que no coincida con lo que se vio en pantalla.
