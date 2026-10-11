@@ -423,7 +423,23 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	elif accion.tipo == Accion.Tipo.TERMINAR:
 		_registrar({"tipo": "fin_turno", "unidad": unidad_id,
 				"posicion": Plantel.casilla_a_lista(_posicion(unidad_id))})
+		_registrar_tras_fin_turno(unidad_id)
 	return resultado
+
+
+# Sistema.md 11.9, metricas 13 y 14 (T23, D-011, A.7): los dos datos que el
+# registro no tenia, calculados por el Tablero en el momento y escritos justo
+# detras del `fin_turno`: la distancia del Maestro a la enemiga de pie mas
+# cercana (en todos sus turnos) y el encierro (solo cuando pasa). Con los dos,
+# primero la distancia.
+func _registrar_tras_fin_turno(unidad_id: String) -> void:
+	var tablero: Tablero = _contexto.tablero
+	var casilla: Vector2i = _posicion(unidad_id)
+	if unidad_id == Maestro.ID:
+		_registrar({"tipo": "distancia_maestro",
+				"distancia": tablero.distancia_a_enemiga_de_pie(casilla, Criatura.Bando.TRIBU, _plantel)})
+	if tablero.encerrada(casilla, _plantel, _surcos):
+		_registrar({"tipo": "encierro", "unidad": unidad_id, "casilla": Plantel.casilla_a_lista(casilla)})
 
 
 # Arquitectura.md A.7: el evento `ataque` de un ataque o del Martillazo.
@@ -453,6 +469,8 @@ func _terminar() -> void:
 	_registrar({"tipo": "cierre", "levantadas": cierre.levantadas.duplicate(),
 			"muertas": cierre.muertas.duplicate(), "pergaminos_ardidos": ardidos.duplicate(),
 			"lealtad": ResultadoCombate.cambios_a_lista(cierre.lealtad)})
+	# Sistema.md 11.9 y D-011 (T23): las metricas, sobre el registro completo.
+	_resultado.metricas = MetricasCombate.calcular(_contexto.escenario, _registro.lineas())
 
 
 # Arquitectura.md A.7: antes de cada evento se vuelcan las tiradas nuevas del

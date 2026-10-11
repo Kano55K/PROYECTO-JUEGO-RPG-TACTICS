@@ -303,70 +303,235 @@
       "pattern": "^[a-z0-9_]+$"
     },
     "metricas": {
-      "description": "T12: null. Las llenan T23 y T33, desde el registro (Sistema.md 11.9)",
-      "type": [
-        "object",
-        "null"
-      ],
+      "description": "Sistema.md 11.9, Métricas por combate (T23, D-011): las calcula MetricasCombate desde el registro y el escenario. Solo enteros, null y listas: un promedio va como suma y cantidad. Las alarmas, los umbrales y el agregado de 10 partidas son de T33",
+      "type": "object",
       "required": [
-        "secundar_usos",
-        "eslabones_promedio",
+        "rondas",
+        "secundar",
+        "eslabones",
         "incidentes",
-        "enconos",
-        "cobardias",
-        "sellados_intentados",
-        "sellados_logrados",
-        "huidas_antes_de_sellar",
+        "encono",
+        "cobardia",
+        "sellados",
+        "capturas_perdidas",
         "caidas",
         "caidas_guardadas",
         "muertes",
-        "rescates",
-        "distancia_media_maestro"
+        "rescate",
+        "distancia_maestro",
+        "activas"
       ],
       "additionalProperties": false,
       "properties": {
-        "secundar_usos": {
-          "type": "integer"
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "rondas": {
+          "description": "Métrica 1. totales: la última ronda; primer_ataque: la ronda del primer evento ataque (Martillazo y golpe de incidente incluidos; el choque de la Lanzadera no), o null; de_pelea: desde el primer ataque hasta la última, inclusive (0 sin ataques)",
+          "type": "object",
+          "required": ["totales", "primer_ataque", "de_pelea"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "totales": { "$ref": "#/$defs/conteo" },
+            "primer_ataque": { "type": ["integer", "null"], "minimum": 0 },
+            "de_pelea": { "$ref": "#/$defs/conteo" }
+          }
         },
-        "eslabones_promedio": {
-          "type": "number"
+        "secundar": {
+          "description": "Métrica 2: eventos secundar",
+          "type": "object",
+          "required": ["usos"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "usos": { "$ref": "#/$defs/conteo" }
+          }
+        },
+        "eslabones": {
+          "description": "Métrica 3: solo las cadena_cortada de 2 eslabones o más. Promedio = suma / cadenas",
+          "type": "object",
+          "required": ["cadenas", "suma", "maximo"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "cadenas": { "$ref": "#/$defs/conteo" },
+            "suma": { "$ref": "#/$defs/conteo" },
+            "maximo": { "$ref": "#/$defs/conteo" }
+          }
         },
         "incidentes": {
-          "type": "integer"
+          "description": "Métrica 4, por bando (el Maestro va con la tribu)",
+          "type": "object",
+          "required": ["tribu", "enemigas"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "tribu": { "$ref": "#/$defs/incidentes_bando" },
+            "enemigas": { "$ref": "#/$defs/incidentes_bando" }
+          }
         },
-        "enconos": {
-          "type": "integer"
+        "encono": {
+          "description": "Métrica 5: chequeo_rival con resultado enconada (también las seguras, sin tirada), por bando",
+          "type": "object",
+          "required": ["tribu", "enemigas"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "tribu": { "$ref": "#/$defs/conteo" },
+            "enemigas": { "$ref": "#/$defs/conteo" }
+          }
         },
-        "cobardias": {
-          "type": "integer"
+        "cobardia": {
+          "description": "Métrica 6: tiradas de cobardía por bando",
+          "type": "object",
+          "required": ["tribu", "enemigas"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "tribu": { "$ref": "#/$defs/cobardia_bando" },
+            "enemigas": { "$ref": "#/$defs/cobardia_bando" }
+          }
         },
-        "sellados_intentados": {
-          "type": "integer"
+        "sellados": {
+          "description": "Métrica 7 (sellados intentados y logrados, con la probabilidad mostrada). T23: null. La llena T24",
+          "type": "null"
         },
-        "sellados_logrados": {
-          "type": "integer"
-        },
-        "huidas_antes_de_sellar": {
-          "type": "integer"
+        "capturas_perdidas": {
+          "description": "Métrica 8 (por huida en su turno y por llegar a 0). T23: null. La llena T25",
+          "type": "null"
         },
         "caidas": {
-          "type": "integer"
+          "description": "Métrica 9: cada evento estado que pasa a caida (o a caido, el Maestro: P-043), en orden",
+          "type": "array",
+          "items": { "$ref": "#/$defs/unidad_ronda" }
         },
         "caidas_guardadas": {
-          "type": "integer"
+          "description": "Métrica 10 (por id de unidad). T23: null. La llena T27",
+          "type": "null"
         },
         "muertes": {
-          "type": "integer"
+          "description": "Métrica 11: las muertas del cierre, con la causa = el desenlace del fin",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["unidad", "causa"],
+            "additionalProperties": false,
+            "properties": {
+              "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+              "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+              "causa": { "$ref": "comunes.schema.json#/$defs/id" }
+            }
+          }
         },
-        "rescates": {
-          "type": "integer"
+        "rescate": {
+          "description": "Métrica 12 (sí o no, y quién rescató). T23: null. La llena T29",
+          "type": "null"
         },
-        "distancia_media_maestro": {
-          "type": "number"
+        "distancia_maestro": {
+          "description": "Métrica 13: los distancia_maestro no nulos desde la ronda del primer ataque. Promedio = suma / turnos",
+          "type": "object",
+          "required": ["turnos", "suma"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "turnos": { "$ref": "#/$defs/conteo" },
+            "suma": { "$ref": "#/$defs/conteo" }
+          }
         },
-        "_nota": {
-          "$ref": "comunes.schema.json#/$defs/nota"
+        "activas": {
+          "description": "Métrica 14: activas (por el tipo de la acción) y terreno",
+          "type": "object",
+          "required": ["usos", "surcos", "ocultos", "destapes_contacto", "bonos_cobrados", "bonos_perdidos", "cambios_modo", "encierros"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "usos": {
+              "description": "Solo las unidades con algún uso, en el orden del escenario",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["unidad", "erizarse", "cavar", "hacerse_junco"],
+                "additionalProperties": false,
+                "properties": {
+                  "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+                  "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "erizarse": { "$ref": "#/$defs/conteo" },
+                  "cavar": { "$ref": "#/$defs/conteo" },
+                  "hacerse_junco": { "$ref": "#/$defs/conteo" }
+                }
+              }
+            },
+            "surcos": { "$ref": "#/$defs/conteo" },
+            "ocultos": { "$ref": "#/$defs/conteo" },
+            "destapes_contacto": { "$ref": "#/$defs/conteo" },
+            "bonos_cobrados": { "$ref": "#/$defs/conteo" },
+            "bonos_perdidos": { "$ref": "#/$defs/conteo" },
+            "cambios_modo": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["unidad", "de", "a", "ronda"],
+                "additionalProperties": false,
+                "properties": {
+                  "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+                  "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "de": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "a": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "ronda": { "$ref": "#/$defs/conteo" }
+                }
+              }
+            },
+            "encierros": {
+              "description": "Turnos terminados sin ninguna casilla libre en las 4 ortogonales (evento encierro). Solo las unidades con alguno, en el orden del escenario",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["unidad", "turnos"],
+                "additionalProperties": false,
+                "properties": {
+                  "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+                  "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "turnos": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          }
         }
+      }
+    }
+  },
+  "$defs": {
+    "conteo": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "incidentes_bando": {
+      "type": "object",
+      "required": ["distraida", "golpe"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "distraida": { "$ref": "#/$defs/conteo" },
+        "golpe": { "$ref": "#/$defs/conteo" }
+      }
+    },
+    "cobardia_bando": {
+      "type": "object",
+      "required": ["acobardada", "resistida"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "acobardada": { "$ref": "#/$defs/conteo" },
+        "resistida": { "$ref": "#/$defs/conteo" }
+      }
+    },
+    "unidad_ronda": {
+      "type": "object",
+      "required": ["unidad", "ronda"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+        "ronda": { "$ref": "#/$defs/conteo" }
       }
     }
   }

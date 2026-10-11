@@ -953,7 +953,7 @@ func _lanzadera(hechizo: Dictionary, objetivo_id: String, sentido: String, aplic
 			"choque": choque, "danio": danio, "vida_antes": vida_antes, "vida_despues": maxi(0, vida_antes - danio)}
 	# P-042: contra quien choco (de pie o caida), o null si fue el borde o un surco.
 	if choque:
-		resultado.evento["contra"] = _ocupante_en(hasta)
+		resultado.evento["contra"] = _tablero.ocupante_en(hasta, _plantel)
 	else:
 		resultado.destaparia = Junco.destaparia(objetivo_id, hasta, _plantel)
 	if aplica:
@@ -1018,17 +1018,6 @@ func _posicion(id_unidad: String) -> Vector2i:
 	if id_unidad == Maestro.ID:
 		return _plantel.maestro.posicion
 	return _plantel.criatura(id_unidad).posicion
-
-
-# P-042: el id de la unidad que ocupa la casilla (el Maestro o una criatura en
-# el tablero, de pie o caida: el mismo criterio que Tablero._ocupantes), o null.
-func _ocupante_en(casilla: Vector2i) -> Variant:
-	if _plantel.maestro.posicion == casilla:
-		return Maestro.ID
-	for criatura in _plantel.criaturas():
-		if criatura.estado != Criatura.Estado.GUARDADA and criatura.posicion == casilla:
-			return criatura.id
-	return null
 
 
 func _poner_posicion(id_unidad: String, casilla: Vector2i) -> void:

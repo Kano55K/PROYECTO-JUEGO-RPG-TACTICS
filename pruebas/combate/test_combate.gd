@@ -280,6 +280,9 @@ func test_resistida_registra_quien_la_sostuvo() -> void:
 	assert_bool(chequeo.has("afin")).is_false()
 
 
+# Reescrito en T23 (A.7, D-011): tras el fin_turno del Maestro va distancia_maestro,
+# y despues encierro: en [3,6] tiene a la tribu en [2,6], [4,6] y [3,7] y al
+# Tasajero en [3,5] (Sistema.md 11.9, metrica 14).
 # (7) Registro de una ronda de C: orden de los eventos, Tasajero con caza, fin_turno
 # con la posicion, sin float. La tirada queda justo antes de la accion que siguio.
 # Reescrito por Sistema.md 11.2.3 v1.3: un solo turno del Tasajero por ronda (en
@@ -303,7 +306,7 @@ func test_registro_de_una_ronda_de_c() -> void:
 		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
 		"turno", "tirada", "tirada", "accion", "fin_turno",
 		"turno", "tirada", "chequeo_rival", "accion", "fin_turno",
-		"turno", "accion", "fin_turno",
+		"turno", "accion", "fin_turno", "distancia_maestro", "encierro",
 		"fin_ronda", "ronda", "turno",
 	])
 	var turnos: Array[Dictionary] = _de_tipo(combate, "turno")

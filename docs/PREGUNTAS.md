@@ -604,3 +604,16 @@
 - **Mientras tanto:** el evento `lanzadera` lleva exactamente los campos de A.7.
 - **Respuesta:** - Arquitecto (10/10/2026): opción A. Con `choque: true`, el evento `lanzadera` suma `contra`: el id de la unidad (de pie o caída) que ocupa la casilla de destino, o `null` si el choque es contra el borde o un surco. Sin choque, el campo no va. La previsualización (`ResultadoAccion.evento`) lo trae igual. Se aplica y se cierra en T22, sesión 2.
 - **Cerrada en:** T22
+
+## P-043 — ¿La métrica 9 (caídas) cuenta la caída del Maestro?
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T23
+- **Fecha:** 11/10/2026
+- **Fuente:** `Arquitectura.md` B.3, fila T23 ("(9) caídas: lista de `{unidad, ronda}` (eventos `estado` que pasan a `caida`)") y `Sistema.md` 11.9 (métrica 9 "Caídas: por id de unidad"; alarma de F "en más del 60% de las partidas en que el Maestro cae, no queda rescatista de pie", métricas 9 y 12)
+- **Duda:** la métrica 9, ¿incluye la caída del Maestro, que en el registro es un evento `estado` que pasa a `caido` (no a `caida`)?
+- **Caso que la dispara:** en F, el Zancajunco tumba al Maestro en la ronda 3: el registro tiene `{"tipo": "estado", "unidad": "maestro", "de": "en_pie", "a": "caido"}`. Con la lectura literal de la fila T23 la métrica 9 no lo lista, y la alarma de F no puede saber desde la métrica 9 si el Maestro cayó.
+- **Opciones:** A) incluirla: la lista suma `{unidad: "maestro", ronda}` cuando `a` es `caido`. B) solo criaturas (`a == "caida"`); la caída del Maestro se lee del desenlace. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programada con la opción A, por decisión del usuario en el plan de T23 (lectura declarada en el resumen). Si la respuesta es B, se cambia una constante (`MetricasCombate._A_CAIDA`) y su test.
+- **Respuesta:** _(la completa el staff)_

@@ -21,6 +21,9 @@ var pergaminos_ardidos: Array[String] = []
 var pergaminos_en_blanco: int = 0
 # id de la atacante nocturna caida al terminar, o "" (su destino es de T30).
 var atacante_pendiente: String = ""
+# Sistema.md 11.9 (T23, D-011): MetricasCombate.calcular sobre el registro
+# completo. La llena el Combate despues del evento `cierre`.
+var metricas: Dictionary = {}
 # Estado final, en el orden del Plantel (diccionarios del esquema).
 var _maestro: Dictionary = {}
 var _unidades: Array = []
@@ -73,7 +76,7 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 
 
 # Arquitectura.md A.7. Los campos de tareas futuras van en null o lista vacia:
-# rescatista y permadeath (T29), capturas (T24, T30), metricas (T23, T33).
+# rescatista y permadeath (T29) y capturas (T24, T30).
 func a_diccionario() -> Dictionary:
 	return {
 		"contexto_id": contexto_id,
@@ -91,7 +94,7 @@ func a_diccionario() -> Dictionary:
 		"lealtad_cambios": cambios_a_lista(lealtad),
 		"pergaminos": {"en_blanco": pergaminos_en_blanco, "ardidos": pergaminos_ardidos.duplicate()},
 		"atacante_pendiente": null if atacante_pendiente.is_empty() else atacante_pendiente,
-		"metricas": null,
+		"metricas": metricas.duplicate(true),
 	}
 
 
