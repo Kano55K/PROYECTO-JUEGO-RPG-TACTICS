@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida_tasajero",
+  "_nota": "Arquitectura.md B.4 (T25): el Tasajero (25 %) herido en el Combate, dos rondas. Sistema.md 11.7, 11.3 paso 2 y 11.2.3. Con 7 de 30 (<= 25 % y <= 50 %) en Caza. Lejos de la tribu (no la alcanza en dos rondas ni la tiene a su alcance): las unicas tiradas son las de huida. Semilla 5: el generador de combate tira 50 y 52, asi se queda las dos veces (pasa a Cuenta en la ronda 1)",
+  "tipo": "test",
+  "semilla": 5,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [11, 11] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [10, 11] }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": 7, "posicion": [0, 0] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

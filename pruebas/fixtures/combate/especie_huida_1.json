@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Arquitectura.md B.4 (T25): una especie inventada que casi nunca huye (huida_pct 1), para el caso 'se queda' con una semilla fija (el test comprueba el tiro). Numeros como especie_huida_100",
+  "id": "especie_huida_1",
+  "rol": "combate",
+  "rango": 1,
+  "sellable": true,
+  "vida": 30,
+  "danio": 3,
+  "movimiento": 2,
+  "alcance": 1,
+  "velocidad": 9,
+  "rasgo": {
+    "id": "rasgo_huida_1",
+    "efecto": "alabarda"
+  },
+  "huida_pct": 1
+}

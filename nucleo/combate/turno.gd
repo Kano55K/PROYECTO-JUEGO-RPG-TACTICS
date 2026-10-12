@@ -61,6 +61,10 @@ var chequeo_rival: Dictionary = {}
 # Sistema.md 2.1 (T21): {de, a} si el inicio de este turno le cambio el mana al
 # Maestro (paso 1 de 11.3); si no, {}.
 var mana: Dictionary = {}
+# Sistema.md 11.7 (T25): {porcentaje, tiro, resultado} si el inicio de este turno
+# tiro huida (paso 2 de 11.3); si no, {}. resultado: Huida.RESULTADO_HUYE o
+# RESULTADO_SE_QUEDA.
+var huida: Dictionary = {}
 # Estados del turno (duran este turno): los ven las consultas, nunca se guardan.
 var enconada: bool = false
 var acobardada: bool = false
@@ -98,6 +102,8 @@ var _regla_mana: RegeneracionMana
 var _hechizos: Hechizos
 # La regla de sellar (T24), como _hechizos.
 var _sellado: Sellado
+# La regla de la huida de las salvajes (T25), como _sellado.
+var _huida: Huida
 var _azar: GeneradorAzar
 
 
@@ -117,6 +123,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Sur
 	_regla_mana = reglas.regeneracion_mana
 	_hechizos = reglas.hechizos
 	_sellado = reglas.sellado
+	_huida = reglas.huida
 	_azar = azar
 
 
@@ -129,12 +136,15 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Sur
 # ronda. La entrada que vuelve despues de Secundar (EntradaCola.vuelve) sigue el
 # turno sin repetirlo; por S-29 ese turno estaba sin usar, asi que se prepara igual.
 # La obligacion del Encono (S-35) y el incidente (paso 4) van despues de
-# preparar: miran los pasos y los ataques del modo.
+# preparar: miran los pasos y los ataques del modo. Si la huida sale (paso 2),
+# el turno termina ahi: no hay nada que preparar.
 static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Surcos,
 		cadena: Cadena, cola: ColaIniciativa, reglas: ReglasCombate, azar: GeneradorAzar) -> Turno:
 	var turno: Turno = Turno.new(entrada, plantel, tablero, surcos, cadena, cola, reglas, azar)
 	if not entrada.vuelve:
 		turno._inicio_del_turno()
+	if turno.terminado:
+		return turno
 	turno._preparar()
 	if not entrada.vuelve:
 		turno._fijar_obligacion()
@@ -382,7 +392,8 @@ func previsualizar_sellar(objetivo_id: String) -> ResultadoAccion:
 # 11.3, en este orden:
 #   1. Regeneracion de mana del Maestro (2.1, T21): RegeneracionMana, con la ronda
 #      del turno y el hambre de ahora (7.2).
-#   2. Huida de las salvajes con vida <= 25% (11.7): T25. Si sale, el turno termina ahi.
+#   2. Huida de las salvajes con vida <= 25% (11.7, T25): _huir. Si sale, el turno
+#      termina ahi. Es una regla, no una decision de la IA (11.8 paso 1).
 #   Cambio de modo (11.2.3, 11.8 paso 2): una regla, no una decision de la IA.
 #   3. Rival enemiga a su alcance: Encono (10.5) o cobardia (10.6): _chequear_rival.
 #   4. Incidente con rival aliada (10.4): _chequear_incidente, despues de _preparar.
@@ -392,8 +403,25 @@ func _inicio_del_turno() -> void:
 	var criatura: Criatura = _plantel.criatura(unidad_id)
 	if criatura != null:
 		criatura.erizada = false
+		if _huir(criatura):
+			return
 		cambio_modo = CambioModo.aplicar(criatura)
 		_chequear_rival()
+
+
+# Sistema.md 11.7 y 11.3 paso 2: una tirada (Huida; con 0 % no hay). Si sale,
+# deja el tablero como la salvaje en 0 (VidaCero.sacar_del_tablero: fuera y sus
+# surcos cerrados) y gasta el turno: sus otras entradas de la ronda se saltean
+# solas (ColaIniciativa). Devuelve si huyo.
+func _huir(criatura: Criatura) -> bool:
+	huida = _huida.tirar(unidad_id, _plantel, _azar)
+	if huida.is_empty() or huida["resultado"] != Huida.RESULTADO_HUYE:
+		return false
+	VidaCero.sacar_del_tablero(criatura, _surcos)
+	movimiento_usado = true
+	accion_usada = true
+	terminado = true
+	return true
 
 
 # Sistema.md 10.5, 10.6, 10.7 y 11.3 paso 3: una sola tirada aunque tenga varias

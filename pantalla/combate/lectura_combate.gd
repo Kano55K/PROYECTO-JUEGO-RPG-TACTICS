@@ -71,6 +71,11 @@ func fichas() -> Array[Dictionary]:
 		var porcentaje: Variant = _combate.porcentaje_sellado(criatura.id)
 		if porcentaje != null:
 			marcas.append(marca_sellado(porcentaje))
+		# T25 (Sistema.md 11.7, "la probabilidad se muestra sobre la unidad"): el % de
+		# huida de Combate.porcentaje_huida, solo si es mayor que 0.
+		var huida: int = _combate.porcentaje_huida(criatura.id)
+		if huida > 0:
+			marcas.append(marca_huida(huida))
 		var ficha: Dictionary = _ficha(criatura.id, foto_criatura["posicion"], criatura.bando == Criatura.Bando.TRIBU,
 				false, estado == _ESTADO_CAIDA, foto_criatura["vida"], criatura.vida_max_real(), marcas)
 		ficha["oculta"] = foto_criatura["oculta"]
@@ -293,6 +298,8 @@ func suceso(evento: Dictionary) -> Array[String]:
 				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_SELLAR)])]
 		"sellado":
 			return [_suceso_sellado(evento)]
+		"huida":
+			return _suceso_huida(evento)
 		"lanzadera":
 			return [_suceso_lanzadera(evento)]
 		# T22 (Sistema.md 1.6): la vida de la curada, de -> a.
@@ -615,6 +622,31 @@ func _suceso_sellado(evento: Dictionary) -> String:
 	return _armador.armar(ClavesTextos.SELLAR_FALLO, _hueco(objetivo), _sujeto(objetivo))
 
 
+# T25: el % de huida como marca de la ficha. El numero va fuera de la clave: se
+# ve aunque la clave falte.
+func marca_huida(porcentaje: int) -> String:
+	return "%s %d%%" % [_armador.armar(ClavesTextos.MARCA_HUIDA), porcentaje]
+
+
+# T25: huida.salvaje.porcentaje con el % que da el nucleo y la salvaje como hueco.
+func linea_huida(unidad_id: String, porcentaje: int) -> String:
+	var datos: Dictionary = _hueco(unidad_id)
+	datos["porcentaje"] = porcentaje
+	return _armador.armar(ClavesTextos.HUIDA_PORCENTAJE, datos, _sujeto(unidad_id))
+
+
+# T25 (Sistema.md 11.7): huye, huida.salvaje con la variante de su especie; se
+# queda, huida.salvaje.se_queda (o su variante) solo si existe.
+func _suceso_huida(evento: Dictionary) -> Array[String]:
+	var unidad: String = evento["unidad"]
+	var sujeto: String = _sujeto(unidad)
+	if evento["resultado"] == Huida.RESULTADO_HUYE:
+		return [_armador.armar(ClavesTextos.HUIDA_SALVAJE, _hueco(unidad), sujeto)]
+	if not _armador.tiene(ClavesTextos.HUIDA_SE_QUEDA) 			and not _armador.tiene("%s.%s" % [ClavesTextos.HUIDA_SE_QUEDA, sujeto]):
+		return []
+	return [_armador.armar(ClavesTextos.HUIDA_SE_QUEDA, _hueco(unidad), sujeto)]
+
+
 func _boton(tipo: String, texto: String, tooltip: String, habilitado: bool) -> Dictionary:
 	return {"tipo": tipo, "texto": texto, "tooltip": tooltip, "habilitado": habilitado}
 
@@ -659,6 +691,10 @@ func tooltip_unidad(id_unidad: String) -> Array[String]:
 	var porcentaje: Variant = _combate.porcentaje_sellado(id_unidad)
 	if porcentaje != null:
 		lineas.append(linea_sellado(id_unidad, porcentaje))
+	# T25 (Sistema.md 11.7): el % de huida, si es mayor que 0.
+	var huida: int = _combate.porcentaje_huida(id_unidad)
+	if huida > 0:
+		lineas.append(linea_huida(id_unidad, huida))
 	# Sistema.md 11.2.3: "el umbral se muestra sobre la unidad".
 	var vida_de_cambio: Variant = _combate.vida_de_cambio(id_unidad)
 	if vida_de_cambio != null:

@@ -26,7 +26,7 @@ static func resolver(unidad_id: String, plantel: Plantel, surcos: Surcos) -> voi
 
 
 # La salvaje deja el tablero: fuera, sin posicion, y sus surcos se cierran
-# (11.2.1). La usan la vida en 0 y el sellado (4.1, T24); despues, la huida (T25).
+# (11.2.1). La usan la vida en 0, el sellado (4.1, T24) y la huida (11.7, T25).
 static func sacar_del_tablero(criatura: Criatura, surcos: Surcos) -> void:
 	criatura.estado = Criatura.Estado.FUERA
 	criatura.posicion = Criatura.SIN_POSICION

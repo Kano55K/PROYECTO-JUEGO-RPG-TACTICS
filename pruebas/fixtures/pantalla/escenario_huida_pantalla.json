@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida_pantalla",
+  "_nota": "Arquitectura.md B.4 (T25), criterio 10: el % de huida sobre la unidad y el evento de su turno. Sistema.md 11.7. El Surcon salvaje (25 %, Velocidad 2) con 5 de 24 (<= 25 %) juega ultimo en la ronda 1: la pantalla muestra su % antes de que tire. La Ocarra salvaje (0 %, Velocidad 7) con 1 de 12: sin marca. Surcon y Ocarra se llevan bien, la Rodauva y el Surcon tambien (10.8): nadie tira Encono, cobardia ni incidente. Lejos de la tribu",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [4, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 7] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": 5, "posicion": [0, 0] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": 1, "posicion": [7, 0] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

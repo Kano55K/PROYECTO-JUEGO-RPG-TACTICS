@@ -36,9 +36,9 @@ const _EFECTO_ERIZARSE: String = "erizarse"
 # cola: la de la ronda en curso, para "la que actua antes en la cola" (P-021).
 static func decidir(turno: Turno, plantel: Plantel, cola: ColaIniciativa) -> DecisionIA:
 	var orden: Dictionary = _orden(cola, plantel)
-	var decision: DecisionIA = _paso_huida(turno, plantel)
-	if decision == null:
-		decision = _paso_encono(turno, plantel, orden)
+	# Paso 1: la huida ya la tiro el inicio del turno (T25, Huida). Una salvaje que
+	# huyo no llega aca: su turno termino.
+	var decision: DecisionIA = _paso_encono(turno, plantel, orden)
 	if decision == null:
 		decision = _paso_erizarse(turno, plantel)
 	if decision == null:
@@ -59,12 +59,6 @@ static func decidir(turno: Turno, plantel: Plantel, cola: ColaIniciativa) -> Dec
 	decision.modo = unidad.modo
 	decision.cambio_modo = turno.cambio_modo.duplicate()
 	return decision
-
-
-# Paso 1, lugar vacio: la huida con vida <= 25% es de T25 (11.7). Ahi: la
-# enconada no huye y la acobardada suma huida_salvaje.acobardada_pts.
-static func _paso_huida(_turno: Turno, _plantel: Plantel) -> DecisionIA:
-	return null
 
 
 # Paso 3 (Sistema.md 10.5 y 11.8, T20): la enconada va por su rival y no corren

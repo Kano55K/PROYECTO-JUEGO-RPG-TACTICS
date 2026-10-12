@@ -70,6 +70,9 @@ var hechizos: Hechizos:
 # Sistema.md 4.1 a 4.3 (T24): sellar en combate. La aplica el Turno con azar_combate.
 var sellado: Sellado:
 	get: return null if reglas == null else reglas.sellado
+# Sistema.md 11.7 (T25): la huida de las salvajes. La tira el Turno con azar_combate.
+var huida: Huida:
+	get: return null if reglas == null else reglas.huida
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -111,7 +114,7 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	var regla_sellado: Sellado = Sellado.desde_datos(datos.get("tablas/sellado.json", {}),
 			datos.get("tablas/costos_mana.json", {}), datos["tablas/lealtad.json"], tabla_combate)
 	contexto.reglas = ReglasCombate.new(regla_danio, regla_afinidad, regla_combo, regla_incidente, regla_chequeo,
-			regla_mana, regla_hechizos, regla_sellado)
+			regla_mana, regla_hechizos, regla_sellado, Huida.desde_datos(tabla_combate))
 	# D-008: sin todas las reglas el combate no se arma (hallazgo de la revision de T21-ajustes).
 	if not contexto.reglas.falta.is_empty():
 		contexto.motivo = Motivo.REGLA_FALTANTE

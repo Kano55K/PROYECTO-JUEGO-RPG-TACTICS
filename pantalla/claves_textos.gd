@@ -108,6 +108,14 @@ const AVISO_SELLAR_NO_SELLABLE: String = "aviso.sellar.no_sellable"
 const AVISO_SELLAR_OCULTA: String = "aviso.sellar.oculta"
 const AVISO_SELLAR_NO_SALVAJE: String = "aviso.sellar.no_salvaje"
 const AVISO_SELLAR_SIN_OBJETIVOS: String = "aviso.sellar.sin_objetivos"
+# T25 (Sistema.md 11.7): la huida de las salvajes. La marca y el tooltip del %
+# no existen en es.json (nombres propuestos). El suceso de la huida es
+# huida.salvaje con la variante de la especie (estan las cinco); el de quedarse,
+# opcional: se muestra solo si existe.
+const MARCA_HUIDA: String = "marca.huida"
+const HUIDA_PORCENTAJE: String = "huida.salvaje.porcentaje"
+const HUIDA_SALVAJE: String = "huida.salvaje"
+const HUIDA_SE_QUEDA: String = "huida.salvaje.se_queda"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -129,6 +137,7 @@ const FIJAS: Array[String] = [
 	ACCION_SELLAR, SELLAR_TOOLTIP, SELLAR_EXITO, SELLAR_FALLO, SELLAR_FALLO_ERIZADA, SELLAR_RANGO_ALTO,
 	PERGAMINO_SIN_BLANCO, AVISO_SELLAR_ACCION_USADA, AVISO_SELLAR_MANA, AVISO_SELLAR_FUERA_DE_ALCANCE,
 	AVISO_SELLAR_NO_SELLABLE, AVISO_SELLAR_OCULTA, AVISO_SELLAR_NO_SALVAJE, AVISO_SELLAR_SIN_OBJETIVOS,
+	MARCA_HUIDA, HUIDA_PORCENTAJE,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -370,6 +379,9 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 			var variante: String = "%s.%s" % [base, sujeto]
 			if existentes.has(variante):
 				_sumar(claves, variante)
+	# T25: quedarse (sin huir) es opcional: solo si existe.
+	if existentes.has(HUIDA_SE_QUEDA):
+		_sumar(claves, HUIDA_SE_QUEDA)
 	# T18: los sucesos del incidente se piden con el par de especies como sujeto.
 	for base in [INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE]:
 		for especie in especies:
@@ -392,6 +404,11 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 		var variante_fallo: String = "%s.%s" % [SELLAR_FALLO, especie]
 		if existentes.has(variante_fallo):
 			_sumar(claves, variante_fallo)
+		# T25: la huida se pide con la especie de la salvaje. La base huida.salvaje
+		# no tiene texto (la cubren las variantes) y no se suma.
+		for variante_huida in ["%s.%s" % [HUIDA_SALVAJE, especie], "%s.%s" % [HUIDA_SE_QUEDA, especie]]:
+			if existentes.has(variante_huida):
+				_sumar(claves, variante_huida)
 		# T22: el choque de la Lanzadera se pide con la especie de la movida.
 		var variante_choque: String = "%s.%s" % [LANZADERA_CHOQUE, especie]
 		if existentes.has(variante_choque):

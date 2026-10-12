@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Arquitectura.md B.4 (T25): una especie inventada que siempre huye (huida_pct 100), con otros ids (especie y rasgo), para que ningun test de huida dependa de un id real. Vida 30: el 25 % (Sistema.md 11.7) es 7,5, asi que con 7 tira y con 8 no. Rol combate: puede llevar Encono. Velocidad 9: juega antes que todas las de la fixture",
+  "id": "especie_huida_100",
+  "rol": "combate",
+  "rango": 1,
+  "sellable": true,
+  "vida": 30,
+  "danio": 3,
+  "movimiento": 2,
+  "alcance": 1,
+  "velocidad": 9,
+  "rasgo": {
+    "id": "rasgo_huida_100",
+    "efecto": "alabarda"
+  },
+  "huida_pct": 100
+}

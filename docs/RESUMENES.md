@@ -2425,3 +2425,81 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
      - PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`
   2. F5 en el editor (o `& $env:GODOT_BIN --path .` en PowerShell, `"%GODOT_BIN%" --path .` en `cmd`) → escenario A: hover sobre casillas y unidades, clic para mover, arrastrar la cámara con el botón del medio, zoom con la rueda, un hechizo (clic izquierdo empuja, derecho atrae) y un sellado con el mouse. Todo tiene que andar igual que antes.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T25 · sesión 1 · 11/10/2026
+- **Rama:** tarea/T25-huida
+- **Estado:** TERMINADA (pendiente de PR). La tarea entró en una sesión, con la pantalla.
+- **Hecho:**
+  - **Regla `Huida`** (`nucleo/combate/huida.gd`, sin estado; D-008: en `ReglasCombate`, `ContextoCombate.armar` y `DatosFixture.reglas`). Lee `tablas/combate.json` `huida_salvaje.umbral_vida_pct` y `acobardada_pts` y `encono.max_puntos`; el % sale de `huida_pct` de cada ficha. Sin un dato da `null` y el contexto se rechaza con `REGLA_FALTANTE`.
+    - `porcentaje(id, plantel, acobardada)` da 0 en tres casos: no es una salvaje de pie (la tribu, el Maestro y la atacante nocturna no huyen: 9.2 punto 5), `vida × 100 > umbral × vida_max`, o el Encono está en el máximo (S-52). En los demás, el de la ficha más el +25 si `acobardada`, recortado a 100.
+    - `porcentaje_al_empezar` = sin el +25. Es el único lugar de la lectura S-52.
+    - `tirar`: con 0 % no toca el generador.
+  - **Paso 2 del inicio del turno** (`Turno._huir`, el lugar de T08): después de borrar Erizarse, antes del cambio de modo, del chequeo de rival y del incidente. No corre con `entrada.vuelve` (S-31).
+    - Si huye: `VidaCero.sacar_del_tablero` (`fuera`, sin posición, surcos cerrados) y el turno termina. `empezar` no prepara nada más. Las otras entradas de la ronda las saltea la cola, como a cualquiera que sale del tablero.
+    - `Turno.huida`: `{porcentaje, tiro, resultado}` o `{}`.
+    - Sale el lugar vacío `IASalvaje._paso_huida`: el paso 1 de 11.8 lo hace el inicio del turno.
+  - **`Combate`:**
+    - `porcentaje_huida(id)`, la consulta para la pantalla (D-005).
+    - Evento `huida` (`unidad`, `porcentaje`, `tiro`, `resultado` `huye` / `se_queda`), justo detrás del `turno` (y del `mana`, que nunca coincide) y de su propia `tirada`, solo si hubo tirada.
+    - Si huye siguen `estado` (`suelta` → `fuera`), `surco_cerrado` y `fin_turno` con `posicion: null`, sin `encierro` porque no está en el tablero. Si era la última enemiga, `fin` (victoria) y `cierre`.
+  - **Métrica 8** (`MetricasCombate`): `capturas_perdidas` = `[{unidad, motivo, ronda}]`, con motivo `huida` o `cero`, en el orden del registro.
+    - Cada `estado` a `fuera` mira el evento que lo precede para esa unidad: un `huida` con `huye` da `huida`; un `sellado` `logrado` no cuenta; ninguno de los dos, siendo una enemiga salvaje (`comportamiento` del escenario), da `cero`.
+    - Esquema `resultado`: lista de objetos, con la `description` nueva.
+  - **Pantalla** (`LecturaCombate`):
+    - Marca de la ficha `marca_huida(pct)` = `marca.huida` + " N%". El número va fuera de la clave, así que se ve aunque falte.
+    - Línea del tooltip `linea_huida` (`huida.salvaje.porcentaje` con `{porcentaje}`).
+    - Las dos salen de `porcentaje_huida`, solo si es > 0.
+    - Suceso `huida`: `huye` → `huida.salvaje` con la variante de la especie (están las cinco en `es.json`); `se_queda` → `huida.salvaje.se_queda` (o su variante) solo si existe.
+    - `ClavesTextos`: `MARCA_HUIDA` y `HUIDA_PORCENTAJE` en `FIJAS`, y `usadas` suma las variantes de huida y `se_queda` solo si existen (nunca la base `huida.salvaje`).
+  - **Mantenimiento:** `CLAUDE.md` dice "unos 15 minutos" para la suite completa.
+- **Forma del registro** (A.7):
+  - Huye y el combate sigue: `turno` → `tirada` → `huida` → `estado` → `surco_cerrado`* → `fin_turno` (`posicion: null`).
+  - Huye la última enemiga: `turno` → `tirada` → `huida` → `estado` → `surco_cerrado`* → `fin` → `cierre`.
+  - Se queda: `turno` → `tirada` → `huida` → `cambio_modo`? → `tirada`? → `chequeo_rival`? → …, como antes.
+  - Ningún evento existente cambió de forma.
+- **Archivos:**
+  - Creados: `nucleo/combate/huida.gd`; `pruebas/combate/mesa_huida.gd`, `test_huida.gd` y `test_huida_combate.gd`; `pruebas/pantalla/test_lectura_huida.gd` y `test_vista_huida.gd` (todos con su `.uid`).
+  - Fixtures creadas: `pruebas/fixtures/combate/especie_huida_100.json`, `especie_huida_1.json`, `escenario_huida.json`, `escenario_huida_combate.json` y `escenario_huida_tasajero.json`, y `pruebas/fixtures/pantalla/escenario_huida_pantalla.json`.
+  - Modificados: `nucleo/combate/combate.gd`, `contexto_combate.gd`, `reglas_combate.gd`, `turno.gd`, `metricas_combate.gd` y `vida_cero.gd` (comentario); `nucleo/combate/ia/ia_salvaje.gd` y `decision_ia.gd`; `pantalla/claves_textos.gd` y `pantalla/combate/lectura_combate.gd`; `datos/_esquemas/resultado.schema.json`; `pruebas/combate/datos_fixture.gd`, `test_metricas_combate.gd` y `test_reglas_combate.gd`; `CLAUDE.md` y `docs/RESUMENES.md`.
+- **Tests:** 29 nuevos, total 665, todos pasan (suite completa).
+  - `test_huida.gd` (16): umbral con vida máxima 30 (7 tira, 8 no), especie con 0 %, Encono en 3 y en 2, +25 y recorte, regla sin un dato, solo salvajes sin tocar el generador, fuera da 0, huye (fuera, surcos, turno terminado), pierde sus entradas, se queda y la IA juega, se queda y sigue el chequeo de rival, 0 % sin tirada, y el Tasajero (antes del cambio de modo, huye sin cambiar de modo, sobre el umbral solo cambia, al volver no tira).
+  - `test_huida_combate.gd` (6): orden del registro al huir y al quedarse, la última que huye da la victoria, el Tasajero tira una vez por ronda durante dos rondas, la grabación se reproduce igual y el resultado con huida valida contra el esquema.
+  - `test_metricas_combate.gd::test_metrica_8_capturas_perdidas` (1): una huida, una por cero, una sellada que no cuenta, un sellado fallido que no salva y una tribu y una atacante que no cuentan.
+  - `test_lectura_huida.gd` (5) y `test_vista_huida.gd` (1).
+- **Tests viejos reescritos:**
+  - `test_metricas_combate.gd::test_metricas_9_y_11`: `capturas_perdidas` dejó de ser `null` (D-011, T25, `Sistema.md` 11.9 métrica 8). En la victoria, la Ocarra salvaje que pasa a `fuera` ahora cuenta como `{ocarra_s1, cero, 2}`; en la derrota, `[]`. Además, el escenario mínimo del archivo suma `comportamiento` a las enemigas (la métrica 8 lo lee, como en todo escenario real) y una atacante nocturna.
+  - `test_reglas_combate.gd::_armar`: el constructor suma `huida` (D-008). Sin cambios de aserciones.
+  - Ningún otro: no hubo tests que compararan la lista de eventos del turno de una salvaje herida.
+- **Criterio de terminado:** cumplido.
+  1. Porcentaje: `test_huida.gd`, los 5 primeros.
+  2. Solo salvajes: `test_solo_salvajes` y `test_fuera_da_cero`.
+  3. Huye, pierde sus entradas y la victoria: `test_huye`, `test_huye_pierde_sus_entradas_de_la_ronda` y `test_la_ultima_que_huye_da_la_victoria`.
+  4. Se queda: `test_se_queda_y_el_turno_sigue`, `test_se_queda_y_sigue_el_chequeo_de_rival` y `test_se_queda_y_juega`.
+  5. Con 0 %: `test_con_cero_no_tira`.
+  6. Tasajero: tres tests de turno y `test_tasajero_una_tirada_por_ronda`.
+  7. Registro y grabación: `test_huye_registro_en_el_orden_de_a7` y `test_grabacion_se_reproduce_igual`.
+  8. Métrica 8 y resultado: `test_metrica_8_capturas_perdidas` y `test_resultado_con_huida_valida`.
+  9. `datos/` real: pasan el permanente, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios`, `test_sellar_a` y `test_lanzadera_b`.
+  10. Pantalla: `test_lectura_huida.gd` y `test_vista_huida.gd`. El mouse va por `MousePrueba` (D-012).
+  11. Suite completa en verde.
+- **Consola:** sin errores ni advertencias nuevas. Los `ERROR: ReglasCombate: falta la regla …` son los que provocan a propósito `test_reglas_combate.gd` y `test_sellado.gd` (suma `huida`, porque el test recorre `REGLAS`), y los dos del `Remote Debugger` son del arranque del runner.
+- **Supuestos y lecturas técnicas:**
+  - Si la huida gana el combate, no va `fin_turno`: lo mismo que hoy con una acción que gana, porque `_ejecutar` solo registra `fin_turno` con el combate en curso.
+  - El `fin_turno` de la que huyó lleva `posicion: null` (`Plantel.casilla_a_lista` de una unidad sin casilla).
+  - Una oculta puede huir: `Objetivos.de_pie` la cuenta.
+  - Con la fórmula del prompt, una especie con 0 % acobardada daría 25. Hoy no pasa nunca (S-52: el +25 no aplica en el paso 2) y solo lo comprueba el test de la regla.
+  - Al huir, la unidad no se destapa (queda `oculta` en una unidad `fuera`, como la salvaje en 0). Ninguna regla la mira; lo limpia el `Cierre`.
+- **Lecturas declaradas:** S-52 (ya declarada en `Arquitectura.md` 10.5), en `Huida.porcentaje_al_empezar`.
+- **Claves de texto nuevas sin texto:** `marca.huida` (marca de la ficha: en pantalla se ve `[FALTA: marca.huida] 25%`) y `huida.salvaje.porcentaje` (tooltip, con `{porcentaje}`). Opcional, no se ve si falta: `huida.salvaje.se_queda` (con variantes `.<especie>`). Existe y no se usa: `huida.salvaje.tooltip` ("Se fue. Ya no se puede sellar."), porque la unidad que huyó ya no está en el tablero ni tiene tooltip; queda para el Worldbuilder decidir dónde va.
+- **Preguntas:** ninguna nueva; ninguna cerrada.
+- **Prueba manual (Windows):**
+  1. Suite completa, en verde:
+     - `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas`
+     - PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`
+  2. Abrir el juego: F5 en el editor, o `"%GODOT_BIN%" --path .` (`cmd`) / `& $env:GODOT_BIN --path .` (PowerShell).
+  3. D normal: bajar a la Rodauva salvaje a 25 % o menos. Antes de su turno se ve su % de huida (50 %) en la ficha (`[FALTA: marca.huida] 50%`) y en el tooltip. En su turno, el suceso dice que huyó (su línea de especie) y sale del tablero; si se queda, no hay línea (falta `huida.salvaje.se_queda`) y juega normal.
+  4. C: bajar al Tasajero a 25 % o menos (75 de 300). Antes de su turno se ve el 25 %; tira una sola vez por ronda (F3: un `huida` por ronda en el registro), antes de pasar a Cuenta.
+  5. A: la Ocarra no muestra % de huida aunque esté en 25 % (su ficha dice 0).
+  6. Abrir el `_resultado.json` más nuevo de `registros/`: `metricas.capturas_perdidas` con la que huyó (`huida`) o la que llegó a 0 (`cero`); las selladas no aparecen.
+  7. Anotar los `[FALTA]` que aparezcan.
+- **Para la próxima sesión:** nada: tarea terminada.
