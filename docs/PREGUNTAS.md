@@ -340,7 +340,7 @@
 - **Respuesta:** `Sistema.md` 9.2, paso 6 (v1.4 y v1.5) y Visión 6.4 v1.2: opción B. Si el combate nocturno termina en derrota, la atacante se va, también si ya estaba caída: su pergamino arde, vuelve a ser salvaje y no hay `atacante_pendiente`. Su ida no cambia la lealtad de nadie. Cambia una condición de `ResultadoCombate.armar` y se suma la derrota al test 11 de T12. Se aplica en T30.
 
 ## P-025 — Guardar a una caída y la consulta única de objetivo
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T38
 - **Fecha:** 06/10/2026
@@ -351,6 +351,7 @@
 - **Bloquea:** no (se necesita antes de T26)
 - **Mientras tanto:** `nucleo/combate/objetivos.gd` (`Objetivos.Clase`) tiene `HOSTIL` y `ALIADA`, y `ALIADA` deja afuera a la caída, que es lo que pide el Remiendo. Test: `pruebas/combate/test_junco.gd`, `test_aliada_vale_sobre_oculta` (una caída da `OBJETIVO_CAIDO` como aliada). Ninguna acción aliada existe todavía.
 - **Respuesta:** Arquitecto (06/10/2026): depende de la acción. ALIADA (Remiendo) sigue dejando afuera a la caída (Sistema.md 1.6). Guardar a una caída usa una clase nueva de Objetivos, CAIDA_PROPIA, que exige que esté caída; que sea de la tribu lo revisa la acción, no la consulta. Se aplica y se cierra en T27.
+- **Cerrada en:** T27
 
 ## P-026 — Qué presas elige el Tasajero en Caza y en qué orden las ataca
 - **Estado:** CERRADA

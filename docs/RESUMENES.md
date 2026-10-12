@@ -2561,3 +2561,93 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   8. Al terminar A con la Rodauva invocada, en la pantalla de resultado recibe el +1 de victoria.
   9. Anotar los `[FALTA]` que aparezcan.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T27 · sesión 1 · 12/10/2026
+- **Rama:** tarea/T27-guardar-caida
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:** el Maestro guarda a una caída de su tribu a distancia Manhattan ≤ 2 (`Sistema.md` 11.5, 3.1, 2.3). Paga el costo de la fila propia, gasta su acción y conserva el movimiento. La caída queda guardada, sin posición, con su pergamino y la vida del dato nuevo; sus surcos se cierran. Lo que pasa después (hambre de combate, +1 de victoria, sobrevivir a la derrota, invocarla) sale del código que ya había para las guardadas. Detalle:
+  - **Deuda de T26:** `ReglasCombate.REGLAS` pone las reglas que otras usan antes que ellas (`costos_mana` antes que `sellado` y `guardado_caida`). Sin `costos_mana.json`, el rechazo nombra `costos_mana`.
+  - **Dato nuevo:** `vida_al_guardar_caida` en `tablas/combate.json`, con esquema, datos y los seis `combate*.json` de fixtures (en 1, D-009). La huella cambió. La `description` de `vida_tras_caida` ya no dice "y al ser guardada caída".
+  - **Regla `GuardadoCaida`** (en `ReglasCombate` y `ContextoCombate`): costo (delega en `CostosMana.guardar_caida`), alcance y vida.
+  - **Objetivo:** clase `Objetivos.Clase.CAIDA_PROPIA` (P-025) y motivo nuevo `OBJETIVO_NO_CAIDO`. `ALIADA` no cambió.
+  - **Acción:** `Accion.guardar_caida(objetivo)`, con un solo chequeo (`Turno._motivo_guardar_caida`) en el orden del prompt. `ResultadoAccion.vida` (`{de, a}`).
+  - **Consultas:** `objetivos_para_guardar_caida`, `motivo_guardar_caida` (el motivo más avanzado entre las caídas de la tribu), `previsualizar_guardar_caida` y `Combate.costo_guardar_caida`.
+  - **Registro:** `accion` → `mana` (`guardar_caida`) → `estado` → `guardado_caida` (`unidad`, `vida`) → `surco_cerrado`.
+  - **Grabación:** tipo `guardar_caida`.
+  - **Métrica 10:** `caidas_guardadas` = `[{unidad, ronda}]` (esquema `resultado`).
+  - **Pantalla:** botón con costo y motivo, modo "elegir caída" excluyente con los demás, hover con maná y vida, clic y sucesos.
+- **Archivos:**
+  - Creados:
+    - `nucleo/combate/guardado_caida.gd`;
+    - `pruebas/fixtures/combate/escenario_guardar_caida.json`, `escenario_guardar_caida_combate.json` y `costos_mana_guardar_caida.json`;
+    - tests `pruebas/combate/test_guardar_caida.gd`, `test_guardado_caida.gd`, `test_guardar_caida_combate.gd`, `pruebas/pantalla/test_lectura_guardar_caida.gd`, `test_vista_guardar_caida.gd` y `pruebas/datos/test_guardar_caida_a.gd`.
+  - Modificados:
+    - núcleo: `nucleo/combate/costos_mana.gd`, `reglas_combate.gd`, `contexto_combate.gd`, `objetivos.gd`, `accion.gd`, `resultado_accion.gd`, `turno.gd`, `combate.gd` y `metricas_combate.gd`;
+    - pantalla: `pantalla/claves_textos.gd`, `pantalla/combate/lectura_combate.gd`, `interprete_clic.gd` y `vista_combate.gd`;
+    - datos: `datos/_esquemas/combate.schema.json`, `grabacion.schema.json` y `resultado.schema.json`, y `datos/tablas/combate.json`;
+    - fixtures y ayudantes: los seis `pruebas/fixtures/combate/combate*.json` (el campo nuevo es requerido por el esquema) y `pruebas/combate/datos_fixture.gd`;
+    - tests: `test_reglas_combate.gd`, `test_costos_mana.gd` y `test_metricas_combate.gd`;
+    - documentación: `docs/PREGUNTAS.md`, `docs/RESUMENES.md` y `CLAUDE.md`.
+- **Tabla de cotejo (A.2.2):**
+
+| Dato | `Sistema.md` | `datos/` | fixture |
+|---|---|---|---|
+| `tablas/combate.json` `vida_al_guardar_caida` | 10 (11.5; 11.1 v1.7) | 10 | 1 (D-009) |
+| `tablas/combate.json` `alcance_guardar_caida` | ≤ 2 (11.5) | 2 | 2 |
+| `tablas/costos_mana.json` `guardar_caida` | 2 / 3 / 4 (2.3) | [2, 3, 4] | [2, 3, 4] (y [1, 4, 6], inventado, en `costos_mana_guardar_caida.json`) |
+| `tablas/costos_mana.json` `costo_minimo` | 1 (2.3) | 1 | 1 |
+
+- **Tests:** 36 nuevos, total 748, todos pasan.
+  - Nuevos por archivo: `test_guardar_caida.gd` (16), `test_guardado_caida.gd` (2), `test_guardar_caida_combate.gd` (6), `test_guardar_caida_a.gd` (2), `test_lectura_guardar_caida.gd` (4) y `test_vista_guardar_caida.gd` (3).
+  - Uno más en cada uno de `test_costos_mana.gd`, `test_metricas_combate.gd` y `test_reglas_combate.gd`.
+- **Tests viejos reescritos:** ninguna aserción vieja cambió de valor.
+  - `test_metricas_combate.gd::test_metricas_9_y_11`: `caidas_guardadas` pasa de `null` a lista vacía (D-011: la métrica 10 la llena T27).
+  - `test_reglas_combate.gd::_armar`: el constructor de `ReglasCombate` suma `guardado_caida` (D-008).
+  - `test_costos_mana.gd::test_sin_un_dato_no_se_arma`: suma el caso sin `guardar_caida`, que `CostosMana.desde_datos` ahora exige.
+- **Criterio de terminado:** cumplido.
+  1. Datos:
+     - `test_guardado_caida.gd`: el fixture carga y un `combate.json` sin el campo no valida;
+     - `test_guardar_caida_a.gd::test_el_dato_carga_en_datos`;
+     - pasa el permanente de datos. La tabla de cotejo está arriba.
+  2. Deuda de T26: `test_reglas_combate.gd::test_contexto_sin_costos_mana_nombra_costos_mana`.
+  3. `CAIDA_PROPIA` y `ALIADA` (el Remiendo no cura a la caída): `test_clase_caida_propia` y `test_aliada_sigue_rechazando_a_la_caida`.
+  4. Costo con la balanza 2, 3 y 5 y el mínimo, desde la fila propia: `test_costos_mana.gd::test_guardar_caida_por_rango_con_balanza_2_3_y_5`.
+  5. Distancia 1 y 2, por encima de una enemiga, y el Maestro se mueve después: `test_guardar_a_distancia_1_y_2`, `test_guardar_por_encima_de_una_enemiga` y `test_previsualizar_es_lo_que_aplica`.
+  6. Rechazos sin cambios (distancia 3, de pie, atacante nocturna caída, acción usada, sin maná y una criatura) y el motivo más avanzado: `test_guardar_caida.gd`.
+  7. Surcón caído: `test_surcon_caido_cierra_sus_surcos`.
+  8. Supervivencia:
+     - con turnos sueltos: `test_la_guardada_no_suma_hambre_de_combate`, `test_la_guardada_sobrevive_si_cae_el_maestro` y `test_en_una_victoria_no_recibe_el_mas_uno`;
+     - dentro del `Combate`: `test_derrota_metrica_10_y_resultado`.
+  9. S-58: `test_se_invoca_despues_con_esa_vida`.
+  10. Registro, grabación y consultas = validar = aplicar: `test_registro_en_el_orden_de_a7`, `test_grabacion_se_reproduce_igual`, `test_accion_ida_y_vuelta` y `test_consultas_son_validar_y_aplicar`.
+      - En el registro, el `surco_cerrado` va detrás del `guardado_caida` porque lo vuelca el `_registrar_surcos` de siempre.
+      - Que se cierren los surcos se prueba con turnos sueltos (criterio 7). No hay test de combate con un Surcón: el escenario de combate no tiene uno.
+  11. Métrica 10:
+      - `test_metricas_combate.gd::test_metrica_10_caidas_guardadas`;
+      - en el combate, `test_derrota_metrica_10_y_resultado`: el resultado valida contra el esquema.
+  12. `datos/` real, A: `test_guardar_caida_a.gd::test_a_el_maestro_guarda_a_la_rodauva_caida`. Pasan el permanente, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios`, `test_sellar_a`, `test_lanzadera_b` y `test_invocar_a`.
+  13. Pantalla: `test_lectura_guardar_caida.gd` y `test_vista_guardar_caida.gd` (mouse por `MousePrueba`, D-012).
+  14. Suite completa: 748 tests, todos pasan.
+- **Consola:** sin errores ni advertencias nuevas. Los `ERROR: ReglasCombate: falta la regla …` los provocan a propósito los tests de reglas faltantes (ahora también `guardado_caida` y `costos_mana` desde el contexto).
+- **Supuestos y lecturas técnicas:**
+  - `Objetivos.motivo(Maestro.ID, CAIDA_PROPIA)` da `OBJETIVO_NO_CAIDO`. El Maestro no es una caída que se guarde: su caída termina el combate (11.5).
+  - `motivo_guardar_caida` recorre solo a las caídas de la tribu; sin ninguna, da `SIN_OBJETIVOS`. Así el botón no dice "objetivo enemigo" por la atacante nocturna caída. La acción sí la rechaza con `OBJETIVO_ENEMIGO`.
+  - El test de A acerca al Maestro a la caída con `casillas_para_mover` solo si no la tiene a su alcance. No toca coordenadas.
+- **Lecturas declaradas:**
+  - S-55: qué conserva la guardada (se reusa `_dejar_guardada`).
+  - S-57: distancia Manhattan, sin mirar la línea; vale por encima de una enemiga.
+  - S-58: se invoca en el mismo combate, pagando invocar, con esa vida.
+- **Claves de texto nuevas sin texto:** `aviso.guardar_caida.accion_usada`, `aviso.guardar_caida.fuera_de_alcance`, `aviso.guardar_caida.mana_insuficiente` y `aviso.guardar_caida.sin_objetivos`. Van en el tooltip del botón deshabilitado y son pedido de `Mundo.md` 9. Las del botón, su tooltip y el suceso (`accion.guardar_caida`, `guardar_caida.tooltip` y `guardar_caida`) ya están en `es.json`.
+- **Preguntas:** ninguna nueva. Cerrada P-025 (clase `CAIDA_PROPIA`).
+- **Prueba manual (Windows):**
+  1. Suite completa, en verde (unos 15 minutos):
+     - `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas`
+     - PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`
+  2. Abrir el juego: F5 en el editor, o `"%GODOT_BIN%" --path .` (`cmd`) / `& $env:GODOT_BIN --path .` (PowerShell). Elegir A y apretar Terminar con la Rodauva hasta que la Ocarra la tumbe.
+  3. En el turno del Maestro aparece "Guardar a la caída (2 Maná)". Si la caída está a 3 o más casillas, el botón está deshabilitado, con `[FALTA: aviso.guardar_caida.fuera_de_alcance]` en el tooltip. Al mover al Maestro más cerca, el botón se habilita.
+  4. Apretarlo: se marca la Rodauva caída. Con el mouse encima, el panel muestra "Maná: x → x−2" y "Vida: 0 → 10".
+  5. Clic: la Rodauva sale del tablero, el maná baja 2 y el suceso dice "Tendés el pergamino hacia la Rodauva…". El Maestro todavía se puede mover.
+  6. Seguir con Terminar hasta que la Ocarra tumbe al Maestro: en la pantalla de resultado, la Rodauva sigue guardada, no muerta.
+  7. Otra vez A: guardarla y, en el turno siguiente del Maestro, invocarla. Aparece con 10 de vida.
+  8. Anotar los `[FALTA]` que aparezcan.
+- **Para la próxima sesión:** nada: tarea terminada.

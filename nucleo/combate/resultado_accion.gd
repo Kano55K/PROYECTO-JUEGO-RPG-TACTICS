@@ -103,6 +103,8 @@ enum Motivo {
 	NO_GUARDADA,
 	# Sistema.md 3.1 (T26): sin ninguna casilla libre junto al Maestro no se invoca.
 	SIN_CASILLA_LIBRE,
+	# Sistema.md 11.5 (T27, P-025): guardar a una caida pide una unidad caida (no una de pie).
+	OBJETIVO_NO_CAIDO,
 }
 
 var valida: bool
@@ -114,18 +116,23 @@ var desglose: DesgloseDanio = null
 # Solo al atacar (Sistema.md 10.2, T16): el eslabon de la cadena que es (o seria)
 # el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
 var eslabon: Variant = null
-# Solo en un hechizo, un sellado o una invocacion (Sistema.md 1.6, 4.1 y 3.1;
-# T22, T24 y T26): {de, a} del mana que paga, o {} si no cambia (D-007).
+# Solo en un hechizo, un sellado, una invocacion o al guardar a una caida (Sistema.md 1.6, 4.1, 3.1 y 11.5;
+# T22, T24, T26 y T27): {de, a} del mana que paga, o {} si no cambia (D-007).
 var mana: Dictionary = {}
 # Solo en un hechizo que no es ataque: el evento de A.7 que produce (`lanzadera`
 # o `remiendo`), con su tipo. Lo mismo al validar y al aplicar. En un sellado
 # (T24), el evento `sellado`, solo al aplicar: la tirada existe solo al aplicar.
-# En una invocacion (T26), el evento `invocacion`.
+# En una invocacion (T26), el evento `invocacion`. Al guardar a una caida (T27), el
+# evento `guardado_caida`, igual al validar y al aplicar.
 var evento: Dictionary = {}
 # Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24): el % que se muestra antes
-# de gastar el mana y el costo. En una invocacion valida (T26), el costo. Lo mismo al validar y al aplicar.
+# de gastar el mana y el costo. En una invocacion valida (T26) y al guardar a una
+# caida (T27), el costo. Lo mismo al validar y al aplicar.
 var porcentaje: Variant = null
 var costo: int = 0
+# Solo al guardar a una caida (Sistema.md 11.5, T27): {de, a} de la vida de la caida
+# (la de ahora y la que le queda guardada). Lo mismo al validar y al aplicar.
+var vida: Dictionary = {}
 # Solo en la Lanzadera y en una invocacion (T26): las ocultas que la movida o la
 # invocada destaparia por contacto al llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
 var destaparia: Array[String] = []

@@ -212,6 +212,17 @@ func costo_invocar(unidad_id: String) -> Variant:
 	return _contexto.costos_mana.invocar(criatura.especie, _plantel.maestro)
 
 
+# Sistema.md 2.3 y 11.5 (T27): el costo de guardar a la unidad si es una caida de
+# la tribu (la consulta unica, Objetivos CAIDA_PROPIA); si no, null. No mira el
+# turno, el mana ni la distancia.
+func costo_guardar_caida(unidad_id: String) -> Variant:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.bando != Criatura.Bando.TRIBU \
+			or not Objetivos.puede_ser_objetivo(unidad_id, Objetivos.Clase.CAIDA_PROPIA, _plantel):
+		return null
+	return _contexto.guardado_caida.costo(criatura.especie, _plantel.maestro)
+
+
 # Sistema.md 11.7 (T25, "la probabilidad se muestra sobre la unidad"): el % de
 # huida que tiraria la unidad si su turno empezara ahora (Huida, la misma cuenta
 # que la tirada); 0 si no tira.
@@ -449,8 +460,8 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	if not resultado.valida:
 		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
 		return resultado
-	# Sistema.md 1.6, 4.1 y 3.1, D-007 (T22, T24 y T26): el mana que paga un
-	# hechizo, un sellado o una invocacion, justo detras de su `accion`. Se
+	# Sistema.md 1.6, 4.1, 3.1 y 11.5, D-007 (T22, T24, T26 y T27): el mana que paga un
+	# hechizo, un sellado, una invocacion o guardar a una caida, justo detras de su `accion`. Se
 	# registra sin volcar tiradas: la del sellado va despues, detras de la que se
 	# pago (A.7). Despues, el Martillazo es un `ataque` normal (es un ataque) y la
 	# Lanzadera, el Remiendo y el sellado, su propio evento.
@@ -482,6 +493,12 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 			_registrar_estados(estados_antes)
 			estados_antes = _estados()
 			_registrar(resultado.evento.duplicate(true))
+		# Sistema.md 11.5 (T27, A.7): la caida pasa a guardada y despues va el
+		# `guardado_caida`; sus surcos cerrados, detras (_registrar_surcos).
+		Accion.Tipo.GUARDAR_CAIDA:
+			_registrar_estados(estados_antes)
+			estados_antes = _estados()
+			_registrar(resultado.evento.duplicate(true))
 	_registrar_eventos_turno()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
@@ -509,6 +526,8 @@ func _motivo_mana(accion: Accion) -> String:
 			return Sellado.MOTIVO_SELLAR
 		Accion.Tipo.INVOCAR:
 			return CostosMana.MOTIVO_INVOCAR
+		Accion.Tipo.GUARDAR_CAIDA:
+			return GuardadoCaida.MOTIVO_GUARDAR_CAIDA
 	return Hechizos.MOTIVO_HECHIZO
 
 

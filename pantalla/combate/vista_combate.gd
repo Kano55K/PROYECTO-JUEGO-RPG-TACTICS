@@ -42,6 +42,8 @@ const _MARCA_DESTINO_HECHIZO: Vector2i = _MARCA_DESTINO
 const _MARCA_OBJETIVO_SELLAR: Vector2i = _MARCA_CAVAR
 # T26: las casillas donde se puede invocar (la misma marca de "elegir" que cavar).
 const _MARCA_INVOCAR: Vector2i = _MARCA_CAVAR
+# T27: las caidas que se pueden guardar (la misma marca de "elegir" que Sellar).
+const _MARCA_CAIDA: Vector2i = _MARCA_CAVAR
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
@@ -66,6 +68,8 @@ const _PREFIJO_BOTON_HECHIZO: String = "Hechizo_"
 const _NOMBRE_BOTON_GUARDAR: String = "Guardar"
 const _PREFIJO_BOTON_INVOCAR: String = "Invocar_"
 const _NOMBRE_BOTON_SELLAR: String = "Sellar"
+# T27: el boton de guardar a una caida.
+const _NOMBRE_BOTON_GUARDAR_CAIDA: String = "GuardarCaida"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -131,6 +135,10 @@ var _sellando: bool = false
 var _sellado_mostrado: Dictionary = {}
 # T26: la guardada cuyo modo "elegir casilla" de invocar esta puesto ("" si ninguna).
 var _invocando: String = ""
+# T27: el modo "elegir caida" de guardar a una caida y lo que se muestra con el
+# mouse sobre una caida valida: {objetivo, costo, vida, previa}, o {}.
+var _guardando_caida: bool = false
+var _caida_mostrada: Dictionary = {}
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -260,7 +268,7 @@ func clic_casilla(casilla: Vector2i, alterno: bool = false) -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
 	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar,
-			_eligiendo_aliada, _hechizo_elegido, alterno, _sellando, _invocando)
+			_eligiendo_aliada, _hechizo_elegido, alterno, _sellando, _invocando, _guardando_caida)
 	if accion == null:
 		return false
 	return _aplicar(accion)
@@ -278,6 +286,7 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
 	_hechizo_mostrado = {}
 	_sellado_mostrado = {}
+	_caida_mostrada = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_capa_afines.clear()
@@ -298,6 +307,8 @@ func sobre_casilla(casilla: Vector2i) -> void:
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
 		if not _hechizo_elegido.is_empty():
 			_mostrar_hechizo(turno, foto, casilla)
+		elif _guardando_caida:
+			_mostrar_caida(turno, foto, casilla)
 		elif _sellando:
 			_mostrar_sellado(turno, foto, casilla)
 		elif not _invocando.is_empty():
@@ -430,6 +441,7 @@ func pulsar_activa(tipo: String) -> bool:
 			_hechizo_elegido = ""
 			_sellando = false
 			_invocando = ""
+			_guardando_caida = false
 			redibujar()
 			return true
 	return false
@@ -452,6 +464,7 @@ func pulsar_hechizo(hechizo_id: String) -> bool:
 	_aliada_previa = ""
 	_sellando = false
 	_invocando = ""
+	_guardando_caida = false
 	redibujar()
 	return true
 
@@ -465,6 +478,7 @@ func pulsar_sellar() -> bool:
 		return false
 	_sellando = not _sellando
 	_invocando = ""
+	_guardando_caida = false
 	_eligiendo_cavar = false
 	_eligiendo_aliada = false
 	_aliada_previa = ""
@@ -475,6 +489,49 @@ func pulsar_sellar() -> bool:
 
 func eligiendo_sellar() -> bool:
 	return _sellando
+
+
+# T27: el boton de guardar a una caida no aplica nada: entra (o sale) del modo
+# "elegir caida". Solo si Turno.motivo_guardar_caida lo deja (salir, siempre).
+# Devuelve true si hizo algo.
+func pulsar_guardar_caida() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if not _guardando_caida and _combate.turno_actual().motivo_guardar_caida() != ResultadoAccion.Motivo.NINGUNO:
+		return false
+	_guardando_caida = not _guardando_caida
+	_sellando = false
+	_invocando = ""
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	redibujar()
+	return true
+
+
+func eligiendo_caida() -> bool:
+	return _guardando_caida
+
+
+# T27: lo que se muestra con el mouse sobre una caida que se puede guardar
+# (Turno.previsualizar_guardar_caida): {objetivo, costo, vida}, o {}.
+func guardado_caida_mostrado() -> Dictionary:
+	if _caida_mostrada.is_empty():
+		return {}
+	return {"objetivo": _caida_mostrada["objetivo"], "costo": _caida_mostrada["costo"],
+			"vida": _caida_mostrada["vida"]}
+
+
+# T27: con el mouse sobre una caida que se puede guardar, el costo y la vida con
+# la que queda, que da el nucleo.
+func _mostrar_caida(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
+	var caida: String = InterpreteClic.caida_en(turno, foto, casilla)
+	if caida.is_empty():
+		return
+	var previa: ResultadoAccion = turno.previsualizar_guardar_caida(caida)
+	if previa.valida:
+		_caida_mostrada = {"objetivo": caida, "costo": previa.costo, "vida": previa.vida, "previa": previa}
 
 
 # T26: el boton Guardar aplica la accion de la criatura del turno.
@@ -501,6 +558,7 @@ func pulsar_invocar(criatura_id: String) -> bool:
 	_aliada_previa = ""
 	_hechizo_elegido = ""
 	_sellando = false
+	_guardando_caida = false
 	redibujar()
 	return true
 
@@ -556,6 +614,7 @@ func pulsar_secundar() -> bool:
 	_hechizo_elegido = ""
 	_sellando = false
 	_invocando = ""
+	_guardando_caida = false
 	_aliada_previa = ""
 	redibujar()
 	return true
@@ -722,7 +781,9 @@ func _aplicar(accion: Accion) -> bool:
 	_hechizo_elegido = ""
 	_sellando = false
 	_invocando = ""
+	_guardando_caida = false
 	_sellado_mostrado = {}
+	_caida_mostrada = {}
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
 	if pausa_ia > 0.0 and not pasos.is_empty():
@@ -860,6 +921,12 @@ func _dibujar_marcas() -> void:
 		var foto_sellar: Dictionary = _combate.instantanea()
 		for objetivo in turno.objetivos_para_sellar():
 			_marcas.set_cell(_casilla_de(foto_sellar, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_SELLAR)
+		return
+	# T27: eligiendo la caida que se guarda, solo las de objetivos_para_guardar_caida.
+	if _guardando_caida:
+		var foto_caida: Dictionary = _combate.instantanea()
+		for caida in turno.objetivos_para_guardar_caida():
+			_marcas.set_cell(_casilla_de(foto_caida, caida), _FUENTE_MARCAS, _MARCA_CAIDA)
 		return
 	# T26: eligiendo donde invocar, solo las de casillas_para_invocar.
 	if not _invocando.is_empty():
@@ -1019,6 +1086,20 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		boton_sellar.pressed.connect(pulsar_sellar)
 		_botones.add_child(boton_sellar)
 		_botones.move_child(boton_sellar, _boton_terminar.get_index())
+	# T27: el boton de guardar a una caida, solo en el turno del Maestro
+	# (LecturaCombate.boton_guardar_caida).
+	var datos_caida: Dictionary = lectura.boton_guardar_caida()
+	if not datos_caida.is_empty():
+		var boton_caida: Button = Button.new()
+		boton_caida.name = _NOMBRE_BOTON_GUARDAR_CAIDA
+		boton_caida.text = datos_caida["texto"]
+		boton_caida.tooltip_text = datos_caida["tooltip"]
+		boton_caida.disabled = not datos_caida["habilitado"] and not _guardando_caida
+		boton_caida.toggle_mode = true
+		boton_caida.button_pressed = _guardando_caida
+		boton_caida.pressed.connect(pulsar_guardar_caida)
+		_botones.add_child(boton_caida)
+		_botones.move_child(boton_caida, _boton_terminar.get_index())
 	# T26: Guardar, solo si la criatura del turno puede guardarse ahora.
 	var datos_guardar: Dictionary = lectura.boton_guardar()
 	if not datos_guardar.is_empty():
@@ -1057,10 +1138,14 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 # El desglose de un ataque o, T22, lo que haria el hechizo (LecturaCombate.vista_previa_hechizo).
 func _dibujar_desglose() -> void:
 	_panel_desglose.visible = not _desglose_mostrado.is_empty() or not _hechizo_mostrado.is_empty() \
-			or not _sellado_mostrado.is_empty()
+			or not _sellado_mostrado.is_empty() or not _caida_mostrada.is_empty()
 	if not _panel_desglose.visible:
 		return
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	# T27: el mana y la vida de guardar a la caida (LecturaCombate.vista_previa_guardar_caida).
+	if not _caida_mostrada.is_empty():
+		_panel_desglose.text = "\n".join(lectura.vista_previa_guardar_caida(_caida_mostrada["previa"]))
+		return
 	# T24: el % y el mana del sellado (LecturaCombate.vista_previa_sellar).
 	if not _sellado_mostrado.is_empty():
 		_panel_desglose.text = "\n".join(lectura.vista_previa_sellar(_sellado_mostrado["previa"],

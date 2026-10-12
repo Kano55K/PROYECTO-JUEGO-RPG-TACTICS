@@ -17,7 +17,8 @@
     "huida_salvaje",
     "alcance_sellar",
     "alcance_guardar_caida",
-    "vida_tras_caida"
+    "vida_tras_caida",
+    "vida_al_guardar_caida"
   ],
   "additionalProperties": false,
   "properties": {
@@ -259,7 +260,12 @@
     "vida_tras_caida": {
       "type": "integer",
       "minimum": 1,
-      "description": "Al levantarse tras ganar y al ser guardada caída"
+      "description": "Al levantarse tras ganar (Sistema.md 11.5)"
+    },
+    "vida_al_guardar_caida": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "La vida con la que queda una caída que el Maestro guarda (Sistema.md 11.5, T27)"
     }
   }
 }

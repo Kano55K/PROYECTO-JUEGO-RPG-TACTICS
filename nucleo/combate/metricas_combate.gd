@@ -50,6 +50,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 	# ser sellada. El motivo sale del evento que precede a su estado fuera (A.7):
 	# las unidades con un huida que salio o un sellado logrado pendientes.
 	var capturas_perdidas: Array = []
+	# 10 (T27): {unidad, ronda} de cada evento guardado_caida, en orden.
+	var caidas_guardadas: Array = []
 	var huyendo: Dictionary = {}
 	var selladas: Dictionary = {}
 	var muertas: Array = []
@@ -72,6 +74,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 					primer_ataque = ronda
 				if _tiene_rasgo_atacante(linea["desglose"]):
 					activas["bonos_cobrados"] += 1
+			"guardado_caida":
+				caidas_guardadas.append({"unidad": linea["unidad"], "ronda": ronda})
 			"secundar":
 				secundar += 1
 			"cadena_cortada":
@@ -166,8 +170,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 		"capturas_perdidas": capturas_perdidas,
 		# 9 (P-043: tambien el Maestro)
 		"caidas": caidas,
-		# 10: la llena T27 (guardar a una caida)
-		"caidas_guardadas": null,
+		# 10 (T27): las caidas que el Maestro guardo
+		"caidas_guardadas": caidas_guardadas,
 		# 11
 		"muertes": muertes,
 		# 12: la llena T29 (rescate)

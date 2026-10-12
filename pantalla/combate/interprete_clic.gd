@@ -22,9 +22,11 @@ extends RefCounted
 # T26: con criatura_invocar (el jugador pulso el boton de invocar de esa
 # guardada), solo una casilla donde la invocacion vale (Turno.previsualizar_invocar)
 # da la accion, con el clic izquierdo.
+# T27: con modo_guardar_caida (el jugador pulso el boton de guardar a una caida),
+# solo una caida de Turno.objetivos_para_guardar_caida da la accion, con el clic izquierdo.
 static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i, modo_cavar: bool = false,
 		modo_secundar: bool = false, hechizo_id: String = "", alterno: bool = false,
-		modo_sellar: bool = false, criatura_invocar: String = "") -> Accion:
+		modo_sellar: bool = false, criatura_invocar: String = "", modo_guardar_caida: bool = false) -> Accion:
 	if not hechizo_id.is_empty():
 		return _accion_hechizo(turno, foto, casilla, hechizo_id, alterno)
 	if alterno:
@@ -32,6 +34,9 @@ static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i, modo_cavar
 	if not criatura_invocar.is_empty():
 		return Accion.invocar(criatura_invocar, casilla) \
 				if turno.previsualizar_invocar(criatura_invocar, casilla).valida else null
+	if modo_guardar_caida:
+		var caida: String = caida_en(turno, foto, casilla)
+		return null if caida.is_empty() else Accion.guardar_caida(caida)
 	if modo_sellar:
 		var objetivo_sellar: String = objetivo_sellar_en(turno, foto, casilla)
 		return null if objetivo_sellar.is_empty() else Accion.sellar(objetivo_sellar)
@@ -66,6 +71,11 @@ static func objetivo_hechizo_en(turno: Turno, foto: Dictionary, casilla: Vector2
 # T24: el id de la objetivo del sellado que esta en la casilla, o "".
 static func objetivo_sellar_en(turno: Turno, foto: Dictionary, casilla: Vector2i) -> String:
 	return _unidad_de(turno.objetivos_para_sellar(), foto, casilla)
+
+
+# T27: el id de la caida que se puede guardar en la casilla, o "".
+static func caida_en(turno: Turno, foto: Dictionary, casilla: Vector2i) -> String:
+	return _unidad_de(turno.objetivos_para_guardar_caida(), foto, casilla)
 
 
 static func _accion_hechizo(turno: Turno, foto: Dictionary, casilla: Vector2i, hechizo_id: String,

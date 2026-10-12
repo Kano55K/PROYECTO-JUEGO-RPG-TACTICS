@@ -115,7 +115,8 @@ static func reglas(reemplazos: Dictionary = {}) -> ReglasCombate:
 			reemplazos.get("hechizos", hechizos()),
 			reemplazos.get("sellado", sellado()),
 			reemplazos.get("huida", huida()),
-			reemplazos.get("costos_mana", costos_mana()))
+			reemplazos.get("costos_mana", costos_mana()),
+			reemplazos.get("guardado_caida", guardado_caida()))
 
 
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
@@ -143,3 +144,9 @@ static func costos_mana(costos: String = "costos_mana.json") -> CostosMana:
 # fixture de tablas/combate.json.
 static func huida(combate: String = "combate.json") -> Huida:
 	return Huida.desde_datos(cargar(combate)["datos"]["tablas/combate.json"])
+
+
+# El GuardadoCaida de los fixtures (T27), armado como en ContextoCombate. costos:
+# otro fixture de tablas/costos_mana.json en la carpeta de combate.
+static func guardado_caida(costos: String = "costos_mana.json") -> GuardadoCaida:
+	return GuardadoCaida.desde_datos(cargar()["datos"]["tablas/combate.json"], costos_mana(costos))

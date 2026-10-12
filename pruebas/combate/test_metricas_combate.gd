@@ -187,7 +187,8 @@ func test_metrica_14_activas_y_terreno() -> void:
 
 
 # (7) Metricas 9 y 11 en una victoria (con una caida que se levanta) y en una
-# derrota con muertas (el Maestro cae: P-043); 10 y 12 en null, y 7 vacia (T24).
+# derrota con muertas (el Maestro cae: P-043); 12 en null, y 7 vacia (T24).
+# T27: la 10 deja de estar en null; sin eventos guardado_caida, lista vacia.
 # T25: la 8 cuenta a la Ocarra salvaje que sale del tablero sin huida ni sellado
 # delante (cero); en la derrota, vacia.
 func test_metricas_9_y_11() -> void:
@@ -215,9 +216,30 @@ func test_metricas_9_y_11() -> void:
 	assert_array(derrota["capturas_perdidas"]).is_empty()
 	for metricas in [victoria, derrota]:
 		assert_array(metricas["sellados"]).is_empty()
-		for clave in ["caidas_guardadas", "rescate"]:
+		assert_array(metricas["caidas_guardadas"]).is_empty()
+		for clave in ["rescate"]:
 			assert_bool(metricas.has(clave)).override_failure_message(clave).is_true()
 			assert_object(metricas[clave]).override_failure_message(clave).is_null()
+
+
+# T27 (Sistema.md 11.9, metrica 10; A.7): cada guardado_caida en orden, con su
+# ronda. Una caida guardada cuenta; otra que no se guardo (y muere en el cierre),
+# no.
+func test_metrica_10_caidas_guardadas() -> void:
+	var metricas: Dictionary = _calcular([{"tipo": "ronda"},
+			{"tipo": "estado", "unidad": "cardo_1", "de": "suelta", "a": "caida"},
+			{"tipo": "estado", "unidad": "ocarra_1", "de": "suelta", "a": "caida"},
+			{"tipo": "fin_ronda"}, {"tipo": "ronda"},
+			{"tipo": "accion", "unidad": Maestro.ID, "origen": "jugador",
+					"accion": {"tipo": "guardar_caida", "objetivo": "cardo_1"}, "paso": null},
+			{"tipo": "mana", "unidad": Maestro.ID, "de": 8, "a": 6, "motivo": "guardar_caida"},
+			{"tipo": "estado", "unidad": "cardo_1", "de": "caida", "a": "guardada"},
+			{"tipo": "guardado_caida", "unidad": "cardo_1", "vida": 10},
+			{"tipo": "estado", "unidad": Maestro.ID, "de": "en_pie", "a": "caido"},
+			{"tipo": "fin", "desenlace": "derrota_por_caida"},
+			{"tipo": "cierre", "levantadas": [], "muertas": ["ocarra_1"], "pergaminos_ardidos": [], "lealtad": []}])
+	assert_array(metricas["caidas_guardadas"]).is_equal([{"unidad": "cardo_1", "ronda": 2}])
+	assert_array(metricas["muertes"]).is_equal([{"unidad": "ocarra_1", "causa": "derrota_por_caida"}])
 
 
 # T25 (Sistema.md 11.9, metrica 8; A.7): una salvaje que huye (huida con huye y
