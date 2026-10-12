@@ -618,3 +618,30 @@
 - **Mientras tanto:** programada con la opción A, por decisión del usuario en el plan de T23 (lectura declarada en el resumen). Si la respuesta es B, se cambia una constante (`MetricasCombate._A_CAIDA`) y su test.
 - **Respuesta:** Arquitecto (11/10/2026; copiada por pedido del usuario de `Arquitectura.md`, "Resuelta por el Arquitecto"): se acepta la lectura que eligió el usuario y ya programó T23: la métrica 9 incluye la caída del Maestro (`caido`). Motivo: 11.9 cuenta las caídas "por id de unidad", y el umbral de F mira "las partidas en que el Maestro cae" con las métricas 9 y 12. Se cierra al empezar T24, sin cambios de código.
 - **Cerrada en:** T24
+
+## P-044 — Los tests de mouse fallan por el tamaño de la ventana, no por eventos reales: ¿qué arreglo se toma?
+- **Estado:** CERRADA
+- **Para:** ARQUITECTO
+- **Tarea:** T24-ajustes
+- **Fecha:** 11/10/2026
+- **Fuente:** `Arquitectura.md` B.4, fila T24-ajustes (opciones A y B), y D-006 ("los tests mandan eventos con su `position` por `Input.parse_input_event`")
+- **Duda:** la causa no es la que supone la tarea (un evento real que le gana al del test). ¿Cuál de estos arreglos se toma, ya que no es ni A ni B?
+- **Caso que la dispara:**
+  - Los tests calculan la posición en coordenadas del **viewport** (`get_canvas_transform() * …`), pero `Input.parse_input_event` la toma en coordenadas de la **ventana** y la pasa por la inversa de `Viewport.get_final_transform()`. Con `window/stretch/mode="canvas_items"` y `aspect="expand"`, esa transformación es la identidad solo si la ventana mide 1152 × 648.
+  - El runner de escenas de GdUnit4 **minimiza** la ventana al liberar cada runner y la restaura al crear el siguiente (`GdUnitSceneRunnerImpl.gd`, `move_window_to_background` / `move_window_to_foreground`). Si un test manda el evento antes de que la ventana recupere su tamaño, la posición se agranda y la casilla sale enorme.
+  - Experimento (test temporal, ya borrado): con la ventana en 200 × 120, el evento del test para `(1,7)` en `(351,398)` llega a la vista como `(2025,2296)` (transformación final 0,1736) y da `(35,45)`. Es la misma familia que `(41,34)` y `(164,9)` de T24, y que `(93,80)` en lugar de `(1,7)`: así falló en esta sesión una corrida de `pruebas/pantalla`, incluido un test nuevo con el filtro de device **desactivado**.
+  - Los eventos reales también llegan (registro temporal: movimientos en `(0,0)` del `warp_mouse` de GdUnit4, y del cursor del usuario, con un clic incluido), todos con `device=32`, el mismo que traen por defecto los eventos del test. Pero no explican las casillas enormes, y la opción B (filtro de device) no corrige esta falla.
+  - Opción A (sin ventana) descartada: con `--headless --ignoreHeadlessMode`, `pruebas/pantalla` da 10 fallas y 1 error (GdUnit4 avisa que en headless no se transportan los `InputEvent`).
+- **Opciones:**
+  - A) El ayudante de los tests pasa la posición a coordenadas de ventana antes de mandarla (`evento.position = viewport.get_final_transform() * posicion`). Sigue con `parse_input_event` y D-006, y ninguna aserción cambia. Se puede sumar el filtro de device de B contra los eventos reales (ya escrito y probado: 2 tests nuevos que pasan).
+  - B) Los tests mandan el mouse con `Viewport.push_input(evento, true)` (coordenadas locales). No pasa por la ventana, pero no actualiza el estado de `Input`: el test de arrastre de la cámara (`Input.is_action_pressed("camara_arrastrar")`) cambiaría, y D-006 también.
+  - C) Que GdUnit4 no minimice la ventana entre tests. Implica tocar el addon.
+  - Recomendación técnica: A, con el filtro de device.
+- **Bloquea:** sí — no se puede cerrar T24-ajustes: el arreglo que pide la tarea (A o B) no corrige la causa.
+- **Mientras tanto:** se paró antes de dejar cambios. La opción B quedó guardada en `git stash` ("T24-ajustes: opcion B (costura de device), en pausa por P-044"): filtro en `VistaCombate._input` (`dispositivo_mouse`, `DISPOSITIVO_CUALQUIERA`), `pruebas/pantalla/mouse_prueba.gd` (`MousePrueba`), los 4 ayudantes y `test_vista_dispositivo_mouse.gd`. El código de la rama está igual que `develop`.
+- **Respuesta:** (Arquitecto, 11/10/2026): se toman las dos partes de la recomendación (D-012):
+
+MousePrueba pasa la posición a coordenadas de ventana con get_viewport().get_final_transform(), en el mismo momento de mandar el evento, y lo marca con su propio device. Todo test de mouse pasa por MousePrueba.
+VistaCombate acepta solo el device de dispositivo_mouse; por defecto acepta cualquiera, así que el juego no cambia.
+El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4 no transporta los eventos; fijar el tamaño de la ventana o esperar a que se restaure, porque suma esperas; y cualquiera de las dos partes sola. Se cierra en la sesión 2.
+- **Cerrada en:** T24-ajustes

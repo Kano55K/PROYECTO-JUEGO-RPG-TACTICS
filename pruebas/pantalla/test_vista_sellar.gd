@@ -7,7 +7,7 @@ extends GdUnitTestSuite
 # el test la hace terminar; el Maestro [4,5], balanza 3, tiene al Surcon salvaje
 # [4,3] con 5 de 24 a distancia 2: 65 %, cuesta 4). es_rasgos.json mas copias
 # textuales de datos/textos/es.json. Sistema.md 4.1 y 2.3.
-# D-006: el mouse se manda como evento (parse_input_event + flush), sin
+# D-006 y D-012: el mouse se manda por MousePrueba (parse_input_event + flush), sin
 # warp_mouse y sin await entre el evento y la comprobacion.
 const _ESCENA: String = "res://pantalla/combate/vista_combate.tscn"
 const _ESCENARIO: String = "res://pruebas/fixtures/combate/escenario_sellar_combate.json"
@@ -40,6 +40,7 @@ func _vista(maestro_en: Vector2i = Criatura.SIN_POSICION) -> GdUnitSceneRunner:
 		escenario["maestro"]["posicion"] = [maestro_en.x, maestro_en.y]
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
 	(runner.scene() as VistaCombate).pausa_ia = 0.0
+	MousePrueba.preparar(runner.scene() as VistaCombate)
 	(runner.scene() as VistaCombate).empezar(escenario, _datos())
 	return runner
 
@@ -63,32 +64,6 @@ func _ultimo(vista: VistaCombate, tipo: String) -> Dictionary:
 func _en_pantalla(vista: VistaCombate, casilla: Vector2i) -> Vector2:
 	var tablero: TileMapLayer = vista.tablero()
 	return tablero.get_viewport().get_canvas_transform() * tablero.to_global(tablero.map_to_local(casilla))
-
-
-func _mandar(evento: InputEvent) -> void:
-	Input.parse_input_event(evento)
-	Input.flush_buffered_events()
-
-
-func _mover_a(posicion: Vector2) -> void:
-	var evento: InputEventMouseMotion = InputEventMouseMotion.new()
-	evento.position = posicion
-	evento.global_position = posicion
-	_mandar(evento)
-
-
-func _clic_en(posicion: Vector2) -> void:
-	var evento: InputEventMouseButton = InputEventMouseButton.new()
-	evento.button_index = MOUSE_BUTTON_LEFT
-	evento.button_mask = MOUSE_BUTTON_MASK_LEFT
-	evento.position = posicion
-	evento.global_position = posicion
-	evento.pressed = true
-	_mandar(evento)
-	var suelto: InputEventMouseButton = evento.duplicate()
-	suelto.button_mask = 0
-	suelto.pressed = false
-	_mandar(suelto)
 
 
 func _ficha(vista: VistaCombate, unidad_id: String) -> FichaUnidad:
@@ -153,7 +128,7 @@ func test_porcentaje_sobre_la_salvaje() -> void:
 	assert_int(porcentaje).is_equal(65)
 	assert_str(_ficha(vista, "surcon_s1").texto_marcas()).contains("%d%%" % porcentaje)
 	assert_str(_ficha(vista, "rodauva_1").texto_marcas()).not_contains("%")
-	_mover_a(_en_pantalla(vista, _SURCON))
+	MousePrueba.mover_a(_en_pantalla(vista, _SURCON))
 	assert_array(vista.tooltip_mostrado()).contains(
 			["65% de que el hilo lo sujete. Si se suelta, el maná se pierde igual."])
 
@@ -168,14 +143,14 @@ func test_hover_igual_al_evento_y_clic() -> void:
 	_hasta_el_maestro(vista)
 	assert_bool(vista.pulsar_sellar()).is_true()
 	var posicion: Vector2 = _en_pantalla(vista, _SURCON)
-	_mover_a(posicion)
+	MousePrueba.mover_a(posicion)
 	var mostrado: Dictionary = vista.sellado_mostrado()
 	assert_dict(mostrado).is_equal({"objetivo": "surcon_s1", "porcentaje": 65, "costo": 4})
 	var panel: Label = runner.find_child("PanelDesglose")
 	assert_bool(panel.visible).is_true()
 	assert_str(panel.text).contains("65% de que el hilo lo sujete")
 	assert_str(panel.text).contains("Maná: 9 → 5")
-	_clic_en(posicion)
+	MousePrueba.clic_en(posicion)
 	var evento: Dictionary = _ultimo(vista, "sellado")
 	assert_str(evento["objetivo"]).is_equal(mostrado["objetivo"])
 	assert_int(evento["porcentaje"]).is_equal(mostrado["porcentaje"])
