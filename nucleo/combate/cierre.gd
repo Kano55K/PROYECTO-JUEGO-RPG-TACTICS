@@ -58,8 +58,8 @@ func _motivo_rechazo(plantel: Plantel, fin: FinCombate.Fin) -> ResultadoCierre.M
 
 
 # Sistema.md 11.5: las caidas se levantan con la vida de combate.json, en su
-# casilla. 5.2: +1 a las sueltas al terminar (de pie y levantadas; las invocadas,
-# cuando exista invocar); las guardadas no.
+# casilla. 5.2: +1 a las sueltas al terminar (de pie, levantadas e invocadas,
+# T26); las guardadas no.
 func _victoria(plantel: Plantel, resultado: ResultadoCierre, acumulador: AcumuladorLealtad) -> void:
 	for criatura in _tribu(plantel, Criatura.Estado.CAIDA):
 		criatura.estado = Criatura.Estado.SUELTA

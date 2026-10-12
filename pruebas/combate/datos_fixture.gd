@@ -114,7 +114,8 @@ static func reglas(reemplazos: Dictionary = {}) -> ReglasCombate:
 			reemplazos.get("regeneracion_mana", regeneracion_mana()),
 			reemplazos.get("hechizos", hechizos()),
 			reemplazos.get("sellado", sellado()),
-			reemplazos.get("huida", huida()))
+			reemplazos.get("huida", huida()),
+			reemplazos.get("costos_mana", costos_mana()))
 
 
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
@@ -128,9 +129,14 @@ static func combo(relaciones: Dictionary = {}) -> Combo:
 # fixture de tablas/costos_mana.json en la carpeta de combate (costos_mana_chico.json).
 static func sellado(costos: String = "costos_mana.json") -> Sellado:
 	var datos: Dictionary = cargar()["datos"]
-	var tabla_costos: Dictionary = LectorFixture.leer(_CARPETA_COMBATE + costos, "costos_mana")["datos"]
-	return Sellado.desde_datos(datos["tablas/sellado.json"], tabla_costos, datos["tablas/lealtad.json"],
+	return Sellado.desde_datos(datos["tablas/sellado.json"], costos_mana(costos), datos["tablas/lealtad.json"],
 			datos["tablas/combate.json"])
+
+
+# Los CostosMana de los fixtures (T26), armados como en ContextoCombate. costos:
+# otro fixture de tablas/costos_mana.json en la carpeta de combate.
+static func costos_mana(costos: String = "costos_mana.json") -> CostosMana:
+	return CostosMana.desde_datos(LectorFixture.leer(_CARPETA_COMBATE + costos, "costos_mana")["datos"])
 
 
 # La Huida de los fixtures (T25), armada como en ContextoCombate. combate: el

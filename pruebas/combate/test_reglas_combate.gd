@@ -9,7 +9,7 @@ func _armar(completas: ReglasCombate, sin: String) -> ReglasCombate:
 	var de: Callable = func(nombre: String) -> Variant: return null if nombre == sin else completas.get(nombre)
 	return ReglasCombate.new(de.call("danio"), de.call("afinidad"), de.call("combo"), de.call("incidente"),
 			de.call("chequeo_rival"), de.call("regeneracion_mana"), de.call("hechizos"), de.call("sellado"),
-			de.call("huida"))
+			de.call("huida"), de.call("costos_mana"))
 
 
 func test_construccion_incompleta_falla_con_el_nombre_de_la_que_falta() -> void:

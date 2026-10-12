@@ -203,6 +203,15 @@ func costo_sellado(unidad_id: String) -> Variant:
 	return null if criatura == null else _contexto.sellado.costo(criatura.especie, _plantel.maestro)
 
 
+# Sistema.md 2.3 y 3.1 (T26): el costo de invocar a la criatura, o null si no es
+# una guardada de la tribu. No mira el turno, el mana ni las casillas.
+func costo_invocar(unidad_id: String) -> Variant:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.bando != Criatura.Bando.TRIBU or criatura.estado != Criatura.Estado.GUARDADA:
+		return null
+	return _contexto.costos_mana.invocar(criatura.especie, _plantel.maestro)
+
+
 # Sistema.md 11.7 (T25, "la probabilidad se muestra sobre la unidad"): el % de
 # huida que tiraria la unidad si su turno empezara ahora (Huida, la misma cuenta
 # que la tirada); 0 si no tira.
@@ -440,16 +449,14 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	if not resultado.valida:
 		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
 		return resultado
-	# Sistema.md 1.6 y 4.1, D-007 (T22 y T24): el mana que paga un hechizo o un
-	# sellado, justo detras de su `accion`. Se registra sin volcar tiradas: la del
-	# sellado va despues, detras de la que se pago (A.7). Despues, el Martillazo es
-	# un `ataque` normal (es un ataque) y la Lanzadera, el Remiendo y el sellado,
-	# su propio evento.
+	# Sistema.md 1.6, 4.1 y 3.1, D-007 (T22, T24 y T26): el mana que paga un
+	# hechizo, un sellado o una invocacion, justo detras de su `accion`. Se
+	# registra sin volcar tiradas: la del sellado va despues, detras de la que se
+	# pago (A.7). Despues, el Martillazo es un `ataque` normal (es un ataque) y la
+	# Lanzadera, el Remiendo y el sellado, su propio evento.
 	if not resultado.mana.is_empty():
-		var motivo_mana: String = Sellado.MOTIVO_SELLAR if accion.tipo == Accion.Tipo.SELLAR \
-				else Hechizos.MOTIVO_HECHIZO
 		_registrar({"tipo": "mana", "unidad": unidad_id, "de": resultado.mana["de"], "a": resultado.mana["a"],
-				"motivo": motivo_mana}, 0)
+				"motivo": _motivo_mana(accion)}, 0)
 	if accion.tipo == Accion.Tipo.HECHIZO:
 		if resultado.desglose != null:
 			_registrar_ataque(unidad_id, accion.objetivo_id, resultado, vida_antes)
@@ -469,6 +476,12 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 		# Sistema.md 4.1 (T24, A.7): el `sellado`, detras de su `tirada` (se vuelca sola).
 		Accion.Tipo.SELLAR:
 			_registrar(resultado.evento.duplicate(true))
+		# Sistema.md 3.1 (T26, A.7): la invocada pasa a suelta y despues va la
+		# `invocacion`; los destapes por contacto, detras.
+		Accion.Tipo.INVOCAR:
+			_registrar_estados(estados_antes)
+			estados_antes = _estados()
+			_registrar(resultado.evento.duplicate(true))
 	_registrar_eventos_turno()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
@@ -482,7 +495,21 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 		_registrar({"tipo": "fin_turno", "unidad": unidad_id,
 				"posicion": Plantel.casilla_a_lista(_posicion(unidad_id))})
 		_registrar_tras_fin_turno(unidad_id)
+	# Sistema.md 3.1 y S-54 (T26, A.7): guardarse termina el turno. Su fin_turno va
+	# sin posicion (ya no esta en el tablero), asi que no hay encierro que medir.
+	elif accion.tipo == Accion.Tipo.GUARDAR:
+		_registrar({"tipo": "fin_turno", "unidad": unidad_id, "posicion": null})
 	return resultado
+
+
+# D-007: el motivo del evento `mana` que paga la accion.
+func _motivo_mana(accion: Accion) -> String:
+	match accion.tipo:
+		Accion.Tipo.SELLAR:
+			return Sellado.MOTIVO_SELLAR
+		Accion.Tipo.INVOCAR:
+			return CostosMana.MOTIVO_INVOCAR
+	return Hechizos.MOTIVO_HECHIZO
 
 
 # Sistema.md 11.9, metricas 13 y 14 (T23, D-011, A.7): los dos datos que el

@@ -24,6 +24,7 @@ const ACTIVA_CAVAR: String = "cavar"
 const _ACCION_HECHIZO: String = "hechizo"
 # A.7 (T24): el tipo de la accion `sellar` en el registro.
 const _ACCION_SELLAR: String = "sellar"
+const _ACCION_GUARDAR: String = "guardar"
 
 var _combate: Combate
 var _plantel: Plantel
@@ -296,6 +297,12 @@ func suceso(evento: Dictionary) -> Array[String]:
 			# T24: quien sella, antes de su `sellado`.
 			if evento["accion"]["tipo"] == _ACCION_SELLAR:
 				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_SELLAR)])]
+			# T26 (Sistema.md 3.1): la criatura que se guarda, con su hueco.
+			if evento["accion"]["tipo"] == _ACCION_GUARDAR:
+				return [_armador.armar(ClavesTextos.GUARDAR, _hueco(evento["unidad"]), _sujeto(evento["unidad"]))]
+		# T26: la invocada, cuando ya esta en el tablero.
+		"invocacion":
+			return [_armador.armar(ClavesTextos.INVOCAR, _hueco(evento["unidad"]), _sujeto(evento["unidad"]))]
 		"sellado":
 			return [_suceso_sellado(evento)]
 		"huida":
@@ -583,6 +590,40 @@ func boton_sellar() -> Dictionary:
 	var clave_motivo: String = ClavesTextos.motivo_sellar(motivo)
 	return {"texto": texto, "habilitado": motivo == ResultadoAccion.Motivo.NINGUNO,
 			"tooltip": "" if clave_motivo.is_empty() else _armador.armar(clave_motivo)}
+
+
+# T26 (Sistema.md 3.1): el boton Guardar {texto, tooltip}, o {} si la criatura
+# del turno no puede guardarse ahora (Turno.motivo_guardar).
+func boton_guardar() -> Dictionary:
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.motivo_guardar() != ResultadoAccion.Motivo.NINGUNO:
+		return {}
+	return {"texto": _armador.armar(ClavesTextos.ACCION_GUARDAR), "tooltip": _armador.armar(ClavesTextos.GUARDAR_TOOLTIP)}
+
+
+# T26 (Sistema.md 3.1 y 2.3): un boton de invocar por guardada de la tribu
+# (Combate.costo_invocar no nulo), en el orden del Plantel, solo en el turno del
+# Maestro: {criatura, texto (nombre y costo), tooltip (invocar.tooltip y, si no
+# se puede, el motivo de Turno.motivo_invocar), habilitado}.
+func botones_invocar() -> Array[Dictionary]:
+	var botones: Array[Dictionary] = []
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.unidad_id != Maestro.ID:
+		return botones
+	for criatura in _plantel.criaturas():
+		var costo: Variant = _combate.costo_invocar(criatura.id)
+		if costo == null:
+			continue
+		var motivo: ResultadoAccion.Motivo = turno.motivo_invocar(criatura.id)
+		var tooltip: Array[String] = [_armador.armar(ClavesTextos.INVOCAR_TOOLTIP)]
+		var clave_motivo: String = ClavesTextos.motivo_invocar(motivo)
+		if not clave_motivo.is_empty():
+			tooltip.append(_armador.armar(clave_motivo))
+		botones.append({"criatura": criatura.id, "habilitado": motivo == ResultadoAccion.Motivo.NINGUNO,
+				"tooltip": "\n".join(tooltip),
+				"texto": "%s %s (%d %s)" % [_armador.armar(ClavesTextos.ACCION_INVOCAR), nombre(criatura.id),
+						costo as int, _armador.armar(ClavesTextos.PANEL_MANA)]})
+	return botones
 
 
 # T24: lo que haria el sellado sobre la objetivo (Turno.previsualizar_sellar): el %

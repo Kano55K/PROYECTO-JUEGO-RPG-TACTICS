@@ -26,7 +26,8 @@ enum Motivo {
 	MOVER_ENTRE_ATAQUES,
 	# Sistema.md 11.2.1, Costo: se cava sin haberse movido en el turno.
 	YA_SE_MOVIO,
-	# Sistema.md 11.2.1, Donde: ortogonalmente adyacente.
+	# Sistema.md 11.2.1, Donde: ortogonalmente adyacente. T26 (3.1): guardar exige
+	# la criatura junto al Maestro e invocar, la casilla junto al Maestro.
 	CASILLA_NO_ADYACENTE,
 	# Sistema.md 11.3, Casilla libre: fuera del tablero, con unidad o con surco (S-25).
 	CASILLA_NO_LIBRE,
@@ -78,7 +79,8 @@ enum Motivo {
 	MANA_INSUFICIENTE,
 	# Sistema.md 1.6: el hechizo no vale sobre el Maestro mismo (la Lanzadera).
 	OBJETIVO_PROPIO,
-	# Sistema.md 1.6: el Remiendo es para el Maestro o una aliada.
+	# Sistema.md 1.6: el Remiendo es para el Maestro o una aliada. T26: se invoca a
+	# una criatura de la tribu.
 	OBJETIVO_ENEMIGO,
 	# Sistema.md 1.6, casos borde de la Lanzadera: atraer a una unidad adyacente.
 	ATRAER_ADYACENTE,
@@ -95,6 +97,12 @@ enum Motivo {
 	NO_SELLABLE,
 	# Sistema.md 4.1: el rango de la especie pasa el maximo sellable de la balanza.
 	RANGO_ALTO,
+	# Sistema.md 3.1 (T26): se guarda una criatura de la tribu (ni el Maestro ni una enemiga).
+	SOLO_CRIATURA_DE_LA_TRIBU,
+	# Sistema.md 3.1 (T26): solo se invoca a una guardada (no a una suelta, caida o fuera).
+	NO_GUARDADA,
+	# Sistema.md 3.1 (T26): sin ninguna casilla libre junto al Maestro no se invoca.
+	SIN_CASILLA_LIBRE,
 }
 
 var valida: bool
@@ -106,19 +114,20 @@ var desglose: DesgloseDanio = null
 # Solo al atacar (Sistema.md 10.2, T16): el eslabon de la cadena que es (o seria)
 # el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
 var eslabon: Variant = null
-# Solo en un hechizo o un sellado (Sistema.md 1.6 y 4.1, T22 y T24): {de, a} del
-# mana que paga, o {} si no cambia (D-007).
+# Solo en un hechizo, un sellado o una invocacion (Sistema.md 1.6, 4.1 y 3.1;
+# T22, T24 y T26): {de, a} del mana que paga, o {} si no cambia (D-007).
 var mana: Dictionary = {}
 # Solo en un hechizo que no es ataque: el evento de A.7 que produce (`lanzadera`
 # o `remiendo`), con su tipo. Lo mismo al validar y al aplicar. En un sellado
 # (T24), el evento `sellado`, solo al aplicar: la tirada existe solo al aplicar.
+# En una invocacion (T26), el evento `invocacion`.
 var evento: Dictionary = {}
 # Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24): el % que se muestra antes
-# de gastar el mana y el costo. Lo mismo al validar y al aplicar.
+# de gastar el mana y el costo. En una invocacion valida (T26), el costo. Lo mismo al validar y al aplicar.
 var porcentaje: Variant = null
 var costo: int = 0
-# Solo en la Lanzadera: las ocultas que la movida destaparia por contacto al
-# llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
+# Solo en la Lanzadera y en una invocacion (T26): las ocultas que la movida o la
+# invocada destaparia por contacto al llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
 var destaparia: Array[String] = []
 # Solo al terminar: true si el turno se cierra sin haber usado la accion (P-015).
 var espero: bool = false

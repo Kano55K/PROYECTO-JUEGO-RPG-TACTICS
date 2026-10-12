@@ -40,6 +40,8 @@ const _MARCA_OBJETIVO_HECHIZO: Vector2i = _MARCA_CAVAR
 const _MARCA_DESTINO_HECHIZO: Vector2i = _MARCA_DESTINO
 # T24: las objetivos del sellado (la misma marca de "elegir").
 const _MARCA_OBJETIVO_SELLAR: Vector2i = _MARCA_CAVAR
+# T26: las casillas donde se puede invocar (la misma marca de "elegir" que cavar).
+const _MARCA_INVOCAR: Vector2i = _MARCA_CAVAR
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
@@ -60,6 +62,9 @@ const _ACCION_CAMARA_ARRASTRAR: String = "camara_arrastrar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
 const _NOMBRE_BOTON_SECUNDAR: String = "Secundar"
 const _PREFIJO_BOTON_HECHIZO: String = "Hechizo_"
+# T26: el boton Guardar y los de invocar (uno por guardada, con su id).
+const _NOMBRE_BOTON_GUARDAR: String = "Guardar"
+const _PREFIJO_BOTON_INVOCAR: String = "Invocar_"
 const _NOMBRE_BOTON_SELLAR: String = "Sellar"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
@@ -124,6 +129,8 @@ var _hechizo_mostrado: Dictionary = {}
 # una objetivo: {objetivo, porcentaje, costo, previa}, o {}.
 var _sellando: bool = false
 var _sellado_mostrado: Dictionary = {}
+# T26: la guardada cuyo modo "elegir casilla" de invocar esta puesto ("" si ninguna).
+var _invocando: String = ""
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -253,7 +260,7 @@ func clic_casilla(casilla: Vector2i, alterno: bool = false) -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
 	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar,
-			_eligiendo_aliada, _hechizo_elegido, alterno, _sellando)
+			_eligiendo_aliada, _hechizo_elegido, alterno, _sellando, _invocando)
 	if accion == null:
 		return false
 	return _aplicar(accion)
@@ -293,6 +300,12 @@ func sobre_casilla(casilla: Vector2i) -> void:
 			_mostrar_hechizo(turno, foto, casilla)
 		elif _sellando:
 			_mostrar_sellado(turno, foto, casilla)
+		elif not _invocando.is_empty():
+			# T26 (S-24): sobre una casilla donde se puede invocar, el aviso si la
+			# invocada destaparia a una oculta (Turno.previsualizar_invocar).
+			var previa: ResultadoAccion = turno.previsualizar_invocar(_invocando, casilla)
+			if previa.valida and not previa.destaparia.is_empty():
+				_aviso_mostrado = _armador.armar(ClavesTextos.AVISO_DESTAPAR)
 		elif _eligiendo_aliada:
 			# T17: sobre una aliada valida, la cola muestra el orden que quedaria.
 			var aliada: String = InterpreteClic.aliada_en(turno, foto, casilla)
@@ -416,6 +429,7 @@ func pulsar_activa(tipo: String) -> bool:
 			_aliada_previa = ""
 			_hechizo_elegido = ""
 			_sellando = false
+			_invocando = ""
 			redibujar()
 			return true
 	return false
@@ -437,6 +451,7 @@ func pulsar_hechizo(hechizo_id: String) -> bool:
 	_eligiendo_aliada = false
 	_aliada_previa = ""
 	_sellando = false
+	_invocando = ""
 	redibujar()
 	return true
 
@@ -449,6 +464,7 @@ func pulsar_sellar() -> bool:
 	if not _sellando and _combate.turno_actual().motivo_sellar() != ResultadoAccion.Motivo.NINGUNO:
 		return false
 	_sellando = not _sellando
+	_invocando = ""
 	_eligiendo_cavar = false
 	_eligiendo_aliada = false
 	_aliada_previa = ""
@@ -459,6 +475,44 @@ func pulsar_sellar() -> bool:
 
 func eligiendo_sellar() -> bool:
 	return _sellando
+
+
+# T26: el boton Guardar aplica la accion de la criatura del turno.
+func pulsar_guardar() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	return _aplicar(Accion.guardar())
+
+
+# T26: el boton de invocar de una guardada no aplica nada: entra (o sale) del
+# modo "elegir casilla" para ella. Solo si Turno.motivo_invocar lo deja (salir,
+# siempre). Devuelve true si hizo algo.
+func pulsar_invocar(criatura_id: String) -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if _invocando == criatura_id:
+		_invocando = ""
+	elif _combate.turno_actual().motivo_invocar(criatura_id) == ResultadoAccion.Motivo.NINGUNO:
+		_invocando = criatura_id
+	else:
+		return false
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	_sellando = false
+	redibujar()
+	return true
+
+
+# T26: la guardada cuyo modo de invocar esta puesto, o "".
+func invocando() -> String:
+	return _invocando
+
+
+# T26: las casillas marcadas para invocar (las de Turno.casillas_para_invocar).
+func casillas_marcadas() -> Array[Vector2i]:
+	return _marcas.get_used_cells()
 
 
 # T24: lo que se muestra con el mouse sobre una objetivo del sellado
@@ -501,6 +555,7 @@ func pulsar_secundar() -> bool:
 	_eligiendo_cavar = false
 	_hechizo_elegido = ""
 	_sellando = false
+	_invocando = ""
 	_aliada_previa = ""
 	redibujar()
 	return true
@@ -666,6 +721,7 @@ func _aplicar(accion: Accion) -> bool:
 	_aliada_previa = ""
 	_hechizo_elegido = ""
 	_sellando = false
+	_invocando = ""
 	_sellado_mostrado = {}
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
@@ -804,6 +860,11 @@ func _dibujar_marcas() -> void:
 		var foto_sellar: Dictionary = _combate.instantanea()
 		for objetivo in turno.objetivos_para_sellar():
 			_marcas.set_cell(_casilla_de(foto_sellar, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_SELLAR)
+		return
+	# T26: eligiendo donde invocar, solo las de casillas_para_invocar.
+	if not _invocando.is_empty():
+		for casilla in turno.casillas_para_invocar():
+			_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_INVOCAR)
 		return
 	if _eligiendo_cavar:
 		for casilla in turno.casillas_para_cavar():
@@ -958,6 +1019,29 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		boton_sellar.pressed.connect(pulsar_sellar)
 		_botones.add_child(boton_sellar)
 		_botones.move_child(boton_sellar, _boton_terminar.get_index())
+	# T26: Guardar, solo si la criatura del turno puede guardarse ahora.
+	var datos_guardar: Dictionary = lectura.boton_guardar()
+	if not datos_guardar.is_empty():
+		var boton_guardar: Button = Button.new()
+		boton_guardar.name = _NOMBRE_BOTON_GUARDAR
+		boton_guardar.text = datos_guardar["texto"]
+		boton_guardar.tooltip_text = datos_guardar["tooltip"]
+		boton_guardar.pressed.connect(pulsar_guardar)
+		_botones.add_child(boton_guardar)
+		_botones.move_child(boton_guardar, _boton_terminar.get_index())
+	# T26: uno por guardada, en el turno del Maestro (LecturaCombate.botones_invocar).
+	for datos_invocar in lectura.botones_invocar():
+		var id_criatura: String = datos_invocar["criatura"]
+		var boton_invocar: Button = Button.new()
+		boton_invocar.name = _PREFIJO_BOTON_INVOCAR + id_criatura
+		boton_invocar.text = datos_invocar["texto"]
+		boton_invocar.tooltip_text = datos_invocar["tooltip"]
+		boton_invocar.disabled = not datos_invocar["habilitado"] and _invocando != id_criatura
+		boton_invocar.toggle_mode = true
+		boton_invocar.button_pressed = _invocando == id_criatura
+		boton_invocar.pressed.connect(pulsar_invocar.bind(id_criatura))
+		_botones.add_child(boton_invocar)
+		_botones.move_child(boton_invocar, _boton_terminar.get_index())
 	var datos_secundar: Dictionary = lectura.boton_secundar()
 	if not datos_secundar.is_empty():
 		var boton_secundar: Button = Button.new()

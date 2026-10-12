@@ -3,14 +3,16 @@
 class_name Accion
 extends RefCounted
 
-# Guardar, invocar y huir son tipos nuevos en T26 a T28. SELLAR (T24): el Maestro
-# sella a una salvaje (Sistema.md 4.1).
+# Huir es un tipo nuevo en T28. SELLAR (T24): el Maestro sella a una salvaje
+# (Sistema.md 4.1). GUARDAR e INVOCAR (T26, Sistema.md 3.1): la criatura se
+# guarda en su pergamino; el Maestro invoca a una guardada.
 # HECHIZO (T22): un solo tipo para todos; el hechizo es un parametro (su id de
 # hechizos.json), asi la pantalla los arma desde los datos.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR }
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR, GUARDAR, INVOCAR }
 
 var tipo: Tipo
-# Para MOVER, la casilla de destino; para CAVAR, la del surco.
+# Para MOVER, la casilla de destino; para CAVAR, la del surco; para INVOCAR,
+# donde aparece la invocada.
 var casilla: Vector2i = Criatura.SIN_POSICION
 # Para ATACAR, HECHIZO y SELLAR: el id de la unidad objetivo.
 var objetivo_id: String = ""
@@ -20,6 +22,8 @@ var hechizo_id: String = ""
 var sentido: String = ""
 # Solo para SECUNDAR: el id de la aliada detras de la que va a actuar.
 var aliado_id: String = ""
+# Solo para INVOCAR: el id de la criatura guardada.
+var criatura_id: String = ""
 
 
 func _init(tipo_accion: Tipo) -> void:
@@ -79,6 +83,19 @@ static func sellar(id_objetivo: String) -> Accion:
 	return accion
 
 
+# Sistema.md 3.1 (T26): la criatura del turno se guarda en su pergamino.
+static func guardar() -> Accion:
+	return Accion.new(Tipo.GUARDAR)
+
+
+# Sistema.md 3.1 (T26): el Maestro invoca a la guardada `id_criatura` en `casilla_invocar`.
+static func invocar(id_criatura: String, casilla_invocar: Vector2i) -> Accion:
+	var accion: Accion = Accion.new(Tipo.INVOCAR)
+	accion.criatura_id = id_criatura
+	accion.casilla = casilla_invocar
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -95,6 +112,9 @@ func a_diccionario() -> Dictionary:
 			resultado["objetivo"] = objetivo_id
 		Tipo.SECUNDAR:
 			resultado["aliado"] = aliado_id
+		Tipo.INVOCAR:
+			resultado["criatura"] = criatura_id
+			resultado["casilla"] = [casilla.x, casilla.y]
 		Tipo.HECHIZO:
 			resultado["hechizo"] = hechizo_id
 			resultado["objetivo"] = objetivo_id
@@ -132,6 +152,11 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 			if datos.size() != 2 or not datos.get("aliado") is String:
 				return null
 			return secundar(datos["aliado"])
+		Tipo.INVOCAR:
+			if datos.size() != 3 or not datos.get("criatura") is String or not _es_casilla(datos.get("casilla")):
+				return null
+			var lugar: Array = datos["casilla"]
+			return invocar(datos["criatura"], Vector2i(int(lugar[0]), int(lugar[1])))
 		Tipo.HECHIZO:
 			var con_sentido: bool = datos.has("sentido")
 			if datos.size() != (4 if con_sentido else 3) or not datos.get("hechizo") is String \
@@ -155,7 +180,7 @@ static func _es_casilla(valor: Variant) -> bool:
 	return true
 
 
-# Sistema.md 11.3: invocar, huir y cavar un surco gastan el turno completo. Los
-# tipos de T26 a T28 se suman aca.
+# Sistema.md 11.3 y 3.1: invocar, huir y cavar un surco gastan el turno
+# completo. Huir (T28) se suma aca.
 func gasta_turno_completo() -> bool:
-	return tipo == Tipo.CAVAR
+	return tipo == Tipo.CAVAR or tipo == Tipo.INVOCAR
