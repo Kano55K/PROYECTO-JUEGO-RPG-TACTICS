@@ -620,7 +620,7 @@
 - **Cerrada en:** T24
 
 ## P-044 — Los tests de mouse fallan por el tamaño de la ventana, no por eventos reales: ¿qué arreglo se toma?
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T24-ajustes
 - **Fecha:** 11/10/2026
@@ -639,4 +639,9 @@
   - Recomendación técnica: A, con el filtro de device.
 - **Bloquea:** sí — no se puede cerrar T24-ajustes: el arreglo que pide la tarea (A o B) no corrige la causa.
 - **Mientras tanto:** se paró antes de dejar cambios. La opción B quedó guardada en `git stash` ("T24-ajustes: opcion B (costura de device), en pausa por P-044"): filtro en `VistaCombate._input` (`dispositivo_mouse`, `DISPOSITIVO_CUALQUIERA`), `pruebas/pantalla/mouse_prueba.gd` (`MousePrueba`), los 4 ayudantes y `test_vista_dispositivo_mouse.gd`. El código de la rama está igual que `develop`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (Arquitecto, 11/10/2026): se toman las dos partes de la recomendación (D-012):
+
+MousePrueba pasa la posición a coordenadas de ventana con get_viewport().get_final_transform(), en el mismo momento de mandar el evento, y lo marca con su propio device. Todo test de mouse pasa por MousePrueba.
+VistaCombate acepta solo el device de dispositivo_mouse; por defecto acepta cualquiera, así que el juego no cambia.
+El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4 no transporta los eventos; fijar el tamaño de la ventana o esperar a que se restaure, porque suma esperas; y cualquiera de las dos partes sola. Se cierra en la sesión 2.
+- **Cerrada en:** T24-ajustes

@@ -6,7 +6,7 @@ extends GdUnitTestSuite
 # Fixtures (A.6): escenario_hechizos_combate.json: la Rodauva [2,6] juega
 # primero (el test la hace terminar); el Maestro [3,6] tiene al Surcon salvaje
 # [3,3] a 3. Hechizos de prueba (escala vieja, D-009). Sistema.md 1.6 y 2.3.
-# D-006: el mouse se manda como evento (parse_input_event + flush), sin
+# D-006 y D-012: el mouse se manda por MousePrueba (parse_input_event + flush), sin
 # warp_mouse y sin await entre el evento y la comprobacion.
 const _ESCENA: String = "res://pantalla/combate/vista_combate.tscn"
 const _ESCENARIO: String = "res://pruebas/fixtures/combate/escenario_hechizos_combate.json"
@@ -35,6 +35,7 @@ func _vista(datos: Dictionary) -> GdUnitSceneRunner:
 	var escenario: Dictionary = LectorFixture.leer(_ESCENARIO, "escenario")["datos"]
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
 	(runner.scene() as VistaCombate).pausa_ia = 0.0
+	MousePrueba.preparar(runner.scene() as VistaCombate)
 	(runner.scene() as VistaCombate).empezar(escenario, datos)
 	return runner
 
@@ -78,32 +79,6 @@ func _ultimo(vista: VistaCombate, tipo: String) -> Dictionary:
 func _en_pantalla(vista: VistaCombate, casilla: Vector2i) -> Vector2:
 	var tablero: TileMapLayer = vista.tablero()
 	return tablero.get_viewport().get_canvas_transform() * tablero.to_global(tablero.map_to_local(casilla))
-
-
-func _mandar(evento: InputEvent) -> void:
-	Input.parse_input_event(evento)
-	Input.flush_buffered_events()
-
-
-func _mover_a(posicion: Vector2) -> void:
-	var evento: InputEventMouseMotion = InputEventMouseMotion.new()
-	evento.position = posicion
-	evento.global_position = posicion
-	_mandar(evento)
-
-
-func _clic_en(posicion: Vector2, boton: MouseButton, mascara: int) -> void:
-	var evento: InputEventMouseButton = InputEventMouseButton.new()
-	evento.button_index = boton
-	evento.button_mask = mascara
-	evento.position = posicion
-	evento.global_position = posicion
-	evento.pressed = true
-	_mandar(evento)
-	var suelto: InputEventMouseButton = evento.duplicate()
-	suelto.button_mask = 0
-	suelto.pressed = false
-	_mandar(suelto)
 
 
 # (1) Con el fixture de otro id, su boton sale de los datos con su costo y su
@@ -209,7 +184,7 @@ func test_hover_y_clics_de_la_lanzadera() -> void:
 	assert_bool(vista.clic_casilla(Vector2i(3, 5))).is_true()
 	assert_bool(vista.pulsar_hechizo("lanzadera")).is_true()
 	var posicion: Vector2 = _en_pantalla(vista, _SURCON)
-	_mover_a(posicion)
+	MousePrueba.mover_a(posicion)
 	assert_vector(vista.casilla_bajo_mouse()).is_equal(_SURCON)
 	var mostrado: Dictionary = vista.hechizo_mostrado()
 	assert_array(mostrado.keys()).is_equal(["empujar", "atraer"])
@@ -217,7 +192,7 @@ func test_hover_y_clics_de_la_lanzadera() -> void:
 	var destinos: TileMapLayer = runner.find_child("DestinosHechizo")
 	assert_vector(destinos.get_cell_atlas_coords(Vector2i(3, 4))).is_equal(_MARCA_DESTINO)
 	# Clic derecho: atrae.
-	_clic_en(posicion, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MASK_RIGHT)
+	MousePrueba.clic_en(posicion, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MASK_RIGHT)
 	var evento: Dictionary = _ultimo(vista, "lanzadera")
 	assert_str(evento["sentido"]).is_equal("atraer")
 	assert_dict(mostrado["atraer"]["evento"]).is_equal(evento)
@@ -253,12 +228,12 @@ func test_clic_derecho_fuera_del_modo() -> void:
 	_hasta_el_maestro(vista)
 	var lineas: int = vista.combate().registro().lineas().size()
 	var posicion: Vector2 = _en_pantalla(vista, Vector2i(3, 5))
-	_mover_a(posicion)
-	_clic_en(posicion, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MASK_RIGHT)
+	MousePrueba.mover_a(posicion)
+	MousePrueba.clic_en(posicion, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MASK_RIGHT)
 	assert_int(vista.combate().registro().lineas().size()).is_equal(lineas)
 	assert_vector(_casilla_de(vista, Maestro.ID)).is_equal(Vector2i(3, 6))
 	# El izquierdo, en cambio, mueve.
-	_clic_en(posicion, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MASK_LEFT)
+	MousePrueba.clic_en(posicion, MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MASK_LEFT)
 	assert_vector(_casilla_de(vista, Maestro.ID)).is_equal(Vector2i(3, 5))
 
 

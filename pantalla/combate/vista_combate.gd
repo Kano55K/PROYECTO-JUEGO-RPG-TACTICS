@@ -70,6 +70,10 @@ const _COLOR_ACTUAL: Color = Color(1.0, 0.85, 0.3)
 const _COLOR_ACTUO: Color = Color(0.6, 0.6, 0.6)
 const _COLOR_PENDIENTE: Color = Color(1, 1, 1)
 const _MARCA_ACTUAL: String = "> "
+# T24-ajustes (D-012): valor de dispositivo_mouse que acepta el mouse de
+# cualquier device. Fuera de los ids que usa Godot (0 en adelante, y -1 para la
+# emulacion desde toque).
+const DISPOSITIVO_CUALQUIERA: int = -1000
 
 # T40, sesion 2: segundos entre los pasos de la IA. Es presentacion, no un dato
 # de balance; con 0 no se anima (los tests la ponen en 0).
@@ -83,6 +87,10 @@ const _MARCA_ACTUAL: String = "> "
 @export var paso_zoom: float = 0.25
 @export var velocidad_camara: float = 600.0
 @export var margen: float = 64.0
+# T24-ajustes (D-012): de que device se acepta el mouse. El juego acepta
+# cualquiera; los tests ponen el suyo (MousePrueba) para que el cursor real de
+# la maquina no pise sus eventos.
+@export var dispositivo_mouse: int = DISPOSITIVO_CUALQUIERA
 
 var _combate: Combate = null
 var _armador: ArmadorTextos = null
@@ -583,7 +591,14 @@ func _unhandled_input(event: InputEvent) -> void:
 # D-006: la posicion del mouse sale del ultimo evento, nunca del cursor del
 # sistema. Se guarda en _input (antes que _unhandled_input y tambien si un
 # Control se queda con el evento); no se marca como manejado.
+# T24-ajustes (D-012): el unico filtro de device. Un mouse de otro device se
+# marca como manejado: no guarda posicion ni llega a los botones ni a
+# _unhandled_input (clic, hover, arrastre).
 func _input(event: InputEvent) -> void:
+	if event is InputEventMouse and dispositivo_mouse != DISPOSITIVO_CUALQUIERA \
+			and event.device != dispositivo_mouse:
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouse:
 		_posicion_mouse = (event as InputEventMouse).position
 		_hay_mouse = true

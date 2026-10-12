@@ -103,14 +103,16 @@ func test_clic_del_mouse_llega_al_tablero() -> void:
 	var runner: GdUnitSceneRunner = _principal("res://datos")
 	await runner.simulate_frames(1)
 	var vista: VistaCombate = (runner.scene() as Principal).abrir_escenario("a_dia_1")
+	MousePrueba.preparar(vista)
 	await runner.simulate_frames(2)
 	var turno: Turno = vista.combate().turno_actual()
 	assert_bool(turno.movimiento_usado).is_false()
 	var casillas: Array[Vector2i] = turno.casillas_para_mover()
 	assert_array(casillas).is_not_empty()
-	# D-006: eventos con su position, sin el cursor del sistema.
-	_mover_a(_en_pantalla(vista, casillas[0]))
-	_clic_en(_en_pantalla(vista, casillas[0]))
+	# D-006: eventos con su position, sin el cursor del sistema (D-012: por
+	# MousePrueba).
+	MousePrueba.mover_a(_en_pantalla(vista, casillas[0]))
+	MousePrueba.clic_en(_en_pantalla(vista, casillas[0]))
 	assert_bool(vista.combate().turno_actual().movimiento_usado).is_true()
 	assert_object(vista.combate().turno_actual()).is_same(turno)
 
@@ -148,34 +150,6 @@ func test_recargar_corta_la_secuencia_de_la_ia() -> void:
 func _en_pantalla(vista: VistaCombate, casilla: Vector2i) -> Vector2:
 	var tablero: TileMapLayer = vista.tablero()
 	return tablero.get_viewport().get_canvas_transform() * tablero.to_global(tablero.map_to_local(casilla))
-
-
-# D-006 (T20-ajustes): el mouse se manda como evento con su position, sin mover
-# el cursor del sistema; el flush lo despacha en el momento.
-func _mandar(evento: InputEvent) -> void:
-	Input.parse_input_event(evento)
-	Input.flush_buffered_events()
-
-
-func _mover_a(posicion: Vector2) -> void:
-	var evento: InputEventMouseMotion = InputEventMouseMotion.new()
-	evento.position = posicion
-	evento.global_position = posicion
-	_mandar(evento)
-
-
-func _clic_en(posicion: Vector2) -> void:
-	var evento: InputEventMouseButton = InputEventMouseButton.new()
-	evento.button_index = MOUSE_BUTTON_LEFT
-	evento.button_mask = MOUSE_BUTTON_MASK_LEFT
-	evento.position = posicion
-	evento.global_position = posicion
-	evento.pressed = true
-	_mandar(evento)
-	var suelto: InputEventMouseButton = evento.duplicate()
-	suelto.button_mask = 0
-	suelto.pressed = false
-	_mandar(suelto)
 
 
 func _copiar_carpeta(origen: String, destino: String) -> void:
