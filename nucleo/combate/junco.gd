@@ -52,9 +52,17 @@ static func revisar_contacto(movida_id: String, plantel: Plantel) -> Array[Dicti
 # del otro bando que `movida_id` destaparia si terminara su movimiento en
 # `casilla`, en el orden del Plantel. No modifica nada.
 static func destaparia(movida_id: String, casilla: Vector2i, plantel: Plantel) -> Array[String]:
-	var ids: Array[String] = []
 	if not Objetivos.de_pie(movida_id, plantel):
-		return ids
+		var ninguna: Array[String] = []
+		return ninguna
+	return destaparia_al_entrar(movida_id, casilla, plantel)
+
+
+# T26 (S-24): la misma regla para una unidad que todavia no esta de pie en el
+# tablero y va a entrar en `casilla` (la guardada que se invoca), sin mirar si
+# esta de pie. No modifica nada.
+static func destaparia_al_entrar(movida_id: String, casilla: Vector2i, plantel: Plantel) -> Array[String]:
+	var ids: Array[String] = []
 	var bando: Criatura.Bando = _bando(movida_id, plantel)
 	for criatura in plantel.criaturas():
 		if criatura.oculta and criatura.bando != bando and Tablero.distancia(criatura.posicion, casilla) == 1:

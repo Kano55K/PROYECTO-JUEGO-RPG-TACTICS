@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "guardar",
+  "_nota": "Sistema.md 3.1, 2.3, 11.2.1, 11.2.2, 11.3 y 10.3 (tests de T26, turnos sueltos). Balanza 2 (reserva 8, descuento 0): invocar cuesta 2 / 3 / 4 por rango. El Maestro en [5,6]; la tribu suelta estacionada en la fila 11 y las enemigas en la fila 0, sin vecinas entre si: cada test acomoda a las que usa. Dos guardadas sin posicion (Rodauva, rango 1, y Surcon, rango 2). Rodauva-Rodauva se llevan bien (10.8, afinidad); Rodauva-Ocarra y Rodauva-Zancajunco sin relacion",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 11] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 11] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 11] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [8, 11] },
+    { "id": "rodauva_g", "especie": "rodauva", "estado": "guardada", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null },
+    { "id": "surcon_g", "especie": "surcon", "estado": "guardada", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] },
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [4, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

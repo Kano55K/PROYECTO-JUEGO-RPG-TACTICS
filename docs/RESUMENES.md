@@ -2503,3 +2503,61 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   6. Abrir el `_resultado.json` más nuevo de `registros/`: `metricas.capturas_perdidas` con la que huyó (`huida`) o la que llegó a 0 (`cero`); las selladas no aparecen.
   7. Anotar los `[FALTA]` que aparezcan.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+
+## T26 · sesión 1 · 12/10/2026
+- **Rama:** tarea/T26-guardar-invocar
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Costo de maná en un solo lugar:** regla `CostosMana` (`nucleo/combate/costos_mana.gd`, sin estado) con `sellar(especie, maestro)` e `invocar(especie, maestro)`, las dos por `max(mínimo, costo del rango − descuento)` (`Sistema.md` 2.3). Está en `ReglasCombate` (campo, `_init`, `REGLAS`), `ContextoCombate.armar` (+ `contexto.costos_mana`) y `DatosFixture.reglas` / `DatosFixture.costos_mana`. `Sellado.desde_datos` recibe la misma instancia y `Sellado.costo` delega: sellar no cambió de comportamiento y `test_sellado.gd` no se tocó.
+  - **Guardar** (`Accion.guardar()`): un solo chequeo, `Turno._motivo_guardar` (turno terminado → `SOLO_CRIATURA_DE_LA_TRIBU` → `ENCONADA` → `ACCION_USADA` → `CASILLA_NO_ADYACENTE`). La acobardada puede. Efecto en `Turno._dejar_guardada`: `guardada`, sin posición, pergamino ocupado, `Surcos.cerrar_de`, pierde erizada, oculta, bono y el límite del junco; conserva vida, hambre, lealtad, enfermedades, Encono y modo. Termina el turno.
+  - **Invocar** (`Accion.invocar(criatura_id, casilla)`): un solo chequeo, `Turno._motivo_invocar(id, casilla = SIN_POSICION)` (turno terminado → `SOLO_MAESTRO` → `ACCION_USADA` → `YA_SE_MOVIO` → `OBJETIVO_INEXISTENTE` / `OBJETIVO_ENEMIGO` / `NO_GUARDADA` → `SIN_CASILLA_LIBRE` → `MANA_INSUFICIENTE` → `CASILLA_NO_ADYACENTE` / `CASILLA_NO_LIBRE`). Paga, queda suelta en la casilla, `Junco.revisar_contacto` y gasta el turno completo (después solo `terminar`, que no es esperar). Entra en la cola desde la ronda siguiente sin código nuevo en la cola.
+  - **Motivos:** nuevos `SOLO_CRIATURA_DE_LA_TRIBU`, `NO_GUARDADA` y `SIN_CASILLA_LIBRE`. Reusados: `TURNO_TERMINADO`, `ENCONADA`, `ACCION_USADA`, `CASILLA_NO_ADYACENTE`, `SOLO_MAESTRO`, `YA_SE_MOVIO`, `OBJETIVO_INEXISTENTE`, `OBJETIVO_ENEMIGO`, `MANA_INSUFICIENTE` y `CASILLA_NO_LIBRE`.
+  - **Consultas** (D-005): `motivo_guardar()`, `guardadas_para_invocar()`, `casillas_para_invocar()`, `motivo_invocar(id)`, `previsualizar_invocar(id, casilla)` y `Combate.costo_invocar(id)`. Para las ocultas que destaparía una invocada, `Junco.destaparia_al_entrar` (la regla de `destaparia` sin pedir que esté de pie; `destaparia` la usa).
+  - **Registro** (A.7): guardar → `accion`, `estado`, `surco_cerrado`, `fin_turno` con `posicion: null`; invocar → `accion`, `mana` (motivo `invocar`, D-007), `estado`, `invocacion` (`unidad`, `casilla`), `destape`. Ningún evento existente cambió.
+  - **Grabación:** tipos `guardar` e `invocar` (`criatura`, `casilla`) en `datos/_esquemas/grabacion.schema.json`, con ida y vuelta en `Accion`.
+  - **Pantalla:** botón `Guardar` (solo si `motivo_guardar` lo deja, tooltip `guardar.tooltip`); en el turno del Maestro, botones `Invocar_<id>` con nombre y costo, deshabilitados con su motivo y `invocar.tooltip`; modo "elegir casilla" con las casillas de la consulta, excluyente con cavar, Secundar, hechizos y sellar; aviso de destapar en el hover; clic izquierdo por `InterpreteClic`; sucesos `guardar` e `invocar`.
+- **Archivos:**
+  - Creados: `nucleo/combate/costos_mana.gd`; `pruebas/combate/mesa_guardar.gd`, `test_costos_mana.gd`, `test_guardar.gd`, `test_invocar.gd`, `test_guardar_invocar_combate.gd`; `pruebas/pantalla/test_lectura_guardar_invocar.gd`, `test_vista_guardar_invocar.gd`; `pruebas/datos/test_invocar_a.gd`; `pruebas/fixtures/combate/escenario_guardar.json` y `escenario_guardar_invocar_combate.json`.
+  - Modificados: `nucleo/combate/accion.gd`, `combate.gd`, `contexto_combate.gd`, `junco.gd`, `reglas_combate.gd`, `resultado_accion.gd`, `sellado.gd`, `turno.gd` y `cierre.gd` (solo un comentario); `pantalla/claves_textos.gd`, `pantalla/combate/interprete_clic.gd`, `lectura_combate.gd` y `vista_combate.gd`; `datos/_esquemas/grabacion.schema.json`; `pruebas/combate/datos_fixture.gd` y `test_reglas_combate.gd`; `CLAUDE.md` y `docs/RESUMENES.md`.
+- **Tests:** 47 nuevos, total 712, todos pasan (suite completa).
+  - `test_costos_mana.gd` (3), `test_guardar.gd` (14), `test_invocar.gd` (11), `test_guardar_invocar_combate.gd` (9), `test_invocar_a.gd` (1), `test_lectura_guardar_invocar.gd` (3) y `test_vista_guardar_invocar.gd` (6).
+- **Tests viejos reescritos:** solo `test_reglas_combate.gd::_armar`: el constructor de `ReglasCombate` suma `costos_mana` (D-008). Sin cambios de aserciones. `DatosFixture.sellado` arma el `CostosMana` del fixture que le pidan (ayudante, no test).
+- **Criterio de terminado:** cumplido.
+  1. Costo por rango con balanza 2, 3 y 5 y el mínimo: `test_costos_mana.gd`; `test_sellado.gd` pasa sin cambios.
+  2. Guardar junto al Maestro, también después de moverse: `test_guardar_junto_al_maestro` y `test_guardar_despues_de_moverse`.
+  3. Rechazos sin cambios (diagonal, distancia 2, después de atacar, enconada, distraída, salvaje y Maestro) y la acobardada vale: `test_guardar.gd`.
+  4. Efectos (afinidad en el acto, surcos, oculta, erizada, lo que conserva): `test_guardar.gd`. Además, `test_no_toca_la_cadena`.
+  5. Invocar con el turno sin usar y lo que se rechaza después: `test_invocar_con_el_turno_sin_usar`.
+  6. Rechazos de invocar: `test_con_el_turno_usado_no`, `test_casillas_que_no_valen`, `test_maestro_rodeado`, `test_mana_insuficiente`, `test_criaturas_que_no_se_invocan` y `test_una_criatura_no_invoca`.
+  7. Ronda de entrada y S-56: `test_ronda_de_entrada`, `test_guardada_en_la_ronda_se_invoca_en_la_misma` y `test_guardada_en_este_combate`.
+  8. Destape por contacto: `test_destapa_por_contacto`.
+  9. Hambre de combate: `test_hambre_de_combate` (turnos sueltos y dentro del `Combate`).
+  10. Cierre: `test_cierre_victoria` y `test_cierre_derrota`.
+  11. Registro y grabación: `test_registro_en_el_orden_de_a7`, `test_surco_cerrado_en_el_registro`, `test_grabacion_se_reproduce_igual` y `test_accion_ida_y_vuelta`.
+  12. Consultas = validar = aplicar: `test_consultas_igual_que_validar_y_aplicar` y `test_consulta_de_guardar_igual_que_validar`.
+  13. `datos/` real: `test_invocar_a.gd`; pasan el permanente, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios`, `test_sellar_a` y `test_lanzadera_b`.
+  14. Pantalla: `test_lectura_guardar_invocar.gd` y `test_vista_guardar_invocar.gd` (mouse por `MousePrueba`, D-012).
+  15. Suite completa: 712 tests, todos pasan.
+- **Consola:** sin errores ni advertencias nuevas. Los `ERROR: ReglasCombate: falta la regla …` son los que provocan a propósito `test_reglas_combate.gd` (ahora también `costos_mana`, porque recorre `REGLAS`), `test_sellado.gd` y el test de hechizos, y los dos del `Remote Debugger` son del arranque del runner.
+- **Supuestos y lecturas técnicas:**
+  - En A, el turno siguiente del Maestro después de que la Rodauva se guarda es de la ronda 1 (Velocidad 6 > 5). `Arquitectura.md` B.4 dice "en la ronda siguiente" y el prompt "en su turno siguiente": el test invoca en la ronda 1 (S-56) y comprueba que la Rodauva juega en la 2.
+  - `test_erizada_pierde_la_marca` pone la marca a mano: hoy ninguna regla deja a una criatura erizada al guardarse (el inicio de su turno la borra). Cubre el efecto que T27 va a reusar.
+  - Si el contexto no tiene `tablas/costos_mana.json`, la regla que falta se informa como `sellado` (va antes en `REGLAS` y también depende de los costos).
+  - `test_hover_avisa_destapar` oculta y mueve al Surcón salvaje a mano para tener una oculta junto a la casilla: prueba que la pantalla muestra lo que dice `previsualizar_invocar`.
+- **Lecturas declaradas:** S-53 (invocar solo con el turno sin usar), S-54 (guardar: puede moverse antes, termina el turno, no la enconada ni la distraída, sí la acobardada), S-55 (qué conserva la guardada) y S-56 (guardar e invocar en la misma ronda), todas en `Arquitectura.md` 10.5.
+- **Claves de texto nuevas sin texto:** `aviso.invocar.ya_se_movio`, `aviso.invocar.accion_usada`, `aviso.invocar.mana_insuficiente` y `aviso.invocar.sin_casilla_libre` (tooltip del botón de invocar deshabilitado; se ve `[FALTA: …]`). Las demás (`accion.guardar`, `accion.invocar`, `guardar`, `guardar.tooltip`, `invocar`, `invocar.tooltip`) ya están en `es.json`.
+- **Preguntas:** ninguna nueva; ninguna cerrada.
+- **Prueba manual (Windows):**
+  1. Suite completa, en verde (unos 15 minutos):
+     - `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas`
+     - PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`
+  2. Abrir el juego: F5 en el editor, o `"%GODOT_BIN%" --path .` (`cmd`) / `& $env:GODOT_BIN --path .` (PowerShell). Elegir A.
+  3. En el turno de la Rodauva (empieza al este del Maestro) aparece el botón Guardar. Si se mueve a una casilla en diagonal del Maestro, el botón desaparece. Apretarlo: la Rodauva sale del tablero y el suceso dice el texto de `guardar`.
+  4. En el turno siguiente del Maestro, sin moverlo: aparece el botón para invocar a la Rodauva con su costo (2 Maná). Apretarlo: se marcan solo las casillas libres a los lados del Maestro. Clic en una: la Rodauva aparece ahí, el maná baja 2 y el suceso dice el texto de `invocar`.
+  5. Mirar la cola: la Rodauva no juega en esa ronda y sí en la siguiente.
+  6. Mover al Maestro antes de invocar: el botón de invocar queda deshabilitado, con `[FALTA: aviso.invocar.ya_se_movio]` en el tooltip.
+  7. En E, cavar con el Surcón en un turno y, en su turno siguiente, guardarlo (empieza al lado del Maestro): sus surcos desaparecen.
+  8. Al terminar A con la Rodauva invocada, en la pantalla de resultado recibe el +1 de victoria.
+  9. Anotar los `[FALTA]` que aparezcan.
+- **Para la próxima sesión:** nada: tarea terminada.

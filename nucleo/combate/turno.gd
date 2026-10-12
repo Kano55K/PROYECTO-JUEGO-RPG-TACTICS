@@ -104,6 +104,8 @@ var _hechizos: Hechizos
 var _sellado: Sellado
 # La regla de la huida de las salvajes (T25), como _sellado.
 var _huida: Huida
+# Los costos de mana con descuento (T26: invocar), como _sellado.
+var _costos: CostosMana
 var _azar: GeneradorAzar
 
 
@@ -124,6 +126,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Sur
 	_hechizos = reglas.hechizos
 	_sellado = reglas.sellado
 	_huida = reglas.huida
+	_costos = reglas.costos_mana
 	_azar = azar
 
 
@@ -387,6 +390,44 @@ func previsualizar_sellar(objetivo_id: String) -> ResultadoAccion:
 	return validar(Accion.sellar(objetivo_id))
 
 
+# Sistema.md 3.1 (T26, D-005): por que la criatura del turno no puede guardarse
+# ahora, con el mismo chequeo que la accion. NINGUNO si puede.
+func motivo_guardar() -> ResultadoAccion.Motivo:
+	return _motivo_guardar()
+
+
+# Sistema.md 3.1 (T26, D-005): las guardadas que el Maestro puede invocar ahora
+# (en alguna casilla), en el orden del Plantel.
+func guardadas_para_invocar() -> Array[String]:
+	var resultado: Array[String] = []
+	for criatura in _plantel.criaturas():
+		if _motivo_invocar(criatura.id) == ResultadoAccion.Motivo.NINGUNO:
+			resultado.append(criatura.id)
+	return resultado
+
+
+# Sistema.md 3.1 y 11.3 (T26, D-005): las casillas donde el Maestro puede invocar
+# ahora, en orden de lectura: las que pasan la parte del chequeo que mira la
+# casilla. [] si el Maestro no puede invocar en este turno.
+func casillas_para_invocar() -> Array[Vector2i]:
+	var resultado: Array[Vector2i] = []
+	if _motivo_puede_invocar() != ResultadoAccion.Motivo.NINGUNO:
+		return resultado
+	return _casillas_libres_junto_al_maestro()
+
+
+# T26 (calcular sin aplicar): por que el Maestro no puede invocar ahora a la
+# criatura, con el mismo chequeo que la accion, sin mirar la casilla. NINGUNO si puede.
+func motivo_invocar(criatura_id: String) -> ResultadoAccion.Motivo:
+	return _motivo_invocar(criatura_id)
+
+
+# Calcular sin aplicar (A.6, D-005): lo mismo que validar la invocacion. Trae el
+# costo, el mana, las ocultas que destaparia y el evento; el motivo si no vale.
+func previsualizar_invocar(criatura_id: String, casilla: Vector2i) -> ResultadoAccion:
+	return validar(Accion.invocar(criatura_id, casilla))
+
+
 # Sistema.md 11.3, Inicio del turno. Primero se borra la marca de erizada: dura
 # hasta el inicio de su proximo turno (11.2, S-15). Despues van los chequeos de
 # 11.3, en este orden:
@@ -590,6 +631,10 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _hechizo(accion, aplica)
 		Accion.Tipo.SELLAR:
 			resultado = _sellar(accion.objetivo_id, aplica)
+		Accion.Tipo.GUARDAR:
+			resultado = _guardar(aplica)
+		Accion.Tipo.INVOCAR:
+			resultado = _invocar(accion.criatura_id, accion.casilla, aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -1152,6 +1197,142 @@ func _motivo_puede_sellar() -> ResultadoAccion.Motivo:
 	if _plantel.pergamino_en_blanco() == null:
 		return ResultadoAccion.Motivo.SIN_PERGAMINO
 	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Sistema.md 3.1 (T26) y S-54: la criatura se guarda en su pergamino. Gasta su
+# accion (puede haberse movido antes) y termina su turno: ya no esta en el
+# tablero. No cuesta mana y no es un ataque: no toca la cadena, el Encono ni el bono.
+func _guardar(aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_guardar()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	if aplica:
+		_dejar_guardada(_plantel.criatura(unidad_id))
+		accion_usada = true
+		ataques_restantes = 0
+		_gastar_pasos(pasos_restantes)
+		terminado = true
+		_fin_del_turno()
+	return ResultadoAccion.aceptada()
+
+
+# Sistema.md 3.1 (T26): el unico chequeo de guardar, compartido por la accion y la
+# consulta, en este orden: turno terminado, una criatura de la tribu, no enconada
+# (su obligacion, 10.5), la accion sin usar (la distraida ya la perdio, 10.4) y
+# ortogonalmente adyacente al Maestro en este momento (11.3). La acobardada puede
+# (S-54).
+func _motivo_guardar() -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if unidad_id == Maestro.ID or _bando(unidad_id) != Criatura.Bando.TRIBU:
+		return ResultadoAccion.Motivo.SOLO_CRIATURA_DE_LA_TRIBU
+	if enconada:
+		return ResultadoAccion.Motivo.ENCONADA
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	if not _tablero.adyacentes(_posicion(unidad_id), _plantel.maestro.posicion):
+		return ResultadoAccion.Motivo.CASILLA_NO_ADYACENTE
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Sistema.md 3.1 y S-55: la criatura deja el tablero guardada, con su pergamino
+# ocupado. Sus surcos se cierran (11.2.1) y pierde las marcas que solo existen en
+# el tablero (erizada, oculta, bono de Hacerse junco y el limite del junco).
+# Conserva vida, hambre, lealtad, enfermedades, contador de Encono y modo.
+func _dejar_guardada(criatura: Criatura) -> void:
+	criatura.estado = Criatura.Estado.GUARDADA
+	criatura.posicion = Criatura.SIN_POSICION
+	criatura.erizada = false
+	criatura.oculta = false
+	criatura.bono_junco = false
+	criatura.junco_turno_anterior = false
+	_surcos.cerrar_de(criatura.id)
+
+
+# Sistema.md 3.1, 2.3 y 11.3 (T26): el Maestro invoca a una guardada en una
+# casilla libre a su lado y paga el costo de su rango (CostosMana). Gasta el
+# turno completo, como cavar (S-53): despues solo vale terminar, que no es
+# esperar. La invocada queda suelta ahi y entra en la cola desde la ronda
+# siguiente (la cola se arma al empezar cada ronda). Despues se revisa el
+# contacto con las ocultas (S-24). No es un ataque: no toca la cadena, el Encono
+# ni el bono.
+func _invocar(criatura_id: String, casilla: Vector2i, aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_invocar(criatura_id, casilla)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	var maestro: Maestro = _plantel.maestro
+	var criatura: Criatura = _plantel.criatura(criatura_id)
+	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
+	resultado.costo = _costos.invocar(criatura.especie, maestro)
+	if resultado.costo != 0:
+		resultado.mana = {"de": maestro.mana, "a": maestro.mana - resultado.costo}
+	resultado.destaparia = Junco.destaparia_al_entrar(criatura_id, casilla, _plantel)
+	resultado.evento = {"tipo": "invocacion", "unidad": criatura_id, "casilla": Plantel.casilla_a_lista(casilla)}
+	if aplica:
+		maestro.mana -= resultado.costo
+		criatura.estado = Criatura.Estado.SUELTA
+		criatura.posicion = casilla
+		_eventos.append_array(Junco.revisar_contacto(criatura_id, _plantel))
+		accion_usada = true
+		ataques_restantes = 0
+		_gastar_pasos(pasos_restantes)
+	return resultado
+
+
+# Sistema.md 3.1 (T26): el unico chequeo de invocar, compartido por la accion y
+# las consultas. Primero lo del Maestro (_motivo_puede_invocar); despues la
+# criatura (de la tribu y guardada: la del escenario o la guardada antes en este
+# combate, tambien en esta ronda, S-56), que haya alguna casilla libre junto al
+# Maestro y el mana del costo. Con la casilla de la accion, al final la casilla:
+# ortogonalmente adyacente al Maestro y libre (S-25). Sin casilla (SIN_POSICION),
+# es la consulta motivo_invocar.
+func _motivo_invocar(criatura_id: String, casilla: Vector2i = Criatura.SIN_POSICION) -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_puede_invocar()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	var criatura: Criatura = _plantel.criatura(criatura_id)
+	if criatura == null:
+		return ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE
+	if criatura.bando != Criatura.Bando.TRIBU:
+		return ResultadoAccion.Motivo.OBJETIVO_ENEMIGO
+	if criatura.estado != Criatura.Estado.GUARDADA:
+		return ResultadoAccion.Motivo.NO_GUARDADA
+	if _casillas_libres_junto_al_maestro().is_empty():
+		return ResultadoAccion.Motivo.SIN_CASILLA_LIBRE
+	if _plantel.maestro.mana < _costos.invocar(criatura.especie, _plantel.maestro):
+		return ResultadoAccion.Motivo.MANA_INSUFICIENTE
+	if casilla == Criatura.SIN_POSICION:
+		return ResultadoAccion.Motivo.NINGUNO
+	if not _tablero.adyacentes(_plantel.maestro.posicion, casilla):
+		return ResultadoAccion.Motivo.CASILLA_NO_ADYACENTE
+	if not _tablero.es_casilla_libre(casilla, _plantel, _surcos):
+		return ResultadoAccion.Motivo.CASILLA_NO_LIBRE
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Lo de invocar que no depende de la criatura, en este orden: turno terminado,
+# solo el Maestro y el turno sin usar (S-53: sin la accion ni haberse movido).
+func _motivo_puede_invocar() -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if unidad_id != Maestro.ID:
+		return ResultadoAccion.Motivo.SOLO_MAESTRO
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	if se_movio:
+		return ResultadoAccion.Motivo.YA_SE_MOVIO
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Sistema.md 3.1 y 11.3: las casillas libres (S-25) en las 4 ortogonales del
+# Maestro, en orden de lectura.
+func _casillas_libres_junto_al_maestro() -> Array[Vector2i]:
+	var resultado: Array[Vector2i] = []
+	for casilla in _tablero.vecinas(_plantel.maestro.posicion):
+		if _tablero.es_casilla_libre(casilla, _plantel, _surcos):
+			resultado.append(casilla)
+	resultado.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	return resultado
 
 
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es

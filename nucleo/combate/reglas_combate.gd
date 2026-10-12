@@ -8,7 +8,7 @@ extends RefCounted
 
 # Las reglas que se revisan al crear, en el orden de _init.
 const REGLAS: Array[String] = ["danio", "afinidad", "combo", "incidente", "chequeo_rival", "regeneracion_mana",
-		"hechizos", "sellado", "huida"]
+		"hechizos", "sellado", "huida", "costos_mana"]
 
 var danio: Danio
 var afinidad: Afinidad
@@ -22,6 +22,8 @@ var hechizos: Hechizos
 var sellado: Sellado
 # Sistema.md 11.7 (T25): la huida de las salvajes al inicio de su turno.
 var huida: Huida
+# Sistema.md 2.3 (T26): los costos de mana con descuento (sellar e invocar).
+var costos_mana: CostosMana
 # La primera regla que llego nula, o "" si estan todas. Sin valores por defecto:
 # una regla que falta falla al crear, con su nombre (leccion de T09 y T37).
 var falta: String = ""
@@ -29,7 +31,7 @@ var falta: String = ""
 
 func _init(regla_danio: Danio, regla_afinidad: Afinidad, regla_combo: Combo, regla_incidente: Incidente,
 		regla_chequeo: ChequeoRival, regla_mana: RegeneracionMana, regla_hechizos: Hechizos,
-		regla_sellado: Sellado, regla_huida: Huida) -> void:
+		regla_sellado: Sellado, regla_huida: Huida, regla_costos: CostosMana) -> void:
 	danio = regla_danio
 	afinidad = regla_afinidad
 	combo = regla_combo
@@ -39,6 +41,7 @@ func _init(regla_danio: Danio, regla_afinidad: Afinidad, regla_combo: Combo, reg
 	hechizos = regla_hechizos
 	sellado = regla_sellado
 	huida = regla_huida
+	costos_mana = regla_costos
 	for nombre in REGLAS:
 		if get(nombre) == null:
 			falta = nombre

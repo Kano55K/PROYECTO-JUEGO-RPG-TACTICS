@@ -19,13 +19,19 @@ extends RefCounted
 # Turno.sentidos_para_hechizo. Fuera del modo hechizo, el clic derecho no hace nada.
 # T24: con modo_sellar (el jugador pulso Sellar), solo una objetivo de
 # Turno.objetivos_para_sellar da la accion, con el clic izquierdo.
+# T26: con criatura_invocar (el jugador pulso el boton de invocar de esa
+# guardada), solo una casilla donde la invocacion vale (Turno.previsualizar_invocar)
+# da la accion, con el clic izquierdo.
 static func accion(turno: Turno, foto: Dictionary, casilla: Vector2i, modo_cavar: bool = false,
 		modo_secundar: bool = false, hechizo_id: String = "", alterno: bool = false,
-		modo_sellar: bool = false) -> Accion:
+		modo_sellar: bool = false, criatura_invocar: String = "") -> Accion:
 	if not hechizo_id.is_empty():
 		return _accion_hechizo(turno, foto, casilla, hechizo_id, alterno)
 	if alterno:
 		return null
+	if not criatura_invocar.is_empty():
+		return Accion.invocar(criatura_invocar, casilla) \
+				if turno.previsualizar_invocar(criatura_invocar, casilla).valida else null
 	if modo_sellar:
 		var objetivo_sellar: String = objetivo_sellar_en(turno, foto, casilla)
 		return null if objetivo_sellar.is_empty() else Accion.sellar(objetivo_sellar)

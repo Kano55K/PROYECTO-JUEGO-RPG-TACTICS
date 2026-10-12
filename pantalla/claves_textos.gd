@@ -116,6 +116,19 @@ const MARCA_HUIDA: String = "marca.huida"
 const HUIDA_PORCENTAJE: String = "huida.salvaje.porcentaje"
 const HUIDA_SALVAJE: String = "huida.salvaje"
 const HUIDA_SE_QUEDA: String = "huida.salvaje.se_queda"
+# T26 (Sistema.md 3.1, Mundo.md): guardar e invocar en combate. Los botones, sus
+# tooltips y los sucesos estan en es.json; por que el boton de invocar esta
+# deshabilitado, no (claves propuestas).
+const ACCION_GUARDAR: String = "accion.guardar"
+const GUARDAR: String = "guardar"
+const GUARDAR_TOOLTIP: String = "guardar.tooltip"
+const ACCION_INVOCAR: String = "accion.invocar"
+const INVOCAR: String = "invocar"
+const INVOCAR_TOOLTIP: String = "invocar.tooltip"
+const AVISO_INVOCAR_YA_SE_MOVIO: String = "aviso.invocar.ya_se_movio"
+const AVISO_INVOCAR_ACCION_USADA: String = "aviso.invocar.accion_usada"
+const AVISO_INVOCAR_MANA: String = "aviso.invocar.mana_insuficiente"
+const AVISO_INVOCAR_SIN_CASILLA_LIBRE: String = "aviso.invocar.sin_casilla_libre"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -138,6 +151,8 @@ const FIJAS: Array[String] = [
 	PERGAMINO_SIN_BLANCO, AVISO_SELLAR_ACCION_USADA, AVISO_SELLAR_MANA, AVISO_SELLAR_FUERA_DE_ALCANCE,
 	AVISO_SELLAR_NO_SELLABLE, AVISO_SELLAR_OCULTA, AVISO_SELLAR_NO_SALVAJE, AVISO_SELLAR_SIN_OBJETIVOS,
 	MARCA_HUIDA, HUIDA_PORCENTAJE,
+	ACCION_GUARDAR, GUARDAR, GUARDAR_TOOLTIP, ACCION_INVOCAR, INVOCAR, INVOCAR_TOOLTIP,
+	AVISO_INVOCAR_YA_SE_MOVIO, AVISO_INVOCAR_ACCION_USADA, AVISO_INVOCAR_MANA, AVISO_INVOCAR_SIN_CASILLA_LIBRE,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -296,6 +311,22 @@ static func motivo_sellar(motivo: ResultadoAccion.Motivo) -> String:
 			return AVISO_SELLAR_MANA
 		ResultadoAccion.Motivo.SIN_OBJETIVOS:
 			return AVISO_SELLAR_SIN_OBJETIVOS
+	return ""
+
+
+# T26: por que un boton de invocar esta deshabilitado (Turno.motivo_invocar), o
+# "" si el motivo no se muestra (los demas no se dan con una guardada de la tribu
+# en el turno del Maestro).
+static func motivo_invocar(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.YA_SE_MOVIO:
+			return AVISO_INVOCAR_YA_SE_MOVIO
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_INVOCAR_ACCION_USADA
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_INVOCAR_MANA
+		ResultadoAccion.Motivo.SIN_CASILLA_LIBRE:
+			return AVISO_INVOCAR_SIN_CASILLA_LIBRE
 	return ""
 
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
