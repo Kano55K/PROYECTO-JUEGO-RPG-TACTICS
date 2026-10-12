@@ -646,3 +646,19 @@ MousePrueba pasa la posición a coordenadas de ventana con get_viewport().get_fi
 VistaCombate acepta solo el device de dispositivo_mouse; por defecto acepta cualquiera, así que el juego no cambia.
 El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4 no transporta los eventos; fijar el tamaño de la ventana o esperar a que se restaure, porque suma esperas; y cualquiera de las dos partes sola. Se cierra en la sesión 2.
 - **Cerrada en:** T24-ajustes
+
+## P-045 — En B no queda ninguna enemiga pendiente cuando el Maestro declara la huida
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T28
+- **Fecha:** 12/10/2026
+- **Fuente:** `Arquitectura.md` B.4, fila T28, test (11) y prueba manual (pasos 2 y 5)
+- **Duda:** ¿El test (11) y la prueba manual de la huida se pasan de B a un escenario donde alguna enemiga juegue después del Maestro (por ejemplo, D)?
+- **Caso que la dispara:** en B las dos Ocarras (Velocidad 7) y la Rodauva (6) juegan antes que el Maestro (5). Cuando él declara, ya no queda ninguna enemiga pendiente en la ronda. `Combate.previsualizar_huida` da la lista vacía y daño máximo 0, el combate termina en `huida` al cerrar esa misma ronda, y el test (11) pasa sin probar la previsualización. Por lo mismo, el paso 2 de la prueba manual ("el panel muestra las Ocarras que actúan antes del cierre") no se va a ver: el panel dice que nadie actúa antes del cierre. En D, el Surcón salvaje (Velocidad 2) juega después del Maestro y figura en la previsualización.
+- **Opciones:**
+  - A) B queda como está (huir antes de que vuelvan a actuar es la salida de B) y el test con `datos/` real suma D.
+  - B) El test (11) y la prueba manual pasan a D.
+  - Recomendación técnica: A, que es lo que se hizo.
+- **Bloquea:** no
+- **Mientras tanto:** `pruebas/datos/test_huida_maestro_b.gd` hace B tal como lo pide la tarea (lista vacía, daño máximo 0, termina en `huida`) y el mismo caso en D (`surcon_s1` figura en la previsualización). Lo aprobó el usuario en el plan de T28.
+- **Respuesta:** _(la completa el staff)_

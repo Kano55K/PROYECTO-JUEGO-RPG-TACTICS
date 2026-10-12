@@ -230,6 +230,62 @@ func porcentaje_huida(unidad_id: String) -> int:
 	return _contexto.huida.porcentaje_al_empezar(unidad_id, _plantel)
 
 
+# Sistema.md 11.7, "previsualizacion al declarar" (T28, D-005, S-61): lo que
+# arriesga el Maestro si declara la huida ahora. Calcula sin aplicar: no cambia
+# el Plantel, la cola ni el generador. Devuelve:
+#   enemigas: [{unidad, alcanza, danio}], las enemigas con entrada pendiente en
+#     la ronda que pueden actuar, en el orden de la cola. alcanza: si lo golpea
+#     en su turno moviendose y atacando, como la IA (pasos_para_mover y
+#     previsualizar_ataque); danio: el de la casilla que mas le pega, por los
+#     ataques de su modo actual (0 si no alcanza).
+#   danio_maximo: la suma; vida: la del Maestro; puede_caer: danio_maximo >= vida;
+#   caidas: las de la tribu que moririan (Cierre.caidas_que_mueren), por id.
+# Lectura S-61: con el tablero de ahora, sin lo que depende de tiradas (huida,
+# Encono, cobardia, incidente) ni de como se muevan las demas.
+func previsualizar_huida() -> Dictionary:
+	var enemigas: Array[Dictionary] = []
+	var total: int = 0
+	var entradas: Array[EntradaCola] = _cola.entradas()
+	for indice in range(_cola.lugar(), entradas.size()):
+		var entrada: EntradaCola = entradas[indice]
+		if _es_del_jugador(entrada.unidad_id) or not _cola.pendiente(entrada.unidad_id, _plantel):
+			continue
+		var danio: int = _danio_maximo_al_maestro(entrada)
+		var alcanza: bool = danio >= 0
+		danio = maxi(danio, 0)
+		enemigas.append({"unidad": entrada.unidad_id, "alcanza": alcanza, "danio": danio})
+		total += danio
+	var caidas: Array[String] = []
+	for criatura in Cierre.caidas_que_mueren(_plantel):
+		caidas.append(criatura.id)
+	var vida: int = _plantel.maestro.vida
+	return {"enemigas": enemigas, "danio_maximo": total, "vida": vida, "puede_caer": total >= vida,
+			"caidas": caidas}
+
+
+# T28 (S-61): el mayor danio que la unidad de la entrada le haria al Maestro en
+# su turno, desde alguna casilla a la que llega, con un turno de consulta
+# (Turno.para_consulta: sin inicio del turno, sin azar). Por los ataques de su
+# modo: el primero y, si tiene mas, los siguientes como el segundo de Caza
+# (previsualizar_ataque con tras_primer_ataque). -1 si no lo alcanza. El danio sale
+# del mismo camino que el ataque real (Danio y los aportes del Turno).
+func _danio_maximo_al_maestro(entrada: EntradaCola) -> int:
+	var consulta: Turno = Turno.para_consulta(entrada, _plantel, _contexto.tablero, _surcos, _cadena, _cola,
+			_contexto.reglas)
+	var mejor: int = -1
+	for casilla: Vector2i in consulta.pasos_para_mover().keys():
+		var primero: ResultadoAccion = consulta.previsualizar_ataque(casilla, Maestro.ID)
+		if not primero.valida:
+			continue
+		var danio: int = primero.danio
+		if consulta.ataques_restantes > 1:
+			var siguiente: ResultadoAccion = consulta.previsualizar_ataque(casilla, Maestro.ID, true)
+			if siguiente.valida:
+				danio += siguiente.danio * (consulta.ataques_restantes - 1)
+		mejor = maxi(mejor, danio)
+	return mejor
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -294,6 +350,9 @@ func _avanzar() -> void:
 		if entrada == null:
 			if _cola.ronda > 0:
 				_cerrar_ronda()
+				# Sistema.md 11.7 (T28): la huida termina el combate al cerrar la ronda.
+				if _fin != FinCombate.Fin.EN_CURSO:
+					continue
 			_cola.empezar_ronda(_plantel)
 			_registrar({"tipo": "ronda"})
 			continue
@@ -413,7 +472,10 @@ func _registrar_incidente(estados_antes: Dictionary) -> void:
 # En una ronda que la dispara, el evento va aunque nadie cambie (todas en el
 # tope): lectura tecnica de T14. Un combate que termina a mitad de ronda no
 # llega aca, asi que no suma. Despues, la cadena se corta: nunca pasa a la ronda
-# siguiente (10.2).
+# siguiente (10.2). Al final, la huida del Maestro (11.7, T28, S-60): si la
+# declaro y el combate sigue en curso, se va y el combate termina en huida (fin
+# y cierre, sin evento nuevo, A.7). Si antes cayo o no quedo ninguna enemiga en
+# pie, el combate ya habia terminado y no llega aca.
 func _cerrar_ronda() -> void:
 	_cola.terminar_ronda()
 	_registrar({"tipo": "fin_ronda"})
@@ -422,6 +484,10 @@ func _cerrar_ronda() -> void:
 		_registrar({"tipo": "hambre_combate", "cambios": cambios})
 	_cadena.cortar(Cadena.MOTIVO_FIN_RONDA)
 	_registrar_cadena()
+	if _plantel.maestro.huida_declarada and _fin == FinCombate.Fin.EN_CURSO:
+		_plantel.maestro.se_fue = true
+		_fin = FinCombate.evaluar(_plantel)
+		_terminar()
 
 
 # Sistema.md 11.8: las acciones de la IA, una por una. Corta si el combate

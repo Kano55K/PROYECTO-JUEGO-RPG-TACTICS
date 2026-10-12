@@ -44,6 +44,8 @@ const _MARCA_OBJETIVO_SELLAR: Vector2i = _MARCA_CAVAR
 const _MARCA_INVOCAR: Vector2i = _MARCA_CAVAR
 # T27: las caidas que se pueden guardar (la misma marca de "elegir" que Sellar).
 const _MARCA_CAIDA: Vector2i = _MARCA_CAVAR
+# T28: las enemigas que alcanzan al Maestro antes del cierre, con la marca de objetivo.
+const _MARCA_ALCANZA_HUIDA: Vector2i = _MARCA_OBJETIVO
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
@@ -70,6 +72,8 @@ const _PREFIJO_BOTON_INVOCAR: String = "Invocar_"
 const _NOMBRE_BOTON_SELLAR: String = "Sellar"
 # T27: el boton de guardar a una caida.
 const _NOMBRE_BOTON_GUARDAR_CAIDA: String = "GuardarCaida"
+# T28 (Sistema.md 11.7): el boton Huir.
+const _NOMBRE_BOTON_HUIR: String = "Huir"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -139,6 +143,9 @@ var _invocando: String = ""
 # mouse sobre una caida valida: {objetivo, costo, vida, previa}, o {}.
 var _guardando_caida: bool = false
 var _caida_mostrada: Dictionary = {}
+# T28: la previsualizacion de la huida con el mouse sobre el boton Huir
+# (Combate.previsualizar_huida), o {}.
+var _huida_mostrada: Dictionary = {}
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -157,6 +164,7 @@ var _limites: Rect2 = Rect2()
 @onready var _capa_rivales: TileMapLayer = $Tablero/Rivales
 @onready var _capa_rivales_enemigas: TileMapLayer = $Tablero/RivalesEnemigas
 @onready var _capa_destinos: TileMapLayer = $Tablero/DestinosHechizo
+@onready var _capa_alcanzan_huida: TileMapLayer = $Tablero/AlcanzanHuida
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -287,6 +295,8 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	_hechizo_mostrado = {}
 	_sellado_mostrado = {}
 	_caida_mostrada = {}
+	_huida_mostrada = {}
+	_capa_alcanzan_huida.clear()
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_capa_afines.clear()
@@ -532,6 +542,44 @@ func _mostrar_caida(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
 	var previa: ResultadoAccion = turno.previsualizar_guardar_caida(caida)
 	if previa.valida:
 		_caida_mostrada = {"objetivo": caida, "costo": previa.costo, "vida": previa.vida, "previa": previa}
+
+
+# T28 (Sistema.md 11.7): el boton Huir declara la huida del Maestro.
+func pulsar_huir() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	return _aplicar(Accion.huir())
+
+
+# T28 ("previsualizacion al declarar"): con el mouse sobre el boton Huir, el
+# panel muestra Combate.previsualizar_huida y se marcan las enemigas que lo
+# alcanzan; al salir, se borra. sobre: si el mouse entro o salio.
+func mostrar_huida(sobre: bool) -> void:
+	_huida_mostrada = {}
+	if sobre and _combate != null and not _en_secuencia and _combate.esperando_jugador():
+		_huida_mostrada = _combate.previsualizar_huida()
+	_dibujar_alcanzan_huida()
+	_dibujar_desglose()
+
+
+# T28: la previsualizacion que se ve ahora (Combate.previsualizar_huida), o {}.
+func huida_mostrada() -> Dictionary:
+	return _huida_mostrada.duplicate(true)
+
+
+# T28: las casillas de las enemigas marcadas porque alcanzan al Maestro.
+func casillas_alcanzan_huida() -> Array[Vector2i]:
+	return _capa_alcanzan_huida.get_used_cells()
+
+
+func _dibujar_alcanzan_huida() -> void:
+	_capa_alcanzan_huida.clear()
+	if _huida_mostrada.is_empty():
+		return
+	var foto: Dictionary = _combate.instantanea()
+	for enemiga: Dictionary in _huida_mostrada["enemigas"]:
+		if enemiga["alcanza"]:
+			_capa_alcanzan_huida.set_cell(_casilla_de(foto, enemiga["unidad"]), _FUENTE_MARCAS, _MARCA_ALCANZA_HUIDA)
 
 
 # T26: el boton Guardar aplica la accion de la criatura del turno.
@@ -784,6 +832,7 @@ func _aplicar(accion: Accion) -> bool:
 	_guardando_caida = false
 	_sellado_mostrado = {}
 	_caida_mostrada = {}
+	_huida_mostrada = {}
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
 	if pausa_ia > 0.0 and not pasos.is_empty():
@@ -907,6 +956,7 @@ func _dibujar_marcas() -> void:
 	_capa_rivales.clear()
 	_capa_rivales_enemigas.clear()
 	_capa_destinos.clear()
+	_dibujar_alcanzan_huida()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()
@@ -1100,6 +1150,20 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		boton_caida.pressed.connect(pulsar_guardar_caida)
 		_botones.add_child(boton_caida)
 		_botones.move_child(boton_caida, _boton_terminar.get_index())
+	# T28: Huir, en el turno del Maestro y sin la huida declarada
+	# (LecturaCombate.boton_huir). Con el mouse encima, la previsualizacion.
+	var datos_huir: Dictionary = lectura.boton_huir()
+	if not datos_huir.is_empty():
+		var boton_huir: Button = Button.new()
+		boton_huir.name = _NOMBRE_BOTON_HUIR
+		boton_huir.text = datos_huir["texto"]
+		boton_huir.tooltip_text = datos_huir["tooltip"]
+		boton_huir.disabled = not datos_huir["habilitado"]
+		boton_huir.pressed.connect(pulsar_huir)
+		boton_huir.mouse_entered.connect(mostrar_huida.bind(true))
+		boton_huir.mouse_exited.connect(mostrar_huida.bind(false))
+		_botones.add_child(boton_huir)
+		_botones.move_child(boton_huir, _boton_terminar.get_index())
 	# T26: Guardar, solo si la criatura del turno puede guardarse ahora.
 	var datos_guardar: Dictionary = lectura.boton_guardar()
 	if not datos_guardar.is_empty():
@@ -1138,10 +1202,14 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 # El desglose de un ataque o, T22, lo que haria el hechizo (LecturaCombate.vista_previa_hechizo).
 func _dibujar_desglose() -> void:
 	_panel_desglose.visible = not _desglose_mostrado.is_empty() or not _hechizo_mostrado.is_empty() \
-			or not _sellado_mostrado.is_empty() or not _caida_mostrada.is_empty()
+			or not _sellado_mostrado.is_empty() or not _caida_mostrada.is_empty() or not _huida_mostrada.is_empty()
 	if not _panel_desglose.visible:
 		return
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	# T28: lo que arriesga el Maestro si huye (LecturaCombate.vista_previa_huida).
+	if not _huida_mostrada.is_empty():
+		_panel_desglose.text = "\n".join(lectura.vista_previa_huida(_huida_mostrada))
+		return
 	# T27: el mana y la vida de guardar a la caida (LecturaCombate.vista_previa_guardar_caida).
 	if not _caida_mostrada.is_empty():
 		_panel_desglose.text = "\n".join(lectura.vista_previa_guardar_caida(_caida_mostrada["previa"]))

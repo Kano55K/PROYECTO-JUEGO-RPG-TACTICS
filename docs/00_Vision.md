@@ -1,7 +1,7 @@
 # 00 — VISIÓN DEL JUEGO
 
-> **Estado:** v1.2 — **MVP definido, rasgos en revisión** · **Dueño:** Director Creativo · **Última actualización:** 05/10/2026
-> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2.
+> **Estado:** v1.4 — **MVP definido, rasgos en revisión** · **Dueño:** Director Creativo · **Última actualización:** 11/10/2026
+> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2. La v1.3 cambia la geometría de las relaciones (vecinas en 8) y el tablero de referencia (12 × 12): ver Escala 3. La v1.4 agrega **los Legados y sus Sombras** a Ideas en espera (10): no toca el MVP ni la 0a.
 > Este documento es la fuente de verdad. Ningún agente puede contradecirlo sin proponer un cambio y registrarlo en `Decisiones.md`.
 > **Documentos subordinados:** `Sistema.md` (reglas y números) · `Mundo.md` (mundo, regiones y criaturas) · `Arquitectura.md` (decisiones técnicas y plan de construcción). Este documento define **qué** y **por qué**; los números viven en `Sistema.md`, y el detalle del mundo, en `Mundo.md`.
 > **`Decisiones.md` es el historial, no la fuente de verdad:** registra cómo se llegó a cada regla. Queda fuera de `docs/` (Claude Code no lo lee) y es opcional en el conocimiento del proyecto.
@@ -69,8 +69,14 @@ El mundo es luminoso y aventurero, pero la supervivencia no perdona. El hambre p
 
 ### Escala 3 — Tablero táctico
 - Combate **por turnos** con movimiento **por casillas**, vista **isométrica**.
-- **Cuadrícula ortogonal, sin diagonales** (`DECIDIDO` 05/10/2026): moverse, atacar y la adyacencia usan las 4 casillas vecinas. Las diagonales abaratan la táctica: los muros, los pasillos y la formación pierden peso.
-- El orden de actuación lo define la **iniciativa** de cada unidad. Una unidad puede **Secundar**: actuar justo después de un aliado elegido, a cambio de dejar que los enemigos intermedios actúen antes.
+- **Cuadrícula ortogonal** (`DECIDIDO` 05/10/2026, ratificado 07/10/2026): moverse, atacar, guardar junto al Maestro y la Caza del Tasajero usan las **4 casillas adyacentes**. Las diagonales abaratan la táctica: los muros, los pasillos y la formación pierden peso.
+- **Las relaciones miran las 8 vecinas** (`DECIDIDO` 07/10/2026): la afinidad, los incidentes entre rivales y el sostén de la cobardía cuentan también las diagonales. Los **combos no miran la posición**.
+  - **Por qué:** con la adyacencia en 4, dos aliadas que le pegan cuerpo a cuerpo a la misma objetivo nunca quedan vecinas entre sí: la afinidad y el foco se excluían, y pelear juntas no premiaba (Pilar 3). Con vecinas en 8, sí.
+  - Las posiciones en diagonal que dan afinidad son las mismas que le dan dos presas al Tasajero: el dilema de *dónde no me paro* queda más nítido (6.2). También suben los incidentes: la vecindad amplia tiene costo.
+- **Tablero de referencia: 12 × 12** (`DECIDIDO` 07/10/2026). Un escenario puede ser más chico si lo pide (combates de nodo, peleas cortas), nunca más grande en el MVP.
+  - **El primer contacto llega en la ronda 2.** El espacio es para maniobrar (flanquear, usar el surco, separar rivales con la Lanzadera), no para caminar: cada ronda suma hambre de combate. Los despliegues los define Sistemas.
+  - El tablero grande necesita **cámara móvil** (desplazar y acercar).
+- El orden de actuación lo define la **iniciativa** de cada unidad, y los bandos **se intercalan** en la cola. Una unidad puede **Secundar**: actuar justo después de un aliado elegido, a cambio de dejar que los enemigos intermedios actúen antes. Sin enemigas intermedias, Secundar no tendría decisión.
 - El Maestro y sus criaturas pelean juntos en el tablero.
 - Los turnos de combate **suman hambre**: los combates largos tienen costo.
 - El maná del Maestro se regenera por turno, pero **nunca supera el maná con el que entró al combate** (ver 6.7).
@@ -131,6 +137,8 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
 - Es **omnívoro**: puede comer cualquier tipo de comida, incluida una criatura.
 - Necesita una **dieta variada**: si come el mismo tipo de comida varios días seguidos, cae **Enfermo** (ver 6.5). La interfaz avisa antes de que pase.
 
+**A futuro (Ideas en espera, 10):** el Maestro será **avatar de los Legados**: no está atado a ninguno y manifiesta su naturaleza por el equipo, con una afinidad que crece con su tribu por **la rueda del árbol**.
+
 ### 6.2 Criaturas
 - Tienen habilidades **activas y pasivas**, que funcionan **dentro y fuera del combate**.
 - Pueden combatir, trabajar y transportar objetos.
@@ -152,9 +160,9 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
 | Tasajero | **Caza y cuenta** | Activa de un solo uso | Dos modos, ver abajo |
 
 - **Caza y cuenta (Tasajero):** **un solo turno por ronda**, con dos modos. Empieza el combate en **Caza**, porque se expuso para cazar. Su activa es **pasar a Cuenta**: es gratis, solo se usa **al principio de su turno** (si se mueve o ataca, ya no puede ese turno) y **no tiene vuelta**. El cambio es el evento del combate.
-  - **Caza:** se mueve normal y hace **dos ataques separados**, a una o a dos presas **adyacentes**. Recibe **más daño** que lo normal.
+  - **Caza:** se mueve normal y hace **dos ataques separados**, a una o a dos presas **adyacentes** (las 4 ortogonales). Recibe **más daño** que lo normal.
   - **Cuenta:** se mueve normal y **puede partir el movimiento** (acercarse, pegar y retirarse). Un solo ataque, con **menos daño**. Recibe daño normal.
-  - **El Tasajero desgasta, no ejecuta.** Pegarle a dos presas es lo propio de un cazador. Del lado del jugador, la pregunta es *dónde no me paro*: formar apretado suma afinidad, pero le da al Tasajero dos presas en un turno.
+  - **El Tasajero desgasta, no ejecuta.** Pegarle a dos presas es lo propio de un cazador. Del lado del jugador, la pregunta es *dónde no me paro*: formar apretado suma afinidad, pero le da al Tasajero dos presas en un turno. Las aliadas en diagonal entre sí son vecinas (suman afinidad) y a la vez dejan esquinas donde el Tasajero alcanza a dos (Escala 3).
   - **Su IA** la propone Sistemas, con estos criterios de visión: prefiere repartir los golpes antes que gastarlos en una sola presa; es predecible y sin azar; no tumba a una presa entera de un solo turno sin una decisión previa del jugador. Cuándo cambia de modo también se ve antes.
 - **Todo rasgo se ve:** nombre y explicación al pasar el mouse sobre cualquier unidad, propia o enemiga, y un aviso cada vez que el rasgo actúa. Un rasgo que no se ve no existe para el jugador (hallazgo del playtest 0a.1).
 - Cada criatura tiene una comida **favorita**, comidas que **acepta** y comidas que **rechaza** (ver 6.5).
@@ -165,7 +173,7 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
   - **Es la Rodauva, la dueña del Molino**: ya vivía junto a la piedra del fuego cuando llegó el Maestro (ver `Mundo.md` 4.8). La relación se invierte: el recién llegado es él.
   - La apertura **no explica el pasado del Maestro**: ese hueco depende de la clase (Capa 3) y de la historia principal (Capa 4).
 - **Puede haber varias criaturas de la misma especie** en la tribu. La **Rodauva es el piso de supervivencia**: abundante y fácil de domesticar. Muchas Rodauvas aseguran un mínimo de comida, no una partida fácil: una tribu de Rodauvas recolecta bien y pelea mal (Pilar 2).
-- En el MVP **no hay tipos ni linajes**. Si a futuro existen, serán **linajes de hechura** (cuál de los Nueve modeló a la criatura), nunca elementos como fuego, agua o planta.
+- En el MVP **no hay tipos ni linajes**. A futuro, el sistema de linajes es **los Legados y sus Sombras** (Ideas en espera, 10): conceptos de la hechura de los Nueve, nunca elementos como fuego, agua o planta, y sin multiplicadores de daño.
 
 ### 6.3 Obtención de criaturas
 Siempre se sellan en un **pergamino** gastando **maná**, por dos caminos:
@@ -191,12 +199,12 @@ Reglas comunes:
 - Una criatura leal con hambre deja de ser tu mejor aliada en el tablero, aunque todavía pueda rescatarte.
 - El Maestro es **afín** de toda criatura con obediencia leal: pelear juntos los potencia.
 
-**Relaciones** (criatura ↔ criatura): en el MVP, un solo tipo: **se llevan bien** o **se llevan mal**. En el tablero se juegan así:
+**Relaciones** (criatura ↔ criatura): en el MVP, un solo tipo: **se llevan bien** o **se llevan mal**. En el tablero se juegan así. **Vecina** significa cualquiera de las **8 casillas** alrededor, diagonales incluidas (Escala 3):
 - **Afines vecinas:** se potencian.
-- **Combos (ataque en cadena):** aliados que actúan seguidos sobre el mismo objetivo suman daño; entre afines, más. Cada eslabón vale menos que el anterior.
+- **Combos (ataque en cadena):** aliados que actúan seguidos sobre el mismo objetivo suman daño; entre afines, más. Cada eslabón vale menos que el anterior. **El combo no mira la posición:** dos afines encadenan como afines aunque estén lejos entre sí.
 - **Rivales aliadas vecinas:** riesgo de **incidente**. Una criatura obediente se distrae; una poco obediente ataca a su rival.
 - **Rival enemiga — Encono** *(antes "provocación")*: las criaturas **de combate y mixtas** pueden ensañarse; la criatura puede ensañarse y atacar a su rival sí o sí, ganando fuerza y perdiendo control.
-- **Cobardía:** las criaturas **de trabajo**, ante una rival enemiga, no se enconan: se acobardan y quedan debilitadas. Su obediencia puede hacerlas resistir: **la regla de oro también se ve en el coraje**. Las **afines adyacentes** también la sostienen (regla a testear en el MVP).
+- **Cobardía:** las criaturas **de trabajo**, ante una rival enemiga, no se enconan: se acobardan y quedan debilitadas. Su obediencia puede hacerlas resistir: **la regla de oro también se ve en el coraje**. Las **afines vecinas** también la sostienen (regla a testear en el MVP).
 - **Salvajes:** siguen las mismas reglas **de relación** (afinidad, incidentes, Encono y cobardía), sin obediencia que las contenga. Atraer a dos rivales salvajes es una táctica legítima.
   - **Las salvajes no encadenan combos:** se sostienen entre ellas, pero no se coordinan. La cadena es algo que solo da el vínculo con el Maestro (Pilar 3).
 - Toda probabilidad de incidente o Encono se **muestra antes** de mover.
@@ -326,7 +334,7 @@ Fuera del Molino, cada noche el Maestro arma un campamento. Entra completo en el
 
 ## 8. Lo que el juego NO es
 
-- No es un Pokémon: no hay entrenador espectador, ni combates 1v1 clásicos, ni tipos elementales.
+- No es un Pokémon: no hay entrenador espectador, ni combates 1v1 clásicos, ni tipos elementales. **Los Legados y sus Sombras** (10) no son elementos ni una tabla de efectividad: sus ciclos actúan sobre la carga, nunca multiplican el daño.
 - No es un juego de colección: guardar criaturas sin vínculo tiene un costo, y la tribu está limitada por los pergaminos.
 - No es un juego de acción en tiempo real.
 - No es un mundo generado proceduralmente (el mapa es fijo; el azar vive en los eventos).
@@ -355,6 +363,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - Captura por ambos caminos.
 - Lealtad simple (valor numérico con cuatro estados), obediencia y **1** tipo de relación (se llevan bien / se llevan mal).
 - Abandono durante la recuperación, abandono nocturno y ataque nocturno.
+- **Sin Legados ni Sombras** (Ideas en espera, 10).
 
 **Mundo**
 - **1** región: **Valdelumbre**, con el campamento (el Molino Callado) y **3** destinos de riesgo creciente: los Huertos de Almiar (bajo), el Vado de los Juncos (medio) y el Robledal Hondo (alto).
@@ -362,7 +371,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - La **Poza Tibia**, en el Vado, como sanador.
 
 **Supervivencia y combate**
-- Combate táctico básico en tablero pequeño de **cuadrícula ortogonal**, con iniciativa, Secundar, combos, afinidad, incidentes, Encono y cobardía.
+- Combate táctico básico en tablero de **hasta 12 × 12**, de **cuadrícula ortogonal** con **relaciones entre vecinas en 8**, con cámara móvil, iniciativa, Secundar, combos, afinidad, incidentes, Encono y cobardía.
 - **Sin terreno**, salvo una excepción: **el surco del Surcón**, el único terreno del MVP, que lo crea una criatura en combate. No abre un sistema de terreno.
 - Hambre como único recurso de supervivencia, con **7 tipos de comida** y preferencias por criatura.
 - **1** estado negativo: **Enfermo**, acumulable, con cura por descanso o viaje.
@@ -403,12 +412,61 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
   - **Los rasgos pasivos no se notaron** (Lomo de tierra, Hacerse junco). Respuesta: todo rasgo se ve en pantalla (6.2).
   - **El combate se sintió rígido.** Se evaluaron y **descartaron las diagonales** (Escala 3). Respuesta: los rasgos reescritos (6.2), que agregan control del espacio (el surco), emboscada (Hacerse junco) y un jefe que castiga la formación apretada (Caza y cuenta). Se vuelve a juzgar con la 0a.2, que suma relaciones, magia y combos, y en isométrica.
 - **Los rasgos reescritos se programan antes de cerrar la 0a.2**, porque tocan tareas terminadas (cola, turno, daño, tablero e IA). Sistemas cierra los números en **una sola pasada de balance**. El Arquitecto decide si T14 avanza en paralelo. Son reemplazos, no agregados: el alcance sigue congelado.
+- **Geometría y tablero** `DECIDIDO` (07/10/2026). Tras jugar la 0a.1b, la afinidad y el foco cuerpo a cuerpo se excluían, y el tablero de 8 × 8 dejaba poco tiempo para planear. No bloquean T16. Orden de trabajo:
+  1. **T16 (cadenas)** sigue como está: los combos no dependen de la posición.
+  2. **Vecinas en 8 para las relaciones**, antes de T18 (incidentes), para que T18 y T19 (Encono y cobardía) nazcan con la regla nueva.
+  3. **Tablero de 12 × 12 con cámara móvil** y escenarios A a H reubicados, antes de los playtests de la 0a.2, porque las alarmas de duración (`Sistema.md` 11.9) se miden sobre el tablero real. Sistemas los recalibra en una sola pasada.
+  - Son reemplazos de reglas existentes, no agregados: el alcance sigue congelado.
 
 **Ideas en espera** (aprobadas en espíritu, sin capa asignada):
 
+- **Los Legados y sus Sombras** *(nombre provisorio; aprobado como diseño el 10/10/2026)*. Es el sistema de linajes del juego completo: reemplaza a los "linajes de hechura" de la v1.3. Son **18**: los **Nueve legados** (1 a 9) y sus **nueve Sombras** (10 a 18), en una rueda.
+  - **La rueda:**
+
+    | # | Legado | # | Sombra |
+    |---|---|---|---|
+    | 1 | Lleno | 10 | Vacío |
+    | 2 | Crecimiento | 11 | Drenaje |
+    | 3 | Movimiento | 12 | Quietud |
+    | 4 | Liviandad | 13 | Presión |
+    | 5 | Intemperie / Exteriorización *(nombre pendiente)* | 14 | Protección |
+    | 6 | Sonido | 15 | Silencio |
+    | 7 | Sinceridad | 16 | Ilusión |
+    | 8 | Unión | 17 | Desapego |
+    | 9 | Disciplina | 18 | Inspiración |
+
+  - **Cuatro ciclos, que se cuentan por distancia en la rueda y actúan sobre la carga, nunca sobre el daño.** No hay tabla de efectividad: cada legado tiene exactamente una relación de cada ciclo.
+    - **Generación (+1):** cada legado genera al siguiente (Lleno → Crecimiento → … → Inspiración → Lleno).
+    - **Potenciación (+4):** cada legado resuena con el que está cuatro casilleros adelante (Lleno → 5, Crecimiento → Sonido…).
+    - **Anulación (+8):** cada legado anula al que está ocho casilleros adelante (Lleno anula Disciplina, Vacío anula Inspiración…).
+    - **Inversión (+9):** cada legado se invierte en su Sombra, y cada Sombra en su legado (Lleno ↔ Vacío).
+    - **Regla que se desprende:** la Sombra de un legado anula a quien lo genera (+9 +8 = −1). La Sombra no ataca al legado: ataca su raíz.
+  - **Criaturas:** cada una está **atada a dos legados**, que definen cómo recibe la carga. Su ataque normal y sus habilidades ponen puntos de uno de ellos, según convenga y según la criatura (por ejemplo, el Zancajunco, Ilusión y Crecimiento: con Hacerse junco carga Ilusión; con el ataque normal, Crecimiento).
+  - **El almacén de carga:** cada unidad tiene uno, con un **umbral** (entre 6 y 10, lo define Sistemas).
+    - Todo legado que entra **suma**, aunque no tenga relación con lo que ya había.
+    - **Solo la anulación resta:** quita puntos del legado anulado, y lo que sobra se pierde (anular nunca carga). Sirve para atacar (desarmar a un enemigo) o para defender (evitar que una aliada explote).
+    - **Potenciación:** cuando se dispara, el ataque **no carga su propio legado**: carga solo el legado potenciado, con **+1 punto** (por ejemplo, 2 de Crecimiento entran como 3 de Sonido). Se dispara si el legado potenciado **ya está en el almacén** del objetivo o **es uno de sus dos legados propios**.
+    - **Se ve y se cuenta:** el almacén es una sola barra segmentada por legado, con el dominante marcado, y la interfaz avisa antes si un golpe lo llena (sección 8).
+  - **Lo decide quien completa el umbral:**
+    - **Un enemigo → explosión e inversión.** Durante algunos turnos, la unidad **defiende como un solo legado: la Sombra del legado dominante** del almacén. Gana sus beneficios, aunque muchas veces contradigan su punto fuerte, y lo sufre si es su opuesto. Al terminar la inversión queda **extenuada** *(provisorio)*.
+    - **La propia criatura o una aliada → el Maestro elige:** **generación** (el almacén se convierte en 1 punto del legado siguiente, sin extenuación) o **inversión** (como arriba, más pérdida de lealtad). Invertir a una propia es un **sacrificio táctico**.
+    - **Empate en el dominante:** gana el legado de quien completó el umbral.
+    - Dar el último punto es una decisión táctica, y cargar a una aliada es una apuesta: si un enemigo la termina, explota del lado equivocado.
+  - **Extenuada:** solo por inversión, nunca por generación. Queda inservible el resto del combate y del día: no trabaja, no hace guardia ni pelea, y no puede volver a acumular. **Sigue comiendo y puede rescatar al Maestro**: la regla de oro no depende de un estado de combate.
+  - **Lo que no le gusta a una criatura** es la Sombra o el anulador de cualquiera de sus legados (Mundo puede agregar casos por especie). Una sola regla para lo que le duele:
+    - Si se lo carga **el Maestro, una aliada o ella misma** (o el Maestro elige invertirla), pierde **lealtad**: es una decisión del jugador.
+    - Si se lo carga **un enemigo**, pierde **obediencia** durante el combate: la sufre, pero el vínculo no se rompe por la acción de otro (sección 8).
+  - **El Maestro, avatar de los legados:** no está atado a ninguno; manifiesta la naturaleza de cualquiera por su equipo y su magia. El **arma** define su legado de ataque y la **armadura**, sus dos legados defensivos. Elige el equipo **antes del combate**, y cambiar de arma en combate le gasta el turno: no puede ser el anulador universal. Si manifiesta un legado que no le gusta a una criatura de su tribu, ella lo siente.
+  - **La rueda del árbol:** la construcción del Maestro. Su afinidad con los legados nace de su clase y **crece con la tribu que elige y por la rueda**: se expande a los legados vecinos, y acercarse a las Sombras de sus legados cuesta más. **Especializarse limita; nunca es gratis.** No es un árbol aparte: sale de la rueda, la clase y la tribu (decisión del 01/10: clases distintas sin sistemas nuevos).
+  - **Criterios de visión:**
+    - La explosión es **un evento, no ruido**: una o dos por combate en las unidades clave.
+    - Explotar a un enemigo **no puede valer más** que bajarle la vida.
+    - El beneficio de invertir a una propia **nunca puede superar** la extenuación y la lealtad perdida.
+    - La tribu pesa más que el enfrentamiento: los legados nunca reemplazan a la afinidad, los combos ni el Encono (Pilar 3).
+  - **Espera porque** es un sistema grande (18 estados con su trueque, arte e interfaz, equipo del Maestro) y el MVP no tiene linajes. Las armas y armaduras dependen además del crafteo (Capa 1). Se le asigna capa cuando el MVP valide la tribu.
 - **La Mudanza** *(nombre provisorio)*. Cada criatura tiene un **defecto de naturaleza** (la Rodauva, la cobardía; la Ocarra, la impulsividad; el Zancajunco, la ariscura; el Surcón, el letargo). Superarlo gracias al vínculo con el Maestro la transforma. Condiciones de visión:
   - **La barra de zozobra** *(nombre provisorio)*: cada criatura tiene una barra que se llena por causas propias de su naturaleza. Al llenarse, la criatura llega a su límite: **se quiebra** (aparece su defecto; los quiebres repetidos pueden llevar a la **involución**) o **lo supera** (queda lista para mudar). Superar el defecto es el **disparador general** de la Mudanza.
-  - **Superarlo no es azar puro:** depende de la **obediencia** y de las **afines adyacentes**, y la probabilidad se muestra antes. La regla de oro también decide quién se crece. *(Así se diferencia de la tirada de Darkest Dungeon.)*
+  - **Superarlo no es azar puro:** depende de la **obediencia** y de las **afines vecinas**, y la probabilidad se muestra antes. La regla de oro también decide quién se crece. *(Así se diferencia de la tirada de Darkest Dungeon.)*
   - La barra **persiste entre combates** y **baja en el Molino**. Guardada en su pergamino, queda congelada, igual que el resto del vínculo.
   - La barra entra **con la capa de la Mudanza**. En el MVP, la cobardía sigue funcionando como hoy.
   - **Nunca** por nivel ni por experiencia: es un momento de vínculo. Aplica a todas las criaturas. *(Única excepción acotada: el contador de combos de la Muda colectiva.)*
@@ -417,7 +475,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
   - Mudar **acelera el metabolismo**: la criatura come más mientras dura. **El riesgo de morir depende de su hambre**, no de una tirada fija: la muerte es consecuencia de la preparación.
   - El Maestro puede **cancelarla** con maná (vuelve a "lista para mudar" y se puede reintentar) o **protegerla** con mucho más maná (evita la muerte por la Mudanza, pero no garantiza que mude). La protección no cubre el hambre general.
   - Espera porque duplica el costo de arte por criatura. Se le asigna capa cuando el MVP valide el vínculo.
-- **La Muda colectiva de la Rodauva** *(aprobada en espíritu)*: es la cara del defecto de la Rodauva, la cobardía. Primero, la Rodauva **supera su cobardía** al llenarse su barra de zozobra (la manada adyacente le da chances). Después, **cinco Rodauvas** que lograron **3 combos de 5 eslabones juntas** (acumulados entre combates; el contador es de esas cinco y vuelve a 0 si alguna cambia) se funden en una Rodauva más grande. Sus pergaminos quedan sellados dentro de un **pergamino de muda** *(provisorio)*. Condiciones: los pergaminos internos siguen ocupados, si muere arden todos y la Muda se inicia en el Molino, con riesgo según el hambre. Es la forma en que la Rodauva vive la regla general: su valentía le llega de la manada. La reversibilidad se decide cuando tenga capa.
+- **La Muda colectiva de la Rodauva** *(aprobada en espíritu)*: es la cara del defecto de la Rodauva, la cobardía. Primero, la Rodauva **supera su cobardía** al llenarse su barra de zozobra (la manada vecina le da chances). Después, **cinco Rodauvas** que lograron **3 combos de 5 eslabones juntas** (acumulados entre combates; el contador es de esas cinco y vuelve a 0 si alguna cambia) se funden en una Rodauva más grande. Sus pergaminos quedan sellados dentro de un **pergamino de muda** *(provisorio)*. Condiciones: los pergaminos internos siguen ocupados, si muere arden todos y la Muda se inicia en el Molino, con riesgo según el hambre. Es la forma en que la Rodauva vive la regla general: su valentía le llega de la manada. La reversibilidad se decide cuando tenga capa.
 - **La involución** *(provisorio)*. Es la otra cara de la Mudanza: la criatura consumida por su defecto de naturaleza. Condiciones de visión:
   - **Disparador:** se quiebra **más de 3 veces**, **sin vínculo** con el Maestro (lealtad 3 o menos) y habiendo sido **obligada** (Grito) o **subyugada** antes. Nunca es un accidente: es la consecuencia de un maltrato sostenido. La interfaz avisa cuando está a un quiebre.
   - **Igual de fuerte, pero paga en el vínculo:** solitaria, egoísta, come más y se lleva mal con todas. Sin control, hace lo que quiere. **Nunca puede rendir más que cuidar a la tribu.**
@@ -444,7 +502,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [ ] Nombre del juego y del mundo.
 - [ ] Muda colectiva: ¿basta con que una Rodauva haya superado su cobardía, o tienen que superarla las cinco? ¿Es reversible? (al darle capa).
 - [ ] Nombre final de la barra de zozobra (Worldbuilder).
-- [ ] Número final de los Nueve (Worldbuilder).
+- [ ] Número final de los Nueve (Worldbuilder). Los Legados y sus Sombras proponen fijarlo en 9.
 - [ ] ¿Qué clases iniciales existen? (Capa 3).
 - [ ] ¿En qué capa el Tasajero pasa a ser reclutable?
 - [ ] ¿En qué capa entra la Mudanza?
@@ -454,12 +512,22 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [ ] Nombres finales de la involución, las órdenes, el Grito, la subyugación y el esbirro (Worldbuilder).
 - [ ] ¿Hay progresión entre partidas en el juego completo? (en el MVP, no)
 - [ ] Nombre final del surco del Surcón (Worldbuilder).
+- [ ] Regla de IA del Tasajero: reparto de los dos ataques de Caza y momento del cambio a Cuenta (Sistemas, con los criterios de 6.2).
+- [ ] Con vecinas en 8: ¿bajan el bono de afinidad y la probabilidad de incidente? (Sistemas)
+- [ ] Despliegues de A a H en 12 × 12 con contacto en la ronda 2 y bandos que se crucen en la cola (Sistemas)
+- [ ] ¿En qué capa entran los Legados y sus Sombras? (al validar la tribu en el MVP)
+- [ ] Legados: nombre del casillero 5 (Intemperie o Exteriorización); nombre del sistema ("Legados"); quién modeló a las Sombras; si cada criatura lleva un legado de los Nueve y una Sombra, o dos cualesquiera; justificaciones de las anulaciones Intemperie → Presión, Sinceridad → Silencio, Unión → Ilusión y Disciplina → Desapego (Worldbuilder)
+- [ ] Legados: nombres finales de la explosión y de "extenuada"; qué legados le caen mal a cada especie, más allá de la regla de la rueda; por qué el Maestro tiene afinidad con algunos legados y no con todos (Worldbuilder)
+- [ ] Legados: umbral del almacén (6 a 10); duración de la inversión; trueque de cada uno de los 18 estados; cuánta lealtad y obediencia cuesta una carga que no le gusta; costos de especialización en la rueda del árbol (Sistemas)
+- [ ] Legados: ¿qué pasa con una salvaje extenuada? ¿Huye o es más fácil de sellar? (compite con "debilitar y sellar", 6.3; Sistemas)
+- [x] ~~¿La afinidad y el foco cuerpo a cuerpo se excluyen?~~ → No: las relaciones miran las 8 vecinas; los combos no miran la posición (Escala 3, 6.4).
+- [x] ~~¿Tablero más grande? (A-2)~~ → 12 × 12 de referencia, con contacto en la ronda 2 y cámara móvil (Escala 3, 9).
+- [x] ~~¿Los bandos se intercalan en la cola?~~ → Sí, ya funciona: el orden es por Velocidad de cada unidad (Escala 3).
 - [x] ~~¿Los playtests de E y F incluyen una encuesta?~~ → No: los umbrales se miden solo con el registro. Se reabre si los comentarios de los jugadores contradicen los números.
 - [x] ~~¿La prenda tiene consecuencias?~~ → No en el MVP; el epílogo que la nombra queda en Ideas en espera (10).
 - [x] ~~Destino de la atacante caída si cae el Maestro (P-024)~~ → Se va: el pergamino arde, sin cambio de lealtad (6.4).
 - [x] ~~Trueque del surco~~ → Cavar le gasta el turno completo (6.2).
-- [ ] Regla de IA del Tasajero: reparto de los dos ataques de Caza y momento del cambio a Cuenta (Sistemas, con los criterios de 6.2).
-- [x] ~~¿El combate admite diagonales?~~ → No: cuadrícula ortogonal (Escala 3).
+- [x] ~~¿El combate admite diagonales?~~ → No para mover ni atacar: cuadrícula ortogonal (Escala 3). Las relaciones sí miran las diagonales (07/10).
 - [x] ~~¿Cada criatura tiene una activa y una pasiva de combate en el MVP?~~ → No: un solo rasgo, reescrito como activa donde aporta (6.2).
 - [x] ~~¿Cuándo se puede comer a una criatura?~~ → Solo en el reparto de la noche, junto al fuego (6.5).
 - [x] ~~Umbrales de las señales de alarma de la 0a~~ → Aprobados (`Sistema.md` 11.9).
@@ -486,7 +554,8 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [x] ~~Nombre de la balanza y de sus polos~~ → Barro ↔ Soplo (6.1).
 - [x] ~~¿De dónde viene la magia y qué es un pergamino en el lore?~~ → Los Nueve y el hilo (6.8).
 - [x] ~~¿Por qué la magia aleja al Maestro de su tribu y debilita su cuerpo?~~ → Lo etéreo (6.8).
-- [x] ~~¿Existen tipos o elementos de criaturas?~~ → No en el MVP; a futuro, solo linajes de hechura (6.2).
+- [x] ~~¿Existen tipos o elementos de criaturas?~~ → No en el MVP; a futuro, los Legados y sus Sombras (10), sin elementos ni multiplicadores de daño.
+- [x] ~~¿Cómo funcionan los linajes?~~ → Rueda de 18 con cuatro ciclos sobre un almacén de carga (10).
 - [x] ~~¿Hay un límite de pergaminos?~~ → Sí: cantidad fija inicial + ritual de sangre (6.7).
 - [x] ~~¿Cuántas criaturas guardadas puede tener el Maestro?~~ → Tantas como pergaminos (6.7).
 
@@ -587,6 +656,21 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | 05/10/2026 | Los playtests de E y F no llevan encuesta: los umbrales se miden solo con el registro | Tests livianos; se reabre si los comentarios contradicen los números |
 | 05/10/2026 | La prenda no tiene consecuencias en el MVP; el epílogo que la nombra queda en espera | Pilar 3 sin reglas nuevas; alcance congelado; el ritual duele por la sangre, no por una optimización |
 | 05/10/2026 | Si el Maestro cae con la atacante nocturna caída, ella se va: su pergamino arde, sin cambio de lealtad | La decisión moral tiene un solo momento (6.5); irse es la norma; sin decisión del Maestro, la tribu no reacciona |
+| 07/10/2026 | Mover, atacar, guardar y la Caza siguen ortogonales (4 adyacentes) | Ratifica el 05/10: las diagonales abaratan la táctica |
+| 07/10/2026 | Las relaciones (afinidad, incidentes, sostén de la cobardía) miran las 8 vecinas; los combos no miran la posición | La afinidad y el foco cuerpo a cuerpo se excluían (Pilar 3); refuerza el dilema del Tasajero |
+| 07/10/2026 | Tablero de referencia 12 × 12, con cámara móvil; un escenario puede ser menor | Espacio para maniobrar y planear (A-2) |
+| 07/10/2026 | Criterio: primer contacto en la ronda 2 | El tablero grande no puede cobrar hambre por caminar |
+| 07/10/2026 | Orden de trabajo: T16 sigue; vecinas en 8 antes de T18; tablero nuevo antes de los playtests de la 0a.2 | Nada bloquea T16; T18 y T19 nacen con la regla nueva; las alarmas se miden sobre el tablero real |
+| 07/10/2026 | Los bandos ya se intercalan en la cola; sin cambios | Confirmado en el escenario C; Secundar depende de eso |
+| 10/10/2026 | Los Legados y sus Sombras (rueda de 18) reemplazan a los linajes de hechura como norte; quedan en Ideas en espera, fuera de la 0a y la 0b | Alcance congelado; el MVP no tiene linajes |
+| 10/10/2026 | Cuatro ciclos por distancia en la rueda (generación +1, potenciación +4, anulación +8, inversión +9), que actúan sobre la carga y nunca multiplican el daño | Sin tabla de efectividad: el sistema queda propio (sección 8) |
+| 10/10/2026 | Almacén de carga por unidad: todo legado suma, solo la anulación resta y su sobrante se pierde | La anulación es la única limpieza; la carga es una apuesta |
+| 10/10/2026 | Quien completa el umbral decide: un enemigo → explosión e inversión; una aliada o la propia → el Maestro elige generación o inversión; en un empate gana el legado de quien completó | Dar el último punto es una decisión táctica; invertir a una propia es un sacrificio con costo |
+| 10/10/2026 | La invertida defiende como un solo legado (la Sombra del dominante) y después queda extenuada el resto del combate y del día; sigue comiendo y puede rescatar | Se lee en un ícono; la consecuencia del combate llega al día (Pilar 4); la regla de oro no depende de un estado de combate |
+| 10/10/2026 | Potenciación: carga solo el legado potenciado, con +1, si ya está en el almacén o es un legado propio del objetivo | El ciclo actúa sobre la carga; premia leer el almacén |
+| 10/10/2026 | Lo que no le gusta = Sombra o anulador de sus legados; carga propia o aliada → lealtad; carga enemiga → obediencia | El vínculo solo se rompe por decisiones del jugador (sección 8) |
+| 10/10/2026 | El Maestro es avatar de los legados: arma = legado de ataque, armadura = dos legados defensivos; equipo elegido antes del combate y cambio de arma con costo de turno | Pilar 1 sin que el Maestro sea el anulador universal |
+| 10/10/2026 | La rueda del árbol: la afinidad del Maestro crece con la tribu que elige y por la rueda; especializarse limita | Construcción profunda sin un árbol aparte; el Maestro crece con su tribu (Pilares 1 y 3) |
 
 ## 13. Registro de versiones
 
@@ -604,3 +688,5 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | v1.0 | 03/10/2026 | **MVP definido.** Regla de cuándo se come a una criatura (6.5). Elisión de comer y del abandono (7). Estado de construcción: luz verde a la 0a, criterios de éxito con umbrales e hitos de la 0b validados (10). Papel de `Decisiones.md` y `Arquitectura.md` en el encabezado. Preguntas abiertas: se cierran cuándo comer y los umbrales; nueva: encuesta en E y F (11). Registro del 03/10 (12) |
 | v1.1 | 05/10/2026 | **Rasgos reescritos tras el playtest 0a.1.** Cuadrícula ortogonal, diagonales descartadas (Escala 3). Principio de las activas, rasgos del MVP, Caza y cuenta en dos modos y rasgos visibles (6.2). Rasgo por criatura y el surco como único terreno, que solo atraviesa un Surcón (9). Hallazgos de la 0a.1 y orden de trabajo (10). Preguntas abiertas: nuevas sobre el surco y la IA del Tasajero; cerradas las diagonales y las activas (11). Registro del 05/10 (12) |
 | v1.2 | 05/10/2026 | La atacante nocturna se va si el Maestro cae antes de decidir, sin cambio de lealtad (6.4, responde P-024). La prenda en el epílogo pasa a Ideas en espera (10). Preguntas abiertas: se cierran la encuesta de E y F, la prenda y la atacante (11). Registro del 05/10 (12) |
+| v1.3 | 07/10/2026 | **Geometría y tablero.** Adyacencia en 4 para mover, atacar, guardar y la Caza; las relaciones miran las 8 vecinas; los combos no miran la posición; tablero de referencia 12 × 12 con cámara móvil y contacto en la ronda 2; bandos intercalados en la cola (Escala 3). Vecinas en 6.4 y en la nota del Tasajero (6.2). MVP actualizado (9). Orden de trabajo del 07/10 y vecinas en la barra de zozobra y la Muda colectiva (10). Preguntas abiertas: nuevas para Sistemas sobre afinidad e incidentes en 8 y despliegues en 12 × 12; cerradas afinidad y foco, tablero e intercalado (11). Registro del 07/10 (12) |
+| v1.4 | 11/10/2026 | **Los Legados y sus Sombras** en Ideas en espera: rueda de 18, cuatro ciclos sobre la carga, almacén con explosión, inversión y extenuación, lo que no le gusta a cada criatura, el Maestro avatar y la rueda del árbol (10). Reemplazan a los linajes de hechura (6.2) y se nombran en el Maestro (6.1), en "no es" (8) y en el MVP como fuera de alcance (9). Preguntas abiertas: nuevas para Worldbuilder y Sistemas; cerrada la de cómo funcionan los linajes (11). Registro del 10/10 (12). Sin cambios en la 0a ni en la 0b |

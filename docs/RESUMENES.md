@@ -2651,3 +2651,70 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   7. Otra vez A: guardarla y, en el turno siguiente del Maestro, invocarla. Aparece con 10 de vida.
   8. Anotar los `[FALTA]` que aparezcan.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T28 · sesión 1 · 12/10/2026
+- **Rama:** tarea/T28-huida-maestro
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:** el Maestro declara la huida en su turno, con el turno sin usar (`Sistema.md` 11.7 y 11.3). La ronda sigue entera y, si al cerrarla el combate sigue en curso, termina en `huida`: las caídas del tablero mueren, las guardadas sobreviven y nadie recibe el +1. Antes de declarar, la pantalla muestra qué enemigas actúan antes del cierre, si lo alcanzan y el daño máximo. Detalle:
+  - **Estado:** `Maestro.huida_declarada` y `Maestro.se_fue`, de ejecución como `caido`, los dos en la `instantanea`. `FinCombate.evaluar` mira caída → victoria → `se_fue` (HUIDA). El fin sigue saliendo del `Plantel`.
+  - **Acción:** `Accion.huir()` (tipo `huir` en el esquema `grabacion`; gasta el turno completo). Un solo chequeo, `Turno._motivo_huir`, que es el del turno completo del Maestro: `_motivo_puede_invocar` pasó a llamarse `_motivo_turno_completo_del_maestro` y lo comparten invocar y huir. Reusa TURNO_TERMINADO, SOLO_MAESTRO, ACCION_USADA y YA_SE_MOVIO; **no hay motivos nuevos**. Después solo vale `terminar`, que no es esperar. Consulta `motivo_huir()`.
+  - **Cierre de la ronda:** `Combate._cerrar_ronda`, después de `fin_ronda`, `hambre_combate` y `cadena_cortada`, deja ir al Maestro y termina el combate. Registro sin evento nuevo: `accion` `huir` … `fin` `huida` → `cierre`.
+  - **`Cierre` con HUIDA:** entra por el mismo camino que la derrota. Sale el rechazo `NO_IMPLEMENTADO` (y su valor del enum). `Cierre.caidas_que_mueren` es el único criterio de quién muere.
+  - **Previsualización:** `Combate.previsualizar_huida()`. Arma para cada enemiga pendiente un turno de consulta, `Turno.para_consulta`: sin inicio del turno (que tira azar), sin generador y con el modo actual; el erizado propio no la deja inmóvil, porque el inicio lo borraría. Pregunta con `pasos_para_mover` + `previsualizar_ataque`, el mismo camino de la IA y del ataque real. No cambian `Danio`, `Cadena`, `ColaIniciativa` ni la IA.
+  - **Resultado:** el esquema `resultado` ya tenía `huida` en `desenlace`. La métrica 11 da causa `huida` sin código nuevo.
+  - **Pantalla:** botón Huir con su motivo en el tooltip; con el mouse encima, el panel muestra la previsualización y se marcan en la capa `AlcanzanHuida` las enemigas que alcanzan al Maestro; el clic declara. Además, la marca en el Maestro, la línea en el panel, los sucesos y el resultado.
+- **Archivos:**
+  - Creados:
+    - fixtures `pruebas/fixtures/combate/escenario_huida_maestro_combate.json` y `escenario_huida_maestro_victoria.json`;
+    - tests `pruebas/combate/test_huir.gd`, `test_huida_maestro_combate.gd`, `pruebas/pantalla/test_lectura_huida_maestro.gd`, `test_vista_huida_maestro.gd` y `pruebas/datos/test_huida_maestro_b.gd`.
+  - Modificados:
+    - núcleo: `nucleo/unidades/maestro.gd`, `plantel.gd`, `nucleo/combate/fin_combate.gd`, `cierre.gd`, `resultado_cierre.gd`, `accion.gd`, `turno.gd` y `combate.gd`;
+    - pantalla: `pantalla/claves_textos.gd`, `pantalla/combate/lectura_combate.gd`, `vista_combate.gd` y `vista_combate.tscn` (capa `Tablero/AlcanzanHuida`);
+    - datos: `datos/_esquemas/grabacion.schema.json`;
+    - tests: `pruebas/combate/test_cierre.gd`;
+    - documentación: `docs/PREGUNTAS.md`, `docs/RESUMENES.md` y `CLAUDE.md`.
+- **Tests:** 34 nuevos (5 en `test_cierre.gd`, 5 en `test_huir.gd`, 11 en `test_huida_maestro_combate.gd`, 8 en `test_lectura_huida_maestro.gd`, 3 en `test_vista_huida_maestro.gd` y 2 en `test_huida_maestro_b.gd`). Total 781, todos pasan (sí).
+  - Reescrito: `test_cierre.gd::test_huida_no_implementada` pasa a ser `test_huida_las_caidas_mueren`, porque `Sistema.md` 11.7 ya define la huida (el test de T10 la rechazaba con `NO_IMPLEMENTADO`). Ningún otro test viejo cambió.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. Declarar y rechazos sin cambios; después solo `terminar`, que no es esperar: `test_huir.gd` (`test_declarar_con_el_turno_sin_usar`, `test_con_el_turno_usado_no` y `test_criatura_y_turno_terminado`).
+  2. La ronda sigue (las enemigas le pegan al Maestro; la Rodauva se mueve y ataca): `test_la_ronda_sigue`.
+  3. `huida`, un solo `cierre` y después COMBATE_TERMINADO; el hambre de combate va antes de irse: `test_al_cerrar_la_ronda_termina_en_huida` y `test_hambre_de_combate_antes_de_irse`.
+  4. Cae antes del cierre → `derrota_por_caida`: `test_cae_antes_del_cierre`.
+  5. La última enemiga cae, o huye (T25), → victoria con el +1: `test_la_ultima_enemiga_cae_antes_del_cierre` y `test_la_ultima_enemiga_huye_antes_del_cierre`.
+  6. `Cierre` con HUIDA (muere, arde, −4/−2, la caída guardada sobrevive, sin +1) y el orden de `evaluar`: `test_cierre.gd`.
+  7. Previsualización:
+     - es exacta en el fixture: `test_previsualizacion_es_el_peor_caso_aplicado`;
+     - la Ocarra figura con `alcanza` falso y 0, y el Tasajero en Caza cuenta 5 + 5: en el mismo test;
+     - no cambia nada: `test_previsualizar_no_cambia_nada`;
+     - solo cuentan las pendientes: `test_solo_las_pendientes`;
+     - turno de consulta con una Rodauva erizada: `test_turno_de_consulta_sin_inicio`.
+  8. Registro, grabación y `instantanea`: `test_grabacion_se_reproduce_igual` y `test_huir_como_diccionario`.
+  9. Resultado que valida y métrica 11 con causa `huida`: `test_resultado_y_metrica_11`.
+  10. Pantalla: `test_lectura_huida_maestro.gd` y `test_vista_huida_maestro.gd` (mouse por `MousePrueba`, D-012).
+  11. `datos/` real: B y D, en `test_huida_maestro_b.gd` (P-045). Pasan el permanente, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios`, `test_lanzadera_b`, `test_sellar_a`, `test_invocar_a` y `test_guardar_caida_a`.
+  12. Suite completa: 781 tests, todos pasan.
+- **Consola:** sin errores ni advertencias nuevas. Los `ERROR: ReglasCombate: falta la regla …` los provocan a propósito los tests de reglas faltantes.
+- **Supuestos y lecturas técnicas:**
+  - El daño máximo cuenta los ataques del modo actual: el primero y, si tiene más, cada uno igual al segundo de Caza.
+  - El turno de consulta no cuenta el erizado propio (el inicio del turno lo borra sin tirar).
+  - Si un Tasajero va a cambiar de modo al empezar su turno, la previsualización igual usa el modo actual (S-61).
+  - En los tests de combate y de pantalla, la Velocidad del Maestro se sube a 9 en memoria (copia de `maestro.json` de fixtures), para que juegue primero.
+- **Observación de pantalla:** la fila de botones del turno del Maestro crece hacia la derecha sin cortar. Con todos los botones (tres hechizos, Sellar, Guardar a la caída, Huir, Invocar, Secundar y Esperar), los últimos ya no entran en la ventana de 1152 px. Con textos `[FALTA]` pasa mucho antes. En B el botón Huir entra. No lo toqué: es de otra tarea.
+- **Lecturas declaradas:**
+  - S-59: como invocar, solo con el turno sin usar.
+  - S-60: la ronda sigue entera; victoria si antes cae o huye la última enemiga; hambre de combate antes de irse.
+  - S-61: el daño máximo con el tablero de ahora, sin tiradas, por los ataques del modo actual.
+- **Claves de texto nuevas sin texto:** `resultado.desenlace.huida`, `marca.huida_declarada`, `panel.huida_declarada`, `huida.previa.alcanza`, `huida.previa.no_alcanza`, `huida.previa.sin_enemigas`, `huida.previa.danio_maximo`, `huida.previa.puede_caer`, `huida.previa.caidas`, `aviso.huir.accion_usada` y `aviso.huir.ya_se_movio` (pedido de `Mundo.md` 9). Ya estaban en `es.json`: `accion.huir`, `huida.maestro.declarar`, `huida.maestro.sin_caidas` y `huida.maestro.con_caidas`.
+- **Preguntas:** nueva P-045 (ARQUITECTO, no bloquea): en B no queda ninguna enemiga pendiente cuando el Maestro declara. Cerradas: ninguna.
+- **Prueba manual (Windows):**
+  1. Suite completa, en verde (unos 15 minutos):
+     - `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas`
+     - PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`
+  2. Abrir el juego: F5 en el editor, o `"%GODOT_BIN%" --path .` (`cmd`) / `& $env:GODOT_BIN --path .` (PowerShell).
+  3. D: en el turno del Maestro, sin moverlo, pasar el mouse sobre Huir. El panel lista al Surcón salvaje (si lo alcanza o no), el daño máximo y la vida; si lo alcanza, se marca en el tablero.
+  4. Mover al Maestro y volver a mirar: el botón queda deshabilitado, con `[FALTA: aviso.huir.ya_se_movio]` en el tooltip.
+  5. B: en el turno del Maestro, pasar el mouse sobre Huir. El panel dice que nadie actúa antes del cierre (P-045). Declarar: la marca aparece sobre el Maestro y la ronda termina. La pantalla de resultado dice `[FALTA: resultado.desenlace.huida]`.
+  6. B con la Rodauva caída (Esperar hasta que la tumben) y huir: en el resultado, la Rodauva queda muerta, y el suceso dice "Al cruzar el claro, mirás atrás una vez…".
+  7. Otra vez, pero guardando antes a la caída (T27) y huyendo en el turno siguiente: la Rodauva sobrevive guardada.
+  8. Anotar los `[FALTA]` que aparezcan.
+- **Para la próxima sesión:** nada: tarea terminada.

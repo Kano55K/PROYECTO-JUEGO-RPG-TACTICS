@@ -8,8 +8,6 @@ enum Motivo {
 	COMBATE_EN_CURSO,
 	# El cierre corre una sola vez por combate.
 	YA_CERRADO,
-	# La huida es de T26.
-	NO_IMPLEMENTADO,
 	# El fin recibido no es el que da FinCombate.evaluar sobre el Plantel.
 	FIN_NO_COINCIDE,
 }
