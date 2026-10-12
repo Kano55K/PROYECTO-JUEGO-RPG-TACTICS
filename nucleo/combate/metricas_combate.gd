@@ -22,6 +22,11 @@ const _DISTRAIDA: String = "distraida"
 const _GOLPE: String = "golpe"
 const _CONTACTO: String = "contacto"
 const _FUENTE_RASGO_ATACANTE: String = "rasgo_atacante"
+const _FUERA: String = "fuera"
+const _SALVAJE: String = "salvaje"
+# Los motivos de la metrica 8 (T25).
+const MOTIVO_HUIDA: String = "huida"
+const MOTIVO_CERO: String = "cero"
 const _MINIMO_ESLABONES: int = 2
 
 
@@ -29,6 +34,7 @@ const _MINIMO_ESLABONES: int = 2
 # lineas: el registro, en orden (RegistroCombate.lineas()).
 static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictionary:
 	var bandos: Dictionary = _bandos(escenario)
+	var salvajes: Array[String] = _salvajes(escenario)
 	var primer_ataque: Variant = null
 	var totales: int = 0
 	var secundar: int = 0
@@ -40,6 +46,12 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 	var caidas: Array = []
 	# 7 (T24): {objetivo, porcentaje, logrado} de cada evento sellado, en orden.
 	var sellados: Array = []
+	# 8 (T25): {unidad, motivo, ronda} de cada salvaje que sale del tablero sin
+	# ser sellada. El motivo sale del evento que precede a su estado fuera (A.7):
+	# las unidades con un huida que salio o un sellado logrado pendientes.
+	var capturas_perdidas: Array = []
+	var huyendo: Dictionary = {}
+	var selladas: Dictionary = {}
 	var muertas: Array = []
 	var desenlace: Variant = null
 	# [ronda, distancia] de cada distancia_maestro no nula: se filtran al final,
@@ -80,6 +92,17 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 			"estado":
 				if _A_CAIDA.has(linea["a"]):
 					caidas.append({"unidad": linea["unidad"], "ronda": ronda})
+				elif linea["a"] == _FUERA:
+					var unidad_fuera: String = linea["unidad"]
+					if huyendo.has(unidad_fuera):
+						capturas_perdidas.append({"unidad": unidad_fuera, "motivo": MOTIVO_HUIDA, "ronda": ronda})
+					elif not selladas.has(unidad_fuera) and salvajes.has(unidad_fuera):
+						capturas_perdidas.append({"unidad": unidad_fuera, "motivo": MOTIVO_CERO, "ronda": ronda})
+					huyendo.erase(unidad_fuera)
+					selladas.erase(unidad_fuera)
+			"huida":
+				if linea["resultado"] == Huida.RESULTADO_HUYE:
+					huyendo[linea["unidad"]] = true
 			"fin":
 				desenlace = linea["desenlace"]
 			"cierre":
@@ -110,6 +133,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 			"sellado":
 				sellados.append({"objetivo": linea["objetivo"], "porcentaje": linea["porcentaje"],
 						"logrado": linea["resultado"] == Sellado.RESULTADO_LOGRADO})
+				if linea["resultado"] == Sellado.RESULTADO_LOGRADO:
+					selladas[linea["objetivo"]] = true
 
 	var distancia_maestro: Dictionary = {"turnos": 0, "suma": 0}
 	if primer_ataque != null:
@@ -137,8 +162,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 		"cobardia": cobardia,
 		# 7 (T24): sellados intentados y logrados, con el % mostrado
 		"sellados": sellados,
-		# 8: la llena T25 (huida)
-		"capturas_perdidas": null,
+		# 8 (T25): por huida en su turno o por llegar a 0; las selladas no cuentan
+		"capturas_perdidas": capturas_perdidas,
 		# 9 (P-043: tambien el Maestro)
 		"caidas": caidas,
 		# 10: la llena T27 (guardar a una caida)
@@ -162,6 +187,16 @@ static func _bandos(escenario: Dictionary) -> Dictionary:
 	for criatura in (escenario["enemigas"] as Array):
 		bandos[criatura["id"]] = BANDO_ENEMIGAS
 	return bandos
+
+
+# Los ids de las enemigas salvajes del escenario (la atacante nocturna no es
+# una captura: 9.3).
+static func _salvajes(escenario: Dictionary) -> Array[String]:
+	var ids: Array[String] = []
+	for criatura in (escenario["enemigas"] as Array):
+		if criatura["comportamiento"] == _SALVAJE:
+			ids.append(criatura["id"])
+	return ids
 
 
 # Sistema.md 11.4 y 11.2.2: el bono de Hacerse junco es el unico modificador de

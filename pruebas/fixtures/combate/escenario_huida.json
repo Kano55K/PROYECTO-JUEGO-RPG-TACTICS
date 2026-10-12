@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida",
+  "_nota": "Sistema.md 11.7 y 11.3 paso 2 (tests de T25, turnos sueltos). Todas estacionadas lejos entre si (fila 0, columna 11 y esquinas): cada test acomoda y hiere a las que usa. especie_huida_100 y especie_huida_1 son inventadas (MesaHuida las suma); la atacante nocturna es de especie_huida_100, para ver que no huye aunque su ficha diga 100",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 11] }
+  ],
+  "enemigas": [
+    { "id": "huye_s1", "especie": "especie_huida_100", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] },
+    { "id": "queda_s1", "especie": "especie_huida_1", "comportamiento": "salvaje", "vida": null, "posicion": [3, 0] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [11, 11] },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [6, 0] },
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [11, 5] },
+    { "id": "atacante_1", "especie": "especie_huida_100", "comportamiento": "atacante_nocturna", "vida": null, "hambre": 3, "enfermedades": 0, "posicion": [9, 0] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

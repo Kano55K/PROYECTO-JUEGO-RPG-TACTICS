@@ -113,7 +113,8 @@ static func reglas(reemplazos: Dictionary = {}) -> ReglasCombate:
 			reemplazos.get("chequeo_rival", chequeo_rival()),
 			reemplazos.get("regeneracion_mana", regeneracion_mana()),
 			reemplazos.get("hechizos", hechizos()),
-			reemplazos.get("sellado", sellado()))
+			reemplazos.get("sellado", sellado()),
+			reemplazos.get("huida", huida()))
 
 
 # El Combo de los fixtures (T16), armado como en ContextoCombate.
@@ -130,3 +131,9 @@ static func sellado(costos: String = "costos_mana.json") -> Sellado:
 	var tabla_costos: Dictionary = LectorFixture.leer(_CARPETA_COMBATE + costos, "costos_mana")["datos"]
 	return Sellado.desde_datos(datos["tablas/sellado.json"], tabla_costos, datos["tablas/lealtad.json"],
 			datos["tablas/combate.json"])
+
+
+# La Huida de los fixtures (T25), armada como en ContextoCombate. combate: el
+# fixture de tablas/combate.json.
+static func huida(combate: String = "combate.json") -> Huida:
+	return Huida.desde_datos(cargar(combate)["datos"]["tablas/combate.json"])

@@ -4,11 +4,14 @@ extends GdUnitTestSuite
 # armados a mano (listas de eventos con el formato de A.7). Sistema.md 11.9,
 # "Metricas por combate". Tests (3) a (7) del criterio de terminado.
 
-# Un escenario minimo: MetricasCombate solo lee los ids de cada bando. La
-# especie `cardo` no existe en ningun dato: las activas salen del tipo de accion.
+# Un escenario minimo: MetricasCombate solo lee los ids de cada bando y, desde
+# T25 (metrica 8), el comportamiento de las enemigas. La especie `cardo` no
+# existe en ningun dato: las activas salen del tipo de accion.
 const _ESCENARIO: Dictionary = {
 	"tribu": [{"id": "cardo_1", "especie": "cardo"}, {"id": "ocarra_1", "especie": "ocarra"}],
-	"enemigas": [{"id": "ocarra_s1", "especie": "ocarra"}, {"id": "tasajero_s1", "especie": "tasajero"}],
+	"enemigas": [{"id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje"},
+			{"id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje"},
+			{"id": "atacante_1", "especie": "ocarra", "comportamiento": "atacante_nocturna"}],
 }
 
 
@@ -184,7 +187,9 @@ func test_metrica_14_activas_y_terreno() -> void:
 
 
 # (7) Metricas 9 y 11 en una victoria (con una caida que se levanta) y en una
-# derrota con muertas (el Maestro cae: P-043); 8, 10 y 12 en null, y 7 vacia (T24).
+# derrota con muertas (el Maestro cae: P-043); 10 y 12 en null, y 7 vacia (T24).
+# T25: la 8 cuenta a la Ocarra salvaje que sale del tablero sin huida ni sellado
+# delante (cero); en la derrota, vacia.
 func test_metricas_9_y_11() -> void:
 	var victoria: Dictionary = _calcular([{"tipo": "ronda"}, {"tipo": "fin_ronda"}, {"tipo": "ronda"},
 			{"tipo": "estado", "unidad": "ocarra_1", "de": "suelta", "a": "caida"},
@@ -206,8 +211,46 @@ func test_metricas_9_y_11() -> void:
 	assert_array(derrota["muertes"]).is_equal([{"unidad": "cardo_1", "causa": "derrota_por_caida"},
 			{"unidad": "ocarra_1", "causa": "derrota_por_caida"}])
 	# T24 (D-011): la metrica 7 deja de estar en null; sin eventos sellado, lista vacia.
+	assert_array(victoria["capturas_perdidas"]).is_equal([{"unidad": "ocarra_s1", "motivo": "cero", "ronda": 2}])
+	assert_array(derrota["capturas_perdidas"]).is_empty()
 	for metricas in [victoria, derrota]:
 		assert_array(metricas["sellados"]).is_empty()
-		for clave in ["capturas_perdidas", "caidas_guardadas", "rescate"]:
+		for clave in ["caidas_guardadas", "rescate"]:
 			assert_bool(metricas.has(clave)).override_failure_message(clave).is_true()
 			assert_object(metricas[clave]).override_failure_message(clave).is_null()
+
+
+# T25 (Sistema.md 11.9, metrica 8; A.7): una salvaje que huye (huida con huye y
+# despues su estado fuera), una que llega a 0 (estado fuera sin huida delante) y
+# una sellada (sellado logrado delante) que no cuenta. Una huida que no sale no
+# marca a nadie. Las de la tribu y la atacante nocturna no son capturas.
+func test_metrica_8_capturas_perdidas() -> void:
+	var metricas: Dictionary = _calcular([{"tipo": "ronda"},
+			{"tipo": "huida", "unidad": "tasajero_s1", "porcentaje": 25, "tiro": 90, "resultado": "se_queda"},
+			_ataque("cardo_1", "tasajero_s1"),
+			{"tipo": "estado", "unidad": "tasajero_s1", "de": "suelta", "a": "fuera"},
+			{"tipo": "huida", "unidad": "ocarra_s1", "porcentaje": 50, "tiro": 3, "resultado": "huye"},
+			{"tipo": "estado", "unidad": "ocarra_s1", "de": "suelta", "a": "fuera"},
+			{"tipo": "fin_ronda"}, {"tipo": "ronda"},
+			{"tipo": "estado", "unidad": "atacante_1", "de": "suelta", "a": "fuera"},
+			{"tipo": "estado", "unidad": "cardo_1", "de": "suelta", "a": "fuera"},
+			{"tipo": "fin", "desenlace": "victoria"}])
+	assert_array(metricas["capturas_perdidas"]).is_equal([
+		{"unidad": "tasajero_s1", "motivo": "cero", "ronda": 1},
+		{"unidad": "ocarra_s1", "motivo": "huida", "ronda": 1},
+	])
+	var con_sellado: Dictionary = _calcular([{"tipo": "ronda"},
+			{"tipo": "sellado", "objetivo": "ocarra_s1", "porcentaje": 50, "tiro": 10, "resultado": "logrado",
+					"pergamino": "pergamino_2"},
+			{"tipo": "estado", "unidad": "ocarra_s1", "de": "suelta", "a": "fuera"},
+			_ataque("cardo_1", "tasajero_s1"),
+			{"tipo": "estado", "unidad": "tasajero_s1", "de": "suelta", "a": "fuera"},
+			{"tipo": "fin", "desenlace": "victoria"}])
+	assert_array(con_sellado["capturas_perdidas"]).is_equal([{"unidad": "tasajero_s1", "motivo": "cero", "ronda": 1}])
+	# Un sellado fallido no la salva: si despues llega a 0, es una captura perdida.
+	var fallido: Dictionary = _calcular([{"tipo": "ronda"},
+			{"tipo": "sellado", "objetivo": "ocarra_s1", "porcentaje": 50, "tiro": 90, "resultado": "fallido",
+					"pergamino": null},
+			_ataque("cardo_1", "ocarra_s1"),
+			{"tipo": "estado", "unidad": "ocarra_s1", "de": "suelta", "a": "fuera"}])
+	assert_array(fallido["capturas_perdidas"]).is_equal([{"unidad": "ocarra_s1", "motivo": "cero", "ronda": 1}])

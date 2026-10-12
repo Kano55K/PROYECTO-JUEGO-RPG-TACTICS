@@ -203,6 +203,13 @@ func costo_sellado(unidad_id: String) -> Variant:
 	return null if criatura == null else _contexto.sellado.costo(criatura.especie, _plantel.maestro)
 
 
+# Sistema.md 11.7 (T25, "la probabilidad se muestra sobre la unidad"): el % de
+# huida que tiraria la unidad si su turno empezara ahora (Huida, la misma cuenta
+# que la tirada); 0 si no tira.
+func porcentaje_huida(unidad_id: String) -> int:
+	return _contexto.huida.porcentaje_al_empezar(unidad_id, _plantel)
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -295,6 +302,9 @@ func _avanzar() -> void:
 		if not _turno.mana.is_empty():
 			_registrar({"tipo": "mana", "unidad": entrada.unidad_id, "de": _turno.mana["de"],
 					"a": _turno.mana["a"], "motivo": RegeneracionMana.MOTIVO_REGENERACION}, 0)
+		# Sistema.md 11.7 y 11.3 paso 2 (T25): la huida, detras de su propia tirada.
+		if _registrar_huida(estados_antes):
+			continue
 		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7). Paso
 		# antes que las tiradas de los pasos 3 y 4 de 11.3: se registra sin
 		# volcarlas, asi el orden del registro es el de lo que paso.
@@ -303,6 +313,31 @@ func _avanzar() -> void:
 					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]}, 0)
 		_registrar_chequeo_rival()
 		_registrar_incidente(estados_antes)
+
+
+# Sistema.md 11.7 (T25, A.7): el evento huida, detras del turno y de su tirada
+# (solo la suya: las de los pasos 3 y 4 van despues), solo si tiro. Si huyo,
+# siguen el estado y los surcos cerrados, y el turno termina: con el combate en
+# curso, su fin_turno (sin posicion, ya no esta en el tablero, asi que no hay
+# encierro que medir); si era la ultima enemiga, el fin, sin fin_turno, como
+# cualquier accion que gana. Devuelve si el turno termino ahi.
+func _registrar_huida(estados_antes: Dictionary) -> bool:
+	var huida: Dictionary = _turno.huida
+	if huida.is_empty():
+		return false
+	var unidad_id: String = _turno.unidad_id
+	_registrar({"tipo": "huida", "unidad": unidad_id, "porcentaje": huida["porcentaje"], "tiro": huida["tiro"],
+			"resultado": huida["resultado"]}, 1)
+	if huida["resultado"] != Huida.RESULTADO_HUYE:
+		return false
+	_registrar_estados(estados_antes)
+	_registrar_surcos()
+	_fin = FinCombate.evaluar(_plantel)
+	if _fin != FinCombate.Fin.EN_CURSO:
+		_terminar()
+	else:
+		_registrar({"tipo": "fin_turno", "unidad": unidad_id, "posicion": Plantel.casilla_a_lista(_posicion(unidad_id))})
+	return true
 
 
 func _empezar_turno(entrada: EntradaCola) -> Turno:

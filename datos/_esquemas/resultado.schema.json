@@ -405,8 +405,19 @@
           }
         },
         "capturas_perdidas": {
-          "description": "Métrica 8 (por huida en su turno y por llegar a 0). T23: null. La llena T25",
-          "type": "null"
+          "description": "Métrica 8 (T25): cada salvaje que sale del tablero sin ser sellada, en orden: por huida en su turno o por llegar a 0. Lista vacía si no hubo ninguna",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["unidad", "motivo", "ronda"],
+            "additionalProperties": false,
+            "properties": {
+              "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+              "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+              "motivo": { "enum": ["huida", "cero"] },
+              "ronda": { "$ref": "#/$defs/conteo" }
+            }
+          }
         },
         "caidas": {
           "description": "Métrica 9: cada evento estado que pasa a caida (o a caido, el Maestro: P-043), en orden",
