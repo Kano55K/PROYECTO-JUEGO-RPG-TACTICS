@@ -3,14 +3,14 @@
 class_name Accion
 extends RefCounted
 
-# Huir es un tipo nuevo en T28. SELLAR (T24): el Maestro sella a una salvaje
-# (Sistema.md 4.1). GUARDAR e INVOCAR (T26, Sistema.md 3.1): la criatura se
+# SELLAR (T24): el Maestro sella a una salvaje (Sistema.md 4.1). HUIR (T28,
+# Sistema.md 11.7): el Maestro declara la huida. GUARDAR e INVOCAR (T26, Sistema.md 3.1): la criatura se
 # guarda en su pergamino; el Maestro invoca a una guardada. GUARDAR_CAIDA (T27,
 # Sistema.md 11.5): el Maestro guarda a una caida de la tribu.
 # HECHIZO (T22): un solo tipo para todos; el hechizo es un parametro (su id de
 # hechizos.json), asi la pantalla los arma desde los datos.
 enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR, GUARDAR, INVOCAR,
-		GUARDAR_CAIDA }
+		GUARDAR_CAIDA, HUIR }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco; para INVOCAR,
@@ -105,6 +105,11 @@ static func guardar_caida(id_objetivo: String) -> Accion:
 	return accion
 
 
+# Sistema.md 11.7 (T28): el Maestro declara la huida; se va al cerrar la ronda.
+static func huir() -> Accion:
+	return Accion.new(Tipo.HUIR)
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -194,6 +199,6 @@ static func _es_casilla(valor: Variant) -> bool:
 
 
 # Sistema.md 11.3 y 3.1: invocar, huir y cavar un surco gastan el turno
-# completo. Huir (T28) se suma aca.
+# completo.
 func gasta_turno_completo() -> bool:
-	return tipo == Tipo.CAVAR or tipo == Tipo.INVOCAR
+	return tipo == Tipo.CAVAR or tipo == Tipo.INVOCAR or tipo == Tipo.HUIR

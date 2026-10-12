@@ -29,6 +29,8 @@ const _ACCION_GUARDAR: String = "guardar"
 const _ACCION_GUARDAR_CAIDA: String = "guardar_caida"
 # T27 (Mundo.md 5): el hueco de rol del suceso guardar_caida ({caida}, {caida_la}).
 const _HUECO_CAIDA: String = "caida"
+# A.7 (T28): el tipo de la accion `huir` en el registro.
+const _ACCION_HUIR: String = "huir"
 
 var _combate: Combate
 var _plantel: Plantel
@@ -55,6 +57,9 @@ func fichas() -> Array[Dictionary]:
 		var marcas_maestro: Array[String] = []
 		if foto_maestro["caido"]:
 			marcas_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, Maestro.ID))
+		# T28 (Sistema.md 11.7): declaro la huida y se va al cerrar la ronda.
+		if foto_maestro["huida_declarada"]:
+			marcas_maestro.append(_armador.armar(ClavesTextos.MARCA_HUIDA_DECLARADA))
 		var ficha_maestro: Dictionary = _ficha(Maestro.ID, foto_maestro["posicion"], true, true, foto_maestro["caido"],
 				foto_maestro["vida"], _plantel.maestro.vida_max_real(), marcas_maestro)
 		lista.append(ficha_maestro)
@@ -202,6 +207,9 @@ func panel_turno() -> Array[String]:
 	var cadena: Variant = _combate.instantanea()["cadena"]
 	if cadena != null:
 		lineas.append(_linea_cadena(cadena))
+	# T28 (Sistema.md 11.7): con la huida declarada, que se va al cerrar la ronda.
+	if _combate.instantanea()["maestro"]["huida_declarada"]:
+		lineas.append(_armador.armar(ClavesTextos.PANEL_HUIDA_DECLARADA))
 	var motivo: String = boton_terminar()["motivo"]
 	if not motivo.is_empty():
 		lineas.append(motivo)
@@ -307,6 +315,9 @@ func suceso(evento: Dictionary) -> Array[String]:
 			# T27: el Maestro nombra la accion antes de su `guardado_caida`.
 			if evento["accion"]["tipo"] == _ACCION_GUARDAR_CAIDA:
 				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_GUARDAR_CAIDA)])]
+			# T28 (Sistema.md 11.7, Mundo.md 9): el Maestro declara la huida.
+			if evento["accion"]["tipo"] == _ACCION_HUIR:
+				return [_armador.armar(ClavesTextos.HUIDA_MAESTRO_DECLARAR)]
 		# T26: la invocada, cuando ya esta en el tablero.
 		"invocacion":
 			return [_armador.armar(ClavesTextos.INVOCAR, _hueco(evento["unidad"]), _sujeto(evento["unidad"]))]
@@ -329,7 +340,7 @@ func suceso(evento: Dictionary) -> Array[String]:
 			if evento["desenlace"] == _DESENLACE_VICTORIA:
 				return [_armador.armar(ClavesTextos.COMBATE_VICTORIA)]
 		"cierre":
-			var lineas: Array[String] = []
+			var lineas: Array[String] = _sucesos_huida_maestro(evento)
 			for id_unidad in evento["levantadas"]:
 				lineas.append(_armador.armar(ClavesTextos.CAIDA_LEVANTARSE, _hueco(id_unidad), _sujeto(id_unidad)))
 			for id_unidad in evento["muertas"]:
@@ -672,6 +683,61 @@ func vista_previa_guardar_caida(previa: ResultadoAccion) -> Array[String]:
 	if not previa.mana.is_empty():
 		lineas.append("%s: %d → %d" % [_armador.armar(ClavesTextos.PANEL_MANA), previa.mana["de"], previa.mana["a"]])
 	lineas.append(_linea_vida(previa.vida["de"], previa.vida["a"]))
+	return lineas
+
+
+# T28 (Sistema.md 11.7): el boton Huir {texto, habilitado, tooltip}, o {} fuera
+# del turno del Maestro o con la huida ya declarada. habilitado y el motivo del
+# tooltip salen de Turno.motivo_huir.
+func boton_huir() -> Dictionary:
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.unidad_id != Maestro.ID or _plantel.maestro.huida_declarada:
+		return {}
+	var motivo: ResultadoAccion.Motivo = turno.motivo_huir()
+	var clave_motivo: String = ClavesTextos.motivo_huir(motivo)
+	return {"texto": _armador.armar(ClavesTextos.ACCION_HUIR), "habilitado": motivo == ResultadoAccion.Motivo.NINGUNO,
+			"tooltip": "" if clave_motivo.is_empty() else _armador.armar(clave_motivo)}
+
+
+# T28 (Sistema.md 11.7, "previsualizacion al declarar"): las lineas de
+# Combate.previsualizar_huida, con los numeros que da el nucleo: cada enemiga que
+# actua antes del cierre (si lo alcanza y su danio maximo), el danio maximo total,
+# la vida del Maestro, el aviso si puede caer y las caidas que moririan.
+func vista_previa_huida(previa: Dictionary) -> Array[String]:
+	var lineas: Array[String] = []
+	var enemigas: Array = previa["enemigas"]
+	if enemigas.is_empty():
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_SIN_ENEMIGAS))
+	for enemiga: Dictionary in enemigas:
+		if enemiga["alcanza"]:
+			lineas.append("%s%s%s −%d" % [nombre(enemiga["unidad"]), _SEPARADOR,
+					_armador.armar(ClavesTextos.HUIDA_PREVIA_ALCANZA), enemiga["danio"]])
+		else:
+			lineas.append(_SEPARADOR.join([nombre(enemiga["unidad"]),
+					_armador.armar(ClavesTextos.HUIDA_PREVIA_NO_ALCANZA)]))
+	lineas.append("%s: %d" % [_armador.armar(ClavesTextos.HUIDA_PREVIA_DANIO_MAXIMO), previa["danio_maximo"]])
+	lineas.append("%s: %d" % [_armador.armar(ClavesTextos.PANEL_VIDA), previa["vida"]])
+	if previa["puede_caer"]:
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_PUEDE_CAER))
+	var caidas: Array = previa["caidas"]
+	if not caidas.is_empty():
+		lineas.append("%s: %s" % [_armador.armar(ClavesTextos.HUIDA_PREVIA_CAIDAS),
+				", ".join(caidas.map(func(id_caida: String) -> String: return nombre(id_caida)))])
+	return lineas
+
+
+# T28 (Sistema.md 11.7, Mundo.md 9): con el combate terminado en huida, la linea
+# de irse antes de las del cierre: sin caidas, huida.maestro.sin_caidas; si no,
+# huida.maestro.con_caidas por cada muerta (hueco {caida}). [] en otro desenlace.
+func _sucesos_huida_maestro(cierre: Dictionary) -> Array[String]:
+	var lineas: Array[String] = []
+	if _combate.fin() != FinCombate.Fin.HUIDA:
+		return lineas
+	if (cierre["muertas"] as Array).is_empty():
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_MAESTRO_SIN_CAIDAS))
+	for id_unidad in cierre["muertas"]:
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_MAESTRO_CON_CAIDAS, {_HUECO_CAIDA: HuecoCriatura.new(
+				_plantel.criatura(id_unidad).especie.id())}, _sujeto(id_unidad)))
 	return lineas
 
 

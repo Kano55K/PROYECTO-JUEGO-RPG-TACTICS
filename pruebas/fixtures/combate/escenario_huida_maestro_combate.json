@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida_maestro_combate",
+  "_nota": "Arquitectura.md B.4 (T28): la huida del Maestro dentro del Combate (ronda que sigue, cierre, previsualizacion, registro, grabacion y resultado). Sistema.md 11.7, 11.5, 5.2 y 11.3. Los tests suben en memoria la Velocidad del Maestro a 9, asi juega primero en la ronda 1: Maestro (9), Tasajero en Caza (8), Ocarra (7), rodauva_1 (6), Surcon (2). rodauva_2 empieza con 0 de vida (caida al arrancar) y rodauva_g guardada. Solo el Maestro esta al alcance del Tasajero ([2,1] a 5: llega a [2,5], dos golpes) y del Surcon ([2,9] a 3: llega a [2,7]); la Ocarra no lo alcanza (a 12) y va por rodauva_1 (a 5). Nadie tira: ninguna salvaje con vida <= 25 %, Tasajero y Rodauva (mal) nunca a 5 o menos, y ninguna enemiga vecina en 8 de una afin o rival. Relaciones de 10.8: Rodauva-Rodauva bien (-4 en la muerte en el grupo)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [9, 6] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 0, "posicion": [11, 11] },
+    { "id": "rodauva_g", "especie": "rodauva", "estado": "guardada", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [2, 1] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [9, 1] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [2, 9] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -89,6 +89,8 @@ var _eventos: Array[Dictionary] = []
 # Sistema.md 10.5 y 10.6: las rivales del chequeo y la casilla donde empezo el turno.
 var _rivales_chequeo: Array[String] = []
 var _casilla_inicial: Vector2i = Criatura.SIN_POSICION
+# T28: turno armado con para_consulta (sin inicio del turno).
+var _consulta: bool = false
 
 var _plantel: Plantel
 var _tablero: Tablero
@@ -165,6 +167,21 @@ static func empezar(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, su
 	if not entrada.vuelve:
 		turno._fijar_obligacion()
 		turno._chequear_incidente()
+	return turno
+
+
+# T28 (D-005, S-61): el turno de una unidad que no es la del turno en curso,
+# solo para preguntar (previsualizar_ataque, pasos_para_mover), sin modificar
+# nada. No corre el inicio del turno, que tira azar (huida, chequeo de rival,
+# incidente) y cambia el modo: juega con el modo actual y sin los estados del
+# inicio. Del inicio solo cuenta el borrado de Erizarse, que no tira (11.3): la
+# unidad no queda inmovil por su erizado (_inmovil). Sin generador: si algo
+# intentara tirar, fallaria a la vista. Nunca se aplica.
+static func para_consulta(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Surcos,
+		cadena: Cadena, cola: ColaIniciativa, reglas: ReglasCombate) -> Turno:
+	var turno: Turno = Turno.new(entrada, plantel, tablero, surcos, cadena, cola, reglas, null)
+	turno._consulta = true
+	turno._preparar()
 	return turno
 
 
@@ -424,7 +441,7 @@ func guardadas_para_invocar() -> Array[String]:
 # casilla. [] si el Maestro no puede invocar en este turno.
 func casillas_para_invocar() -> Array[Vector2i]:
 	var resultado: Array[Vector2i] = []
-	if _motivo_puede_invocar() != ResultadoAccion.Motivo.NINGUNO:
+	if _motivo_turno_completo_del_maestro() != ResultadoAccion.Motivo.NINGUNO:
 		return resultado
 	return _casillas_libres_junto_al_maestro()
 
@@ -439,6 +456,12 @@ func motivo_invocar(criatura_id: String) -> ResultadoAccion.Motivo:
 # costo, el mana, las ocultas que destaparia y el evento; el motivo si no vale.
 func previsualizar_invocar(criatura_id: String, casilla: Vector2i) -> ResultadoAccion:
 	return validar(Accion.invocar(criatura_id, casilla))
+
+
+# Sistema.md 11.7 (T28, D-005): por que el Maestro no puede declarar la huida
+# ahora, con el mismo chequeo que la accion. NINGUNO si puede.
+func motivo_huir() -> ResultadoAccion.Motivo:
+	return _motivo_huir()
 
 
 # Sistema.md 11.5 (T27, D-005): las caidas que el Maestro puede guardar ahora, en
@@ -693,6 +716,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _guardar_caida(accion.objetivo_id, aplica)
 		Accion.Tipo.INVOCAR:
 			resultado = _invocar(accion.criatura_id, accion.casilla, aplica)
+		Accion.Tipo.HUIR:
+			resultado = _declarar_huida(aplica)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:
@@ -1338,14 +1363,14 @@ func _invocar(criatura_id: String, casilla: Vector2i, aplica: bool) -> Resultado
 
 
 # Sistema.md 3.1 (T26): el unico chequeo de invocar, compartido por la accion y
-# las consultas. Primero lo del Maestro (_motivo_puede_invocar); despues la
-# criatura (de la tribu y guardada: la del escenario o la guardada antes en este
+# las consultas. Primero lo del Maestro (_motivo_turno_completo_del_maestro);
+# despues la criatura (de la tribu y guardada: la del escenario o la guardada antes en este
 # combate, tambien en esta ronda, S-56), que haya alguna casilla libre junto al
 # Maestro y el mana del costo. Con la casilla de la accion, al final la casilla:
 # ortogonalmente adyacente al Maestro y libre (S-25). Sin casilla (SIN_POSICION),
 # es la consulta motivo_invocar.
 func _motivo_invocar(criatura_id: String, casilla: Vector2i = Criatura.SIN_POSICION) -> ResultadoAccion.Motivo:
-	var motivo: ResultadoAccion.Motivo = _motivo_puede_invocar()
+	var motivo: ResultadoAccion.Motivo = _motivo_turno_completo_del_maestro()
 	if motivo != ResultadoAccion.Motivo.NINGUNO:
 		return motivo
 	var criatura: Criatura = _plantel.criatura(criatura_id)
@@ -1368,9 +1393,10 @@ func _motivo_invocar(criatura_id: String, casilla: Vector2i = Criatura.SIN_POSIC
 	return ResultadoAccion.Motivo.NINGUNO
 
 
-# Lo de invocar que no depende de la criatura, en este orden: turno terminado,
-# solo el Maestro y el turno sin usar (S-53: sin la accion ni haberse movido).
-func _motivo_puede_invocar() -> ResultadoAccion.Motivo:
+# Lo de las acciones del Maestro que gastan el turno completo (11.3): invocar
+# (sin mirar la criatura) y huir (T28), en este orden: turno terminado, solo el
+# Maestro y el turno sin usar (S-53 y S-59: sin la accion ni haberse movido).
+func _motivo_turno_completo_del_maestro() -> ResultadoAccion.Motivo:
 	if terminado:
 		return ResultadoAccion.Motivo.TURNO_TERMINADO
 	if unidad_id != Maestro.ID:
@@ -1456,6 +1482,28 @@ func _motivo_puede_guardar_caida() -> ResultadoAccion.Motivo:
 	return ResultadoAccion.Motivo.NINGUNO
 
 
+# Sistema.md 11.7 y 11.3 (T28): el Maestro declara la huida. Gasta el turno
+# completo, como invocar (S-59): despues solo vale terminar, que no es esperar.
+# Sigue en el tablero y puede ser objetivo; se va al cerrar la ronda (Combate).
+# No es un ataque: no toca la cadena, el Encono ni el bono.
+func _declarar_huida(aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_huir()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	if aplica:
+		_plantel.maestro.huida_declarada = true
+		accion_usada = true
+		ataques_restantes = 0
+		_gastar_pasos(pasos_restantes)
+	return ResultadoAccion.aceptada()
+
+
+# Sistema.md 11.7 (T28): el unico chequeo de huir, compartido por la accion y la
+# consulta. Es el del turno completo del Maestro, como invocar (S-59).
+func _motivo_huir() -> ResultadoAccion.Motivo:
+	return _motivo_turno_completo_del_maestro()
+
+
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es
 # "esperar" (10.2, P-015): el resultado lo dice para el registro. No corta la cadena.
 func _terminar(aplica: bool) -> ResultadoAccion:
@@ -1476,8 +1524,12 @@ func _terminar(aplica: bool) -> ResultadoAccion:
 	return resultado
 
 
-# Erizada con un rasgo que la deja inmovil (dato de la ficha).
+# Erizada con un rasgo que la deja inmovil (dato de la ficha). En un turno de
+# consulta (T28), el erizado de la propia unidad no cuenta: el inicio de su
+# turno lo borraria (11.2, 11.3).
 func _inmovil(id_unidad: String) -> bool:
+	if _consulta and id_unidad == unidad_id:
+		return false
 	var criatura: Criatura = _plantel.criatura(id_unidad)
 	return criatura != null and criatura.erizada and criatura.especie.rasgo().get("inmovil", false)
 

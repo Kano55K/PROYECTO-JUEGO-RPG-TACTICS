@@ -137,6 +137,9 @@ func instantanea() -> Dictionary:
 			"mana": maestro.mana,
 			"posicion": casilla_a_lista(maestro.posicion),
 			"caido": maestro.caido,
+			# Arquitectura.md A.7 (T28): la huida declarada y si ya se fue.
+			"huida_declarada": maestro.huida_declarada,
+			"se_fue": maestro.se_fue,
 		},
 		"criaturas": lista_criaturas,
 		"pergaminos": lista_pergaminos,

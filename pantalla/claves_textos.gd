@@ -139,6 +139,24 @@ const AVISO_GUARDAR_CAIDA_ACCION_USADA: String = "aviso.guardar_caida.accion_usa
 const AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE: String = "aviso.guardar_caida.fuera_de_alcance"
 const AVISO_GUARDAR_CAIDA_MANA: String = "aviso.guardar_caida.mana_insuficiente"
 const AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS: String = "aviso.guardar_caida.sin_objetivos"
+# T28 (Sistema.md 11.7, Mundo.md 9): la huida del Maestro. El boton y los
+# sucesos de declarar y de irse (con o sin caidas, hueco {caida}) estan en
+# es.json; la marca, la linea del panel, la previsualizacion y por que el boton
+# esta deshabilitado, no (claves propuestas, pedido de Mundo.md 9).
+const ACCION_HUIR: String = "accion.huir"
+const HUIDA_MAESTRO_DECLARAR: String = "huida.maestro.declarar"
+const HUIDA_MAESTRO_SIN_CAIDAS: String = "huida.maestro.sin_caidas"
+const HUIDA_MAESTRO_CON_CAIDAS: String = "huida.maestro.con_caidas"
+const MARCA_HUIDA_DECLARADA: String = "marca.huida_declarada"
+const PANEL_HUIDA_DECLARADA: String = "panel.huida_declarada"
+const HUIDA_PREVIA_ALCANZA: String = "huida.previa.alcanza"
+const HUIDA_PREVIA_NO_ALCANZA: String = "huida.previa.no_alcanza"
+const HUIDA_PREVIA_SIN_ENEMIGAS: String = "huida.previa.sin_enemigas"
+const HUIDA_PREVIA_DANIO_MAXIMO: String = "huida.previa.danio_maximo"
+const HUIDA_PREVIA_PUEDE_CAER: String = "huida.previa.puede_caer"
+const HUIDA_PREVIA_CAIDAS: String = "huida.previa.caidas"
+const AVISO_HUIR_ACCION_USADA: String = "aviso.huir.accion_usada"
+const AVISO_HUIR_YA_SE_MOVIO: String = "aviso.huir.ya_se_movio"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -165,14 +183,18 @@ const FIJAS: Array[String] = [
 	AVISO_INVOCAR_YA_SE_MOVIO, AVISO_INVOCAR_ACCION_USADA, AVISO_INVOCAR_MANA, AVISO_INVOCAR_SIN_CASILLA_LIBRE,
 	ACCION_GUARDAR_CAIDA, GUARDAR_CAIDA, GUARDAR_CAIDA_TOOLTIP, AVISO_GUARDAR_CAIDA_ACCION_USADA,
 	AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE, AVISO_GUARDAR_CAIDA_MANA, AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS,
+	ACCION_HUIR, HUIDA_MAESTRO_DECLARAR, HUIDA_MAESTRO_SIN_CAIDAS, HUIDA_MAESTRO_CON_CAIDAS,
+	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_ALCANZA, HUIDA_PREVIA_NO_ALCANZA,
+	HUIDA_PREVIA_SIN_ENEMIGAS, HUIDA_PREVIA_DANIO_MAXIMO, HUIDA_PREVIA_PUEDE_CAER, HUIDA_PREVIA_CAIDAS,
+	AVISO_HUIR_ACCION_USADA, AVISO_HUIR_YA_SE_MOVIO,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
 	EstadosUnidad.LEALTAD_DESLEAL, EstadosUnidad.LEALTAD_DUDOSA,
 	EstadosUnidad.LEALTAD_NEUTRAL, EstadosUnidad.LEALTAD_LEAL,
 ]
-# FinCombate: los desenlaces que hoy pueden pasar (huida es de T26).
-const _DESENLACES: Array[String] = ["victoria", "derrota_por_caida"]
+# FinCombate: los desenlaces que pueden pasar (huida desde T28).
+const _DESENLACES: Array[String] = ["victoria", "derrota_por_caida", "huida"]
 # ModificadorDanio.Fuente sin texto propio en es.json (hambre, rasgos y modo lo tienen).
 const _FUENTES_DESGLOSE: Array[String] = ["combo", "afinidad", "encono", "cobardia"]
 # Arquitectura.md A.7: motivos del evento destape.
@@ -356,6 +378,18 @@ static func motivo_guardar_caida(motivo: ResultadoAccion.Motivo) -> String:
 			return AVISO_GUARDAR_CAIDA_MANA
 		ResultadoAccion.Motivo.SIN_OBJETIVOS:
 			return AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS
+	return ""
+
+
+# T28: la clave del aviso de por que el Maestro no puede declarar la huida
+# (Turno.motivo_huir), o "" si el motivo no se muestra (fuera del turno del
+# Maestro el boton no aparece).
+static func motivo_huir(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_HUIR_ACCION_USADA
+		ResultadoAccion.Motivo.YA_SE_MOVIO:
+			return AVISO_HUIR_YA_SE_MOVIO
 	return ""
 
 

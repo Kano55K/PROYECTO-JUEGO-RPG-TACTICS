@@ -34,6 +34,7 @@ func cerrar(plantel: Plantel, fin: FinCombate.Fin) -> ResultadoCierre:
 	if fin == FinCombate.Fin.VICTORIA:
 		_victoria(plantel, resultado, acumulador)
 	else:
+		# Derrota por caida (6) o huida (11.7, T28): las caidas mueren igual.
 		_derrota(plantel, resultado, acumulador)
 	resultado.lealtad = acumulador.aplicar(plantel.criaturas())
 	# Sistema.md 11.2.2, Fin del combate: se borran el estado oculto y el bono.
@@ -50,8 +51,6 @@ func _motivo_rechazo(plantel: Plantel, fin: FinCombate.Fin) -> ResultadoCierre.M
 		return ResultadoCierre.Motivo.YA_CERRADO
 	if fin == FinCombate.Fin.EN_CURSO:
 		return ResultadoCierre.Motivo.COMBATE_EN_CURSO
-	if fin == FinCombate.Fin.HUIDA:
-		return ResultadoCierre.Motivo.NO_IMPLEMENTADO
 	if fin != FinCombate.evaluar(plantel):
 		return ResultadoCierre.Motivo.FIN_NO_COINCIDE
 	return ResultadoCierre.Motivo.NINGUNO
@@ -69,12 +68,13 @@ func _victoria(plantel: Plantel, resultado: ResultadoCierre, acumulador: Acumula
 		acumulador.anotar(criatura.id, _lealtad_por_victoria, _MOTIVO_VICTORIA)
 
 
-# Sistema.md 6 y 11.5: las caidas mueren y su pergamino arde (3.2). 5.2 y P-001:
-# por cada muerta, cada suelta pierde lo de afines si su especie se lleva bien
-# con la de la muerta (10.8) y lo general si no. Las guardadas no se tocan.
+# Sistema.md 6, 11.5 y 11.7: las caidas mueren y su pergamino arde (3.2). 5.2 y
+# P-001: por cada muerta, cada suelta pierde lo de afines si su especie se lleva
+# bien con la de la muerta (10.8) y lo general si no. Las guardadas no se tocan.
+# Con la huida nadie recibe el +1: las sueltas de pie se van con el Maestro.
 func _derrota(plantel: Plantel, resultado: ResultadoCierre, acumulador: AcumuladorLealtad) -> void:
 	resultado.maestro_caido = plantel.maestro.caido
-	var muertas: Array[Criatura] = _tribu(plantel, Criatura.Estado.CAIDA)
+	var muertas: Array[Criatura] = caidas_que_mueren(plantel)
 	for muerta in muertas:
 		muerta.estado = Criatura.Estado.MUERTA
 		plantel.pergamino(muerta.pergamino_id).arder()
@@ -88,6 +88,13 @@ func _derrota(plantel: Plantel, resultado: ResultadoCierre, acumulador: Acumulad
 				acumulador.anotar(suelta.id, eventos[_MOTIVO_MUERTE_AFINES], _MOTIVO_MUERTE_AFINES)
 			else:
 				acumulador.anotar(suelta.id, eventos[_MOTIVO_MUERTE], _MOTIVO_MUERTE)
+
+
+# Sistema.md 6 y 11.7: las que mueren si el combate se pierde o se huye, las
+# caidas de la tribu (siempre en el tablero), en su orden. La usa tambien la
+# previsualizacion de la huida (T28), con el Plantel de ahora.
+static func caidas_que_mueren(plantel: Plantel) -> Array[Criatura]:
+	return _tribu(plantel, Criatura.Estado.CAIDA)
 
 
 # Las de la tribu en ese estado, en su orden.

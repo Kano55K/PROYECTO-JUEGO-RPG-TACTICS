@@ -28,6 +28,12 @@ var mana: int = 0
 # Sistema.md 11.5: llego a 0 y el combate termino (T10). Estado del combate: no
 # viene del escenario.
 var caido: bool = false
+# Sistema.md 11.7 (T28): declaro la huida en su turno; sigue en el tablero hasta
+# el cierre de la ronda. Estado del combate, como caido.
+var huida_declarada: bool = false
+# Sistema.md 11.7 (T28): se fue al cerrar la ronda con la huida declarada.
+# FinCombate.evaluar lo lee: el fin no se guarda en otro lado.
+var se_fue: bool = false
 
 # Compartida y de solo lectura, como la ficha de una especie.
 var _tabla_balanza: TablaBalanza

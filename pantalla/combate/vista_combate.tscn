@@ -32,6 +32,9 @@ tile_set = ExtResource("2_casillas")
 [node name="DestinosHechizo" type="TileMapLayer" parent="Tablero"]
 tile_set = ExtResource("2_casillas")
 
+[node name="AlcanzanHuida" type="TileMapLayer" parent="Tablero"]
+tile_set = ExtResource("2_casillas")
+
 [node name="PausaIA" type="Timer" parent="."]
 one_shot = true
 
