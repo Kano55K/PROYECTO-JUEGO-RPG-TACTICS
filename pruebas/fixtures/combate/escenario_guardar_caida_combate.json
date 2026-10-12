@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "guardar_caida_combate",
+  "_nota": "Arquitectura.md B.4 (T27): guardar a una caida dentro del Combate (registro, grabacion, metrica 10, invocar despues, derrota) y en la pantalla. Sistema.md 11.5, 3.1, 2.3, 11.3 y 11.8. Balanza 2 (reserva 8, descuento 0): guardar o invocar a una Rodauva (rango 1) cuesta 2. Las dos Rodauvas de la tribu empiezan con 1 de vida. Orden de la ronda: Zancajunco salvaje (Velocidad 8), Ocarra salvaje (7), Rodauvas (6), Maestro (5). En la ronda 1, el Zancajunco (Movimiento 4) solo llega a rodauva_2 y la tumba; la Ocarra (Movimiento 3) solo llega a rodauva_1 y la tumba. En el turno del Maestro, rodauva_1 queda a distancia 2 ([3,5] y [3,7]) y rodauva_2 lejos. En la ronda 2 la Ocarra llega a pegarle al Maestro. Rodauva-Ocarra y Rodauva-Zancajunco sin relacion; la Ocarra y el Zancajunco (que se llevan mal) nunca quedan vecinos en 8",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 1, "posicion": [3, 5] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 1, "posicion": [0, 4] }
+  ],
+  "enemigas": [
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [4, 2] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

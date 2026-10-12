@@ -129,6 +129,16 @@ const AVISO_INVOCAR_YA_SE_MOVIO: String = "aviso.invocar.ya_se_movio"
 const AVISO_INVOCAR_ACCION_USADA: String = "aviso.invocar.accion_usada"
 const AVISO_INVOCAR_MANA: String = "aviso.invocar.mana_insuficiente"
 const AVISO_INVOCAR_SIN_CASILLA_LIBRE: String = "aviso.invocar.sin_casilla_libre"
+# T27 (Sistema.md 11.5, Mundo.md 5): guardar a una caida. El boton, su tooltip y
+# el suceso (hueco {caida}) estan en es.json; por que el boton esta
+# deshabilitado, no (claves propuestas, pedido de Mundo.md 9).
+const ACCION_GUARDAR_CAIDA: String = "accion.guardar_caida"
+const GUARDAR_CAIDA: String = "guardar_caida"
+const GUARDAR_CAIDA_TOOLTIP: String = "guardar_caida.tooltip"
+const AVISO_GUARDAR_CAIDA_ACCION_USADA: String = "aviso.guardar_caida.accion_usada"
+const AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE: String = "aviso.guardar_caida.fuera_de_alcance"
+const AVISO_GUARDAR_CAIDA_MANA: String = "aviso.guardar_caida.mana_insuficiente"
+const AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS: String = "aviso.guardar_caida.sin_objetivos"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -153,6 +163,8 @@ const FIJAS: Array[String] = [
 	MARCA_HUIDA, HUIDA_PORCENTAJE,
 	ACCION_GUARDAR, GUARDAR, GUARDAR_TOOLTIP, ACCION_INVOCAR, INVOCAR, INVOCAR_TOOLTIP,
 	AVISO_INVOCAR_YA_SE_MOVIO, AVISO_INVOCAR_ACCION_USADA, AVISO_INVOCAR_MANA, AVISO_INVOCAR_SIN_CASILLA_LIBRE,
+	ACCION_GUARDAR_CAIDA, GUARDAR_CAIDA, GUARDAR_CAIDA_TOOLTIP, AVISO_GUARDAR_CAIDA_ACCION_USADA,
+	AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE, AVISO_GUARDAR_CAIDA_MANA, AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -328,6 +340,24 @@ static func motivo_invocar(motivo: ResultadoAccion.Motivo) -> String:
 		ResultadoAccion.Motivo.SIN_CASILLA_LIBRE:
 			return AVISO_INVOCAR_SIN_CASILLA_LIBRE
 	return ""
+
+
+# T27: por que el boton de guardar a una caida esta deshabilitado
+# (Turno.motivo_guardar_caida), o "" si el motivo no se muestra (los demas no se
+# dan en el turno del Maestro con el combate en curso: la consulta solo mira a
+# las caidas de la tribu).
+static func motivo_guardar_caida(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_GUARDAR_CAIDA_ACCION_USADA
+		ResultadoAccion.Motivo.FUERA_DE_ALCANCE:
+			return AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_GUARDAR_CAIDA_MANA
+		ResultadoAccion.Motivo.SIN_OBJETIVOS:
+			return AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS
+	return ""
+
 
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:

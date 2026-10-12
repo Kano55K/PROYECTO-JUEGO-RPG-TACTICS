@@ -30,6 +30,16 @@ const _ORDEN_SELLAR: Array[ResultadoAccion.Motivo] = [
 	ResultadoAccion.Motivo.RANGO_ALTO,
 	ResultadoAccion.Motivo.MANA_INSUFICIENTE,
 ]
+# T27: los motivos de una caida de _motivo_guardar_caida, en el orden en que los
+# revisa (despues de los del Maestro). Lo usa motivo_guardar_caida, como _ORDEN_SELLAR.
+const _ORDEN_GUARDAR_CAIDA: Array[ResultadoAccion.Motivo] = [
+	ResultadoAccion.Motivo.OBJETIVO_INEXISTENTE,
+	ResultadoAccion.Motivo.OBJETIVO_FUERA_DEL_TABLERO,
+	ResultadoAccion.Motivo.OBJETIVO_NO_CAIDO,
+	ResultadoAccion.Motivo.OBJETIVO_ENEMIGO,
+	ResultadoAccion.Motivo.FUERA_DE_ALCANCE,
+	ResultadoAccion.Motivo.MANA_INSUFICIENTE,
+]
 
 var unidad_id: String
 # La de la entrada: "caza", "cuenta" o "". Es el modo al armar la ronda; el
@@ -106,6 +116,8 @@ var _sellado: Sellado
 var _huida: Huida
 # Los costos de mana con descuento (T26: invocar), como _sellado.
 var _costos: CostosMana
+# La regla de guardar a una caida (T27), como _sellado.
+var _guardado_caida: GuardadoCaida
 var _azar: GeneradorAzar
 
 
@@ -127,6 +139,7 @@ func _init(entrada: EntradaCola, plantel: Plantel, tablero: Tablero, surcos: Sur
 	_sellado = reglas.sellado
 	_huida = reglas.huida
 	_costos = reglas.costos_mana
+	_guardado_caida = reglas.guardado_caida
 	_azar = azar
 
 
@@ -428,6 +441,49 @@ func previsualizar_invocar(criatura_id: String, casilla: Vector2i) -> ResultadoA
 	return validar(Accion.invocar(criatura_id, casilla))
 
 
+# Sistema.md 11.5 (T27, D-005): las caidas que el Maestro puede guardar ahora, en
+# el orden del Plantel.
+func objetivos_para_guardar_caida() -> Array[String]:
+	var resultado: Array[String] = []
+	for criatura in _plantel.criaturas():
+		if _motivo_guardar_caida(criatura.id) == ResultadoAccion.Motivo.NINGUNO:
+			resultado.append(criatura.id)
+	return resultado
+
+
+# T27 (calcular sin aplicar): por que el Maestro no puede guardar a una caida
+# ahora, con el mismo chequeo que la accion (_motivo_guardar_caida). Primero lo
+# del Maestro; despues mira solo a las caidas de la tribu (las que la consulta
+# unica acepta como CAIDA_PROPIA): NINGUNO si alguna vale y, si no, el motivo de
+# la que mas lejos llego en _ORDEN_GUARDAR_CAIDA (empate: la primera del
+# Plantel), asi la pantalla dice por que (fuera de alcance, mana). Sin caidas de
+# la tribu, SIN_OBJETIVOS.
+func motivo_guardar_caida() -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_puede_guardar_caida()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	var mejor: ResultadoAccion.Motivo = ResultadoAccion.Motivo.SIN_OBJETIVOS
+	var mejor_paso: int = -1
+	for criatura in _plantel.criaturas():
+		if criatura.bando != Criatura.Bando.TRIBU \
+				or not Objetivos.puede_ser_objetivo(criatura.id, Objetivos.Clase.CAIDA_PROPIA, _plantel):
+			continue
+		var de_esta: ResultadoAccion.Motivo = _motivo_guardar_caida(criatura.id)
+		if de_esta == ResultadoAccion.Motivo.NINGUNO:
+			return de_esta
+		var paso: int = _ORDEN_GUARDAR_CAIDA.find(de_esta)
+		if paso > mejor_paso:
+			mejor = de_esta
+			mejor_paso = paso
+	return mejor
+
+
+# Calcular sin aplicar (A.6, D-005): lo mismo que validar guardar a la caida. Trae
+# el costo, el mana, la vida (de -> a) y el evento; el motivo si no vale.
+func previsualizar_guardar_caida(objetivo_id: String) -> ResultadoAccion:
+	return validar(Accion.guardar_caida(objetivo_id))
+
+
 # Sistema.md 11.3, Inicio del turno. Primero se borra la marca de erizada: dura
 # hasta el inicio de su proximo turno (11.2, S-15). Despues van los chequeos de
 # 11.3, en este orden:
@@ -633,6 +689,8 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _sellar(accion.objetivo_id, aplica)
 		Accion.Tipo.GUARDAR:
 			resultado = _guardar(aplica)
+		Accion.Tipo.GUARDAR_CAIDA:
+			resultado = _guardar_caida(accion.objetivo_id, aplica)
 		Accion.Tipo.INVOCAR:
 			resultado = _invocar(accion.criatura_id, accion.casilla, aplica)
 		_:
@@ -1333,6 +1391,69 @@ func _casillas_libres_junto_al_maestro() -> Array[Vector2i]:
 			resultado.append(casilla)
 	resultado.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
 	return resultado
+
+
+# Sistema.md 11.5, 3.1 y 2.3 (T27): el Maestro guarda a una caida de la tribu y
+# paga el costo de su fila (GuardadoCaida). Gasta la accion y conserva el
+# movimiento, como sellar. La caida deja el tablero guardada, como al guardarse
+# (_dejar_guardada, S-55: sus surcos se cierran y su casilla queda libre), con su
+# pergamino (ya era suyo) y la vida del dato. Lo que le pasa despues (hambre de
+# combate, +1 de victoria, sobrevivir a la derrota, invocarla, S-58) es lo de
+# toda guardada. No es un ataque: no toca la cadena, el Encono ni el bono.
+func _guardar_caida(objetivo_id: String, aplica: bool) -> ResultadoAccion:
+	var motivo: ResultadoAccion.Motivo = _motivo_guardar_caida(objetivo_id)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return ResultadoAccion.rechazada(motivo)
+	var maestro: Maestro = _plantel.maestro
+	var criatura: Criatura = _plantel.criatura(objetivo_id)
+	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
+	resultado.costo = _guardado_caida.costo(criatura.especie, maestro)
+	if resultado.costo != 0:
+		resultado.mana = {"de": maestro.mana, "a": maestro.mana - resultado.costo}
+	resultado.vida = {"de": criatura.vida, "a": _guardado_caida.vida()}
+	resultado.evento = {"tipo": "guardado_caida", "unidad": objetivo_id, "vida": _guardado_caida.vida()}
+	if aplica:
+		maestro.mana -= resultado.costo
+		_dejar_guardada(criatura)
+		criatura.vida = _guardado_caida.vida()
+		accion_usada = true
+		ataques_restantes = 0
+	return resultado
+
+
+# Sistema.md 11.5 (T27): el unico chequeo de guardar a una caida, compartido por
+# la accion y las consultas. Primero lo del Maestro (_motivo_puede_guardar_caida);
+# despues la caida, en el orden de _ORDEN_GUARDAR_CAIDA: la consulta unica
+# (Objetivos CAIDA_PROPIA, P-025), de la tribu (la atacante nocturna caida no,
+# 9.3), distancia Manhattan <= alcance sin mirar la linea (S-57) y, al final, el
+# mana del costo de esa caida. Nada se decide por el id.
+func _motivo_guardar_caida(objetivo_id: String) -> ResultadoAccion.Motivo:
+	var motivo: ResultadoAccion.Motivo = _motivo_puede_guardar_caida()
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	motivo = Objetivos.motivo(objetivo_id, Objetivos.Clase.CAIDA_PROPIA, _plantel)
+	if motivo != ResultadoAccion.Motivo.NINGUNO:
+		return motivo
+	var criatura: Criatura = _plantel.criatura(objetivo_id)
+	if criatura.bando != Criatura.Bando.TRIBU:
+		return ResultadoAccion.Motivo.OBJETIVO_ENEMIGO
+	if Tablero.distancia(_posicion(unidad_id), criatura.posicion) > _guardado_caida.alcance():
+		return ResultadoAccion.Motivo.FUERA_DE_ALCANCE
+	if _plantel.maestro.mana < _guardado_caida.costo(criatura.especie, _plantel.maestro):
+		return ResultadoAccion.Motivo.MANA_INSUFICIENTE
+	return ResultadoAccion.Motivo.NINGUNO
+
+
+# Lo de guardar a una caida que no depende de la caida, en este orden: turno
+# terminado, solo el Maestro y la accion sin usar (3.1).
+func _motivo_puede_guardar_caida() -> ResultadoAccion.Motivo:
+	if terminado:
+		return ResultadoAccion.Motivo.TURNO_TERMINADO
+	if unidad_id != Maestro.ID:
+		return ResultadoAccion.Motivo.SOLO_MAESTRO
+	if accion_usada:
+		return ResultadoAccion.Motivo.ACCION_USADA
+	return ResultadoAccion.Motivo.NINGUNO
 
 
 # Sistema.md 11.3: lo que no se uso se pierde. Sin haber usado la accion es

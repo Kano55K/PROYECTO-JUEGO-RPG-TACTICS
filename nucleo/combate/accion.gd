@@ -5,16 +5,18 @@ extends RefCounted
 
 # Huir es un tipo nuevo en T28. SELLAR (T24): el Maestro sella a una salvaje
 # (Sistema.md 4.1). GUARDAR e INVOCAR (T26, Sistema.md 3.1): la criatura se
-# guarda en su pergamino; el Maestro invoca a una guardada.
+# guarda en su pergamino; el Maestro invoca a una guardada. GUARDAR_CAIDA (T27,
+# Sistema.md 11.5): el Maestro guarda a una caida de la tribu.
 # HECHIZO (T22): un solo tipo para todos; el hechizo es un parametro (su id de
 # hechizos.json), asi la pantalla los arma desde los datos.
-enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR, GUARDAR, INVOCAR }
+enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR, GUARDAR, INVOCAR,
+		GUARDAR_CAIDA }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco; para INVOCAR,
 # donde aparece la invocada.
 var casilla: Vector2i = Criatura.SIN_POSICION
-# Para ATACAR, HECHIZO y SELLAR: el id de la unidad objetivo.
+# Para ATACAR, HECHIZO, SELLAR y GUARDAR_CAIDA: el id de la unidad objetivo.
 var objetivo_id: String = ""
 # Solo para HECHIZO: el id del hechizo (hechizos.json) y, en la Lanzadera, el
 # sentido ("empujar" o "atraer"; "" en los demas).
@@ -96,6 +98,13 @@ static func invocar(id_criatura: String, casilla_invocar: Vector2i) -> Accion:
 	return accion
 
 
+# Sistema.md 11.5 (T27): el Maestro guarda a la caida `id_objetivo`.
+static func guardar_caida(id_objetivo: String) -> Accion:
+	var accion: Accion = Accion.new(Tipo.GUARDAR_CAIDA)
+	accion.objetivo_id = id_objetivo
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -108,7 +117,7 @@ func a_diccionario() -> Dictionary:
 	match tipo:
 		Tipo.MOVER, Tipo.CAVAR:
 			resultado["casilla"] = [casilla.x, casilla.y]
-		Tipo.ATACAR, Tipo.SELLAR:
+		Tipo.ATACAR, Tipo.SELLAR, Tipo.GUARDAR_CAIDA:
 			resultado["objetivo"] = objetivo_id
 		Tipo.SECUNDAR:
 			resultado["aliado"] = aliado_id
@@ -148,6 +157,10 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 			if datos.size() != 2 or not datos.get("objetivo") is String:
 				return null
 			return sellar(datos["objetivo"])
+		Tipo.GUARDAR_CAIDA:
+			if datos.size() != 2 or not datos.get("objetivo") is String:
+				return null
+			return guardar_caida(datos["objetivo"])
 		Tipo.SECUNDAR:
 			if datos.size() != 2 or not datos.get("aliado") is String:
 				return null

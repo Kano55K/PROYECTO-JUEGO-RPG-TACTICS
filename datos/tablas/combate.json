@@ -1,6 +1,6 @@
 {
   "$schema": "../_esquemas/combate.schema.json",
-  "_nota": "Sistema.md 8.2, 8.4, 10.1 a 10.7, 11.3, 11.5 y 11.7. En otros archivos: Arrimo por paso (tablas/arrimo.json), obediencia por hambre, Saciado y hambre de combate (tablas/hambre.json), % de huida y rasgos (especies/), costo de guardar caida (tablas/costos_mana.json), muerte en el grupo, rescate y victoria (tablas/lealtad.json), umbral de rescate y pasos de Arrimo (tablas/balanza.json). Las tablas de 10.2 (eslabones) y 10.6 (cobardia por balanza) se derivan, no se guardan. Campos sueltos: despliegue_filas 11.3 v1.6 (tribu en las filas 9 a 11 y enemigas en las 0 a 2 de un tablero de 12); danio_minimo 8.4 y 11.4 paso 4 (10, escala x10 de 11.1 v1.7); afinidad_danio_plano 10.3 (10, 11.1 v1.7) (tambien es el tope por ataque) y 10.7; enfermedad_danio_pct 8.2, por enfermedad, se suman (el mismo -25 rige la recoleccion en 0b); alcance_sellar 4.1; alcance_guardar_caida y vida_tras_caida 11.5 (10, 11.1 v1.7)",
+  "_nota": "Sistema.md 8.2, 8.4, 10.1 a 10.7, 11.3, 11.5 y 11.7. En otros archivos: Arrimo por paso (tablas/arrimo.json), obediencia por hambre, Saciado y hambre de combate (tablas/hambre.json), % de huida y rasgos (especies/), costo de guardar caida (tablas/costos_mana.json), muerte en el grupo, rescate y victoria (tablas/lealtad.json), umbral de rescate y pasos de Arrimo (tablas/balanza.json). Las tablas de 10.2 (eslabones) y 10.6 (cobardia por balanza) se derivan, no se guardan. Campos sueltos: despliegue_filas 11.3 v1.6 (tribu en las filas 9 a 11 y enemigas en las 0 a 2 de un tablero de 12); danio_minimo 8.4 y 11.4 paso 4 (10, escala x10 de 11.1 v1.7); afinidad_danio_plano 10.3 (10, 11.1 v1.7) (tambien es el tope por ataque) y 10.7; enfermedad_danio_pct 8.2, por enfermedad, se suman (el mismo -25 rige la recoleccion en 0b); alcance_sellar 4.1; alcance_guardar_caida y vida_tras_caida 11.5 (10, 11.1 v1.7); vida_al_guardar_caida 11.5 (10, 11.1 v1.7; T27): otra regla con el mismo valor",
   "despliegue_filas": 3,
   "danio_minimo": 10,
   "afinidad_danio_plano": 10,
@@ -58,5 +58,6 @@
   },
   "alcance_sellar": 2,
   "alcance_guardar_caida": 2,
-  "vida_tras_caida": 10
+  "vida_tras_caida": 10,
+  "vida_al_guardar_caida": 10
 }

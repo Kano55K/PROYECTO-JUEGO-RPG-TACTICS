@@ -25,6 +25,10 @@ const _ACCION_HECHIZO: String = "hechizo"
 # A.7 (T24): el tipo de la accion `sellar` en el registro.
 const _ACCION_SELLAR: String = "sellar"
 const _ACCION_GUARDAR: String = "guardar"
+# A.7 (T27): el tipo de la accion `guardar_caida` en el registro.
+const _ACCION_GUARDAR_CAIDA: String = "guardar_caida"
+# T27 (Mundo.md 5): el hueco de rol del suceso guardar_caida ({caida}, {caida_la}).
+const _HUECO_CAIDA: String = "caida"
 
 var _combate: Combate
 var _plantel: Plantel
@@ -300,9 +304,16 @@ func suceso(evento: Dictionary) -> Array[String]:
 			# T26 (Sistema.md 3.1): la criatura que se guarda, con su hueco.
 			if evento["accion"]["tipo"] == _ACCION_GUARDAR:
 				return [_armador.armar(ClavesTextos.GUARDAR, _hueco(evento["unidad"]), _sujeto(evento["unidad"]))]
+			# T27: el Maestro nombra la accion antes de su `guardado_caida`.
+			if evento["accion"]["tipo"] == _ACCION_GUARDAR_CAIDA:
+				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_GUARDAR_CAIDA)])]
 		# T26: la invocada, cuando ya esta en el tablero.
 		"invocacion":
 			return [_armador.armar(ClavesTextos.INVOCAR, _hueco(evento["unidad"]), _sujeto(evento["unidad"]))]
+		# T27 (Sistema.md 11.5): la caida que el Maestro guardo, con el hueco {caida}.
+		"guardado_caida":
+			return [_armador.armar(ClavesTextos.GUARDAR_CAIDA, {_HUECO_CAIDA: HuecoCriatura.new(
+					_plantel.criatura(evento["unidad"]).especie.id())}, _sujeto(evento["unidad"]))]
 		"sellado":
 			return [_suceso_sellado(evento)]
 		"huida":
@@ -624,6 +635,44 @@ func botones_invocar() -> Array[Dictionary]:
 				"texto": "%s %s (%d %s)" % [_armador.armar(ClavesTextos.ACCION_INVOCAR), nombre(criatura.id),
 						costo as int, _armador.armar(ClavesTextos.PANEL_MANA)]})
 	return botones
+
+
+# T27 (Sistema.md 11.5 y 2.3): el boton de guardar a una caida, {texto, tooltip,
+# habilitado}, o {} fuera del turno del Maestro. El texto lleva los costos
+# distintos de las caidas de la tribu (Combate.costo_guardar_caida, de menor a
+# mayor); habilitado y el motivo del tooltip salen de Turno.motivo_guardar_caida.
+func boton_guardar_caida() -> Dictionary:
+	var turno: Turno = _combate.turno_actual()
+	if turno == null or turno.unidad_id != Maestro.ID:
+		return {}
+	var costos: Array[int] = []
+	for criatura in _plantel.criaturas():
+		var costo: Variant = _combate.costo_guardar_caida(criatura.id)
+		if costo != null and not costos.has(costo):
+			costos.append(costo)
+	costos.sort()
+	var texto: String = _armador.armar(ClavesTextos.ACCION_GUARDAR_CAIDA)
+	if not costos.is_empty():
+		texto += " (%s %s)" % ["/".join(costos.map(func(costo: int) -> String: return str(costo))),
+				_armador.armar(ClavesTextos.PANEL_MANA)]
+	var motivo: ResultadoAccion.Motivo = turno.motivo_guardar_caida()
+	var tooltip: Array[String] = [_armador.armar(ClavesTextos.GUARDAR_CAIDA_TOOLTIP)]
+	var clave_motivo: String = ClavesTextos.motivo_guardar_caida(motivo)
+	if not clave_motivo.is_empty():
+		tooltip.append(_armador.armar(clave_motivo))
+	return {"texto": texto, "habilitado": motivo == ResultadoAccion.Motivo.NINGUNO, "tooltip": "\n".join(tooltip)}
+
+
+# T27: lo que haria guardar a la caida (Turno.previsualizar_guardar_caida): el
+# mana de -> a que paga y la vida de -> a con la que queda. [] si no vale.
+func vista_previa_guardar_caida(previa: ResultadoAccion) -> Array[String]:
+	var lineas: Array[String] = []
+	if not previa.valida:
+		return lineas
+	if not previa.mana.is_empty():
+		lineas.append("%s: %d → %d" % [_armador.armar(ClavesTextos.PANEL_MANA), previa.mana["de"], previa.mana["a"]])
+	lineas.append(_linea_vida(previa.vida["de"], previa.vida["a"]))
+	return lineas
 
 
 # T24: lo que haria el sellado sobre la objetivo (Turno.previsualizar_sellar): el %

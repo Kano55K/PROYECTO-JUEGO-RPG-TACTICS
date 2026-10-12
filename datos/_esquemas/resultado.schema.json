@@ -425,8 +425,9 @@
           "items": { "$ref": "#/$defs/unidad_ronda" }
         },
         "caidas_guardadas": {
-          "description": "Métrica 10 (por id de unidad). T23: null. La llena T27",
-          "type": "null"
+          "description": "Métrica 10 (T27): cada evento guardado_caida (la caída que el Maestro guardó), en orden. Lista vacía si no hubo ninguno",
+          "type": "array",
+          "items": { "$ref": "#/$defs/unidad_ronda" }
         },
         "muertes": {
           "description": "Métrica 11: las muertas del cierre, con la causa = el desenlace del fin",

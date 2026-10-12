@@ -58,5 +58,6 @@
   },
   "alcance_sellar": 2,
   "alcance_guardar_caida": 2,
-  "vida_tras_caida": 1
+  "vida_tras_caida": 1,
+  "vida_al_guardar_caida": 1
 }
