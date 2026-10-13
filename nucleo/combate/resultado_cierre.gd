@@ -15,8 +15,11 @@ enum Motivo {
 var valido: bool
 var motivo: Motivo
 var fin: FinCombate.Fin
-# Sistema.md 6: el cierre solo dice que cayo; rescate y permadeath no son de T10.
 var maestro_caido: bool = false
+# Sistema.md 6 (T29), solo si cayo el Maestro: el id de la rescatista, o "" si no
+# hubo; permadeath, si cayo sin rescatista.
+var rescatista: String = ""
+var permadeath: bool = false
 # ids, en el orden de la tribu. Las muertas son tambien las de pergamino ardido.
 var levantadas: Array[String] = []
 var muertas: Array[String] = []

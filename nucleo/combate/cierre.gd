@@ -1,4 +1,4 @@
-# Sistema.md 11.5, 6 (Las caidas), 3.2 (Quema) y 5.2: lo que pasa con la tribu
+# Sistema.md 11.5, 6 (rescate y Las caidas), 3.2 (Quema) y 5.2: lo que pasa con la tribu
 # al terminar el combate. Corre una sola vez por combate (Plantel.cerrado).
 # Solo toca a la tribu: la atacante caida es de T30 y las salvajes no cambian.
 class_name Cierre
@@ -8,7 +8,11 @@ extends RefCounted
 const _MOTIVO_VICTORIA: String = "victoria"
 const _MOTIVO_MUERTE: String = "muerte_en_el_grupo"
 const _MOTIVO_MUERTE_AFINES: String = "muerte_en_el_grupo_afines"
+const _MOTIVO_RESCATE: String = "rescate"
 
+# Sistema.md 6 (T29): la eleccion de la rescatista. Es la misma instancia que
+# ContextoCombate.rescate, la de la consulta Combate.rescatista_ahora.
+var rescate: Rescate
 var _vida_tras_caida: int
 var _lealtad_por_victoria: int
 var _tabla_lealtad: Dictionary
@@ -22,6 +26,7 @@ static func desde_datos(tabla_combate: Dictionary, tabla_lealtad: Dictionary, re
 	cierre._lealtad_por_victoria = (tabla_lealtad["eventos"] as Dictionary)[_MOTIVO_VICTORIA]
 	cierre._tabla_lealtad = tabla_lealtad
 	cierre._relaciones = relaciones
+	cierre.rescate = Rescate.desde_datos(tabla_lealtad)
 	return cierre
 
 
@@ -72,15 +77,23 @@ func _victoria(plantel: Plantel, resultado: ResultadoCierre, acumulador: Acumula
 # P-001: por cada muerta, cada suelta pierde lo de afines si su especie se lleva
 # bien con la de la muerta (10.8) y lo general si no. Las guardadas no se tocan.
 # Con la huida nadie recibe el +1: las sueltas de pie se van con el Maestro.
+# Sistema.md 6 (T29): si cayo el Maestro, la rescatista se elige antes de todo
+# cambio de lealtad (S-62) y su +2 va al mismo acumulador (suma y recorte unicos,
+# 5.2); sin rescatista, permadeath. La huida no rescata.
 func _derrota(plantel: Plantel, resultado: ResultadoCierre, acumulador: AcumuladorLealtad) -> void:
 	resultado.maestro_caido = plantel.maestro.caido
+	var eventos: Dictionary = _tabla_lealtad["eventos"]
+	if plantel.maestro.caido:
+		resultado.rescatista = rescate.elegir(plantel)
+		resultado.permadeath = resultado.rescatista.is_empty()
+		if not resultado.permadeath:
+			acumulador.anotar(resultado.rescatista, eventos[_MOTIVO_RESCATE], _MOTIVO_RESCATE)
 	var muertas: Array[Criatura] = caidas_que_mueren(plantel)
 	for muerta in muertas:
 		muerta.estado = Criatura.Estado.MUERTA
 		plantel.pergamino(muerta.pergamino_id).arder()
 		muerta.pergamino_id = ""
 		resultado.muertas.append(muerta.id)
-	var eventos: Dictionary = _tabla_lealtad["eventos"]
 	var sueltas: Array[Criatura] = _tribu(plantel, Criatura.Estado.SUELTA)
 	for muerta in muertas:
 		for suelta in sueltas:

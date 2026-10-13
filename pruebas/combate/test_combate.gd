@@ -219,7 +219,8 @@ func test_derrota_a_mitad_de_ronda() -> void:
 	assert_array(_de_tipo(combate, "fin_turno")).is_empty()
 	assert_array(_de_tipo(combate, "fin_ronda")).is_empty()
 	var tipos: Array[String] = _tipos(combate)
-	assert_array(tipos.slice(tipos.find("ataque"))).is_equal(["ataque", "estado", "fin", "cierre"])
+	# Reescrito en T29 (A.7): el rescate va entre fin y cierre.
+	assert_array(tipos.slice(tipos.find("ataque"))).is_equal(["ataque", "estado", "fin", "rescate", "cierre"])
 	var estado: Dictionary = _de_tipo(combate, "estado")[0]
 	assert_dict(estado).contains_key_value("unidad", Maestro.ID)
 	assert_dict(estado).contains_key_value("a", "caido")
@@ -247,7 +248,8 @@ func test_unidades_en_0_al_armar() -> void:
 	(maestro_en_0["maestro"] as Dictionary)["vida"] = 0
 	var derrota: Combate = _combate(maestro_en_0)
 	_assert_fin(derrota, FinCombate.Fin.DERROTA_POR_CAIDA)
-	assert_array(_tipos(derrota)).is_equal(["inicio", "estado", "fin", "cierre"])
+	# Reescrito en T29 (A.7): el rescate va entre fin y cierre.
+	assert_array(_tipos(derrota)).is_equal(["inicio", "estado", "fin", "rescate", "cierre"])
 	assert_int(derrota.instantanea()["ronda"] as int).is_equal(0)
 	assert_object(derrota.turno_actual()).is_null()
 

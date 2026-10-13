@@ -648,7 +648,7 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Cerrada en:** T24-ajustes
 
 ## P-045 — En B no queda ninguna enemiga pendiente cuando el Maestro declara la huida
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T28
 - **Fecha:** 12/10/2026
@@ -662,3 +662,4 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Bloquea:** no
 - **Mientras tanto:** `pruebas/datos/test_huida_maestro_b.gd` hace B tal como lo pide la tarea (lista vacía, daño máximo 0, termina en `huida`) y el mismo caso en D (`surcon_s1` figura en la previsualización). Lo aprobó el usuario en el plan de T28.
 - **Respuesta:** Arquitecto (12/10/2026): se acepta lo programado. En B el Maestro actúa último y al declarar no queda ninguna enemiga pendiente: la previsualización vacía es correcta. La previsualización con enemigas pendientes queda probada en D. Sin cambios de código. El balance de la huida va a Sistemas como S-63. Se cierra al empezar T29.
+- **Cerrada en:** T29

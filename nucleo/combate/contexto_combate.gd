@@ -38,6 +38,10 @@ var toggles: Dictionary = {}
 var azar_combate: GeneradorAzar
 var azar_textos: GeneradorAzar
 var cierre: Cierre
+# Sistema.md 6 (T29): la eleccion de la rescatista, la misma instancia que usa el
+# Cierre. No va en ReglasCombate: el Turno no la usa (D-008).
+var rescate: Rescate:
+	get: return null if cierre == null else cierre.rescate
 var relaciones: Relaciones
 # Sistema.md 5.4 (T14): se pregunta, nunca se guarda. La leen la pantalla y T15 a T20.
 var obediencia: Obediencia

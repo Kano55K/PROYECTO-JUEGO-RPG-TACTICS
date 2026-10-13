@@ -2718,3 +2718,39 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   7. Otra vez, pero guardando antes a la caída (T27) y huyendo en el turno siguiente: la Rodauva sobrevive guardada.
   8. Anotar los `[FALTA]` que aparezcan.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T29 · sesión 1 · 12/10/2026
+- **Rama:** tarea/T29-rescate
+- **Estado:** EN CURSO (sigue en la sesión 2)
+- **Hecho:**
+  - P-045 pasó a `CERRADA`, sin cambios de código.
+  - `Rescate` (`nucleo/combate/rescate.gd`, sin estado) es la única elección de la rescatista. Las candidatas son las de la tribu de pie en el tablero (`Objetivos.de_pie`: la oculta cuenta), con lealtad real Leal según `EstadosUnidad.corte` y el `umbral_rescate` de la balanza del Maestro; nunca mira la obediencia. Desempates: mayor lealtad → menor distancia Manhattan a la casilla del Maestro → orden del Plantel. La arma `Cierre.desde_datos` (sin cambiar su firma) y `ContextoCombate.rescate` es la misma instancia. No va en `ReglasCombate`, porque el `Turno` no la usa.
+  - `Cierre`: con el Maestro caído, elige antes de aplicar los cambios de lealtad (S-62) y anota el +2 (`eventos.rescate`, motivo `rescate`) en el mismo acumulador que la muerte en el grupo. Sin rescatista, `permadeath`. La huida no rescata.
+  - `Combate.rescatista_ahora()` (D-005), con la misma función. Evento nuevo `rescate` (`rescatista` o `null`, `permadeath`) entre `fin` y `cierre`, solo con `derrota_por_caida`.
+  - `ResultadoCombate`: `rescatista` y `permadeath` salen del cierre. Esquema `resultado`: descripciones nuevas, `permadeath` solo booleano y `metricas.rescate` objeto `{rescatista}` o `null`. `MetricasCombate` llena la métrica 12 desde el evento `rescate`.
+  - `Danio`, `Turno`, `ColaIniciativa` y la IA no cambiaron.
+- **Archivos:**
+  - Creados: `nucleo/combate/rescate.gd`, `pruebas/fixtures/combate/escenario_rescate.json`, `escenario_rescate_combate.json`, `pruebas/combate/test_rescate.gd` y `test_rescate_combate.gd`.
+  - Modificados: `nucleo/combate/cierre.gd`, `resultado_cierre.gd`, `resultado_combate.gd`, `contexto_combate.gd`, `combate.gd`, `metricas_combate.gd`, `datos/_esquemas/resultado.schema.json`, `pruebas/combate/test_cierre.gd`, `test_combate.gd`, `test_contrato.gd`, `test_metricas_combate.gd`, `docs/PREGUNTAS.md` y `CLAUDE.md`.
+- **Tests:** 18 nuevos, total 799, todos pasan (sí). Reescritos, con su motivo:
+  - `test_cierre.gd::test_derrota_con_dos_caidas` y `test_ejemplo_muerte_de_una_rodauva` (`Sistema.md` 6): `surcon_1` (9 ≥ 7) ahora rescata y suma +2. Queda en 3 en vez de 1, y en 7 en vez de 5. Su anotación `rescate` va primero.
+  - `test_combate.gd::test_derrota_a_mitad_de_ronda` y el test (6) de unidades en 0 (A.7 T29): las listas de eventos suman `rescate` entre `fin` y `cierre`.
+  - `test_contrato.gd::test_resultados_validan_contra_el_esquema` (`Sistema.md` 6): `permadeath` es falso en la victoria y verdadero en la derrota (su única criatura está caída). `rescatista` es `null` en las dos.
+  - `test_metricas_combate.gd::test_metricas_9_y_11` (D-011, métrica 12): la derrota armada a mano suma el evento `rescate` y da `{rescatista: null}`; en la victoria sigue en `null`. Nuevo: `test_metrica_12_rescate`.
+- **Criterio de terminado:** parcial.
+  - Cumplidos:
+    1. Candidatas: `test_candidatas_por_estado`, `test_umbral_de_la_balanza` (balanza 2 y 4) y `test_leal_hambrienta_rescata`.
+    2. Desempates: `test_gana_la_mayor_lealtad` y `test_desempate_por_distancia_y_orden`.
+    3. S-62 y el ejemplo de 5.2: `test_s62_en_el_umbral_rescata_aunque_pierda` (7 + 2 − 4 = 5) y `test_ejemplo_de_5_2` (9 + 2 − 2 = 9).
+    4. Sin candidatas: `test_sin_candidatas_permadeath`.
+    5. Huida declarada: `test_cae_con_la_huida_declarada` y, con `Combate`, `test_huida_declarada`.
+    6. Victoria y huida: `test_victoria_y_huida_sin_rescate` y `test_victoria_sin_rescate`.
+    7. Consulta igual al cierre: `test_rescatista_ahora_es_la_del_cierre` y `test_rescatista_ahora_sigue_la_lealtad`.
+    8. Registro, grabación, resultado y métrica 12: `test_registro_con_rescate`, `test_registro_con_permadeath`, `test_grabacion_se_reproduce_igual` y `test_metrica_12_rescate`.
+  - Faltan: 9 (pantalla) y 10 (F con `datos/` real), de la sesión 2.
+- **Lecturas declaradas:** S-62 (la lealtad del momento en que cae el Maestro, antes de los cambios del cierre).
+- **Claves de texto nuevas sin texto:** ninguna (sin pantalla en esta sesión).
+- **Preguntas:** nuevas: ninguna. Cerradas: P-045.
+- **Para la próxima sesión:**
+  - Sesión 2: la línea "Te rescataría" y la marca desde `rescatista_ahora()`; el resultado completo; la botonera en `HFlowContainer`; `pruebas/datos/test_rescate_f.gd`.
+  - Al cerrar: suite completa, lista de claves `[FALTA]` y prueba manual.

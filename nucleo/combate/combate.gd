@@ -230,6 +230,14 @@ func porcentaje_huida(unidad_id: String) -> int:
 	return _contexto.huida.porcentaje_al_empezar(unidad_id, _plantel)
 
 
+# Sistema.md 6 (T29, D-005): quien rescataria al Maestro si cayera ahora, con la
+# misma eleccion que el Cierre (Rescate.elegir) y el Plantel de ahora; null si
+# nadie. No modifica nada.
+func rescatista_ahora() -> Variant:
+	var elegida: String = _contexto.rescate.elegir(_plantel)
+	return null if elegida.is_empty() else elegida
+
+
 # Sistema.md 11.7, "previsualizacion al declarar" (T28, D-005, S-61): lo que
 # arriesga el Maestro si declara la huida ahora. Calcula sin aplicar: no cambia
 # el Plantel, la cola ni el generador. Devuelve:
@@ -636,6 +644,10 @@ func _terminar() -> void:
 		if not ardidos_antes.has(id_pergamino):
 			ardidos.append(id_pergamino)
 	_resultado = ResultadoCombate.armar(_contexto, cierre, _cola.ronda, ardidos)
+	# Sistema.md 6 y A.7 (T29): el rescate, entre `fin` y `cierre`, solo si cayo el Maestro.
+	if _fin == FinCombate.Fin.DERROTA_POR_CAIDA:
+		_registrar({"tipo": "rescate", "rescatista": null if cierre.rescatista.is_empty() else cierre.rescatista,
+				"permadeath": cierre.permadeath})
 	_registrar({"tipo": "cierre", "levantadas": cierre.levantadas.duplicate(),
 			"muertas": cierre.muertas.duplicate(), "pergaminos_ardidos": ardidos.duplicate(),
 			"lealtad": ResultadoCombate.cambios_a_lista(cierre.lealtad)})

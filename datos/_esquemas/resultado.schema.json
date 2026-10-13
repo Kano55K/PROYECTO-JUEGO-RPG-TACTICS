@@ -50,7 +50,7 @@
       "type": "boolean"
     },
     "rescatista": {
-      "description": "id de la rescatista. T12: null. Lo llena T29",
+      "description": "id de la rescatista si cayó el Maestro y alguien lo rescató (Sistema.md 6, T29); si no, null",
       "type": [
         "string",
         "null"
@@ -58,11 +58,8 @@
       "pattern": "^[a-z0-9_]+$"
     },
     "permadeath": {
-      "description": "T12: null. Lo llena T29",
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "description": "Verdadero solo si cayó el Maestro sin rescatista (Sistema.md 6, T29)",
+      "type": "boolean"
     },
     "maestro": {
       "type": "object",
@@ -444,8 +441,17 @@
           }
         },
         "rescate": {
-          "description": "Métrica 12 (sí o no, y quién rescató). T23: null. La llena T29",
-          "type": "null"
+          "description": "Métrica 12 (T29), desde el evento rescate: null si el Maestro no cayó; si cayó, quién lo rescató (null si fue permadeath)",
+          "type": ["object", "null"],
+          "required": ["rescatista"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "rescatista": {
+              "type": ["string", "null"],
+              "pattern": "^[a-z0-9_]+$"
+            }
+          }
         },
         "distancia_maestro": {
           "description": "Métrica 13: los distancia_maestro no nulos desde la ronda del primer ataque. Promedio = suma / turnos",
