@@ -55,14 +55,17 @@ offset_right = 216.0
 offset_bottom = 344.0
 mouse_filter = 2
 
-[node name="Botones" type="HBoxContainer" parent="Interfaz"]
-anchors_preset = 2
+[node name="Botones" type="HFlowContainer" parent="Interfaz"]
+anchors_preset = 12
 anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
 offset_top = -56.0
-offset_right = 416.0
+offset_right = -468.0
 offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
 mouse_filter = 2
 
 [node name="BotonTerminar" type="Button" parent="Interfaz/Botones"]
@@ -131,8 +134,14 @@ offset_bottom = 220.0
 [node name="Contenido" type="VBoxContainer" parent="Interfaz/PantallaResultado"]
 layout_mode = 2
 
-[node name="TextoResultado" type="Label" parent="Interfaz/PantallaResultado/Contenido"]
+[node name="Desplazable" type="ScrollContainer" parent="Interfaz/PantallaResultado/Contenido"]
 layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="TextoResultado" type="Label" parent="Interfaz/PantallaResultado/Contenido/Desplazable"]
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 autowrap_mode = 3
 

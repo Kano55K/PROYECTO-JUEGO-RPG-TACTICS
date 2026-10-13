@@ -52,6 +52,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 	var capturas_perdidas: Array = []
 	# 10 (T27): {unidad, ronda} de cada evento guardado_caida, en orden.
 	var caidas_guardadas: Array = []
+	# 12 (T29): {rescatista} del evento rescate; null si el Maestro no cayo.
+	var rescate: Variant = null
 	var huyendo: Dictionary = {}
 	var selladas: Dictionary = {}
 	var muertas: Array = []
@@ -74,6 +76,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 					primer_ataque = ronda
 				if _tiene_rasgo_atacante(linea["desglose"]):
 					activas["bonos_cobrados"] += 1
+			"rescate":
+				rescate = {"rescatista": linea["rescatista"]}
 			"guardado_caida":
 				caidas_guardadas.append({"unidad": linea["unidad"], "ronda": ronda})
 			"secundar":
@@ -174,8 +178,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 		"caidas_guardadas": caidas_guardadas,
 		# 11
 		"muertes": muertes,
-		# 12: la llena T29 (rescate)
-		"rescate": null,
+		# 12 (T29): quien rescato (o null si fue permadeath); null si no cayo
+		"rescate": rescate,
 		# 13, desde la ronda del primer ataque (11.9 v1.6)
 		"distancia_maestro": distancia_maestro,
 		# 14

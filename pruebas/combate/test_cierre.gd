@@ -133,8 +133,10 @@ func test_derrota_con_dos_caidas() -> void:
 	for id_pergamino in pergaminos:
 		assert_int(plantel.pergamino(id_pergamino).estado).is_equal(Pergamino.Estado.ARDIDO)
 
-	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(1)
-	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["muerte_en_el_grupo_afines", "muerte_en_el_grupo_afines"])
+	# Reescrito en T29 (Sistema.md 6): surcon_1 (9, la mas leal) rescata y suma +2:
+	# 9 + 2 - 4 - 4 = 3.
+	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(3)
+	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["rescate", "muerte_en_el_grupo_afines", "muerte_en_el_grupo_afines"])
 	assert_int(plantel.criatura("ocarra_1").lealtad).is_equal(3)
 	assert_array(_motivos(_cambio(cierre, "ocarra_1"))).contains_exactly(["muerte_en_el_grupo", "muerte_en_el_grupo"])
 
@@ -149,9 +151,10 @@ func test_ejemplo_muerte_de_una_rodauva() -> void:
 	_assert_valido(cierre)
 	assert_int(_cambio(cierre, "rodauva_2").cambio).is_equal(-4)
 	assert_int(plantel.criatura("rodauva_2").lealtad).is_equal(2)
-	assert_int(_cambio(cierre, "surcon_1").cambio).is_equal(-4)
-	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(5)
-	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["muerte_en_el_grupo_afines"])
+	# Reescrito en T29 (Sistema.md 6): surcon_1 tambien rescata (+2): 9 + 2 - 4 = 7.
+	assert_int(_cambio(cierre, "surcon_1").cambio).is_equal(-2)
+	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(7)
+	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["rescate", "muerte_en_el_grupo_afines"])
 	assert_int(_cambio(cierre, "ocarra_1").cambio).is_equal(-2)
 	assert_int(plantel.criatura("ocarra_1").lealtad).is_equal(5)
 	assert_array(_motivos(_cambio(cierre, "ocarra_1"))).contains_exactly(["muerte_en_el_grupo"])

@@ -187,7 +187,7 @@ func test_metrica_14_activas_y_terreno() -> void:
 
 
 # (7) Metricas 9 y 11 en una victoria (con una caida que se levanta) y en una
-# derrota con muertas (el Maestro cae: P-043); 12 en null, y 7 vacia (T24).
+# derrota con muertas (el Maestro cae: P-043); 12 (T29), y 7 vacia (T24).
 # T27: la 10 deja de estar en null; sin eventos guardado_caida, lista vacia.
 # T25: la 8 cuenta a la Ocarra salvaje que sale del tablero sin huida ni sellado
 # delante (cero); en la derrota, vacia.
@@ -206,6 +206,7 @@ func test_metricas_9_y_11() -> void:
 			{"tipo": "fin_ronda"}, {"tipo": "ronda"},
 			{"tipo": "estado", "unidad": Maestro.ID, "de": "en_pie", "a": "caido"},
 			{"tipo": "fin", "desenlace": "derrota_por_caida"},
+			{"tipo": "rescate", "rescatista": null, "permadeath": true},
 			{"tipo": "cierre", "levantadas": [], "muertas": ["cardo_1", "ocarra_1"], "pergaminos_ardidos": [],
 					"lealtad": []}])
 	assert_array(derrota["caidas"]).is_equal([{"unidad": "cardo_1", "ronda": 1}, {"unidad": Maestro.ID, "ronda": 2}])
@@ -217,9 +218,25 @@ func test_metricas_9_y_11() -> void:
 	for metricas in [victoria, derrota]:
 		assert_array(metricas["sellados"]).is_empty()
 		assert_array(metricas["caidas_guardadas"]).is_empty()
-		for clave in ["rescate"]:
-			assert_bool(metricas.has(clave)).override_failure_message(clave).is_true()
-			assert_object(metricas[clave]).override_failure_message(clave).is_null()
+	# Reescrito en T29 (A.7 y D-011, metrica 12): la derrota trae el evento rescate
+	# (sin rescatista); en la victoria sigue en null.
+	assert_object(victoria["rescate"]).is_null()
+	assert_dict(derrota["rescate"]).is_equal({"rescatista": null})
+
+
+# T29 (Sistema.md 11.9, metrica 12; A.7): desde el evento rescate. Con rescatista,
+# su id; sin evento (el Maestro no cayo), null.
+func test_metrica_12_rescate() -> void:
+	var con_rescate: Dictionary = _calcular([{"tipo": "ronda"},
+			{"tipo": "estado", "unidad": Maestro.ID, "de": "en_pie", "a": "caido"},
+			{"tipo": "fin", "desenlace": "derrota_por_caida"},
+			{"tipo": "rescate", "rescatista": "cardo_1", "permadeath": false},
+			{"tipo": "cierre", "levantadas": [], "muertas": [], "pergaminos_ardidos": [], "lealtad": []}])
+	assert_dict(con_rescate["rescate"]).is_equal({"rescatista": "cardo_1"})
+	var huida: Dictionary = _calcular([{"tipo": "ronda"}, {"tipo": "fin_ronda"},
+			{"tipo": "fin", "desenlace": "huida"},
+			{"tipo": "cierre", "levantadas": [], "muertas": [], "pergaminos_ardidos": [], "lealtad": []}])
+	assert_object(huida["rescate"]).is_null()
 
 
 # T27 (Sistema.md 11.9, metrica 10; A.7): cada guardado_caida en orden, con su

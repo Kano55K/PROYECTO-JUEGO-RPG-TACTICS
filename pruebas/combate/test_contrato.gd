@@ -126,10 +126,11 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_array(victoria["lealtad_cambios"]).is_equal([{"id": "rodauva_1", "antes": 5, "cambio": 1,
 			"despues": 6, "anotaciones": [{"cambio": 1, "motivo": "victoria"}]}])
 	assert_dict(victoria["pergaminos"]).is_equal({"en_blanco": 0, "ardidos": []})
-	# Campos de tareas futuras: null o lista vacia.
+	# Campos de tareas futuras: null o lista vacia. Reescrito en T29 (Sistema.md 6):
+	# en una victoria, sin rescatista y permadeath falso.
 	assert_object(victoria["atacante_pendiente"]).is_null()
 	assert_object(victoria["rescatista"]).is_null()
-	assert_object(victoria["permadeath"]).is_null()
+	assert_bool(victoria["permadeath"]).is_false()
 	# Reescrito en T23 (A.7, D-011): metricas ya no es null; valida con el resto.
 	assert_int((victoria["metricas"]["rondas"] as Dictionary)["totales"]).is_equal(1)
 	# Reescrito por Sistema.md 2.1 (T21): el mana del Maestro es un entero; sin
@@ -153,6 +154,9 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_dict(_estado(derrota, "rodauva_1")).contains_key_value("estado", "muerta")
 	assert_array((derrota["pergaminos"] as Dictionary)["ardidos"]).is_equal(["pergamino_1"])
 	assert_object(derrota["atacante_pendiente"]).is_null()
+	# T29 (Sistema.md 6): la unica de la tribu esta caida: permadeath.
+	assert_object(derrota["rescatista"]).is_null()
+	assert_bool(derrota["permadeath"]).is_true()
 
 	# Escenario G con la atacante en 0: queda caida, victoria sin rondas y su
 	# destino queda pendiente (T30).

@@ -12,6 +12,9 @@ var semilla: int
 var desenlace: FinCombate.Fin
 var rondas: int
 var maestro_caido: bool
+# Sistema.md 6 (T29): el id de la rescatista ("" si no hubo) y si fue permadeath.
+var rescatista: String = ""
+var permadeath: bool = false
 # ids en el orden de la tribu.
 var levantadas: Array[String] = []
 var muertas: Array[String] = []
@@ -43,6 +46,8 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	resultado.desenlace = cierre.fin
 	resultado.rondas = rondas_jugadas
 	resultado.maestro_caido = plantel.maestro.caido
+	resultado.rescatista = cierre.rescatista
+	resultado.permadeath = cierre.permadeath
 	resultado.levantadas = cierre.levantadas.duplicate()
 	resultado.muertas = cierre.muertas.duplicate()
 	resultado.lealtad = cierre.lealtad.duplicate()
@@ -85,8 +90,8 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	return resultado
 
 
-# Arquitectura.md A.7. Los campos de tareas futuras van en null o lista vacia:
-# rescatista y permadeath (T29). capturas: las de T24 (T30 suma el resellado).
+# Arquitectura.md A.7. rescatista y permadeath, desde T29 (Sistema.md 6).
+# capturas: las de T24 (T30 suma el resellado).
 func a_diccionario() -> Dictionary:
 	return {
 		"contexto_id": contexto_id,
@@ -94,8 +99,8 @@ func a_diccionario() -> Dictionary:
 		"desenlace": (FinCombate.Fin.keys()[desenlace] as String).to_lower(),
 		"rondas": rondas,
 		"maestro_caido": maestro_caido,
-		"rescatista": null,
-		"permadeath": null,
+		"rescatista": null if rescatista.is_empty() else rescatista,
+		"permadeath": permadeath,
 		"maestro": _maestro.duplicate(true),
 		"unidades": _unidades.duplicate(true),
 		"levantadas": levantadas.duplicate(),
