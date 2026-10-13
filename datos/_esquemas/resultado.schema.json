@@ -18,6 +18,7 @@
     "lealtad_cambios",
     "pergaminos",
     "atacante_pendiente",
+    "destino_atacante",
     "metricas"
   ],
   "additionalProperties": false,
@@ -290,12 +291,29 @@
       }
     },
     "atacante_pendiente": {
-      "description": "id de la atacante nocturna caída al terminar, que espera la decisión del Maestro (perdonar, sellar, comer: T30); null si no hay",
+      "description": "id de la atacante nocturna caída tras una victoria, que espera la decisión del Maestro (perdonar, sellar, comer: Sistema.md 9.3, T30); null si no hay. Con la derrota o la huida se va (P-024, S-66): null",
       "type": [
         "string",
         "null"
       ],
       "pattern": "^[a-z0-9_]+$"
+    },
+    "destino_atacante": {
+      "description": "Sistema.md 9.2 y 9.3 (T30): null si no hubo atacante nocturna que resolver; si no, la opción elegida y su resultado. Con la derrota o la huida (P-024, S-66), opcion null y resultado se_fue. La sesión 2 de T30 suma los resultados del destino",
+      "type": ["object", "null"],
+      "required": ["opcion", "resultado"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "opcion": {
+          "type": ["string", "null"],
+          "enum": ["perdonar", "sellar", "comer", null]
+        },
+        "resultado": {
+          "type": "string",
+          "enum": ["se_fue"]
+        }
+      }
     },
     "metricas": {
       "description": "Sistema.md 11.9, Métricas por combate (T23, D-011): las calcula MetricasCombate desde el registro y el escenario. Solo enteros, null y listas: un promedio va como suma y cantidad. Las alarmas, los umbrales y el agregado de 10 partidas son de T33",

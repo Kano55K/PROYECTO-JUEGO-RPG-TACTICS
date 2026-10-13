@@ -141,19 +141,22 @@ const AVISO_GUARDAR_CAIDA_MANA: String = "aviso.guardar_caida.mana_insuficiente"
 const AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS: String = "aviso.guardar_caida.sin_objetivos"
 # T28 (Sistema.md 11.7, Mundo.md 9): la huida del Maestro. El boton y los
 # sucesos de declarar y de irse (con o sin caidas, hueco {caida}) estan en
-# es.json; la marca, la linea del panel, la previsualizacion y por que el boton
-# esta deshabilitado, no (claves propuestas, pedido de Mundo.md 9).
+# es.json; la marca y la linea del panel, no (claves propuestas, pedido de
+# Mundo.md 9).
 const ACCION_HUIR: String = "accion.huir"
 const HUIDA_MAESTRO_DECLARAR: String = "huida.maestro.declarar"
 const HUIDA_MAESTRO_SIN_CAIDAS: String = "huida.maestro.sin_caidas"
 const HUIDA_MAESTRO_CON_CAIDAS: String = "huida.maestro.con_caidas"
 const MARCA_HUIDA_DECLARADA: String = "marca.huida_declarada"
 const PANEL_HUIDA_DECLARADA: String = "panel.huida_declarada"
-const HUIDA_PREVIA_ALCANZA: String = "huida.previa.alcanza"
-const HUIDA_PREVIA_NO_ALCANZA: String = "huida.previa.no_alcanza"
-const HUIDA_PREVIA_SIN_ENEMIGAS: String = "huida.previa.sin_enemigas"
-const HUIDA_PREVIA_DANIO_MAXIMO: String = "huida.previa.danio_maximo"
-const HUIDA_PREVIA_PUEDE_CAER: String = "huida.previa.puede_caer"
+# T30 (Mundo.md 1.5 v1.4): las de la previsualizacion, las del Worldbuilder. La
+# de las caidas que moririan no tiene texto todavia (pedido al Worldbuilder).
+const HUIDA_PREVIA_TITULO: String = "huida.previa.titulo"
+const HUIDA_PREVIA_ACTUAN: String = "huida.previa.actuan"
+const HUIDA_PREVIA_NINGUNA: String = "huida.previa.ninguna"
+const HUIDA_PREVIA_ALCANZAN: String = "huida.previa.alcanzan"
+const HUIDA_PREVIA_NO_ALCANZAN: String = "huida.previa.no_alcanzan"
+const HUIDA_PREVIA_CAES: String = "huida.previa.caes"
 const HUIDA_PREVIA_CAIDAS: String = "huida.previa.caidas"
 const AVISO_HUIR_ACCION_USADA: String = "aviso.huir.accion_usada"
 const AVISO_HUIR_YA_SE_MOVIO: String = "aviso.huir.ya_se_movio"
@@ -199,8 +202,8 @@ const FIJAS: Array[String] = [
 	ACCION_GUARDAR_CAIDA, GUARDAR_CAIDA, GUARDAR_CAIDA_TOOLTIP, AVISO_GUARDAR_CAIDA_ACCION_USADA,
 	AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE, AVISO_GUARDAR_CAIDA_MANA, AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS,
 	ACCION_HUIR, HUIDA_MAESTRO_DECLARAR, HUIDA_MAESTRO_SIN_CAIDAS, HUIDA_MAESTRO_CON_CAIDAS,
-	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_ALCANZA, HUIDA_PREVIA_NO_ALCANZA,
-	HUIDA_PREVIA_SIN_ENEMIGAS, HUIDA_PREVIA_DANIO_MAXIMO, HUIDA_PREVIA_PUEDE_CAER, HUIDA_PREVIA_CAIDAS,
+	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_TITULO, HUIDA_PREVIA_ACTUAN,
+	HUIDA_PREVIA_NINGUNA, HUIDA_PREVIA_ALCANZAN, HUIDA_PREVIA_NO_ALCANZAN, HUIDA_PREVIA_CAES, HUIDA_PREVIA_CAIDAS,
 	AVISO_HUIR_ACCION_USADA, AVISO_HUIR_YA_SE_MOVIO,
 	PANEL_RESCATISTA, PANEL_SIN_RESCATISTA, MARCA_RESCATISTA, RESULTADO_RESCATISTA, PERMADEATH,
 	RESULTADO_MUERTAS, RESULTADO_LEVANTADAS, RESULTADO_CAIDAS_GUARDADAS, RESULTADO_CAPTURAS,

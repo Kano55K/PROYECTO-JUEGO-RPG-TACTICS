@@ -24,6 +24,9 @@ var permadeath: bool = false
 var levantadas: Array[String] = []
 var muertas: Array[String] = []
 var lealtad: Array[CambioLealtad] = []
+# Sistema.md 9.2 paso 6 (P-024, S-66; T30): ids de las atacantes nocturnas que se
+# fueron con la derrota o la huida.
+var se_fueron: Array[String] = []
 
 
 func _init(es_valido: bool, motivo_rechazo: Motivo, fin_combate: FinCombate.Fin) -> void:

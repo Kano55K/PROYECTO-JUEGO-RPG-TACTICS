@@ -19,16 +19,18 @@ const _TEXTOS_ES: Dictionary = {
 	"huida.maestro.declarar": "Retrocedés. Hasta que salgas del claro, todavía te pueden alcanzar.",
 	"huida.maestro.sin_caidas": "Se van sin mirar atrás. El día queda a medias.",
 	"huida.maestro.con_caidas": "Al cruzar el claro, mirás atrás una vez. {caida} sigue donde cayó.",
+	# T30 (Mundo.md 1.5 v1.4): la previsualizacion.
+	"huida.previa.titulo": "Si huís ahora",
+	"huida.previa.actuan": "Antes de que salgas del claro, todavía actúan:",
+	"huida.previa.ninguna": "Nadie más actúa antes de que salgas del claro.",
+	"huida.previa.alcanzan": "Te pueden alcanzar. En el peor caso, {n} de daño.",
+	"huida.previa.no_alcanzan": "Ninguna te alcanza antes de que te vayas.",
+	"huida.previa.caes": "Con eso, caés antes de irte.",
 }
-# Textos de prueba de las claves propuestas.
+# Textos de prueba de las claves propuestas (sin texto en es.json).
 const _TEXTOS_PRUEBA: Dictionary = {
 	"marca.huida_declarada": "Se va",
 	"panel.huida_declarada": "Se va al cerrar la ronda",
-	"huida.previa.alcanza": "te alcanza",
-	"huida.previa.no_alcanza": "no te alcanza",
-	"huida.previa.sin_enemigas": "Nadie actúa antes del cierre",
-	"huida.previa.danio_maximo": "Daño máximo",
-	"huida.previa.puede_caer": "Podés caer",
 	"huida.previa.caidas": "Mueren",
 }
 
@@ -94,24 +96,40 @@ func test_sin_boton_con_la_huida_declarada() -> void:
 
 # (10) La vista previa con los numeros de Combate.previsualizar_huida: cada enemiga
 # en el orden de la cola, el danio maximo, la vida y las caidas que moririan.
+# Reescrito en T30 (Mundo.md 1.5 v1.4, pedido resuelto de 9.2): las claves del
+# Worldbuilder (titulo, actuan, alcanzan con {n}); el danio de cada una que
+# alcanza sigue al lado de su nombre.
 func test_vista_previa() -> void:
 	var lectura: LecturaCombate = _lectura()
 	var previa: Dictionary = _combate.previsualizar_huida()
 	assert_array(lectura.vista_previa_huida(previa)).is_equal([
-		"%s · Te alcanza −10" % lectura.nombre("tasajero_s1"),
-		"%s · No te alcanza" % lectura.nombre("ocarra_s1"),
-		"%s · Te alcanza −3" % lectura.nombre("surcon_s1"),
-		"Daño máximo: 13",
+		"Si huís ahora",
+		"Antes de que salgas del claro, todavía actúan:",
+		"%s −10" % lectura.nombre("tasajero_s1"),
+		lectura.nombre("ocarra_s1"),
+		"%s −3" % lectura.nombre("surcon_s1"),
+		"Te pueden alcanzar. En el peor caso, 13 de daño.",
 		"Vida: 20",
 		"Mueren: %s" % lectura.nombre(_CAIDA),
 	])
 
 
-# (10) Sin enemigas pendientes, la linea de nadie; si puede caer, el aviso.
+# (10) Sin enemigas pendientes, la linea de ninguna; si puede caer, el aviso.
+# Reescrito en T30 (Mundo.md 1.5 v1.4): ninguna y caes.
 func test_vista_previa_sin_enemigas_y_puede_caer() -> void:
 	var lectura: LecturaCombate = _lectura()
 	assert_array(lectura.vista_previa_huida({"enemigas": [], "danio_maximo": 0, "vida": 0, "puede_caer": true,
-			"caidas": []})).is_equal(["Nadie actúa antes del cierre", "Daño máximo: 0", "Vida: 0", "Podés caer"])
+			"caidas": []})).is_equal(["Si huís ahora", "Nadie más actúa antes de que salgas del claro.", "Vida: 0",
+			"Con eso, caés antes de irte."])
+
+
+# T30 (criterio 7, Mundo.md 1.5 v1.4): actuan, pero ninguna llega.
+func test_vista_previa_ninguna_alcanza() -> void:
+	var lectura: LecturaCombate = _lectura()
+	assert_array(lectura.vista_previa_huida({"enemigas": [{"unidad": "ocarra_s1", "alcanza": false, "danio": 0}],
+			"danio_maximo": 0, "vida": 20, "puede_caer": false, "caidas": []})).is_equal(["Si huís ahora",
+			"Antes de que salgas del claro, todavía actúan:", lectura.nombre("ocarra_s1"),
+			"Ninguna te alcanza antes de que te vayas.", "Vida: 20"])
 
 
 # (10) Con la huida declarada: la marca en la ficha del Maestro y la linea del

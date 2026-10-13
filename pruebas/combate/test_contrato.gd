@@ -129,6 +129,8 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	# Campos de tareas futuras: null o lista vacia. Reescrito en T29 (Sistema.md 6):
 	# en una victoria, sin rescatista y permadeath falso.
 	assert_object(victoria["atacante_pendiente"]).is_null()
+	# T30 (Sistema.md 9.3): sin atacante nocturna, destino_atacante null.
+	assert_object(victoria["destino_atacante"]).is_null()
 	assert_object(victoria["rescatista"]).is_null()
 	assert_bool(victoria["permadeath"]).is_false()
 	# Reescrito en T23 (A.7, D-011): metricas ya no es null; valida con el resto.
@@ -159,7 +161,9 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_bool(derrota["permadeath"]).is_true()
 
 	# Escenario G con la atacante en 0: queda caida, victoria sin rondas y su
-	# destino queda pendiente (T30).
+	# destino queda pendiente (T30). Reescrito en T30 (Sistema.md 9.2 y 9.3, P-024):
+	# una atacante que arranca en 0 no da el golpe inicial, la pendiente solo
+	# existe con la victoria y su destino todavia no esta (null).
 	var nocturno: Dictionary = _escenario(_CARPETA_UNIDADES + "escenario_g.json")
 	((nocturno["enemigas"] as Array)[0] as Dictionary)["vida"] = 0
 	var pendiente: Dictionary = _combate(nocturno).resultado().a_diccionario()
@@ -168,6 +172,8 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_int(pendiente["rondas"]).is_equal(0)
 	assert_str(pendiente["atacante_pendiente"]).is_equal("ocarra_1")
 	assert_dict(_estado(pendiente, "ocarra_1")).contains_key_value("estado", "caida")
+	assert_object(pendiente["destino_atacante"]).is_null()
+	assert_int((pendiente["maestro"] as Dictionary)["vida"]).is_equal(_combate(nocturno).contexto().plantel.maestro.vida_max_real())
 
 
 # (12) P-019: cada motivo es una clave de lealtad.json eventos y el +1 de

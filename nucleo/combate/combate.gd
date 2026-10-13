@@ -340,10 +340,21 @@ func _arrancar() -> void:
 		_avanzar()
 
 
-# Punto vacio: Sistema.md 9.2, el golpe inicial como primer evento, antes de la
-# ronda 1 (T30). En T12 el campo se lee (ContextoCombate) y no se resuelve.
+# Sistema.md 9.2 punto 1 (T30, A.7): la atacante golpea al Maestro antes de la
+# ronda 1, como primer evento detras de `inicio`. Es el Danio de un ataque (11.4,
+# con sus rasgos de caracteristica) sin aportes de turno: ni afinidad, ni combo,
+# ni Encono, ni cobardia (S-64). No toca la cadena ni el contador de Encono. La
+# vida en 0 la resuelve despues _arrancar, como siempre. Una atacante que no esta
+# de pie o que arranca en 0 no golpea (la resuelve VidaCero en _arrancar).
 func _golpe_inicial() -> void:
-	pass
+	var atacante_id: String = _contexto.golpe_inicial
+	if atacante_id.is_empty() or not Objetivos.de_pie(atacante_id, _plantel) or _vida(atacante_id) == 0:
+		return
+	var desglose: DesgloseDanio = _contexto.danio.calcular(atacante_id, Maestro.ID, _plantel, [])
+	var vida_antes: int = _plantel.maestro.vida
+	_plantel.maestro.vida = maxi(0, vida_antes - desglose.total)
+	_registrar({"tipo": "golpe_inicial", "atacante": atacante_id, "objetivo": Maestro.ID,
+			"desglose": desglose.a_diccionario(), "vida_antes": vida_antes, "vida_despues": _plantel.maestro.vida})
 
 
 # Juega entradas hasta un turno del jugador, el fin o un error.
@@ -635,7 +646,7 @@ func _terminar() -> void:
 	_registrar_cadena()
 	_registrar({"tipo": "fin", "desenlace": (FinCombate.Fin.keys()[_fin] as String).to_lower()})
 	var ardidos_antes: Array[String] = _pergaminos_ardidos()
-	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin)
+	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin, _surcos)
 	if not cierre.valido:
 		_error = "cierre rechazado: " + ResultadoCierre.Motivo.keys()[cierre.motivo]
 		return
@@ -648,6 +659,8 @@ func _terminar() -> void:
 	if _fin == FinCombate.Fin.DERROTA_POR_CAIDA:
 		_registrar({"tipo": "rescate", "rescatista": null if cierre.rescatista.is_empty() else cierre.rescatista,
 				"permadeath": cierre.permadeath})
+	# Sistema.md 9.2 paso 6 (T30, P-024): los surcos de la atacante que se fue.
+	_registrar_surcos()
 	_registrar({"tipo": "cierre", "levantadas": cierre.levantadas.duplicate(),
 			"muertas": cierre.muertas.duplicate(), "pergaminos_ardidos": ardidos.duplicate(),
 			"lealtad": ResultadoCombate.cambios_a_lista(cierre.lealtad)})

@@ -757,25 +757,32 @@ func boton_huir() -> Dictionary:
 
 
 # T28 (Sistema.md 11.7, "previsualizacion al declarar"): las lineas de
-# Combate.previsualizar_huida, con los numeros que da el nucleo: cada enemiga que
-# actua antes del cierre (si lo alcanza y su danio maximo), el danio maximo total,
-# la vida del Maestro, el aviso si puede caer y las caidas que moririan.
+# Combate.previsualizar_huida, con los numeros que da el nucleo. T30 (Mundo.md
+# 1.5 v1.4): el titulo; las que actuan antes del cierre (con su danio si lo
+# alcanzan) o la linea de ninguna; si alguna alcanza, el danio maximo total ({n});
+# si no, la de ninguna llega; la vida del Maestro, el aviso si cae y las caidas
+# que moririan.
 func vista_previa_huida(previa: Dictionary) -> Array[String]:
-	var lineas: Array[String] = []
+	var lineas: Array[String] = [_armador.armar(ClavesTextos.HUIDA_PREVIA_TITULO)]
 	var enemigas: Array = previa["enemigas"]
 	if enemigas.is_empty():
-		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_SIN_ENEMIGAS))
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_NINGUNA))
+	else:
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_ACTUAN))
+	var alguna_alcanza: bool = false
 	for enemiga: Dictionary in enemigas:
 		if enemiga["alcanza"]:
-			lineas.append("%s%s%s −%d" % [nombre(enemiga["unidad"]), _SEPARADOR,
-					_armador.armar(ClavesTextos.HUIDA_PREVIA_ALCANZA), enemiga["danio"]])
+			alguna_alcanza = true
+			lineas.append("%s −%d" % [nombre(enemiga["unidad"]), enemiga["danio"]])
 		else:
-			lineas.append(_SEPARADOR.join([nombre(enemiga["unidad"]),
-					_armador.armar(ClavesTextos.HUIDA_PREVIA_NO_ALCANZA)]))
-	lineas.append("%s: %d" % [_armador.armar(ClavesTextos.HUIDA_PREVIA_DANIO_MAXIMO), previa["danio_maximo"]])
+			lineas.append(nombre(enemiga["unidad"]))
+	if alguna_alcanza:
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_ALCANZAN, {"n": previa["danio_maximo"]}))
+	elif not enemigas.is_empty():
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_NO_ALCANZAN))
 	lineas.append("%s: %d" % [_armador.armar(ClavesTextos.PANEL_VIDA), previa["vida"]])
 	if previa["puede_caer"]:
-		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_PUEDE_CAER))
+		lineas.append(_armador.armar(ClavesTextos.HUIDA_PREVIA_CAES))
 	var caidas: Array = previa["caidas"]
 	if not caidas.is_empty():
 		lineas.append("%s: %s" % [_armador.armar(ClavesTextos.HUIDA_PREVIA_CAIDAS),
