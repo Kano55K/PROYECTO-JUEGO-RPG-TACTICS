@@ -45,10 +45,20 @@ static func reproducir(grabacion: Grabacion, datos: Dictionary, hasta_n: int = -
 
 # "" si la accion se aplico; si no, por que no.
 func _aplicar(grabada: Dictionary) -> String:
+	# Sistema.md 9.3 (T30): el destino de la atacante es una accion del Maestro con
+	# el combate ya terminado.
+	if combate.esperando_destino():
+		if grabada["unidad"] != Maestro.ID:
+			return "el destino de la atacante lo decide %s, no %s" % [Maestro.ID, grabada["unidad"]]
+		return _aplicar_accion(grabada)
 	if not combate.esperando_jugador():
 		return "el combate no espera una accion del jugador"
 	if combate.turno_actual().unidad_id != grabada["unidad"]:
 		return "es el turno de %s, no de %s" % [combate.turno_actual().unidad_id, grabada["unidad"]]
+	return _aplicar_accion(grabada)
+
+
+func _aplicar_accion(grabada: Dictionary) -> String:
 	var accion: Accion = Accion.desde_diccionario(grabada["accion"])
 	if accion == null:
 		return "accion ilegible: " + str(grabada["accion"])

@@ -663,3 +663,16 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Mientras tanto:** `pruebas/datos/test_huida_maestro_b.gd` hace B tal como lo pide la tarea (lista vacía, daño máximo 0, termina en `huida`) y el mismo caso en D (`surcon_s1` figura en la previsualización). Lo aprobó el usuario en el plan de T28.
 - **Respuesta:** Arquitecto (12/10/2026): se acepta lo programado. En B el Maestro actúa último y al declarar no queda ninguna enemiga pendiente: la previsualización vacía es correcta. La previsualización con enemigas pendientes queda probada en D. Sin cambios de código. El balance de la huida va a Sistemas como S-63. Se cierra al empezar T29.
 - **Cerrada en:** T29
+
+## P-046 — Vida de la atacante resellada
+- **Estado:** RESPONDIDA
+- **Para:** SISTEMAS
+- **Tarea:** T30
+- **Fecha:** 13/10/2026
+- **Fuente:** `Sistema.md` 4.4 (fila "Resultado": "vuelve guardada con lealtad 1") y 9.3 (fila "Sellar")
+- **Duda:** ¿con qué vida queda guardada la atacante nocturna resellada? 4.4 da su lealtad, pero no su vida, y está caída en 0.
+- **Caso que la dispara:** el Maestro tumba a la Ocarra atacante en G y la resella. Queda guardada de la tribu; si en 0b se la invoca, ¿sale con 0 de vida, con la de una caída que se levanta o con otra?
+- **Opciones:** A) con la vida que tiene (0). B) con un valor propio en `datos/` (como `vida_al_guardar_caida`, 11.5). — Recomendación técnica: B (un guardado con 0 de vida no tiene sentido al invocarlo).
+- **Bloquea:** no
+- **Mientras tanto:** el usuario respondió en la sesión 2 de T30 y se programó con esa respuesta (abajo).
+- **Respuesta:** el usuario, en el chat de la sesión 2 de T30 (13/10/2026): "Queda con 10 puntos de vida". Programado como `tablas/combate.json` `vida_al_resellar` = 10 (esquema `combate`, requerido); los fixtures de combate llevan 1 (D-009). Falta que Sistemas lo pase a `Sistema.md` 4.4.

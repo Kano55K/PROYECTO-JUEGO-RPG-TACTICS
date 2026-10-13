@@ -28,7 +28,9 @@ const DESTINO_SE_FUE: String = "se_fue"
 # (Sistema.md 9.3), o "".
 var atacante_pendiente: String = ""
 # Sistema.md 9.2 y 9.3 (T30): {opcion, resultado} o {} (null en el diccionario).
-# Con la derrota o la huida (P-024, S-66), {opcion: null, resultado: se_fue}.
+# Con la derrota o la huida (P-024, S-66), {opcion: null, resultado: se_fue}. Con
+# la victoria, lo pone el Combate cuando el destino se decide (perdonada, sellada
+# o comida); mientras espera, {} y atacante_pendiente.
 var destino_atacante: Dictionary = {}
 # Sistema.md 11.9 (T23, D-011): MetricasCombate.calcular sobre el registro
 # completo. La llena el Combate despues del evento `cierre`.
@@ -68,13 +70,12 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 				resultado.capturas.append({"unidad": ocupante.id, "especie": ocupante.especie.id(),
 						"pergamino": pergamino.id, "lealtad": contexto.sellado.lealtad_inicial(plantel.maestro)})
 	# Sistema.md 9.3 y P-024 (T30): solo con la victoria la atacante caida espera su
-	# destino; con la derrota o la huida se fue (el Cierre ya la saco).
+	# destino; con la derrota o la huida se fue (el Cierre ya la saco). Despues del
+	# destino ya no esta caida (o lo sigue, si fallo el sellado: sigue esperando).
 	if cierre.fin == FinCombate.Fin.VICTORIA:
-		for criatura in plantel.criaturas():
-			if criatura.comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA \
-					and criatura.estado == Criatura.Estado.CAIDA:
-				resultado.atacante_pendiente = criatura.id
-				break
+		var atacante: Criatura = Cierre.atacante_caida(plantel)
+		if atacante != null:
+			resultado.atacante_pendiente = atacante.id
 	if not cierre.se_fueron.is_empty():
 		resultado.destino_atacante = {"opcion": null, "resultado": DESTINO_SE_FUE}
 	resultado._maestro = {
@@ -101,7 +102,7 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 
 
 # Arquitectura.md A.7. rescatista y permadeath, desde T29 (Sistema.md 6).
-# capturas: las de T24 (T30 suma el resellado).
+# capturas: las de T24 (el resellado de T30 no es una captura: vuelve de la tribu, 4.4).
 func a_diccionario() -> Dictionary:
 	return {
 		"contexto_id": contexto_id,

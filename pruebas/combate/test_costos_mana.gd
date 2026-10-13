@@ -55,7 +55,7 @@ func test_sin_un_dato_no_se_arma() -> void:
 	var tabla: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/costos_mana.json",
 			"costos_mana")["datos"]
 	assert_object(CostosMana.desde_datos(tabla)).is_not_null()
-	for clave in ["sellar", "invocar", "guardar_caida", "costo_minimo"]:
+	for clave in ["sellar", "invocar", "guardar_caida", "resellar", "costo_minimo"]:
 		var sin: Dictionary = tabla.duplicate(true)
 		sin.erase(clave)
 		assert_object(CostosMana.desde_datos(sin)).override_failure_message(clave).is_null()

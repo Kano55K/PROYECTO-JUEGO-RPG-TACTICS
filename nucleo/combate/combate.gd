@@ -35,6 +35,14 @@ var _junco_volcados: int = 0
 var _cadena: Cadena
 # Eventos cadena_cortada ya volcados al registro.
 var _cadena_volcados: int = 0
+# Sistema.md 9.3 (T30): la atacante caida que espera su destino tras la victoria
+# ("" si ninguna), si ya fallo un sellado (4.4: quedan perdonar y comer), el
+# cierre (con el acumulador de la noche abierto, S-65) y los pergaminos ardidos
+# antes de cerrar (para los de este combate, tambien los del destino).
+var _destino_pendiente: String = ""
+var _sellar_fallido: bool = false
+var _cierre: ResultadoCierre = null
+var _ardidos_antes: Array[String] = []
 
 
 func _init(contexto_combate: ContextoCombate) -> void:
@@ -66,6 +74,10 @@ func turno_actual() -> Turno:
 # ni se graba. `terminar` cierra el turno y el bucle sigue hasta el proximo
 # turno del jugador o el fin.
 func aplicar(accion: Accion) -> ResultadoAccion:
+	# Sistema.md 9.3 (T30): el destino de la atacante va por su propio camino, con
+	# el combate terminado; mientras espera, todo lo demas es COMBATE_TERMINADO.
+	if accion.tipo == Accion.Tipo.DESTINO_ATACANTE:
+		return _aplicar_destino(accion)
 	if _fin != FinCombate.Fin.EN_CURSO:
 		var rechazo: ResultadoAccion = ResultadoAccion.rechazada(ResultadoAccion.Motivo.COMBATE_TERMINADO)
 		rechazo.fin = _fin
@@ -84,6 +96,25 @@ func aplicar(accion: Accion) -> ResultadoAccion:
 
 func terminado() -> bool:
 	return _fin != FinCombate.Fin.EN_CURSO
+
+
+# Sistema.md 9.3 (T30): el combate termino con la victoria y la atacante nocturna
+# caida espera que el Maestro decida su destino (Accion.destino_atacante).
+func esperando_destino() -> bool:
+	return _error.is_empty() and not _destino_pendiente.is_empty()
+
+
+# T30 (D-005): por que no vale esa opcion ahora, con el mismo chequeo que la
+# accion (DestinoAtacante.motivo); NINGUNO si vale.
+func motivo_destino(opcion: String) -> ResultadoAccion.Motivo:
+	return _contexto.destino_atacante.motivo(opcion, _atacante_que_espera(), _plantel, _sellar_fallido)
+
+
+# T30 (D-005, calcular sin aplicar): lo que haria esa opcion: costo, porcentaje y
+# mana al sellar, y los cambios de lealtad de la noche que quedarian (en sellar,
+# si sale). No cambia nada ni toca el generador.
+func previsualizar_destino(opcion: String) -> ResultadoAccion:
+	return _resolver_destino(opcion, false)
 
 
 func fin() -> FinCombate.Fin:
@@ -645,15 +676,15 @@ func _terminar() -> void:
 	_cadena.cortar(Cadena.MOTIVO_FIN_COMBATE)
 	_registrar_cadena()
 	_registrar({"tipo": "fin", "desenlace": (FinCombate.Fin.keys()[_fin] as String).to_lower()})
-	var ardidos_antes: Array[String] = _pergaminos_ardidos()
+	_ardidos_antes = _pergaminos_ardidos()
 	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin, _surcos)
 	if not cierre.valido:
 		_error = "cierre rechazado: " + ResultadoCierre.Motivo.keys()[cierre.motivo]
 		return
-	var ardidos: Array[String] = []
-	for id_pergamino in _pergaminos_ardidos():
-		if not ardidos_antes.has(id_pergamino):
-			ardidos.append(id_pergamino)
+	_cierre = cierre
+	# Sistema.md 9.3 (T30): con la victoria y la atacante caida, su destino espera.
+	_destino_pendiente = cierre.destino_pendiente
+	var ardidos: Array[String] = _ardidos_del_combate()
 	_resultado = ResultadoCombate.armar(_contexto, cierre, _cola.ronda, ardidos)
 	# Sistema.md 6 y A.7 (T29): el rescate, entre `fin` y `cierre`, solo si cayo el Maestro.
 	if _fin == FinCombate.Fin.DERROTA_POR_CAIDA:
@@ -666,6 +697,66 @@ func _terminar() -> void:
 			"lealtad": ResultadoCombate.cambios_a_lista(cierre.lealtad)})
 	# Sistema.md 11.9 y D-011 (T23): las metricas, sobre el registro completo.
 	_resultado.metricas = MetricasCombate.calcular(_contexto.escenario, _registro.lineas())
+
+
+# Sistema.md 9.3 (T30, A.7: "una decision posterior al combate, registrada como
+# una accion mas"): valida sin aplicar (DestinoAtacante.resolver); si vale,
+# registra la accion, la aplica y registra lo que paso: el mana del resellado
+# (sin volcar la tirada), el `destino_atacante` (detras de su tirada, con la
+# lealtad de la noche), el estado de la atacante y sus surcos. Se graba como una
+# accion del Maestro. Un sellado que falla deja el destino pendiente, sin
+# sellar. Despues, el resultado se vuelve a armar con el estado final.
+func _aplicar_destino(accion: Accion) -> ResultadoAccion:
+	var validacion: ResultadoAccion = _resolver_destino(accion.opcion, false)
+	if not validacion.valida:
+		validacion.fin = _fin
+		return validacion
+	_registrar({"tipo": "accion", "unidad": Maestro.ID, "origen": _ORIGEN_JUGADOR,
+			"accion": accion.a_diccionario(), "paso": null})
+	var estados_antes: Dictionary = _estados()
+	var resultado: ResultadoAccion = _resolver_destino(accion.opcion, true)
+	if not resultado.valida:
+		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
+		return resultado
+	_acciones_jugador.append({"unidad": Maestro.ID, "accion": accion.a_diccionario()})
+	if not resultado.mana.is_empty():
+		_registrar({"tipo": "mana", "unidad": Maestro.ID, "de": resultado.mana["de"], "a": resultado.mana["a"],
+				"motivo": DestinoAtacante.MOTIVO_RESELLAR}, 0)
+	_registrar(resultado.evento.duplicate(true))
+	_registrar_estados(estados_antes)
+	_registrar_surcos()
+	var nombre_resultado: String = resultado.evento["resultado"]
+	if nombre_resultado == DestinoAtacante.RESULTADO_SELLADO_FALLIDO:
+		_sellar_fallido = true
+	else:
+		_destino_pendiente = ""
+		_cierre.lealtad = resultado.lealtad
+	_resultado = ResultadoCombate.armar(_contexto, _cierre, _cola.ronda, _ardidos_del_combate())
+	if _destino_pendiente.is_empty():
+		_resultado.destino_atacante = {"opcion": accion.opcion, "resultado": nombre_resultado}
+	_resultado.metricas = MetricasCombate.calcular(_contexto.escenario, _registro.lineas())
+	resultado.fin = _fin
+	return resultado
+
+
+func _resolver_destino(opcion: String, aplica: bool) -> ResultadoAccion:
+	var acumulador: AcumuladorLealtad = null if _cierre == null else _cierre.acumulador
+	return _contexto.destino_atacante.resolver(opcion, _atacante_que_espera(), _plantel, acumulador, _sellar_fallido,
+			_contexto.azar_combate, _surcos, aplica)
+
+
+# La atacante que espera su destino, o "" (tambien si el combate se detuvo por un error).
+func _atacante_que_espera() -> String:
+	return _destino_pendiente if esperando_destino() else ""
+
+
+# Los pergaminos que ardieron en este combate: al cerrar y en el destino (T30).
+func _ardidos_del_combate() -> Array[String]:
+	var ardidos: Array[String] = []
+	for id_pergamino in _pergaminos_ardidos():
+		if not _ardidos_antes.has(id_pergamino):
+			ardidos.append(id_pergamino)
+	return ardidos
 
 
 # Arquitectura.md A.7: antes de cada evento se vuelcan las tiradas nuevas del

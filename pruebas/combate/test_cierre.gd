@@ -80,6 +80,9 @@ func _assert_rechazado(cierre: ResultadoCierre, motivo: ResultadoCierre.Motivo) 
 
 # (6) Victoria con una caida: se levanta con 1 de vida y recibe el +1, como las
 # de pie; la guardada no lo recibe. La atacante caida no cambia.
+# Reescrito en T30 (Sistema.md 5.2 y 9.3, S-65): con la atacante caida, el cierre
+# deja su destino pendiente y la lealtad de la noche sin aplicar (un solo recorte
+# con el destino). Los mismos +1 salen al aplicar el acumulador que deja abierto.
 func test_victoria_levanta_y_suma_uno() -> void:
 	var plantel: Plantel = _plantel()
 	_victoria(plantel)
@@ -96,6 +99,11 @@ func test_victoria_levanta_y_suma_uno() -> void:
 	assert_int(levantada.estado).is_equal(Criatura.Estado.SUELTA)
 	assert_int(levantada.vida).is_equal(1)
 	assert_that(levantada.posicion).is_equal(Vector2i(1, 6))
+	assert_str(cierre.destino_pendiente).is_equal("ocarra_n1")
+	assert_array(cierre.lealtad).is_empty()
+	assert_int(levantada.lealtad).is_equal(8)
+	assert_object(cierre.acumulador).is_not_null()
+	cierre.lealtad = cierre.acumulador.aplicar(plantel.criaturas())
 	assert_int(levantada.lealtad).is_equal(9)
 	assert_int(plantel.criatura("rodauva_2").lealtad).is_equal(7)
 	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(10)
@@ -347,3 +355,17 @@ func test_victoria_la_atacante_no_se_va() -> void:
 	_assert_valido(cierre)
 	assert_array(cierre.se_fueron).is_empty()
 	assert_int(plantel.criatura("ocarra_n1").estado).is_equal(Criatura.Estado.CAIDA)
+
+
+# T30 (S-65): sin una atacante caida (aca, ya fuera del tablero), la victoria no
+# deja destino pendiente y la lealtad se aplica en el cierre, como siempre.
+func test_victoria_sin_atacante_caida_aplica_la_lealtad() -> void:
+	var plantel: Plantel = _plantel()
+	_tumbar(plantel, ["ocarra_s1"])
+	VidaCero.sacar_del_tablero(plantel.criatura("ocarra_n1"), Surcos.new())
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.VICTORIA)
+	_assert_valido(cierre)
+	assert_str(cierre.destino_pendiente).is_empty()
+	assert_object(cierre.acumulador).is_null()
+	assert_int(cierre.lealtad.size()).is_equal(4)
+	assert_int(plantel.criatura("rodauva_1").lealtad).is_equal(9)

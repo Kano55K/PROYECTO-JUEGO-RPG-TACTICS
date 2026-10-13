@@ -6,11 +6,13 @@ extends RefCounted
 # SELLAR (T24): el Maestro sella a una salvaje (Sistema.md 4.1). HUIR (T28,
 # Sistema.md 11.7): el Maestro declara la huida. GUARDAR e INVOCAR (T26, Sistema.md 3.1): la criatura se
 # guarda en su pergamino; el Maestro invoca a una guardada. GUARDAR_CAIDA (T27,
-# Sistema.md 11.5): el Maestro guarda a una caida de la tribu.
+# Sistema.md 11.5): el Maestro guarda a una caida de la tribu. DESTINO_ATACANTE (T30,
+# Sistema.md 9.3): con el combate ya ganado, el Maestro decide que pasa con la
+# atacante nocturna caida; la aplica el Combate, no el Turno.
 # HECHIZO (T22): un solo tipo para todos; el hechizo es un parametro (su id de
 # hechizos.json), asi la pantalla los arma desde los datos.
 enum Tipo { MOVER, ATACAR, ERIZARSE, TERMINAR, CAVAR, HACERSE_JUNCO, SECUNDAR, HECHIZO, SELLAR, GUARDAR, INVOCAR,
-		GUARDAR_CAIDA, HUIR }
+		GUARDAR_CAIDA, HUIR, DESTINO_ATACANTE }
 
 var tipo: Tipo
 # Para MOVER, la casilla de destino; para CAVAR, la del surco; para INVOCAR,
@@ -26,6 +28,8 @@ var sentido: String = ""
 var aliado_id: String = ""
 # Solo para INVOCAR: el id de la criatura guardada.
 var criatura_id: String = ""
+# Solo para DESTINO_ATACANTE: "perdonar", "sellar" o "comer" (DestinoAtacante.OPCIONES).
+var opcion: String = ""
 
 
 func _init(tipo_accion: Tipo) -> void:
@@ -110,6 +114,13 @@ static func huir() -> Accion:
 	return Accion.new(Tipo.HUIR)
 
 
+# Sistema.md 9.3 (T30): el destino de la atacante nocturna caida tras la victoria.
+static func destino_atacante(opcion_destino: String) -> Accion:
+	var accion: Accion = Accion.new(Tipo.DESTINO_ATACANTE)
+	accion.opcion = opcion_destino
+	return accion
+
+
 # Cierra el turno. Sin haber usado la accion, es "esperar" (P-015).
 static func terminar() -> Accion:
 	return Accion.new(Tipo.TERMINAR)
@@ -126,6 +137,8 @@ func a_diccionario() -> Dictionary:
 			resultado["objetivo"] = objetivo_id
 		Tipo.SECUNDAR:
 			resultado["aliado"] = aliado_id
+		Tipo.DESTINO_ATACANTE:
+			resultado["opcion"] = opcion
 		Tipo.INVOCAR:
 			resultado["criatura"] = criatura_id
 			resultado["casilla"] = [casilla.x, casilla.y]
@@ -170,6 +183,10 @@ static func desde_diccionario(datos: Dictionary) -> Accion:
 			if datos.size() != 2 or not datos.get("aliado") is String:
 				return null
 			return secundar(datos["aliado"])
+		Tipo.DESTINO_ATACANTE:
+			if datos.size() != 2 or not datos.get("opcion") is String:
+				return null
+			return destino_atacante(datos["opcion"])
 		Tipo.INVOCAR:
 			if datos.size() != 3 or not datos.get("criatura") is String or not _es_casilla(datos.get("casilla")):
 				return null

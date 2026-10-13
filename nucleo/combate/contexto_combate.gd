@@ -17,6 +17,8 @@ enum Motivo {
 # Arquitectura.md A.8: nombres de sistema para derivar los generadores.
 const SISTEMA_COMBATE: String = "combate"
 const SISTEMA_TEXTOS: String = "textos"
+# T30: el nombre de regla_faltante si falta un dato del destino de la atacante.
+const REGLA_DESTINO_ATACANTE: String = "destino_atacante"
 
 var valido: bool = false
 var motivo: Motivo = Motivo.NINGUNO
@@ -83,6 +85,8 @@ var costos_mana: CostosMana:
 # Sistema.md 11.5 (T27): guardar a una caida propia. La aplica el Turno.
 var guardado_caida: GuardadoCaida:
 	get: return null if reglas == null else reglas.guardado_caida
+# Sistema.md 9.3 (T30): el destino de la atacante nocturna caida tras la victoria.
+var destino_atacante: DestinoAtacante
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -131,6 +135,14 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	if not contexto.reglas.falta.is_empty():
 		contexto.motivo = Motivo.REGLA_FALTANTE
 		contexto.regla_faltante = contexto.reglas.falta
+		return contexto
+	# Sistema.md 9.3 (T30): el destino de la atacante, despues del combate (no es del
+	# Turno, como el Rescate). Con todas las reglas, solo falta si falta un dato suyo.
+	contexto.destino_atacante = DestinoAtacante.desde_datos(tabla_combate, datos["tablas/lealtad.json"],
+			regla_costos, regla_sellado)
+	if contexto.destino_atacante == null:
+		contexto.motivo = Motivo.REGLA_FALTANTE
+		contexto.regla_faltante = REGLA_DESTINO_ATACANTE
 		return contexto
 	contexto.valido = true
 	return contexto

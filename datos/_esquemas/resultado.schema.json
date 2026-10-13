@@ -205,7 +205,7 @@
       }
     },
     "lealtad_cambios": {
-      "description": "Lo que devuelve el acumulador de lealtad: por criatura, antes, cambio recortado una vez y después, con cada anotación y su motivo",
+      "description": "Lo que devuelve el acumulador de lealtad: por criatura, antes, cambio recortado una vez y después, con cada anotación y su motivo. T30 (Sistema.md 5.2, S-65): con el destino de la atacante pendiente, vacío; con el destino resuelto, los de toda la noche (cierre y destino), recortados una sola vez",
       "type": "array",
       "items": {
         "type": "object",
@@ -299,7 +299,7 @@
       "pattern": "^[a-z0-9_]+$"
     },
     "destino_atacante": {
-      "description": "Sistema.md 9.2 y 9.3 (T30): null si no hubo atacante nocturna que resolver; si no, la opción elegida y su resultado. Con la derrota o la huida (P-024, S-66), opcion null y resultado se_fue. La sesión 2 de T30 suma los resultados del destino",
+      "description": "Sistema.md 9.2 y 9.3 (T30): null si no hubo atacante nocturna que resolver; si no, la opción elegida y su resultado. Con la derrota o la huida (P-024, S-66), opcion null y resultado se_fue. Con la victoria y la atacante caída, null mientras el destino está pendiente (atacante_pendiente); después, la opción final y perdonada, sellada o comida (un sellado fallido no es final)",
       "type": ["object", "null"],
       "required": ["opcion", "resultado"],
       "additionalProperties": false,
@@ -311,7 +311,7 @@
         },
         "resultado": {
           "type": "string",
-          "enum": ["se_fue"]
+          "enum": ["se_fue", "perdonada", "sellada", "comida"]
         }
       }
     },

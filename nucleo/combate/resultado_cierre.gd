@@ -27,6 +27,11 @@ var lealtad: Array[CambioLealtad] = []
 # Sistema.md 9.2 paso 6 (P-024, S-66; T30): ids de las atacantes nocturnas que se
 # fueron con la derrota o la huida.
 var se_fueron: Array[String] = []
+# Sistema.md 9.3 y 5.2 (T30, S-65): con la victoria y la atacante nocturna caida,
+# su id y el acumulador de la noche sin aplicar (lealtad queda vacia): el
+# destino suma ahi lo suyo y recorta una sola vez. Si no, "" y null.
+var destino_pendiente: String = ""
+var acumulador: AcumuladorLealtad = null
 
 
 func _init(es_valido: bool, motivo_rechazo: Motivo, fin_combate: FinCombate.Fin) -> void:

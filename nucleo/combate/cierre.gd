@@ -1,7 +1,8 @@
 # Sistema.md 11.5, 6 (rescate y Las caidas), 3.2 (Quema) y 5.2: lo que pasa con la tribu
 # al terminar el combate. Corre una sola vez por combate (Plantel.cerrado).
 # Toca a la tribu y, con la derrota o la huida, a la atacante nocturna, que se va
-# (P-024, S-66). Con la victoria, su destino es una decision aparte (9.3, T30).
+# (P-024, S-66). Con la victoria, su destino es una decision aparte (9.3, T30): la
+# deja pendiente y no aplica la lealtad de la noche hasta que se decida (S-65).
 # Las salvajes no cambian.
 class_name Cierre
 extends RefCounted
@@ -42,11 +43,18 @@ func cerrar(plantel: Plantel, fin: FinCombate.Fin, surcos: Surcos = null) -> Res
 	var acumulador: AcumuladorLealtad = AcumuladorLealtad.desde_datos(_tabla_lealtad)
 	if fin == FinCombate.Fin.VICTORIA:
 		_victoria(plantel, resultado, acumulador)
+		var atacante: Criatura = atacante_caida(plantel)
+		if atacante != null:
+			resultado.destino_pendiente = atacante.id
 	else:
 		# Derrota por caida (6) o huida (11.7, T28): las caidas mueren igual.
 		_derrota(plantel, resultado, acumulador)
 		_atacantes_se_van(plantel, resultado, Surcos.new() if surcos == null else surcos)
-	resultado.lealtad = acumulador.aplicar(plantel.criaturas())
+	# Sistema.md 5.2 y S-65 (T30): con el destino pendiente, la noche sigue abierta.
+	if resultado.destino_pendiente.is_empty():
+		resultado.lealtad = acumulador.aplicar(plantel.criaturas())
+	else:
+		resultado.acumulador = acumulador
 	# Sistema.md 11.2.2, Fin del combate: se borran el estado oculto y el bono.
 	Junco.limpiar(plantel)
 	# Sistema.md 10.5, Fin del combate: el Encono vuelve a 0 (todos los bandos).
@@ -124,6 +132,16 @@ func _atacantes_se_van(plantel: Plantel, resultado: ResultadoCierre, surcos: Sur
 			criatura.pergamino_id = ""
 		VidaCero.sacar_del_tablero(criatura, surcos)
 		resultado.se_fueron.append(criatura.id)
+
+
+# Sistema.md 9.3 (T30): la atacante nocturna caida que espera su destino tras la
+# victoria, o null. Es el unico criterio: lo usan el Cierre y ResultadoCombate.
+static func atacante_caida(plantel: Plantel) -> Criatura:
+	for criatura in plantel.criaturas():
+		if criatura.comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA \
+				and criatura.estado == Criatura.Estado.CAIDA:
+			return criatura
+	return null
 
 
 # Sistema.md 6 y 11.7: las que mueren si el combate se pierde o se huye, las

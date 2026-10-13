@@ -36,15 +36,29 @@ func aplicar(criaturas: Array[Criatura]) -> Array[CambioLealtad]:
 	if _aplicado:
 		return cambios
 	_aplicado = true
+	cambios = calcular(criaturas)
+	for cambio in cambios:
+		for criatura in criaturas:
+			if criatura.id == cambio.criatura_id:
+				criatura.lealtad = cambio.despues
+	return cambios
+
+
+# Calcular sin aplicar (T30, S-65): los cambios que daria aplicar con las
+# anotaciones de ahora mas `extra`, sin escribir lealtades ni guardar el extra.
+# Asi la previsualizacion del destino de la atacante usa la misma cuenta.
+func calcular(criaturas: Array[Criatura], extra: Array[AnotacionLealtad] = []) -> Array[CambioLealtad]:
+	var cambios: Array[CambioLealtad] = []
+	var anotaciones: Array[AnotacionLealtad] = _anotaciones.duplicate()
+	anotaciones.append_array(extra)
 	for criatura in criaturas:
 		var cambio: CambioLealtad = CambioLealtad.new(criatura.id, criatura.lealtad)
-		for anotacion in _anotaciones:
+		for anotacion in anotaciones:
 			if anotacion.criatura_id == criatura.id:
 				cambio.anotaciones.append(anotacion)
 				cambio.cambio += anotacion.cambio
 		if cambio.anotaciones.is_empty():
 			continue
 		cambio.despues = clampi(cambio.antes + cambio.cambio, _minimo, _maximo)
-		criatura.lealtad = cambio.despues
 		cambios.append(cambio)
 	return cambios
