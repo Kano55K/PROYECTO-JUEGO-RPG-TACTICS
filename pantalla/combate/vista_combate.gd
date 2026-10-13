@@ -173,12 +173,13 @@ var _limites: Rect2 = Rect2()
 @onready var _panel_turno: Label = $Interfaz/PanelTurno
 @onready var _panel_desglose: Label = $Interfaz/PanelDesglose
 @onready var _texto_sucesos: Label = $Interfaz/Sucesos
-@onready var _botones: HBoxContainer = $Interfaz/Botones
+# T29: corta en varias lineas (HFlowContainer) para no salirse de la ventana.
+@onready var _botones: HFlowContainer = $Interfaz/Botones
 @onready var _boton_terminar: Button = $Interfaz/Botones/BotonTerminar
 @onready var _panel_unidad: Label = $Interfaz/PanelUnidad
 @onready var _aviso: Label = $Interfaz/Aviso
 @onready var _pantalla_resultado: Control = $Interfaz/PantallaResultado
-@onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/TextoResultado
+@onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/Desplazable/TextoResultado
 @onready var _boton_volver: Button = $Interfaz/PantallaResultado/Contenido/BotonVolver
 @onready var _depuracion: TextEdit = $Interfaz/PanelDepuracion
 @onready var _pausa: Timer = $PausaIA

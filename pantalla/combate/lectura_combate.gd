@@ -53,6 +53,7 @@ func fichas() -> Array[Dictionary]:
 	var lista: Array[Dictionary] = []
 	var foto: Dictionary = _combate.instantanea()
 	var foto_maestro: Dictionary = foto["maestro"]
+	var rescatista: Variant = _rescatista_a_la_vista()
 	if foto_maestro["posicion"] != null:
 		var marcas_maestro: Array[String] = []
 		if foto_maestro["caido"]:
@@ -86,6 +87,9 @@ func fichas() -> Array[Dictionary]:
 		var huida: int = _combate.porcentaje_huida(criatura.id)
 		if huida > 0:
 			marcas.append(marca_huida(huida))
+		# T29 (Sistema.md 6): quien rescataria ahora (Combate.rescatista_ahora).
+		if rescatista != null and criatura.id == rescatista:
+			marcas.append(_armador.armar(ClavesTextos.MARCA_RESCATISTA, {}, criatura.especie.id()))
 		var ficha: Dictionary = _ficha(criatura.id, foto_criatura["posicion"], criatura.bando == Criatura.Bando.TRIBU,
 				false, estado == _ESTADO_CAIDA, foto_criatura["vida"], criatura.vida_max_real(), marcas)
 		ficha["oculta"] = foto_criatura["oculta"]
@@ -210,10 +214,33 @@ func panel_turno() -> Array[String]:
 	# T28 (Sistema.md 11.7): con la huida declarada, que se va al cerrar la ronda.
 	if _combate.instantanea()["maestro"]["huida_declarada"]:
 		lineas.append(_armador.armar(ClavesTextos.PANEL_HUIDA_DECLARADA))
+	var rescate: String = linea_rescatista()
+	if not rescate.is_empty():
+		lineas.append(rescate)
 	var motivo: String = boton_terminar()["motivo"]
 	if not motivo.is_empty():
 		lineas.append(motivo)
 	return lineas
+
+
+# T29 (Sistema.md 6, Vision 6.6): la linea fija de quien rescataria si el Maestro
+# cayera ahora (Combate.rescatista_ahora), solo en el turno del jugador: "Te
+# rescataria: <nombre>" (el nombre se ve aunque falte la clave) o "Nadie te
+# rescataria". Fuera del turno del jugador, "".
+func linea_rescatista() -> String:
+	if not _combate.esperando_jugador():
+		return ""
+	var rescatista: Variant = _combate.rescatista_ahora()
+	if rescatista == null:
+		return _armador.armar(ClavesTextos.PANEL_SIN_RESCATISTA)
+	return "%s: %s" % [_armador.armar(ClavesTextos.PANEL_RESCATISTA), nombre(rescatista)]
+
+
+# T29: el id de quien rescataria, solo en el turno del jugador; si no, null.
+func _rescatista_a_la_vista() -> Variant:
+	if not _combate.esperando_jugador():
+		return null
+	return _combate.rescatista_ahora()
 
 
 # T16 (Sistema.md 10.2): la cadena tal como la da el nucleo: la objetivo y el
@@ -471,14 +498,24 @@ func desglose(datos: Dictionary, atacante_id: String) -> Array[String]:
 	return lineas
 
 
-# La pantalla de resultado desde ResultadoCombate.a_diccionario() (A.7).
+# La pantalla de resultado desde ResultadoCombate.a_diccionario() (A.7). T29: con
+# la rescatista (y su linea de Mundo.md 9) o permadeath, las muertas con su causa
+# (metrica 11), las levantadas, las caidas guardadas (metrica 10), las capturas y
+# la atacante pendiente. Un bloque sin nada no se muestra.
 func resultado(datos: Dictionary) -> Array[String]:
 	var etiqueta_vida: String = _armador.armar(ClavesTextos.PANEL_VIDA)
 	var lineas: Array[String] = [
 		_armador.armar(ClavesTextos.RESULTADO_TITULO),
 		_armador.armar(ClavesTextos.desenlace(datos["desenlace"])),
-		"%s: %d" % [_armador.armar(ClavesTextos.RESULTADO_RONDAS), datos["rondas"]],
 	]
+	if datos.get("rescatista") != null:
+		var especie: String = _especie_en_resultado(datos, datos["rescatista"])
+		lineas.append("%s: %s" % [_armador.armar(ClavesTextos.RESULTADO_RESCATISTA),
+				_nombre_en_resultado(datos, datos["rescatista"])])
+		lineas.append(_armador.armar(ClavesTextos.RESCATE, {"criatura": HuecoCriatura.new(especie)}, especie))
+	if datos.get("permadeath", false):
+		lineas.append(_armador.armar(ClavesTextos.PERMADEATH))
+	lineas.append("%s: %d" % [_armador.armar(ClavesTextos.RESULTADO_RONDAS), datos["rondas"]])
 	var linea_maestro: Array[String] = [nombre(Maestro.ID), "%s: %d" % [etiqueta_vida, datos["maestro"]["vida"]]]
 	if datos["maestro_caido"]:
 		linea_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, Maestro.ID))
@@ -487,6 +524,26 @@ func resultado(datos: Dictionary) -> Array[String]:
 		lineas.append(_SEPARADOR.join([_armador.armar(ClavesTextos.nombre_especie(unidad["especie"])),
 				_armador.armar(ClavesTextos.estado_unidad(unidad["estado"]), {}, unidad["especie"]),
 				"%s: %d" % [etiqueta_vida, unidad["vida"]]]))
+	var metricas: Dictionary = datos.get("metricas", {})
+	var muertes: Array = metricas.get("muertes", [])
+	if not muertes.is_empty():
+		lineas.append(_armador.armar(ClavesTextos.RESULTADO_MUERTAS))
+		for muerte: Dictionary in muertes:
+			lineas.append(_SEPARADOR.join([_nombre_en_resultado(datos, muerte["unidad"]),
+					_armador.armar(ClavesTextos.causa_muerte(muerte["causa"]))]))
+	_bloque_resultado(lineas, ClavesTextos.RESULTADO_LEVANTADAS, datos, datos.get("levantadas", []))
+	var guardadas: Array = []
+	for guardada: Dictionary in metricas.get("caidas_guardadas", []):
+		guardadas.append(guardada["unidad"])
+	_bloque_resultado(lineas, ClavesTextos.RESULTADO_CAIDAS_GUARDADAS, datos, guardadas)
+	if not (datos.get("capturas", []) as Array).is_empty():
+		lineas.append(_armador.armar(ClavesTextos.RESULTADO_CAPTURAS))
+		for captura: Dictionary in datos["capturas"]:
+			lineas.append(_SEPARADOR.join([_nombre_en_resultado(datos, captura["unidad"]),
+					"%s: %d" % [_armador.armar(ClavesTextos.PANEL_LEALTAD), captura["lealtad"]]]))
+	if datos.get("atacante_pendiente") != null:
+		lineas.append("%s: %s" % [_armador.armar(ClavesTextos.RESULTADO_ATACANTE_PENDIENTE),
+				_nombre_en_resultado(datos, datos["atacante_pendiente"])])
 	if not (datos["lealtad_cambios"] as Array).is_empty():
 		lineas.append(_armador.armar(ClavesTextos.RESULTADO_LEALTAD))
 		for cambio in datos["lealtad_cambios"]:
@@ -910,7 +967,23 @@ func _hueco(id_unidad: String) -> Dictionary:
 
 
 func _nombre_en_resultado(datos: Dictionary, id_unidad: String) -> String:
+	var especie: String = _especie_en_resultado(datos, id_unidad)
+	if especie.is_empty():
+		return id_unidad
+	return _armador.armar(ClavesTextos.nombre_especie(especie))
+
+
+func _especie_en_resultado(datos: Dictionary, id_unidad: String) -> String:
 	for unidad in datos["unidades"]:
 		if unidad["id"] == id_unidad:
-			return _armador.armar(ClavesTextos.nombre_especie(unidad["especie"]))
-	return id_unidad
+			return unidad["especie"]
+	return ""
+
+
+# T29: un bloque del resultado, su titulo y un nombre por linea; nada si ids esta vacio.
+func _bloque_resultado(lineas: Array[String], clave_titulo: String, datos: Dictionary, ids: Array) -> void:
+	if ids.is_empty():
+		return
+	lineas.append(_armador.armar(clave_titulo))
+	for id_unidad in ids:
+		lineas.append(_nombre_en_resultado(datos, id_unidad))

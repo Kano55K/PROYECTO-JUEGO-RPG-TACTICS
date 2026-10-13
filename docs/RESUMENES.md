@@ -2754,3 +2754,46 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Para la próxima sesión:**
   - Sesión 2: la línea "Te rescataría" y la marca desde `rescatista_ahora()`; el resultado completo; la botonera en `HFlowContainer`; `pruebas/datos/test_rescate_f.gd`.
   - Al cerrar: suite completa, lista de claves `[FALTA]` y prueba manual.
+
+## T29 · sesión 2 · 13/10/2026
+- **Rama:** tarea/T29-rescate
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho (la tarea entera):**
+  - Sesión 1 (núcleo): `Rescate` (`nucleo/combate/rescate.gd`, sin estado) es la única elección de la rescatista: tribu de pie en el tablero (`Objetivos.de_pie`, la oculta cuenta), lealtad real Leal según `EstadosUnidad.corte` y el `umbral_rescate` de la balanza, nunca la obediencia; desempates mayor lealtad → menor distancia Manhattan al Maestro → orden del Plantel. `Cierre`: con el Maestro caído elige antes de aplicar los cambios de lealtad (S-62) y anota el +2 (`rescate`) en el mismo acumulador; sin rescatista, permadeath. `Combate.rescatista_ahora()` (D-005). Evento `rescate` entre `fin` y `cierre`, solo con `derrota_por_caida`. Resultado con `rescatista` y `permadeath`; métrica 12. P-045 cerrada sin cambios de código.
+  - Sesión 2 (pantalla, sin tocar `nucleo/` ni `datos/`):
+    - Quién te rescata: `LecturaCombate.linea_rescatista()` ("Te rescataría: <nombre>" o "Nadie te rescataría"), en `panel_turno()`, y la marca `marca.rescatista` en la ficha de esa criatura. Las dos salen de `rescatista_ahora()` y solo se muestran con `esperando_jugador()`.
+    - Resultado completo, todo desde `ResultadoCombate.a_diccionario()`: desenlace; rescatista con su línea `rescate.<especie>` o `permadeath`; muertas con su causa (`metricas.muertes`); levantadas; caídas guardadas (`metricas.caidas_guardadas`); capturas con su lealtad; `atacante_pendiente`; cambios de lealtad con su motivo (`lealtad.motivo.rescate`: "Te llevó a casa"). Un bloque vacío no se muestra. `TextoResultado` va dentro de un `ScrollContainer` (`Desplazable`) para que un resultado largo no se corte.
+    - Botonera: `Interfaz/Botones` pasa de `HBoxContainer` a `HFlowContainer`, abajo a lo ancho hasta 468 px del borde derecho (no pisa `Sucesos`), y crece hacia arriba. Con la escena vieja, el test de la botonera deja 7 botones fuera de la ventana; con la nueva, ninguno.
+- **Archivos:**
+  - Creados (sesión 1): `nucleo/combate/rescate.gd`, `pruebas/fixtures/combate/escenario_rescate.json`, `escenario_rescate_combate.json`, `pruebas/combate/test_rescate.gd` y `test_rescate_combate.gd`. (Sesión 2): `pruebas/pantalla/test_lectura_rescate.gd`, `test_vista_rescate.gd` y `pruebas/datos/test_rescate_f.gd`.
+  - Modificados (sesión 1): `nucleo/combate/cierre.gd`, `resultado_cierre.gd`, `resultado_combate.gd`, `contexto_combate.gd`, `combate.gd`, `metricas_combate.gd`, `datos/_esquemas/resultado.schema.json`, `pruebas/combate/test_cierre.gd`, `test_combate.gd`, `test_contrato.gd`, `test_metricas_combate.gd` y `docs/PREGUNTAS.md`. (Sesión 2): `pantalla/claves_textos.gd`, `pantalla/combate/lectura_combate.gd`, `vista_combate.gd` y `vista_combate.tscn`. Las dos: `CLAUDE.md` y `docs/RESUMENES.md`.
+- **Tests:** 29 nuevos en la tarea (18 en la sesión 1 y 11 en la 2), total 810, todos pasan (sí). Reescritos, con su motivo (todos de la sesión 1; en la sesión 2 no cambió ningún test viejo):
+  - `test_cierre.gd::test_derrota_con_dos_caidas` y `test_ejemplo_muerte_de_una_rodauva` (`Sistema.md` 6): `surcon_1` (9 ≥ 7) ahora rescata y suma +2.
+  - `test_combate.gd::test_derrota_a_mitad_de_ronda` y el test (6) de unidades en 0 (A.7 T29): el evento `rescate` entre `fin` y `cierre`.
+  - `test_contrato.gd::test_resultados_validan_contra_el_esquema` (`Sistema.md` 6): `permadeath` falso en la victoria y verdadero en la derrota.
+  - `test_metricas_combate.gd::test_metricas_9_y_11` (D-011, métrica 12): la derrota armada a mano suma el evento `rescate`.
+- **Criterio de terminado:** cumplido punto por punto.
+  1. Candidatas: `test_candidatas_por_estado`, `test_umbral_de_la_balanza` y `test_leal_hambrienta_rescata`.
+  2. Desempates: `test_gana_la_mayor_lealtad` y `test_desempate_por_distancia_y_orden`.
+  3. S-62 y 5.2: `test_s62_en_el_umbral_rescata_aunque_pierda` y `test_ejemplo_de_5_2`.
+  4. Sin candidatas: `test_sin_candidatas_permadeath`.
+  5. Huida declarada: `test_cae_con_la_huida_declarada` y `test_huida_declarada`.
+  6. Victoria y huida: `test_victoria_y_huida_sin_rescate` y `test_victoria_sin_rescate`.
+  7. Consulta = cierre: `test_rescatista_ahora_es_la_del_cierre` y `test_rescatista_ahora_sigue_la_lealtad`.
+  8. Registro, grabación, resultado y métrica 12: `test_registro_con_rescate`, `test_registro_con_permadeath`, `test_grabacion_se_reproduce_igual` y `test_metrica_12_rescate`.
+  9. Pantalla: línea y marca que cambian con la lealtad y con la caída (`test_linea_y_marca_al_empezar`, `test_cambia_con_la_lealtad`, `test_cambia_si_cae_la_candidata`, `test_sin_turno_del_jugador_no_se_muestra`, `test_cambia_al_redibujar`); resultado con rescatista, permadeath y muertas con causa (`test_resultado_con_rescate`, `test_resultado_con_permadeath`, `test_resultado_completo`, `test_linea_marca_y_resultado`); botonera con todos los botones del Maestro y textos `[FALTA]` dentro de 1152 px (`test_botonera_entra_en_la_ventana`).
+  10. F con `datos/` real: `test_f_rescata_la_que_se_veia` (derrota por caída en la ronda 3, último golpe del Zancajunco, rescatista = la Rodauva que daba `rescatista_ahora()` en el último turno del jugador). Pasan el permanente de datos, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios` y los de datos reales de T22 a T28.
+  11. Suite completa en verde: 810 de 810. Consola sin errores ni advertencias nuevas (solo los `push_error` esperados de los tests de `ReglasCombate` y el aviso del depurador remoto de siempre).
+- **Lecturas declaradas:** S-62 (la lealtad del momento en que cae el Maestro, antes de los cambios del cierre). Supuestos de pantalla (sin pregunta, no son reglas): la línea y la marca solo con `esperando_jugador()`; la causa de cada muerta sale de la métrica 11; la línea `rescate.<especie>` va en el resultado, no en los sucesos.
+- **Claves de texto nuevas sin texto:** `panel.rescatista`, `panel.sin_rescatista`, `marca.rescatista`, `resultado.rescatista`, `resultado.muertas`, `resultado.levantadas`, `resultado.caidas_guardadas`, `resultado.capturas`, `resultado.atacante_pendiente`, `resultado.causa.derrota_por_caida` y `resultado.causa.huida`. Se usan las que existen: `rescate.<especie>`, `permadeath` y `lealtad.motivo.rescate`.
+- **Preguntas:** nuevas: ninguna. Cerradas: P-045 (sesión 1).
+- **Prueba manual (Windows):**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. Abrir el juego: F5 en el editor, o PowerShell `& $env:GODOT_BIN --path .` · `cmd`: `"%GODOT_BIN%" --path .`
+  3. F: en cada turno se ve la línea "Te rescataría: …" (hoy `[FALTA: panel.rescatista]: Rodauva`) y la marca sobre la Rodauva leal. La Ocarra (Neutral) nunca aparece.
+  4. Seguir con Esperar hasta que el Zancajunco tumbe al Maestro (ronda 3): el resultado dice que la Rodauva te rescató, con su línea, y su lealtad sube 2 (motivo "Te llevó a casa").
+  5. Otra vez F: en el turno de la Rodauva, Guardar. La línea pasa a "Nadie te rescataría". Al caer el Maestro, el resultado dice "Nadie te llevó a casa." y la Rodauva sigue guardada.
+  6. A, con la Rodauva Neutral: la línea dice "Nadie te rescataría" desde el principio.
+  7. C, en el turno del Maestro: todos los botones entran en la ventana, aunque ocupen dos líneas.
+  8. Anotar los `[FALTA]` que aparezcan.
+- **Para la próxima sesión:** nada: tarea terminada.

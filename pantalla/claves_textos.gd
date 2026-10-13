@@ -157,6 +157,21 @@ const HUIDA_PREVIA_PUEDE_CAER: String = "huida.previa.puede_caer"
 const HUIDA_PREVIA_CAIDAS: String = "huida.previa.caidas"
 const AVISO_HUIR_ACCION_USADA: String = "aviso.huir.accion_usada"
 const AVISO_HUIR_YA_SE_MOVIO: String = "aviso.huir.ya_se_movio"
+# T29 (Sistema.md 6, Mundo.md 9): el rescate. rescate.<especie>, permadeath y
+# lealtad.motivo.rescate estan en es.json; la linea y la marca de quien rescataria
+# y los bloques nuevos del resultado, no (claves propuestas). RESCATE se arma
+# solo con la especie como sujeto (no tiene base): no va en FIJAS.
+const PANEL_RESCATISTA: String = "panel.rescatista"
+const PANEL_SIN_RESCATISTA: String = "panel.sin_rescatista"
+const MARCA_RESCATISTA: String = "marca.rescatista"
+const RESULTADO_RESCATISTA: String = "resultado.rescatista"
+const RESCATE: String = "rescate"
+const PERMADEATH: String = "permadeath"
+const RESULTADO_MUERTAS: String = "resultado.muertas"
+const RESULTADO_LEVANTADAS: String = "resultado.levantadas"
+const RESULTADO_CAIDAS_GUARDADAS: String = "resultado.caidas_guardadas"
+const RESULTADO_CAPTURAS: String = "resultado.capturas"
+const RESULTADO_ATACANTE_PENDIENTE: String = "resultado.atacante_pendiente"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -187,6 +202,9 @@ const FIJAS: Array[String] = [
 	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_ALCANZA, HUIDA_PREVIA_NO_ALCANZA,
 	HUIDA_PREVIA_SIN_ENEMIGAS, HUIDA_PREVIA_DANIO_MAXIMO, HUIDA_PREVIA_PUEDE_CAER, HUIDA_PREVIA_CAIDAS,
 	AVISO_HUIR_ACCION_USADA, AVISO_HUIR_YA_SE_MOVIO,
+	PANEL_RESCATISTA, PANEL_SIN_RESCATISTA, MARCA_RESCATISTA, RESULTADO_RESCATISTA, PERMADEATH,
+	RESULTADO_MUERTAS, RESULTADO_LEVANTADAS, RESULTADO_CAIDAS_GUARDADAS, RESULTADO_CAPTURAS,
+	RESULTADO_ATACANTE_PENDIENTE,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -195,6 +213,8 @@ const _ESTADOS_LEALTAD: Array[String] = [
 ]
 # FinCombate: los desenlaces que pueden pasar (huida desde T28).
 const _DESENLACES: Array[String] = ["victoria", "derrota_por_caida", "huida"]
+# T29 (metrica 11): las causas de muerte son los desenlaces que matan.
+const _CAUSAS_MUERTE: Array[String] = ["derrota_por_caida", "huida"]
 # ModificadorDanio.Fuente sin texto propio en es.json (hambre, rasgos y modo lo tienen).
 const _FUENTES_DESGLOSE: Array[String] = ["combo", "afinidad", "encono", "cobardia"]
 # Arquitectura.md A.7: motivos del evento destape.
@@ -241,6 +261,11 @@ static func estado_unidad(estado: String) -> String:
 
 static func desenlace(nombre: String) -> String:
 	return "resultado.desenlace.%s" % nombre
+
+
+# T29: la causa de una muerta del resultado (metrica 11: el desenlace del fin).
+static func causa_muerte(causa: String) -> String:
+	return "resultado.causa.%s" % causa
 
 
 # motivo: una clave de tablas/lealtad.json eventos (P-019).
@@ -406,6 +431,8 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		_sumar(claves, estado_unidad((estado as String).to_lower()))
 	for nombre in _DESENLACES:
 		_sumar(claves, desenlace(nombre))
+	for causa in _CAUSAS_MUERTE:
+		_sumar(claves, causa_muerte(causa))
 	for fuente in _FUENTES_DESGLOSE:
 		_sumar(claves, fuente_desglose(fuente))
 	for motivo in _MOTIVOS_DESTAPE:
