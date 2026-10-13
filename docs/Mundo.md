@@ -1,8 +1,8 @@
-# MUNDO — Mundo, regiones y criaturas (v1.3)
+# MUNDO — Mundo, regiones y criaturas (v1.4)
 
-08/10/2026 · @Joaquín
+13/10/2026 · @Joaquín
 
-**Estado:** v1.3 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1). **v1.2:** etiquetas de T14 y T16, relaciones con vecinas en 8 (Visión v1.3) y cierre de las derivaciones ya resueltas. **v1.3:** etiquetas y avisos de T19 a T21 (Encono, cobardía y maná) y textos revisados contra la escala ×10 de vida y daño (`Sistema.md` 11.1 v1.7) · Sincronizado con `00_Vision.md` v1.3, `Sistema.md` v1.7 y `Arquitectura.md` v0.37 · **Dueño:** Worldbuilder y Diseñador Narrativo
+**Estado:** v1.4 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1). **v1.2:** etiquetas de T14 y T16, relaciones con vecinas en 8 (Visión v1.3) y cierre de las derivaciones ya resueltas. **v1.3:** etiquetas y avisos de T19 a T21 (Encono, cobardía y maná) y textos revisados contra la escala ×10 de vida y daño (`Sistema.md` 11.1 v1.7). **v1.4:** textos de T22 a T28 (hechizos, sellar, huida, invocar, guardar a una caída y huida del Maestro; `es.json`: 586 → 620 claves) y lore de fondo de **los Legados y sus Reveses** (2.10): los Nueve son nueve oficios de dos manos · Sincronizado con `00_Vision.md` v1.5, `Sistema.md` v1.7 y `Arquitectura.md` v0.48 · **Dueño:** Worldbuilder y Diseñador Narrativo
 
 Este documento define la identidad del mundo. Si algo acá contradice `00_Vision.md`, manda la Visión: se propone el cambio y se registra en `Decisiones.md`. Los números (rangos, apetito, efectos, costos) viven en `Sistema.md`.
 
@@ -21,7 +21,7 @@ Todo se nombra en **castellano evocador**: palabras reales o compuestas que suen
 
 - **Criaturas:** una palabra, compuesta de rasgo + oficio o forma (*Rodauva* = rueda + uva, *Zancajunco* = zanco + junco).
 - **Lugares:** artículo + sustantivo + adjetivo o complemento (*El Molino Callado*, *El Vado de los Juncos*).
-- **Dioses:** por un oficio de dar forma (*el Alfarero*, *la Hilandera*). `PROPUESTA`, ver 2.4.
+- **Dioses:** por un oficio de dar forma (*la Alfarera*, *la Hilandera*). Desde la v1.4, los nueve oficios están fijados (2.4).
 - Evitar nombres que ya sean marca, personaje o criatura de otra franquicia.
 
 ### 1.2 Glosario de términos del juego — `DECIDIDO`
@@ -40,6 +40,9 @@ Todo se nombra en **castellano evocador**: palabras reales o compuestas que suen
 | **Quebranto** | La secuela tras el rescate (antes "malherido") | "Quebranto de salud": un daño que no se repone. No se lee como estado negativo (ver 4.9) |
 | **Las rayas** | El contador del plazo de la partida | Rayas de carbón del fuego del Molino, una por día (ver 4.10) |
 | **Las golondrinas del Molino** | La señal del fin del plazo en el mundo | Se juntan en el techo a medida que pasan los días y se van el último (ver 4.10) |
+| **Huyendo** | El Maestro que declaró la huida y todavía no se fue (v1.4) | Gerundio a propósito: es el único estado que todavía no pasó; la ronda sigue y puede caer antes |
+
+Los términos de capas futuras (Legados, Reveses, desborde, molida, torcedura, el Yugo…) están en 2.10 y en 8.
 
 ### 1.2.1 Nombres de la v1.1 — `PROPUESTA` (PARA DIRECTOR CREATIVO)
 
@@ -80,7 +83,7 @@ Los textos de este documento viven como datos en **`juego/datos/textos/es.json`*
 | `[comida]` (tipo de comida) | `{comida}` | `fruta`, `raíces`, `grano`… |
 | `[comida]` (la criatura comida, 4.12) | `{ausente}` | La que ya no está |
 | "1 día", "2 días" | `{duracion}` | Se arma con `tiempo.dia` / `tiempo.dias` |
-| Un número de la pantalla | `{n}` | Ronda, vida de cambio de modo (literal) |
+| Un número de la pantalla | `{n}` | Ronda, vida de cambio de modo, daño máximo de la huida (literal) |
 
 #### Huecos gramaticales — `DECIDIDO` (`Arquitectura.md` A.2.1, programados en T34)
 
@@ -198,17 +201,68 @@ Claves que dejaron T19 a T21 sin texto (`RESUMENES.md`; `Sistema.md` 15 v1.7). M
 
 > **Regla desde la v1.3:** ningún texto escribe un número de vida, daño o curación. Si la pantalla tiene que mostrar uno, va por hueco (`{n}`, `{vida}`, `{porcentaje}`) y lo llena desde los datos, como `aviso.cuenta.umbral` y `rio.crecido.tooltip`. Así un cambio de balance nunca deja un texto mintiendo. Los números de distancia, días o cantidades de lore (*"dos casillas"*, *"Tres días de [tipo]"*, *"tres gotas"*, *"cuarenta y una rayas"*) no son de balance y se quedan.
 
+#### Textos de la pantalla de T22 a T28 — `DECIDIDO` (v1.4, aprobados por el usuario el 13/10/2026)
+
+Claves que dejaron T22 a T28 sin texto (`Arquitectura.md` A.10 v0.48). `es.json`: 586 → 620 claves.
+
+**Criterio:**
+- Los avisos de botón deshabilitado dicen **qué falta** y, cuando aplica, qué todavía se puede hacer. Sin números de balance: el daño de la huida va por `{n}`.
+- Los avisos de sellar y de guardar a una caída hablan del **hilo**, como `sellar.*`: el sellado es el hilo del pergamino (2.5), no un rayo.
+- **Invocar y huir** repiten *"lleva el turno entero"*: es la misma regla (S-53) y se aprende una vez.
+- `accion_usada` es el mismo texto en hechizo, sellar y guardar a una caída. Si el Arquitecto prefiere una sola clave compartida, cambia la clave, no el texto.
+
+| Qué | Clave | Texto |
+| --- | --- | --- |
+| Hechizo sin maná (T22) | `aviso.hechizo.mana_insuficiente` | *"No te alcanza el maná para este hechizo."* |
+| Hechizo con la acción usada | `aviso.hechizo.accion_usada` | *"Ya usaste tu acción este turno."* |
+| Hechizo sin objetivos | `aviso.hechizo.sin_objetivos` | *"No hay nadie a tu alcance para este hechizo."* |
+| Sentidos de la Lanzadera (clic izquierdo y derecho) | `hechizo.sentido.empujar` · `.atraer` | Empujar · Atraer |
+| Choque contra el borde o un surco (P-042) | `lanzadera.choque.obstaculo` | *"[Unidad] sale despedid[a/o], no tiene adónde ir y se da de lleno."* |
+| Sellar con la acción usada (T24) | `aviso.sellar.accion_usada` | *"Ya usaste tu acción este turno."* |
+| Sellar sin maná | `aviso.sellar.mana_insuficiente` | *"No te alcanza el maná para tender el hilo."* |
+| Salvaje fuera de alcance | `aviso.sellar.fuera_de_alcance` | *"Está demasiado lejos: el hilo no llega."* |
+| No sellable (el Tasajero) | `aviso.sellar.no_sellable` | *"Hay cosas que el hilo no sujeta. Esta es una."* |
+| Oculta | `aviso.sellar.oculta` | *"No la distinguís: el hilo no sabe a quién buscar."* |
+| No salvaje | `aviso.sellar.no_salvaje` | *"El hilo solo busca a las salvajes."* |
+| Sin salvajes al alcance | `aviso.sellar.sin_objetivos` | *"No hay ninguna salvaje al alcance del hilo."* |
+| Marca de huida sobre la salvaje (T25) | `marca.huida` | Huida |
+| Tooltip de la marca | `huida.salvaje.porcentaje` | *"[X]% de que huya al empezar su turno. Si se va, ya no se puede sellar."* |
+| Invocar después de moverse (T26) | `aviso.invocar.ya_se_movio` | *"Invocar lleva el turno entero, y ya te moviste."* |
+| Invocar con la acción usada | `aviso.invocar.accion_usada` | *"Invocar lleva el turno entero, y ya usaste tu acción."* |
+| Invocar sin maná | `aviso.invocar.mana_insuficiente` | *"No te alcanza el maná para desenrollar este pergamino."* |
+| Invocar sin casilla libre | `aviso.invocar.sin_casilla_libre` | *"No hay lugar libre a tu lado para que salga."* |
+| Guardar a una caída con la acción usada (T27) | `aviso.guardar_caida.accion_usada` | *"Ya usaste tu acción este turno."* |
+| Caída fuera de alcance | `aviso.guardar_caida.fuera_de_alcance` | *"Está demasiado lejos: el hilo no llega."* |
+| Guardar a una caída sin maná | `aviso.guardar_caida.mana_insuficiente` | *"No te alcanza el maná para recogerla."* |
+| Sin caídas al alcance | `aviso.guardar_caida.sin_objetivos` | *"No hay nadie caído al alcance del hilo."* |
+| Desenlace de la huida (T28) | `resultado.desenlace.huida` | Huiste |
+| Marca del Maestro que declaró la huida | `marca.huida_declarada` | Huyendo |
+| Panel del turno del Maestro | `panel.huida_declarada` | *"Te vas al cerrar la ronda."* |
+| Huir después de moverse ⚠️ | `aviso.huir.ya_se_movio` | *"Huir lleva el turno entero, y ya te moviste."* |
+| Huir con la acción usada ⚠️ | `aviso.huir.accion_usada` | *"Huir lleva el turno entero, y ya usaste tu acción."* |
+| Previsualización: título ⚠️ | `huida.previa.titulo` | Si huís ahora |
+| Lista de las que actúan antes del cierre ⚠️ | `huida.previa.actuan` | *"Antes de que salgas del claro, todavía actúan:"* |
+| Nadie actúa antes del cierre ⚠️ | `huida.previa.ninguna` | *"Nadie más actúa antes de que salgas del claro."* |
+| Alguna alcanza al Maestro (`{n}` = daño máximo) ⚠️ | `huida.previa.alcanzan` | *"Te pueden alcanzar. En el peor caso, [n] de daño."* |
+| Actúan, pero ninguna llega ⚠️ | `huida.previa.no_alcanzan` | *"Ninguna te alcanza antes de que te vayas."* |
+| El daño máximo tumba al Maestro ⚠️ | `huida.previa.caes` | *"Con eso, caés antes de irte."* |
+
+> ⚠️ **Claves a confirmar** (PARA ARQUITECTO): `Arquitectura.md` v0.48 nombra `huida.previa.*` (6) y `aviso.huir.*` (2) sin listar las claves exactas. Los nombres son la lectura del Worldbuilder de la previsualización de `Sistema.md` 11.7. Se cotejan con la entrada de T28 en `docs/RESUMENES.md`; si difieren, cambia la clave y no el texto.
+> **"Huyendo"** es el único participio que no es participio: dice que la huida todavía no se cumplió (11.7: el Maestro puede caer antes del cierre). Sin concordancia: solo el Maestro huye.
+> **`lanzadera.choque.obstaculo`** no nombra contra qué choca: con P-042, `contra` es `null` en el borde y en un surco.
+> **`huida.salvaje.tooltip`** (*"Se fue. Ya no se puede sellar."*) existe y T25 no lo usa. Se propone usarlo como tooltip del suceso de una huida ya ocurrida, junto a `huida.salvaje.<especie>` (PARA ARQUITECTO).
+
 ## 2. La magia y los Nueve
 
 La magia es el resto de la hechura del mundo: tocarla vuelve al Maestro más etéreo y lo aleja de lo tangible, de su cuerpo y de su tribu.
 
 ### 2.1 Los Nueve — `DECIDIDO`
 
-- La magia proviene de **los Nueve**, los dioses que **le dieron forma** al mundo. El número es provisorio.
+- La magia proviene de **los Nueve**, los dioses que **le dieron forma** al mundo. **Son nueve** (v1.4): nueve oficios, de dos manos cada uno (2.4).
 - No lo crearon de la nada: lo **hicieron**, como se hace una vasija o un tejido. Al terminar, quedó en el aire un resto de esa hechura. Eso es la magia.
 - **Qué pasa hoy con los Nueve: nadie lo sabe.** Es un misterio deliberado. Ningún texto del juego lo afirma; los personajes y los rastros solo suponen.
 
-> **Criterio narrativo:** el misterio se sostiene con rastros (un altar sin dueño, una talla gastada), nunca con respuestas. Ningún evento del MVP revela el destino de los Nueve. Los rastros nunca aparecen en un códice ni se explican (ver 2.7).
+> **Criterio narrativo:** el misterio se sostiene con rastros (un altar sin dueño, una talla gastada), nunca con respuestas. Ningún evento del MVP revela el destino de los Nueve. Los rastros nunca aparecen en un códice ni se explican (ver 2.7). El mundo conoce los **oficios** de los Nueve por las marcas que dejaron en lo que hicieron, no sus nombres propios.
 
 ### 2.2 Lo etéreo — `DECIDIDO`
 
@@ -235,11 +289,16 @@ Quien toca la magia empieza a parecerse un poco a los Nueve: sabe dar forma a la
 
 Los valores viven en la tabla 1.2 de `Sistema.md`.
 
-### 2.4 Cómo nombrar a los Nueve — `PROPUESTA`
+### 2.4 Los Nueve: nueve oficios de dos manos — `DECIDIDO` (v1.4)
 
-- Cada dios se nombra por un **oficio de dar forma**: *el Alfarero*, *la Hilandera*, *el Herrero*, *la Sembradora*.
-- No se detallan los nueve hasta cerrar el MVP.
-- **Linajes:** no existen en el MVP (`DECIDIDO`). Si llegan a existir, serán **linajes de hechura** (quién modeló a la criatura), nunca elementos como fuego, agua o planta.
+> **Cada uno de los Nueve trabajaba con dos manos. Lo que hizo con la mano que da es un legado; lo que hizo con la otra, su revés.**
+
+- Cada dios se nombra por un **oficio de dar forma**. Todo oficio tiene un gesto que da y otro que quita, sostiene o calla, y los dos hacen falta para que la cosa quede hecha: la Alfarera **llena** la vasija, pero lo que la hace vasija es el **hueco**.
+- Son **dieciocho** legados (Visión 10): nueve oficios, dos manos cada uno.
+- **Nadie hizo los reveses aparte**: los hicieron los mismos Nueve, con la otra mano. **Un revés no es el mal** ni una versión oscura: es la otra cara del oficio, como el revés de una tela. Una criatura de Drenaje no es mala, como la hoz no es mala.
+- **El legado es lo que el hacedor dejó de sí en lo que hizo.** Es la ley del ritual: *"Nadie hace nada sin dejar algo de sí"* (2.6). El Maestro deja su sangre en el pergamino; los Nueve dejaron sus manos en las criaturas.
+- Los **linajes de hechura** de la v0.3 quedan reemplazados por **los Legados y sus Reveses** (Visión 10). No existen en el MVP (`DECIDIDO`) y nunca serán elementos como fuego, agua o planta.
+- El detalle (los nueve oficios, los cuatro ciclos, los nombres del sistema) está en 2.10. Es **material de fondo**: no se necesita para la 0a ni la 0b.
 
 ### 2.5 Los pergaminos — `DECIDIDO`
 
@@ -320,6 +379,8 @@ Cada nodo de material del ritual lleva un rastro. Juntar materiales es también 
 | El Roble Viejo (Robledal) | Una talla gastada: una figura con las manos juntas, sosteniendo algo que ya no está | Quién es la figura ni qué sostenía |
 
 > **La mancha del cuenco es ambigua para siempre.** Sugiere que alguien en Almiar hizo el ritual antes del Invierno Flaco, pero ningún texto, en ninguna capa, lo confirma ni lo niega. Es un rastro, no una pista.
+>
+> **Desde la v1.4**, cada rastro se puede leer como la mano de un oficio (2.10: la Alfarera en el cuenco, el Vidriero en el charco, el Tallista en el Roble Viejo, el Molinero en el Molino Callado). **Esa lectura nunca se escribe en el juego:** la hace el jugador o nadie.
 
 ### 2.8 Los hechizos del Maestro — `DECIDIDO`
 
@@ -332,6 +393,7 @@ Nombres y hechizos aprobados (Visión 6.7; reglas en `Sistema.md` 1.6). Cada uno
 | Sanar | **Remiendo** | Costura | *"Un remiendo cierra lo abierto. No levanta lo caído."* |
 
 > El tooltip del Remiendo explica en el lore por qué no afecta a las caídas (`Sistema.md` 11.5).
+> Los hechizos **insinúan** oficios, no los asignan: el Martillazo no es "de Presión" ni la Lanzadera "de Unión". No se tocan con la v1.4.
 
 ### 2.9 La clase del MVP: el Menestral — `DECIDIDO`
 
@@ -348,6 +410,185 @@ El Maestro del MVP es un **Menestral**: alguien que hace magia como quien trabaj
 | Paso hacia el Barro | *"Te pesan las manos, como a quien trabajó la tierra todo el día. Las tuyas se te arriman."* |
 | Paso hacia el Soplo | *"Por un momento, el fuego te calienta menos que antes."* |
 | Aviso de rescatista perdida (antes de confirmar) | *"Si das este paso, [Criatura] ya no te va a poder llevar a casa."* |
+
+### 2.10 Los Legados y sus Reveses — `DECIDIDO` (v1.4; material de fondo, capa futura)
+
+Lore del sistema de la Visión 10. No toca la 0a ni la 0b. Responde las preguntas de Worldbuilder de la Visión 11 sin cambiar ninguna regla.
+
+> **Revés en lugar de Sombra** (aprobado por el usuario, 13/10/2026; **PARA DIRECTOR CREATIVO**: renombrar en la Visión 6.1, 6.2, 8, 10 y 11). "Sombra" se leía como "lo malo", y la Visión prohíbe la estética de versión oscura. **Revés** sale del telar, como la Urdimbre, y dice "la otra cara" sin juicio.
+
+#### Los nueve oficios
+
+Columna "Rastro posible": dónde podría asomar, **sin explicarse nunca** (2.1 y 2.7).
+
+| # | Oficio | Legado (la mano que da) | Revés (la otra mano) | La imagen | Rastro posible |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **la Alfarera** | Lleno | Vacío | La vasija: el barro lleno y el hueco que guarda | El cuenco de la hornacina |
+| 2 | **la Sembradora** | Crecimiento | Drenaje | Siembra y siega: la misma mano que hace crecer cosecha | Surcos viejos en los Huertos |
+| 3 | **el Molinero** | Movimiento | Quietud | La **piedra volandera** gira; la **solera** no se mueve y sostiene a la otra | El Molino Callado: hecho para moverse, hoy quieto |
+| 4 | **el Herrero** | Liviandad | Presión | El fuelle (lo que se escapa) y el martillo sobre el yunque (lo que aplasta) | Insinuado por el Martillazo |
+| 5 | **el Alarife** (maestro de obras) | Intemperie | Protección | El patio abierto y el muro | Ruinas de Almiar: paredes de pie, techos caídos |
+| 6 | **la Campanera** | Sonido | Silencio | La campana que suena y la que se queda quieta en la torre | Una región futura con un campanario sin badajo |
+| 7 | **el Vidriero** | Sinceridad | Ilusión | El vidrio que deja ver y el espejo que devuelve otra cosa | El charco quieto, que refleja más de lo que hay |
+| 8 | **la Hilandera** | Unión | Desapego | El huso que une y la tijera que corta | El pergamino es "el hilo": la magia del Maestro es la más cercana a este oficio |
+| 9 | **el Tallista** | Disciplina | Inspiración | El golpe de gubia repetido y la veta que decide sola | La talla gastada del Roble Viejo |
+
+> **Originalidad:** la Hilandera con huso y tijera recuerda de lejos a un motivo de folclore general (las hilanderas del destino). No es de ninguna franquicia, y se aleja así: **nuestra tijera corta lazos, no vidas**, y nadie mide la vida de nadie.
+
+#### Nombres del sistema
+
+| Qué | Nombre | Por qué |
+| --- | --- | --- |
+| El sistema | **Los Legados y sus Reveses** | "Legado" dice "lo que alguien dejó" |
+| Casillero 5 | **Intemperie** (se confirma) | Se entiende sin explicación. Descartadas: Raso (se lee "liso") y Sereno (ambigua) |
+| Almacén de carga | **El colmo** | El umbral es el colmo: lo que sobresale de la medida |
+| Explosión | **Desborde** (*se desborda*) | La carga es una vasija que se llena; al llegar al colmo, rebalsa |
+| Inversión | **Darse vuelta** (*se dio vuelta*) | Como un guante o una tela: muestra el revés |
+| Extenuada | **Molida** (*molido* en masculino) | "Estar molido" es habla de campo y ata con el Molino. Descartadas: Rendida, Deshecha (se lee "destruida") |
+
+#### Preguntas de la Visión 11
+
+| Pregunta | Respuesta |
+| --- | --- |
+| Quién modeló a los Reveses | Los mismos Nueve, con la otra mano |
+| ¿Legado + revés, o dos cualesquiera? | En el lore, **cualquier par vale**: una criatura puede llevar las dos manos de un oficio (Lleno y Vacío) o manos de oficios distintos. **PARA DIRECTOR / SISTEMAS:** el lore no restringe; si conviene, las dos manos del mismo oficio pueden ser una rareza, no una regla |
+| Por qué el Maestro tiene afinidad con algunos legados y no con todos | Ningún humano tiene marca de hacedor: el Maestro **aprende** oficios. Arranca con los de su clase (el Menestral, con las manos) y aprende los de las criaturas con las que convive, **como un aprendiz que mira trabajar**. Los oficios lejanos de lo que vio le cuestan. Es la rueda del árbol dicha en el mundo (Pilar 3) |
+| Por qué Lleno come mucho | Lo hizo la mano que llena: **tiene que estar lleno para ser lo que es** |
+| Por qué Drenaje y Desapego son solitarios | Drenaje es la siega: donde pasa, lo de al lado se seca. Desapego es la tijera: lo suyo es soltar |
+| Qué hace que una de Desapego se quede con el Maestro | **No se queda por necesidad: se queda porque quiere.** Por eso su lealtad cambia lento: no la compra el hambre ni la asusta el castigo |
+| Cómo se comunican las de Sonido / por qué no se oye a las de Silencio | Sonido es la campana: llama y avisa, y el valle la entiende. Silencio es la campana quieta: no es mudez, es **no sonar** |
+
+#### Los cuatro ciclos en el mundo
+
+Cada ciclo es **un verbo del taller**. Sirve para que tooltips, descripciones y eventos digan siempre lo mismo.
+
+| Ciclo | Distancia | Verbo | En una frase |
+| --- | --- | --- | --- |
+| Generación | +1 | **Nace** | Lo que una mano termina, la siguiente lo empieza |
+| Potenciación | +4 | **Resuena** | Lo que uno tiene, el otro lo agranda, como la caja de un instrumento |
+| Anulación | +8 | **Deshace** | Lo que uno hace, el otro lo desarma |
+| Inversión | +9 | **Se da vuelta** | Las dos manos del mismo oficio |
+
+**La rueda es una jornada de taller.** Los nueve legados son el trabajo del día, con la mano que da; los nueve reveses, el trabajo de la noche, con la otra. **Disciplina → Vacío** es el taller que queda vacío cuando termina la tarea de todos los días; **Inspiración → Lleno** es la idea de la madrugada que llena el día siguiente. Por eso la rueda no tiene principio ni fin.
+
+**La regla que se desprende** (el revés de un legado anula a quien lo genera) se dice así: *la otra mano no deshace la obra, deshace de dónde salió.* El Vacío no rompe lo Lleno: le quita la Inspiración que lo llenaba.
+
+##### Generación (+1): nace
+
+| De | Nace | En el mundo |
+| --- | --- | --- |
+| Lleno | Crecimiento | Lo que está lleno tiene de qué crecer: la semilla lleva su propio alimento |
+| Crecimiento | Movimiento | Lo que crece empieza a andar: el brote empuja la tierra, el potrillo corre |
+| Movimiento | Liviandad | Lo que se mueve mucho se aliviana: la muela que gira saca la harina más fina |
+| Liviandad | Intemperie | Lo liviano sale afuera: el vilano se va con el viento y vive en el aire |
+| Intemperie | Sonido | Lo que vive afuera aprende a llamar: el pastor grita de un cerro al otro |
+| Sonido | Sinceridad | Lo que suena se oye como es: la campana rajada no puede sonar sana |
+| Sinceridad | Unión | De lo dicho de frente nace la confianza |
+| Unión | Disciplina | Lo que se une se sostiene repitiendo: la trenza, la costumbre de la tribu |
+| Disciplina | Vacío | Después de la tarea de todos los días queda el taller vacío. *Cruce del día a la noche* |
+| Vacío | Drenaje | El hueco atrae lo que tiene alrededor: el pozo seca la tierra de al lado |
+| Drenaje | Quietud | Lo que se secó deja de correr: el arroyo sin agua se queda quieto |
+| Quietud | Presión | Lo quieto pesa sobre lo de abajo: la piedra solera |
+| Presión | Protección | Lo apretado hace muro: el adobe prensado, la tierra pisada |
+| Protección | Silencio | Detrás del muro no se oye nada |
+| Silencio | Ilusión | En el silencio se imagina lo que no está: de noche, cualquier ruido es otra cosa |
+| Ilusión | Desapego | Quien descubre que era un reflejo deja de aferrarse |
+| Desapego | Inspiración | Con las manos libres aparece la ocurrencia |
+| Inspiración | Lleno | La idea de la madrugada llena el día. *Cruce de la noche al día* |
+
+> **Gancho para Sistemas:** la generación cuesta **fatiga** (Visión 10). En el mundo: pasar a la tarea siguiente cansa, pero no rompe. La inversión es darse vuelta entera: por eso **muele**.
+
+##### Potenciación (+4): resuena
+
+| El que tiene | Agranda a | En el mundo |
+| --- | --- | --- |
+| Lleno | Intemperie | Lo que está lleno aguanta afuera: la vasija llena no se la lleva el viento |
+| Crecimiento | Sonido | La madera que creció despacio es la que mejor suena |
+| Movimiento | Sinceridad | Lo que anda no se puede esconder: se lo ve pasar |
+| Liviandad | Unión | Solo lo liviano se hila: el vellón, no la piedra |
+| Intemperie | Disciplina | El que duerme al raso hace la guardia todas las noches, o no amanece |
+| Sonido | Vacío | Lo que suena, suena en el hueco: la campana es hueca, el cántaro vacío retumba |
+| Sinceridad | Drenaje | Lo que se muestra entero deja ver por dónde sacarle: el panal a la vista se saquea primero |
+| Unión | Quietud | Un estandarte necesita a los suyos alrededor para quedarse en pie |
+| Disciplina | Presión | El golpe repetido aprieta: el pisón, el martillo sobre el yunque |
+| Vacío | Protección | El hueco cuida lo que guarda: la vasija, la cueva, la madriguera |
+| Drenaje | Silencio | Lo que se seca se calla: el molino sin agua es un molino callado |
+| Quietud | Ilusión | Lo quieto se confunde con el paisaje: el que no se mueve se vuelve junco |
+| Presión | Desapego | Lo que se aprieta demasiado se suelta: la soga tensa se corta |
+| Protección | Inspiración | A resguardo se piensa: junto al fuego, bajo techo, se ocurren las cosas |
+| Silencio | Lleno | Lo que no se anuncia se conserva: la despensa callada nadie la vacía |
+| Ilusión | Crecimiento | Lo que se esconde crece sin que se lo coman |
+| Desapego | Movimiento | Lo que no está atado va adonde quiere: la barca sin amarra |
+| Inspiración | Liviandad | Cuando se te ocurre algo, se te va el peso |
+
+> Dos rastros que nunca se explican: **Drenaje → Silencio** nombra al Molino Callado sin decir por qué se tapó la acequia (4.3), y **Quietud → Ilusión** es lo que hace el Zancajunco cuando se hace junco.
+
+##### Anulación (+8): deshace
+
+| El que deshace | Lo deshecho | En el mundo |
+| --- | --- | --- |
+| Lleno | Disciplina | El que está lleno afloja la costumbre: panza llena duerme la guardia |
+| Crecimiento | Vacío | Lo que crece tapa el hueco: la hierba cubre el pozo abandonado |
+| Movimiento | Drenaje | El agua que corre no se estanca ni se deja secar |
+| Liviandad | Quietud | Lo liviano no se queda donde lo ponen: la pluma no se queda quieta |
+| Intemperie | Presión | Lo que vive afuera no se deja encerrar ni sujetar: el aire no se aplasta |
+| Sonido | Protección | Ningún muro detiene el aviso: la campana se oye adentro de la casa |
+| Sinceridad | Silencio | Lo que se ve no se puede callar: el vidrio muestra aunque nadie hable |
+| Unión | Ilusión | Dos que se conocen no se engañan: el lazo ve a través del espejo |
+| Disciplina | Desapego | La costumbre ata más que el hilo: lo que se repite todos los días no se suelta |
+| Vacío | Inspiración | El hueco se traga la chispa: en la cabeza vacía no se enciende nada |
+| Drenaje | Lleno | La grieta vacía el cántaro, por lleno que esté |
+| Quietud | Crecimiento | Lo quieto no deja crecer: la piedra sobre el brote |
+| Presión | Movimiento | Lo apretado no se mueve: el cepo, la tenaza |
+| Protección | Liviandad | En la casa cerrada no corre el aire: lo que vuela se queda en el suelo |
+| Silencio | Intemperie | Afuera se vive de oír: en el silencio no sabés de dónde viene el peligro |
+| Ilusión | Sonido | El eco engaña: oís el aviso y no sabés de dónde vino |
+| Desapego | Sinceridad | La verdad solo pesa sobre quien quiere quedarse: al que no le importa, no lo ata |
+| Inspiración | Unión | La ocurrencia de uno rompe el plan de todos: el que se cortó solo con su idea |
+
+> La anulación sirve para atacar y para defender (Visión 10: sacarle carga a una aliada antes de que se desborde). En el mundo, deshacer también es **desatar un nudo antes de que apriete**.
+
+##### Inversión (+9): se da vuelta
+
+Invertirse es **darse vuelta como un guante**: la criatura muestra el trabajo de la otra mano de quien la hizo.
+
+| Legado | Se da vuelta en | Oficio | En el mundo |
+| --- | --- | --- | --- |
+| Lleno | Vacío | la Alfarera | La vasija llena y el hueco que la hace vasija |
+| Crecimiento | Drenaje | la Sembradora | La mano que siembra es la misma que siega |
+| Movimiento | Quietud | el Molinero | La piedra volandera gira porque la solera no se mueve |
+| Liviandad | Presión | el Herrero | El fuelle deja escapar; el martillo aplasta |
+| Intemperie | Protección | el Alarife | El patio abierto y el muro que lo rodea |
+| Sonido | Silencio | la Campanera | Toda campana pasa más tiempo callada que sonando |
+| Sinceridad | Ilusión | el Vidriero | Con el mismo vidrio se hace una ventana o un espejo |
+| Unión | Desapego | la Hilandera | El huso une; la tijera corta |
+| Disciplina | Inspiración | el Tallista | La gubia repite el golpe; la veta decide sola |
+
+> **Por qué la que se dio vuelta queda molida:** una criatura está hecha para una mano. Trabajar con la otra la deja **molida** el resto del día. Coincide con la regla de la Visión 10; no pide cambios.
+
+#### La escena de Desapego (texto de referencia, no entra al MVP)
+
+Para la regla "si cae el Maestro, Desapego sigue peleando" (Visión 10):
+
+> *[Rescatista] te arrastra fuera del claro. Los demás vienen detrás.*
+> *[Criatura de Desapego] no viene. Se queda entre los caídos y el enemigo, sola, como si nunca hubiera esperado otra cosa.*
+> *No pelea por vos. Pelea porque nadie se lo pidió.*
+
+Si gana: *"Cuando volvés a abrir los ojos, [criatura] está en el Molino, sentada lejos del fuego. Detrás de ella, los que habías dejado atrás."*
+
+#### Hipótesis de legados para las criaturas del MVP — `PROPUESTA` (PARA SISTEMAS)
+
+Cuál mano las hizo. Los perfiles de atributos son de Sistemas.
+
+| Criatura | Principal | Secundario | Por qué |
+| --- | --- | --- | --- |
+| Rodauva | Protección | Crecimiento | Se cierra y aguanta (Erizarse es el modelo de Protección, Visión 10); vive de la fruta |
+| Surcón | Presión | Lleno | Ara, decide por dónde se pasa; come mucho |
+| Ocarra | Sonido | Movimiento | Centinela y alarma; carga a los graznidos |
+| Zancajunco | Ilusión | Crecimiento | Definido en la Visión 10 (Hacerse junco es Ilusión) |
+| Tasajero | Disciplina | Drenaje | Cuenta y guarda: constancia; caza hasta secar el robledal de presas |
+
+> Lectura de ecología que se sostiene: el Tasajero (Drenaje) les cae mal a la Rodauva y a lo que crece. Si la rueda no queda coherente con el mapa de relaciones (6.1), el lore se acomoda, no al revés.
 
 ## 3. La comida — `DECIDIDO`
 
@@ -761,7 +1002,7 @@ Nombres finales (reemplazan a los provisorios de `Sistema.md` 9.4) y texto de la
 | --- | --- |
 | Fin de la recuperación | *"Te podés parar. No mucho más. Algo adentro tuyo no está cerrando."* |
 | Mañana con quebranto | *"Hoy amaneciste con menos de lo que tenías ayer."* |
-| Vida máxima en 1 (nunca fue a la Poza) | *"Ya no queda nada que perder. Eso tampoco es un alivio."* |
+| Vida máxima en el mínimo (nunca fue a la Poza) | *"Ya no queda nada que perder. Eso tampoco es un alivio."* |
 | Baño en la Poza | *"Te metés en la Poza hasta el pecho. El agua no está caliente: está tibia como un cuerpo. Del otro lado, un animal que no conocés tiene una pata recogida y no te mira. Cuando salís, el cansancio sigue ahí, pero ya no se te sigue cayendo encima."* |
 | Tooltip del baño | *"Lo que perdiste no vuelve. Lo que te queda, ahora sí se cura."* |
 | Variante (criatura suelta y leal; solo texto) | *"[Criatura] se queda en la orilla, de guardia, hasta que salís."* |
@@ -1026,7 +1267,7 @@ Las golondrinas solo se ven al llegar o despertar en el Molino. Su partida es la
 
 El MVP tiene 5 criaturas (2 de trabajo, 2 de combate, 1 mixta): 4 reclutables y el **Tasajero** como encuentro aspiracional de rango 3. Los momentos oscuros son la **cara narrativa de reglas generales** (abandono, ataque nocturno, muerte por hambre), no reglas propias de cada criatura.
 
-Cada ficha incluye la **prenda** que da para el ritual (2.6) y su **defecto de naturaleza**, que es la base de la Mudanza (Ideas en espera, sección 8).
+Cada ficha incluye la **prenda** que da para el ritual (2.6) y su **defecto de naturaleza**, que es la base de la Mudanza (Ideas en espera, sección 8). La hipótesis de legados de cada una (capa futura) está en 2.10.
 
 ### Rodauva
 
@@ -1129,7 +1370,7 @@ Las criaturas de **combate** y **mixtas** se enconan ante una rival enemiga; las
 >
 > Un Zancajunco **hecho junco** no cuenta como rival a su alcance: no dispara Encono ni cobardía hasta que se destapa (`Sistema.md` 10.5). En el mundo, nadie se ensaña con un junco.
 >
-> La cobardía la sostienen el Maestro y las afines **vecinas**, también en diagonal (`Sistema.md` 10.6 v1.6). En el mundo: a la Rodauva la calma sentir a los suyos cerca, no verlos de frente. Por eso sus líneas de resistir dicen *"cerca"* y no *"al lado"* (`cobardia.resiste.afin`: *"Se queda porque tiene a [afín] cerca."* · `cobardia.resiste.maestro`: *"Se queda porque estás cerca."* — `PROPUESTA` v1.2).
+> La cobardía la sostienen el Maestro y las afines **vecinas**, también en diagonal (`Sistema.md` 10.6 v1.6). En el mundo: a la Rodauva la calma sentir a los suyos cerca, no verlos de frente. Por eso sus líneas de resistir dicen *"cerca"* y no *"al lado"* (`cobardia.resiste.afin`: *"Se queda porque tiene a [afín] cerca."* · `cobardia.resiste.maestro`: *"Se queda porque estás cerca."*). Desde T44, el evento trae quién la sostuvo (`sostenida_por`, `Arquitectura.md` A.7) y las dos líneas se ven.
 
 ### Incidentes entre rivales aliadas — `DECIDIDO`
 
@@ -1175,6 +1416,7 @@ Tooltip general: *"Se fue. Ya no se puede sellar."*
 | Tasajero | *"Retrocede sin dejar de mirarte. No huye: se va a pensar."* |
 
 > Derrotar al Tasajero baja su hostilidad en 1 y no vuelve en lo que queda de la visita (`Sistema.md` 12.10).
+> La salvaje que **huye en su turno** (T25) usa las mismas líneas; antes de que le toque, su riesgo se ve con `marca.huida` y `huida.salvaje.porcentaje` (1.5, v1.4).
 
 #### Criatura de la tribu caída
 
@@ -1202,6 +1444,8 @@ Tooltip: *"Guardada con lo justo para respirar. No se cura hasta que salga."* (v
 | Sin caídas | *"Se van sin mirar atrás. El día queda a medias."* |
 | Con caídas en el tablero | *"Al cruzar el claro, mirás atrás una vez. [Caída] sigue donde cayó."* |
 | Esa noche | *"Uno de los pergaminos se enciende solo, con una llama pálida que no calienta."* (sirve en el Molino y al raso, con o sin fuego) |
+
+La previsualización antes de declarar y la marca "Huyendo" están en 1.5 (v1.4).
 
 #### El rescate
 
@@ -1243,7 +1487,7 @@ Momentos que muestran los hitos 0a.1 a 0a.3 (`Arquitectura.md` B.2 a B.4) y que 
 | Rango fuera de la balanza | `sellar.rango_alto` | *"El hilo no alcanza a sujetar algo así. Te falta Soplo."* |
 | Sin pergamino en blanco | `pergamino.sin_blanco` | Compartido con 4.6 |
 
-La salvaje que **huye en su turno** reutiliza las líneas de "Salvaje que huye a 0 de vida".
+La salvaje que **huye en su turno** reutiliza las líneas de "Salvaje que huye a 0 de vida". Los avisos del botón Sellar están en 1.5 (v1.4).
 
 #### Encono y cobardía en el registro (T19)
 
@@ -1260,7 +1504,7 @@ Las reacciones por par de rivales (tabla de Encono y cobardía) sirven como lín
 | Resiste por una afín vecina (toggle del escenario E) | `cobardia.resiste.afin` | *"Se queda porque tiene a [afín] cerca."* (v1.2) |
 | Resiste con el Maestro vecino | `cobardia.resiste.maestro` | *"Se queda porque estás cerca."* (v1.2) |
 
-> **v1.3 — las dos líneas de quién la sostiene todavía no se ven** (hallazgo de T19): el evento `chequeo_rival` no dice si la sostuvieron el Maestro o una afín, y la pantalla no puede recalcularlo después. Son la cara visible de la regla de oro en el coraje (Visión 6.4), así que se piden al Arquitecto (9.2): que el evento traiga quién la sostuvo. Mientras tanto, la resistida usa `cobardia.resiste` y su variante de especie.
+> Desde T44 se muestran según `sostenida_por` del evento `chequeo_rival` (`Arquitectura.md` A.7): `maestro` → la del Maestro; `afin` → la de la afín; `null` → la general.
 
 #### Tooltips de los rasgos (T08, T09, T13; reescritos en la v1.1)
 
@@ -1311,12 +1555,14 @@ Los de Arar, Hacerse junco y Caza y cuenta son `PROPUESTA` (v1.1). Se retiraron 
 
 > El texto de invocar sale del lore del pergamino (2.5): enseña, sin tooltip, por qué una guardada no gana lealtad.
 > Los combos **no miran la posición** (Visión v1.3): *"ya se conocen el golpe"* habla del vínculo, no de estar pegadas.
+> Los avisos de los botones de invocar y de guardar a una caída están en 1.5 (v1.4).
 
 #### Hechizos, hambre y cierre del combate (T10, T14, T22)
 
 | Momento | Clave | Texto |
 | --- | --- | --- |
 | Lanzadera: choque | `lanzadera.choque` | *"[Unidad] sale despedida y se lleva por delante a [otra]."* |
+| Lanzadera: choque contra el borde o un surco (v1.4) | `lanzadera.choque.obstaculo` | *"[Unidad] sale despedida, no tiene adónde ir y se da de lleno."* |
 | Hambre de combate (al cerrar las rondas 6, 12…) | `combate.hambre` | *"La pelea se alarga. A los tuyos les empieza a pesar el estómago vacío."* |
 | El Maestro cae (antes del rescate) | `maestro.caida` | *"Te fallan las piernas. El suelo está más cerca de lo que pensabas."* |
 | Victoria | `combate.victoria` | *"El claro queda en silencio. Se terminó."* |
@@ -1356,11 +1602,10 @@ Hay dos bandos naturales, "la granja" (Rodauva, Surcón, Ocarra) y "lo salvaje" 
 
 El resto del mundo se esboza, no se detalla, hasta cerrar el MVP. Lo que falta:
 
-- Nombre, oficio y huella de cada uno de los Nueve.
-- Dónde aparecen los primeros rastros de los Nueve fuera de Valdelumbre.
+- Dónde aparecen los primeros rastros de los Nueve fuera de Valdelumbre (2.10 deja ideas: el campanario sin badajo de la Campanera).
 - Esbozo de los escribas (cuando la economía tenga capa).
 
-Resuelto en esta versión: los Nueve no definen linajes en el MVP (2.4) · origen de los pergaminos (2.5 y 2.6).
+Resuelto: los Nueve no definen linajes en el MVP (2.4) · origen de los pergaminos (2.5 y 2.6) · **nombre, oficio y huella de cada uno de los Nueve (v1.4, 2.4 y 2.10)**.
 
 ## 8. Ideas en espera
 
@@ -1368,17 +1613,33 @@ Ideas aprobadas en espíritu, sin mecánica en el MVP.
 
 | Idea | Por qué espera |
 | --- | --- |
-| **La Mudanza** *(nombre provisorio)*: cada criatura supera su defecto de naturaleza gracias al vínculo y cambia de forma (detalle en la Visión, sección 10). Defectos confirmados: Rodauva, cobardía · Surcón, letargo · Ocarra, impulsividad · Zancajunco, ariscura | Duplica el costo de arte. El nombre final se define cuando tenga capa |
+| **La Mudanza**: cada criatura supera su defecto de naturaleza gracias al vínculo y cambia de forma (detalle en la Visión, sección 10). Defectos confirmados: Rodauva, cobardía · Surcón, letargo · Ocarra, impulsividad · Zancajunco, ariscura | Duplica el costo de arte |
 | **La despensa del Tasajero:** si el Maestro cae y el Tasajero está famélico, lo arrastra a su despensa; famélico, también empieza a "guardar" al más débil del grupo. Debe ser un evento del que se puede escapar | El Tasajero no es reclutable en el MVP |
 | **La despensa como pasiva:** reserva de comida de emergencia que no se echa a perder | Ídem |
 | **El Surcón cava bajo las reservas** del campamento cuando está famélico | Regla propia de criatura; el MVP usa reglas generales |
 | **Reencontrar a una criatura que se fue** en su hábitat, ya salvaje | El MVP no guarda individuos |
 | **El santuario de escribas:** pergaminos a cambio de monedas | Depende de la economía (Capa 5) |
 | **La prenda en el epílogo:** el epílogo nombra quién dio la prenda de cada pergamino. Solo narrativa (Visión 10 v1.2) | Una consecuencia mecánica volvería al ritual una optimización: el ritual duele por la sangre |
+| **Los Legados y sus Reveses** (lore en 2.10) | Sistema grande de la Visión 10; espera a que el MVP valide la tribu |
+
+### 8.1 Nombres de las capas futuras — `DECIDIDO` (v1.4)
+
+Responden las preguntas de nombres de la Visión 11. **PARA DIRECTOR CREATIVO:** registrarlos en la Visión 10 y 11.
+
+| Qué | Nombre | Por qué |
+| --- | --- | --- |
+| Barra de zozobra | **Zozobra** (la barra); **templarse** (superarla); **quebrarse** (aparece el defecto) | La barra es la inquietud; el temple es lo que gana quien la supera |
+| La Mudanza | **Mudanza** (se confirma) | Mudar plumas, mudar de casa |
+| Pergamino de muda (Muda colectiva) | **El atado** (*un atado de pergaminos*) | Cinco hilos atados en uno |
+| Involución | **Torcedura** (*se torció*) | Un árbol torcido sigue siendo el mismo árbol: reconocible y sin estética oscura |
+| La subyugación | **El Yugo** | Herramienta de oficio, como los otros hechizos. El Soplo domina por yugo; el Barro guía por vínculo |
+| El esbirro | **Uncida** (*uncido*) | *Uncir* = poner al yugo |
+| Las órdenes | **La Voz**; la orden puntual, **el Grito** | La voz no es magia: es cuerpo (Barro) |
+| Explosión, inversión y extenuada (Legados) | **Desborde**, **darse vuelta** y **molida** | Ver 2.10 |
 
 ## 9. Pendientes
 
-**v1.3:** las etiquetas y avisos de T19 a T21 están en `es.json` (586 claves), y el único texto con un número de vida pasó a no tenerlo (1.5). Los nombres de la v1.1 siguen esperando al Director (1.2.1), pero ya tienen texto: **el Worldbuilder no tiene pendientes que bloqueen la 0a.2 ni la 0b.**
+**v1.4:** los textos de T22 a T28 están en `es.json` (620 claves). El lore de los Legados y los nombres de las capas futuras quedan cerrados del lado del Worldbuilder. **El Worldbuilder no tiene pendientes que bloqueen la 0a.3 ni la 0b.**
 
 ### 9.1 Preguntas abiertas de reglas
 
@@ -1398,24 +1659,31 @@ Todas cerradas.
 
 **PARA DIRECTOR CREATIVO:**
 
+- [ ] **v1.4:** renombrar **Sombra → Revés** en la Visión (6.1, 6.2, 8, 10 y 11) y registrar en `Decisiones.md` el marco de los nueve oficios de dos manos (2.4 y 2.10). Cierra en la Visión 11: "número final de los Nueve" (9), "nombre final de la barra de zozobra", "nombres finales de la involución, las órdenes, el Grito, la subyugación y el esbirro", "confirmar Intemperie", "nombre del sistema", "quién modeló a las Sombras", las justificaciones de las anulaciones y de la potenciación, "nombres finales de la explosión y de extenuada", "por qué el Maestro tiene afinidad con algunos legados", "los verbos en el lenguaje del mundo" y "la escena de Desapego".
+- [ ] **v1.4:** decidir si una criatura puede llevar las dos manos de un mismo oficio (2.10; el lore lo permite).
 - [ ] Aprobar los nombres de 1.2.1: **Arar** (el surco), **Hecho junco** (oculto) y **Embestida** (el bono). Ya están en `es.json`. Al aprobarlos, cierran la pregunta "Nombre final del surco del Surcón" de la Visión 11 y sacan el *(provisorio)* de la Visión 6.2 y de `Sistema.md` 11.2.1 y 11.2.2.
 - [ ] Decidir si la hostilidad **Cazando** pasa a **Rastreando** (1.2.1). Es 0b: no bloquea.
 - [ ] Aprobar los textos nuevos de la v1.1 (pantalla de T13, las que miran, la atacante que se va, la emboscada del Robledal y los rasgos en acción) y de la v1.2 (etiquetas de T14 y T16, tooltips de relaciones y las dos líneas de cobardía) (1.5 y sección 5).
 - [ ] Registrar en `Decisiones.md` que las etiquetas de estado concuerdan con el género de la especie, y que las de obediencia no (1.5).
-- [ ] **v1.3:** registrar en `Decisiones.md` los textos de T19 a T21 y la regla "ningún texto escribe un número de vida, daño o curación" (1.5), aprobados por el usuario el 08/10/2026.
+- [ ] Registrar en `Decisiones.md` los textos de T19 a T21 y la regla "ningún texto escribe un número de vida, daño o curación" (1.5), aprobados por el usuario el 08/10/2026.
 
 **PARA SISTEMAS:**
 
-- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder ya entregados. **Sigue pendiente desde la v1.2:** `Sistema.md` v1.7 todavía los lista. Son los de la v1.1 (tooltips nuevos y retiro de Lomo de tierra; textos de las claves de la v1.3; fichas de la sección 5; preguntas de 9.1 y retiro de `comer.sacar_guardada`; la atacante que se va; las que miran y la Centinela no leal; claves de pantalla de T13), el de la v1.6 (tooltips de relaciones con diagonales, entregado en la v1.2) y los dos de la v1.7 (escala ×10 y claves sin texto de T13 a T21), que entrega esta v1.3. Queda abierto solo el de los nombres, que espera al Director.
+- [ ] **v1.4:** revisar la hipótesis de legados de las 5 criaturas (2.10) contra los perfiles y la rueda; si el mapa de relaciones (6.1) no queda coherente con las anulaciones, avisar: el lore se acomoda.
+- [ ] Tachar en `Sistema.md` 15 los pedidos al Worldbuilder ya entregados: los de la v1.1, la v1.6 y los dos de la v1.7 (escala ×10 y claves sin texto de T13 a T21). Queda abierto solo el de los nombres, que espera al Director.
 - [ ] Si el Director aprueba **Rastreando**, cambiar el nombre del estado en 12.10.
 
 **PARA ARQUITECTO:**
 
-- [ ] **v1.3:** copiar `es.json` v1.3 a `juego/datos/textos/` (Claude Code no edita esa carpeta). Claves: 577 → 586. La huella de los datos no cambia (excluye `textos/`, A.7). Desaparecen los `[FALTA]` de `marca.enconada`, `marca.acobardada`, `panel.encono`, `panel.mana` y los dos `aviso.terminar.*`.
-- [ ] **v1.3, quién sostuvo a la que resiste** (`PROPUESTA` aprobada por el usuario): que el evento `chequeo_rival` resistido traiga quién la sostuvo (el Maestro, una afín o nadie), para mostrar `cobardia.resiste.maestro` y `cobardia.resiste.afin` (sección 5). Si las dos aplican, se muestra la del Maestro. Alternativa: dejarlas sin uso hasta la 0b. No bloquea.
+- [ ] **v1.4:** copiar `es.json` v1.4 a `juego/datos/textos/` (Claude Code no edita esa carpeta). Claves: 586 → 620. La huella de los datos no cambia (excluye `textos/`, A.7). Desaparecen los `[FALTA]` de T22 a T28.
+- [ ] **v1.4, claves a confirmar:** cotejar `aviso.huir.*` (2) y `huida.previa.*` (6) con la entrada de T28 en `docs/RESUMENES.md`. Si los nombres difieren, se cambian las claves en `es.json`; los textos no cambian (1.5).
+- [ ] **v1.4:** `huida.salvaje.tooltip` existe y T25 no lo usa. Propuesta: tooltip del suceso de una huida ya ocurrida. Si no tiene lugar, se retira en la v1.5.
+- [ ] **v1.4, T29:** si el rescate deja claves de pantalla sin texto, van al resumen como siempre; los textos del rescate (4.11 y sección 5) ya existen.
+- [x] ~~v1.3: copiar `es.json` v1.3~~ → copiado.
+- [x] ~~v1.3: quién sostuvo a la que resiste~~ → `sostenida_por` y `afin` en el `chequeo_rival` (T44, P-041).
 - [x] ~~Copiar `es.json` v1.2~~ → copiado en la sincronización previa a T41 (`Arquitectura.md` B.3.1).
 - [x] ~~Confirmar las claves de los tooltips de relaciones~~ → confirmadas con esos nombres, con `{porcentaje}` (`Arquitectura.md` 10.5, 07/10/2026).
-- [x] ~~`panel.cadena.eslabon`~~ → no hizo falta: las pruebas manuales de T16 y T41 no lo marcaron.
+- [x] ~~`panel.cadena.eslabon`~~ → no hizo falta.
 - [x] ~~Copiar `es.json` v1.1~~ → copiado en la sincronización previa a T35 (`Arquitectura.md` A.2.1).
 - [x] ~~Claves retiradas (`rasgo.lomo_de_tierra.*`, `comer.sacar_guardada`)~~ → retiradas en T35.
 - [x] ~~Concordancia de las etiquetas~~ → `DECIDIDO` (A.2.1), programada en T40.
@@ -1425,11 +1693,13 @@ Todas cerradas.
 
 **PARA ARTE / UI:**
 
+- [ ] **v1.4, huida:** la marca "Huida" sobre la salvaje con su porcentaje, y "Huyendo" sobre el Maestro que declaró. Que "Huyendo" no se confunda con un estado ya cumplido (un contorno que se apaga, por ejemplo).
+- [ ] **v1.4, Lanzadera:** el choque contra el borde o un surco se lee igual que contra una unidad (un golpe seco, sin desplazamiento).
 - [ ] **v1.3, escala ×10:** los números de vida y daño llegan a tres cifras (Tasajero, 300). Prever el ancho en la ficha, la cola y el desglose (`Sistema.md` 15 v1.7). Los textos no tienen números de balance: no cambian el ancho.
 - [ ] **v1.3, marcas de Encono:** "Enconada" y "Acobardada" sobre la ficha, más el contador "Encono: n/3". Que la acobardada se lea por la silueta (bola floja, sección 5) y no solo por la palabra.
 - [ ] **v1.2, tablero de 12 × 12 con cámara móvil:** las posturas que cambian una regla (Rodauva erizada y acobardada, Zancajunco hecho junco y con la embestida, Tasajero en Caza y en Cuenta) se tienen que leer por la silueta también con la cámara alejada (1.4).
 - [ ] **v1.2, relaciones:** al mover una unidad, marcar qué vecinas (las 8) le darían afinidad o riesgo de incidente en el destino (`Sistema.md` 15). El texto ya dice "al lado o en diagonal"; el tablero lo tiene que mostrar.
-- [ ] **v1.1, rasgos:** el surco (tierra removida con un lomo de terrones a cada lado, simétrico, que se lea como pozo), con el color del bando de su dueño; el Surcón arando; el Zancajunco **hecho junco** (silueta de mata de juncos) y con la **embestida** pendiente (cuello en S tenso); el Tasajero en **Caza** (largo y pegado al suelo) y en **Cuenta** (recogido, cola enroscada). Todo se distingue por la silueta (sección 5). Reemplaza al pedido "marcas Caza y Cuenta en la barra de iniciativa": ahora el modo se ve también en su ficha.
+- [ ] **v1.1, rasgos:** el surco (tierra removida con un lomo de terrones a cada lado, simétrico, que se lea como pozo), con el color del bando de su dueño; el Surcón arando; el Zancajunco **hecho junco** (silueta de mata de juncos) y con la **embestida** pendiente (cuello en S tenso); el Tasajero en **Caza** (largo y pegado al suelo) y en **Cuenta** (recogido, cola enroscada). Todo se distingue por la silueta (sección 5).
 - [ ] Pantalla de comer a una criatura: aviso de rescatistas perdidas, botones "Hacerlo" / "Todavía no", la tribu alrededor del fuego sin mostrar a la comida y su pergamino ardiendo.
 - [ ] Rastro del abandono donde dormía la criatura: hojas, surco o huellas, según la especie.
 - [ ] Un solo ícono de Enfermo, con la causa y los días restantes en el tooltip; una sola postura de enferma, simétrica.
@@ -1458,31 +1728,35 @@ Todas cerradas.
 ### 9.3 Para el Worldbuilder (capas futuras, sin detallar)
 
 - [ ] Qué criaturas son orgullosas (dato para el Grito).
-- [ ] Nombres finales de la involución (candidatos: malmuda, torcedura), las órdenes, el Grito, la subyugación y el esbirro.
-- [ ] Por qué la voz del Maestro pesa sobre el hilo del pergamino, y por qué el Soplo puede atar una voluntad.
-- [ ] Textos del momento en que el defecto consume a la criatura.
-- [ ] Nombre final de la barra de zozobra (candidatos: zozobra, temple, desvelo), qué la llena en cada criatura y textos de quiebre y superación.
-- [ ] Número final de los Nueve.
-- [ ] Nombre final de la Mudanza y del pergamino de muda.
+- [ ] Por qué la voz del Maestro pesa sobre el hilo del pergamino, y por qué el Soplo puede atar una voluntad (el Yugo).
+- [ ] Textos del momento en que el defecto consume a la criatura (la torcedura).
+- [ ] Qué llena la zozobra en cada criatura y textos de quebrarse y templarse.
+- [ ] Qué legados le caen mal a cada especie, más allá de la regla de la rueda (Visión 11).
+- [ ] Verbos de los 18 legados en tooltips de juego (cuando tengan capa; base en 2.10).
 - [ ] Esbozo de los escribas (Capa 5).
 - [ ] Propuestas para el título del juego y el nombre del mundo (con el Director Creativo).
 - [ ] **PREGUNTA ABIERTA:** ¿las criaturas tienen nombre propio? Con varias de la misma especie, el epílogo repite "la Rodauva". Se decide después del primer playtest de la 0b.
+- [x] ~~Nombres finales de la involución, las órdenes, el Grito, la subyugación y el esbirro~~ → 8.1 (v1.4).
+- [x] ~~Nombre final de la barra de zozobra~~ → Zozobra (8.1).
+- [x] ~~Número final de los Nueve~~ → 9 (2.1 y 2.4).
+- [x] ~~Nombre final de la Mudanza y del pergamino de muda~~ → Mudanza y el atado (8.1).
 - [x] ~~Entregar los textos en JSON~~ → entregado el 03/10/2026 (1.5).
 
 ## 10. Registro de cambios
 
 | Versión | Fecha | Cambio |
 | --- | --- | --- |
+| v1.4 | 13/10/2026 | **Textos de T22 a T28 y lore de los Legados.** 1.5: textos de pantalla de T22 a T28 (avisos de hechizos, sellar, invocar y guardar a una caída; sentidos y choque de la Lanzadera; marca y tooltip de huida de las salvajes; desenlace, marca, panel, avisos y previsualización de la huida del Maestro), aprobados por el usuario; 8 claves a confirmar por el Arquitecto. 1.2: *Huyendo*. 2.1: los Nueve son nueve. 2.4 reescrita: nueve oficios de dos manos; los linajes de hechura pasan a **los Legados y sus Reveses** (Revés reemplaza a Sombra). Nueva 2.10: los nueve oficios, nombres del sistema (Legados, Intemperie, colmo, desborde, darse vuelta, molida), respuestas a la Visión 11, justificación de los cuatro ciclos en los 18 legados, escena de Desapego e hipótesis de legados de las 5 criaturas. 2.7: lectura de los rastros por oficio, nunca escrita en el juego. 7: Nueve resueltos. 8: Legados en espera; nueva 8.1 con los nombres de las capas futuras (zozobra, templarse, quebrarse, el atado, torcedura, el Yugo, uncida, la Voz y el Grito). 9: derivaciones al día. `es.json`: 586 → 620 claves |
 | v1.3 | 08/10/2026 | **Sincronización con `Sistema.md` v1.7 y `Arquitectura.md` v0.37 (T17 a T21, escala ×10).** 1.5: textos de pantalla de T19 a T21 (`marca.enconada`, `marca.acobardada` con concordancia, `panel.encono`, `panel.mana`, `aviso.terminar.debe_atacar_rival` según P-038 opción A y `aviso.terminar.debe_acercarse`), aprobados por el usuario; revisión contra la escala ×10, con la regla "ningún texto escribe un número de vida, daño o curación". Sección 5: `guardar_caida.tooltip` sin número; nota sobre `cobardia.resiste.afin` y `.maestro`, que esperan un dato en el evento. 9.2: derivaciones al día (cerradas las de la v1.2 ya resueltas; nuevas para el Arquitecto, Sistemas, el Director y Arte). `es.json`: 577 → 586 claves |
 | v1.2 | 07/10/2026 | **Sincronización con la Visión v1.3 y `Sistema.md` v1.6 (vecinas en 8, tablero de 12 × 12).** 1.4: siluetas legibles con la cámara alejada. 1.5: etiquetas de T14 (obediencia y sus tramos, sin concordancia) y T16 (cadena); tooltips de afinidad, incidente, cobardía y Encono con las diagonales (claves propuestas al Arquitecto); concordancia de etiquetas cerrada (T40). Sección 5: hecho junco se destapa solo por los lados; las presas del Tasajero en los huecos de la formación; sostén de la cobardía en 8, con dos líneas que pasan de "al lado" a "cerca"; incidente con la rival en diagonal; combos sin posición; hambre de combate cada 6 rondas. Sección 6: el vínculo mira 8, el cuerpo mira 4. 9.2: derivaciones cerradas y nuevas. `es.json`: 568 → 577 claves |
 | v1.1 | 05/10/2026 | **Sincronización con la Visión v1.2 y `Sistema.md` v1.5 (rasgos reescritos tras el playtest 0a.1).** Nueva 1.2.1: nombres en `PROPUESTA` (Arar, Hecho junco, Embestida; Rastreando para la hostilidad). 1.5: huecos `DECIDIDO`, hueco `{n}`, concordancia de las etiquetas de estado con la especie y textos de la pantalla de T13. 2.6: la prenda sin consecuencias. 4.6: las que miran (ya estaban en `es.json`) y la atacante que se va. 4.7: emboscada del Robledal sin "mirando a una sola". 4.11: perdida por abandono tras atacarte. 4.12: solo se come a una suelta; sale "sacar a una guardada". Sección 5: Surcón con Arar (sale Lomo de tierra), Zancajunco con Hacerse junco activo, Tasajero con Caza y cuenta en dos modos; posturas nuevas para arte; nota del Encono con un Zancajunco hecho junco; tooltips nuevos y rasgos en acción. 8: la prenda en el epílogo. Sección 9 reescrita: 9.1 cerrada; derivaciones al Director, Sistemas, Arquitecto y Arte. `es.json`: 496 → 568 claves |
 | v1.0 | 03/10/2026 | **Sincronización con la Visión v1.0. El Worldbuilder no tiene pendientes que bloqueen el MVP.** Pasan a `DECIDIDO` el ritmo del día (4.15) y los textos nuevos de la entrega (1.5). 4.12: cuándo se come a una criatura (solo en el reparto de la noche, junto al fuego). Centinela unificado entre 1.5 y 4.6, sin hueco (actualizar `nocturno.centinela` en `es.json`). Sección 9: se cierra la pregunta de cuándo comer; pedidos a Sistemas para poner al día `Sistema.md` 15; prioridad de los huecos gramaticales para el Arquitecto |
 | v0.9 | 03/10/2026 | **Textos entregados en JSON** (`juego/datos/textos/es.json`, 493 claves). Nueva 1.5: notación, huecos gramaticales (`PROPUESTA` al Arquitecto), reglas de armado y textos nuevos de la entrega (`PROPUESTA` al Director). Claves de la sección 5 y 4.6 alineadas con el JSON (`sellar.fallo.erizada`, `nocturno.comer.zancajunco_suelto`, `rasgo.<id>.tooltip`). 4.11: muerte de hambre del Maestro `DECIDIDO` (`Sistema.md` 7.6). Sección 9 reescrita: se cierran los pedidos ya registrados en `Arquitectura.md` v0.6; las guardadas no pierden lealtad al comer a una compañera (Visión 6.4); nuevos pedidos sobre el esquema de textos y la variante "solo guardadas" |
 | v0.8 | 02/10/2026 | **Textos del MVP completos.** Pasan a `DECIDIDO`: textos de combate de la 0a, atacante caída (4.6), variante "solo guardadas" (4.11) y el criterio de 1.3, que pasa a "la tribu es la cámara". Nuevas 3.5 (hambre) y 3.6 (Enfermo). Evento completo del juncal (4.5). Nuevas 4.12 (comerse una criatura), 4.13 (abandono), 4.14 (camino de confianza y Leal por primera vez, con el payoff de la compañera) y 4.15 (ritmo del día, `PROPUESTA`). Pantalla de muerte por hambre del Maestro (4.11, `PROPUESTA`). Sección 9 reescrita: preguntas de reglas para Sistemas y Director, y pedidos acumulados |
-| v0.7 | 02/10/2026 | **Textos de la 0a completos en `PROPUESTA`.** 1.3: criterio "comer a una criatura se elide". 4.6: la atacante caída (escenario G) con sus tres salidas. 4.11: orden de lectura del epílogo `DECIDIDO` según `Sistema.md` 13; variante de cierre "solo quedan guardadas". Sección 5: textos de combate de la 0a (sellado, Encono y cobardía, tooltips de rasgos, Secundar, combos, invocar, guardar, choque de la Lanzadera, hambre de combate, caída del Maestro y victoria). Sección 9 reescrita: se cierran los pendientes ya resueltos en la Visión v0.9 y en `Sistema.md` v0.8 (Menestral, quebranto, rayas y golondrinas, orden del epílogo, variante "Solo", golondrinas sin mecánica, incidentes y baño en la Poza); nueva 9.1 con los seis bloques de texto de la 0b por prioridad y 9.2 con las preguntas abiertas |
-| v0.6 | 02/10/2026 | **MVP cerrado para el Worldbuilder.** Glosario (1.2): Menestral, quebranto, las rayas y las golondrinas. Hechizos (2.8) y rasgos (sección 5) pasan a `DECIDIDO`. Nueva 2.9: la clase del MVP y textos de subida de nivel. 4.3: la crecida no cierra el paso. 4.5: la ciruela en disputa (encuentro de solo trabajo); "La crecida" se reescribe como "leer el río" con textos de cruce; Poza, rodeo y Tasajero derrotado resueltos; textos del Tasajero por estado. Nuevas 4.9 (quebranto y Poza Tibia), 4.10 (el plazo: rayas y golondrinas) y 4.11 (el epílogo). Incidentes entre rivales aliadas (sección 5). Pendientes reescritos (9) |
-| v0.5 | 01/10/2026 | Nueva 2.8: nombres de los hechizos (Martillazo, Lanzadera, Remiendo). Nueva 3.4: textos de rebuscar y de pudrición. Nueva 4.3: geografía del valle; el Robledal está del otro lado del vado; el Molino es de agua y está callado por la acequia tapada (gancho Capa 1). Lugares (4.4): el Surcón pasa al Vado. Eventos (4.5): el corral caído (Ocarra), el surco que ronca (Surcón) y la Poza Tibia (sanador del MVP). Ataque nocturno al raso y Centinela (4.6). Nueva 4.7: habilidades de campamento con nombres finales (Madriguera reemplaza a Hoyo) y emboscadas. Las dos frutas iniciales (4.8). Avistamiento en cada ficha. Temperamento de huida confirmado; textos de guardar a una caída y de huida del Maestro. Tregua de la Poza en la cadena alimentaria. Secciones 4.3 a 4.6 renumeradas a 4.4, 4.5, 4.6 y 4.8. Pendientes actualizados |
-| v0.4 | 01/10/2026 | Nueva 4.6: la apertura; la Rodauva es la dueña del Molino; el pasado del Maestro no se explica en el MVP. Fichas con rasgo de combate. Nombres finales de los rasgos: Erizarse, Lomo de tierra, Alabarda, Hacerse junco, Caza y cuenta. Rodauva erizada y acobardada con siluetas distintas. Textos de huida, caída, rescate y caídas que quedan atrás. Relaciones dentro de una misma especie (6.1): Rodauva bien, Ocarra mal, Surcón y Zancajunco sin relación. Se quita la nota sobre el Encono de las mixtas (confirmado). Pendientes actualizados |
-| v0.3 | 01/10/2026 | Glosario de términos (1.2): Arrimo, Encono y Secundar finales; Urdimbre, prenda, péñola y "lo que diste". Pergaminos: no son piel; origen fijo + ritual (2.5). Nueva 2.6: el ritual de sangre (lore, materiales, Urdimbre, textos, prendas y "lo que diste"). Nueva 2.7: rastros de los Nueve; la mancha del cuenco es ambigua para siempre. Lugares con materiales (4.3). Nodos nuevos: la hornacina, el palomar, el charco quieto, el Roble Viejo y el rodeo de las zarzas (4.4). Ofrenda del colgadero: la comida se pierde. Ataque nocturno aprobado (4.5). Fichas con prenda y defecto de naturaleza. Tasajero sin momento oscuro propio en el MVP. Cobardía reemplaza al encono de presa. Mudanza y escribas en Ideas en espera |
-| v0.2 | 30/09/2026 | Nueva sección 2: los Nueve, lo etéreo, la balanza Barro ↔ Soplo y los pergaminos que arden. Estado Enfermo único con tres causas. El Zancajunco acepta carne. Rangos en las fichas. Tasajero apaciguable. Momentos oscuros como caras de reglas generales. El colgadero reescrito. Textos del ataque nocturno y de Encono. Ideas en espera |
+| v0.7 | 02/10/2026 | **Textos de la 0a completos en `PROPUESTA`.** 1.3: criterio "comer a una criatura se elide". 4.6: la atacante caída (escenario G) con sus tres salidas. 4.11: orden de lectura del epílogo `DECIDIDO` según `Sistema.md` 13; variante de cierre "solo quedan guardadas". Sección 5: textos de combate de la 0a (sellado, Encono y cobardía, tooltips de rasgos, Secundar, combos, invocar, guardar, choque de la Lanzadera, hambre de combate, caída del Maestro y victoria). Sección 9 reescrita |
+| v0.6 | 02/10/2026 | **MVP cerrado para el Worldbuilder.** Glosario (1.2): Menestral, quebranto, las rayas y las golondrinas. Hechizos (2.8) y rasgos (sección 5) pasan a `DECIDIDO`. Nueva 2.9: la clase del MVP y textos de subida de nivel. 4.3: la crecida no cierra el paso. 4.5: la ciruela en disputa; "leer el río"; Poza, rodeo y Tasajero derrotado resueltos; textos del Tasajero por estado. Nuevas 4.9 (quebranto y Poza Tibia), 4.10 (el plazo) y 4.11 (el epílogo). Incidentes entre rivales aliadas (sección 5). Pendientes reescritos (9) |
+| v0.5 | 01/10/2026 | Nueva 2.8: nombres de los hechizos. Nueva 3.4: textos de rebuscar y de pudrición. Nueva 4.3: geografía del valle; el Molino es de agua y está callado por la acequia tapada (gancho Capa 1). Lugares: el Surcón pasa al Vado. Eventos: el corral caído, el surco que ronca y la Poza Tibia. Ataque nocturno al raso y Centinela. Nueva 4.7: habilidades de campamento y emboscadas. Las dos frutas iniciales. Temperamento de huida; textos de guardar a una caída y de huida del Maestro |
+| v0.4 | 01/10/2026 | Nueva 4.6: la apertura; la Rodauva es la dueña del Molino; el pasado del Maestro no se explica en el MVP. Fichas con rasgo de combate. Nombres finales de los rasgos. Rodauva erizada y acobardada con siluetas distintas. Textos de huida, caída, rescate y caídas que quedan atrás. Relaciones dentro de una misma especie |
+| v0.3 | 01/10/2026 | Glosario (1.2): Arrimo, Encono y Secundar finales; Urdimbre, prenda, péñola y "lo que diste". Pergaminos: no son piel. Nueva 2.6: el ritual de sangre. Nueva 2.7: rastros de los Nueve. Nodos nuevos: la hornacina, el palomar, el charco quieto, el Roble Viejo y el rodeo de las zarzas. Fichas con prenda y defecto de naturaleza. Cobardía reemplaza al encono de presa. Mudanza y escribas en Ideas en espera |
+| v0.2 | 30/09/2026 | Nueva sección 2: los Nueve, lo etéreo, la balanza Barro ↔ Soplo y los pergaminos que arden. Estado Enfermo único con tres causas. El Zancajunco acepta carne. Rangos en las fichas. Tasajero apaciguable. Momentos oscuros como caras de reglas generales |
 | v0.1 | 30/09/2026 | Creación: convenciones, comida, región Valdelumbre y 5 criaturas del MVP |
