@@ -18,7 +18,8 @@
     "alcance_sellar",
     "alcance_guardar_caida",
     "vida_tras_caida",
-    "vida_al_guardar_caida"
+    "vida_al_guardar_caida",
+    "vida_al_resellar"
   ],
   "additionalProperties": false,
   "properties": {
@@ -266,6 +267,11 @@
       "type": "integer",
       "minimum": 1,
       "description": "La vida con la que queda una caída que el Maestro guarda (Sistema.md 11.5, T27)"
+    },
+    "vida_al_resellar": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "La vida con la que queda guardada la atacante nocturna resellada (Sistema.md 4.4 y 9.3, T30; P-046)"
     }
   }
 }

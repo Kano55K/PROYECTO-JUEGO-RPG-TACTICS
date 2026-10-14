@@ -1,6 +1,9 @@
 # Sistema.md 11.5, 6 (rescate y Las caidas), 3.2 (Quema) y 5.2: lo que pasa con la tribu
 # al terminar el combate. Corre una sola vez por combate (Plantel.cerrado).
-# Solo toca a la tribu: la atacante caida es de T30 y las salvajes no cambian.
+# Toca a la tribu y, con la derrota o la huida, a la atacante nocturna, que se va
+# (P-024, S-66). Con la victoria, su destino es una decision aparte (9.3, T30): la
+# deja pendiente y no aplica la lealtad de la noche hasta que se decida (S-65).
+# Las salvajes no cambian.
 class_name Cierre
 extends RefCounted
 
@@ -30,7 +33,9 @@ static func desde_datos(tabla_combate: Dictionary, tabla_lealtad: Dictionary, re
 	return cierre
 
 
-func cerrar(plantel: Plantel, fin: FinCombate.Fin) -> ResultadoCierre:
+# surcos: los del combate, para cerrar los de la atacante que se va (11.2.1). Sin
+# ellos (tests del cierre suelto), unos vacios.
+func cerrar(plantel: Plantel, fin: FinCombate.Fin, surcos: Surcos = null) -> ResultadoCierre:
 	var motivo: ResultadoCierre.Motivo = _motivo_rechazo(plantel, fin)
 	if motivo != ResultadoCierre.Motivo.NINGUNO:
 		return ResultadoCierre.new(false, motivo, fin)
@@ -38,10 +43,18 @@ func cerrar(plantel: Plantel, fin: FinCombate.Fin) -> ResultadoCierre:
 	var acumulador: AcumuladorLealtad = AcumuladorLealtad.desde_datos(_tabla_lealtad)
 	if fin == FinCombate.Fin.VICTORIA:
 		_victoria(plantel, resultado, acumulador)
+		var atacante: Criatura = atacante_caida(plantel)
+		if atacante != null:
+			resultado.destino_pendiente = atacante.id
 	else:
 		# Derrota por caida (6) o huida (11.7, T28): las caidas mueren igual.
 		_derrota(plantel, resultado, acumulador)
-	resultado.lealtad = acumulador.aplicar(plantel.criaturas())
+		_atacantes_se_van(plantel, resultado, Surcos.new() if surcos == null else surcos)
+	# Sistema.md 5.2 y S-65 (T30): con el destino pendiente, la noche sigue abierta.
+	if resultado.destino_pendiente.is_empty():
+		resultado.lealtad = acumulador.aplicar(plantel.criaturas())
+	else:
+		resultado.acumulador = acumulador
 	# Sistema.md 11.2.2, Fin del combate: se borran el estado oculto y el bono.
 	Junco.limpiar(plantel)
 	# Sistema.md 10.5, Fin del combate: el Encono vuelve a 0 (todos los bandos).
@@ -101,6 +114,34 @@ func _derrota(plantel: Plantel, resultado: ResultadoCierre, acumulador: Acumulad
 				acumulador.anotar(suelta.id, eventos[_MOTIVO_MUERTE_AFINES], _MOTIVO_MUERTE_AFINES)
 			else:
 				acumulador.anotar(suelta.id, eventos[_MOTIVO_MUERTE], _MOTIVO_MUERTE)
+
+
+# Sistema.md 9.2 paso 6 (P-024) y S-66 (T30): con la derrota o la huida, la
+# atacante nocturna del tablero, de pie o caida, se va: su pergamino arde y sale
+# del tablero por la unica salida (VidaCero.sacar_del_tablero). Va despues de
+# _motivo_rechazo: sacarla antes podria cambiar el fin que da el Plantel. Su ida
+# no anota lealtad (el acumulador solo recorre a la tribu).
+func _atacantes_se_van(plantel: Plantel, resultado: ResultadoCierre, surcos: Surcos) -> void:
+	for criatura in plantel.criaturas():
+		if criatura.comportamiento != Criatura.Comportamiento.ATACANTE_NOCTURNA:
+			continue
+		if criatura.estado != Criatura.Estado.SUELTA and criatura.estado != Criatura.Estado.CAIDA:
+			continue
+		if not criatura.pergamino_id.is_empty():
+			plantel.pergamino(criatura.pergamino_id).arder()
+			criatura.pergamino_id = ""
+		VidaCero.sacar_del_tablero(criatura, surcos)
+		resultado.se_fueron.append(criatura.id)
+
+
+# Sistema.md 9.3 (T30): la atacante nocturna caida que espera su destino tras la
+# victoria, o null. Es el unico criterio: lo usan el Cierre y ResultadoCombate.
+static func atacante_caida(plantel: Plantel) -> Criatura:
+	for criatura in plantel.criaturas():
+		if criatura.comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA \
+				and criatura.estado == Criatura.Estado.CAIDA:
+			return criatura
+	return null
 
 
 # Sistema.md 6 y 11.7: las que mueren si el combate se pierde o se huye, las

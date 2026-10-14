@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "nocturno_combate",
+  "_nota": "Arquitectura.md B.4 (T30, sesión 1): golpe inicial y la atacante que se va. Sistema.md 9.2 (punto 1 y paso 6), 11.4, S-64 a S-66. La Ocarra atacante [3,4] golpea al Maestro [3,6] antes de la ronda 1 (4 de daño en el fixture). El Surcón salvaje [4,3] es su vecino en 8 y afín (10.8: Surcón-Ocarra bien): el golpe inicial no lleva afinidad igual. rodauva_1 (lealtad 8, leal con balanza 2) lejos, en [0,7]. Los tests bajan vidas, sacan el golpe o suben la Velocidad del Maestro en memoria",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 9, "vida": null, "posicion": [3, 4] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [4, 3] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": "ocarra_1",
+  "toggles": { "afines_contra_cobardia": false }
+}

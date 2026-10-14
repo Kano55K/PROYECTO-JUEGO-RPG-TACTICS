@@ -150,3 +150,14 @@ static func huida(combate: String = "combate.json") -> Huida:
 # otro fixture de tablas/costos_mana.json en la carpeta de combate.
 static func guardado_caida(costos: String = "costos_mana.json") -> GuardadoCaida:
 	return GuardadoCaida.desde_datos(cargar()["datos"]["tablas/combate.json"], costos_mana(costos))
+
+
+# El DestinoAtacante de los fixtures (T30), armado como en ContextoCombate: con los
+# mismos CostosMana que su Sellado. costos: otro fixture de tablas/costos_mana.json.
+static func destino_atacante(costos: String = "costos_mana.json") -> DestinoAtacante:
+	var datos: Dictionary = cargar()["datos"]
+	var regla_costos: CostosMana = costos_mana(costos)
+	var regla_sellado: Sellado = Sellado.desde_datos(datos["tablas/sellado.json"], regla_costos,
+			datos["tablas/lealtad.json"], datos["tablas/combate.json"])
+	return DestinoAtacante.desde_datos(datos["tablas/combate.json"], datos["tablas/lealtad.json"], regla_costos,
+			regla_sellado)

@@ -105,6 +105,13 @@ enum Motivo {
 	SIN_CASILLA_LIBRE,
 	# Sistema.md 11.5 (T27, P-025): guardar a una caida pide una unidad caida (no una de pie).
 	OBJETIVO_NO_CAIDO,
+	# Sistema.md 9.3 (T30): no hay una atacante nocturna caida esperando su destino (el
+	# combate sigue, termino de otra forma o ya se decidio). Tambien en el Turno.
+	SIN_DESTINO_PENDIENTE,
+	# Sistema.md 9.3: la opcion no es perdonar, sellar ni comer.
+	OPCION_INVALIDA,
+	# Sistema.md 4.4: si sellar de nuevo fallo, solo quedan perdonar y comer.
+	SELLAR_YA_FALLO,
 }
 
 var valida: bool
@@ -117,22 +124,28 @@ var desglose: DesgloseDanio = null
 # el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
 var eslabon: Variant = null
 # Solo en un hechizo, un sellado, una invocacion o al guardar a una caida (Sistema.md 1.6, 4.1, 3.1 y 11.5;
-# T22, T24, T26 y T27): {de, a} del mana que paga, o {} si no cambia (D-007).
+# T22, T24, T26 y T27) y en el resellado del destino (T30): {de, a} del mana que
+# paga, o {} si no cambia (D-007).
 var mana: Dictionary = {}
 # Solo en un hechizo que no es ataque: el evento de A.7 que produce (`lanzadera`
 # o `remiendo`), con su tipo. Lo mismo al validar y al aplicar. En un sellado
 # (T24), el evento `sellado`, solo al aplicar: la tirada existe solo al aplicar.
 # En una invocacion (T26), el evento `invocacion`. Al guardar a una caida (T27), el
-# evento `guardado_caida`, igual al validar y al aplicar.
+# evento `guardado_caida`, igual al validar y al aplicar. En el destino de la
+# atacante (T30), el evento `destino_atacante`, solo al aplicar (puede haber tirada).
 var evento: Dictionary = {}
-# Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24): el % que se muestra antes
-# de gastar el mana y el costo. En una invocacion valida (T26) y al guardar a una
+# Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24) y en el resellado del
+# destino (4.4, T30): el % que se muestra antes de gastar el mana y el costo. En una invocacion valida (T26) y al guardar a una
 # caida (T27), el costo. Lo mismo al validar y al aplicar.
 var porcentaje: Variant = null
 var costo: int = 0
 # Solo al guardar a una caida (Sistema.md 11.5, T27): {de, a} de la vida de la caida
 # (la de ahora y la que le queda guardada). Lo mismo al validar y al aplicar.
 var vida: Dictionary = {}
+# Solo en el destino de la atacante (Sistema.md 5.2, T30, S-65): los cambios de
+# lealtad de toda la noche (cierre y destino) con un solo recorte; [] en un
+# sellado que falla, que no cierra la noche. Lo mismo al validar y al aplicar.
+var lealtad: Array[CambioLealtad] = []
 # Solo en la Lanzadera y en una invocacion (T26): las ocultas que la movida o la
 # invocada destaparia por contacto al llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
 var destaparia: Array[String] = []

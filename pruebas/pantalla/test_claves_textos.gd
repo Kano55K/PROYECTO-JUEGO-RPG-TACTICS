@@ -142,3 +142,19 @@ func test_claves_de_sellar() -> void:
 			"aviso.sellar.mana_insuficiente", "aviso.sellar.fuera_de_alcance", "aviso.sellar.no_sellable",
 			"aviso.sellar.oculta", "aviso.sellar.no_salvaje", "aviso.sellar.sin_objetivos", "sellar.fallo.surcon"])
 	assert_array(claves).not_contains(["sellar.fallo.ocarra"])
+
+
+# T30 (Mundo.md 4.6): las claves del ataque nocturno. El boton y el tooltip, por
+# cada opcion de DestinoAtacante; la linea de comer con una especie suelta, solo
+# si esta en los textos.
+func test_claves_del_ataque_nocturno() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"nocturno.comer.zancajunco_suelto": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["nocturno.base", "nocturno.atacante.caida", "nocturno.perdonar",
+			"nocturno.perdonar.tribu", "nocturno.sellar", "nocturno.comer", "nocturno.comer.zancajunco_suelto"])
+	for opcion in DestinoAtacante.OPCIONES:
+		assert_array(claves).contains(["nocturno.boton.%s" % opcion, "nocturno.%s.tooltip" % opcion])
+	assert_array(claves).not_contains(["nocturno.comer.ocarra_suelto"])

@@ -718,6 +718,10 @@ func _resolver(accion: Accion, aplica: bool) -> ResultadoAccion:
 			resultado = _invocar(accion.criatura_id, accion.casilla, aplica)
 		Accion.Tipo.HUIR:
 			resultado = _declarar_huida(aplica)
+		# Sistema.md 9.3 (T30): el destino de la atacante es despues del combate y
+		# lo resuelve el Combate; en un turno no hay ninguno pendiente.
+		Accion.Tipo.DESTINO_ATACANTE:
+			resultado = ResultadoAccion.rechazada(ResultadoAccion.Motivo.SIN_DESTINO_PENDIENTE)
 		_:
 			resultado = _terminar(aplica)
 	if aplica and resultado.valida:

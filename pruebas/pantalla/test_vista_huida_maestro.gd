@@ -22,7 +22,7 @@ const _TOPE_TURNOS: int = 10
 # Copias textuales de datos/textos/es.json (los botones del Maestro: con las
 # claves faltantes, el texto [FALTA: ...] deja el boton Huir fuera de la ventana)
 # y textos de prueba de las claves propuestas (marca.huida_declarada y
-# huida.previa.danio_maximo).
+# huida.previa.alcanzan, copia de es.json desde T30, Mundo.md 1.5 v1.4).
 const _TEXTOS_T28: Dictionary = {
 	"accion.sellar": "Sellar",
 	"accion.invocar": "Invocar",
@@ -35,7 +35,7 @@ const _TEXTOS_T28: Dictionary = {
 	"accion.huir": "Huir",
 	"huida.maestro.declarar": "Retrocedés. Hasta que salgas del claro, todavía te pueden alcanzar.",
 	"marca.huida_declarada": "Se va",
-	"huida.previa.danio_maximo": "Daño máximo",
+	"huida.previa.alcanzan": "Te pueden alcanzar. En el peor caso, {n} de daño.",
 }
 
 
@@ -95,7 +95,8 @@ func test_mouse_sobre_el_boton_muestra_la_previsualizacion() -> void:
 	assert_vector(capa.get_cell_atlas_coords(_CASILLA_TASAJERO)).is_equal(_MARCA_ALCANZA)
 	var panel: Label = runner.find_child("PanelDesglose")
 	assert_bool(panel.visible).is_true()
-	assert_str(panel.text).contains("Daño máximo: 13")
+	# Reescrito en T30 (Mundo.md 1.5 v1.4): la clave del Worldbuilder, con {n}.
+	assert_str(panel.text).contains("Te pueden alcanzar. En el peor caso, 13 de daño.")
 
 	MousePrueba.mover_a(_en_pantalla(vista, Vector2i(6, 6)))
 	assert_dict(vista.huida_mostrada()).is_empty()

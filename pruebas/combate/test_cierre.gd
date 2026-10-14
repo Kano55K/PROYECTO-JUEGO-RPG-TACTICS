@@ -80,6 +80,9 @@ func _assert_rechazado(cierre: ResultadoCierre, motivo: ResultadoCierre.Motivo) 
 
 # (6) Victoria con una caida: se levanta con 1 de vida y recibe el +1, como las
 # de pie; la guardada no lo recibe. La atacante caida no cambia.
+# Reescrito en T30 (Sistema.md 5.2 y 9.3, S-65): con la atacante caida, el cierre
+# deja su destino pendiente y la lealtad de la noche sin aplicar (un solo recorte
+# con el destino). Los mismos +1 salen al aplicar el acumulador que deja abierto.
 func test_victoria_levanta_y_suma_uno() -> void:
 	var plantel: Plantel = _plantel()
 	_victoria(plantel)
@@ -96,6 +99,11 @@ func test_victoria_levanta_y_suma_uno() -> void:
 	assert_int(levantada.estado).is_equal(Criatura.Estado.SUELTA)
 	assert_int(levantada.vida).is_equal(1)
 	assert_that(levantada.posicion).is_equal(Vector2i(1, 6))
+	assert_str(cierre.destino_pendiente).is_equal("ocarra_n1")
+	assert_array(cierre.lealtad).is_empty()
+	assert_int(levantada.lealtad).is_equal(8)
+	assert_object(cierre.acumulador).is_not_null()
+	cierre.lealtad = cierre.acumulador.aplicar(plantel.criaturas())
 	assert_int(levantada.lealtad).is_equal(9)
 	assert_int(plantel.criatura("rodauva_2").lealtad).is_equal(7)
 	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(10)
@@ -296,3 +304,68 @@ func test_fin_que_no_coincide() -> void:
 	var antes: String = _foto(plantel)
 	_assert_rechazado(_cierre.cerrar(plantel, FinCombate.Fin.VICTORIA), ResultadoCierre.Motivo.FIN_NO_COINCIDE)
 	assert_str(_foto(plantel)).is_equal(antes)
+
+
+# T30 (P-024, Sistema.md 9.2 paso 6): con la derrota, la atacante nocturna se va,
+# de pie o caida: su pergamino arde, sale del tablero (fuera, sin posicion) y
+# nadie anota lealtad por ella. Queda en se_fueron.
+func test_derrota_la_atacante_se_va() -> void:
+	for caida in [false, true]:
+		var plantel: Plantel = _plantel()
+		var atacantes: Array[String] = [Maestro.ID]
+		if caida:
+			atacantes.append("ocarra_n1")
+		_tumbar(plantel, atacantes)
+		var atacante: Criatura = plantel.criatura("ocarra_n1")
+		var pergamino_id: String = atacante.pergamino_id
+		var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.DERROTA_POR_CAIDA)
+		_assert_valido(cierre)
+		assert_array(cierre.se_fueron).contains_exactly(["ocarra_n1"])
+		assert_int(atacante.estado).is_equal(Criatura.Estado.FUERA)
+		assert_that(atacante.posicion).is_equal(Criatura.SIN_POSICION)
+		assert_str(atacante.pergamino_id).is_empty()
+		assert_int(plantel.pergamino(pergamino_id).estado).is_equal(Pergamino.Estado.ARDIDO)
+		assert_object(_cambio(cierre, "ocarra_n1")).is_null()
+		assert_array(cierre.muertas).is_empty()
+		# Lo unico de lealtad es el rescate (Sistema.md 6): nada por la que se va.
+		for cambio in cierre.lealtad:
+			assert_array(_motivos(cambio)).contains_exactly(["rescate"])
+
+
+# T30 (S-66): con la huida del Maestro, la atacante se va igual.
+func test_huida_la_atacante_se_va() -> void:
+	var plantel: Plantel = _plantel()
+	plantel.maestro.huida_declarada = true
+	plantel.maestro.se_fue = true
+	var atacante: Criatura = plantel.criatura("ocarra_n1")
+	var pergamino_id: String = atacante.pergamino_id
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.HUIDA)
+	_assert_valido(cierre)
+	assert_array(cierre.se_fueron).contains_exactly(["ocarra_n1"])
+	assert_int(atacante.estado).is_equal(Criatura.Estado.FUERA)
+	assert_int(plantel.pergamino(pergamino_id).estado).is_equal(Pergamino.Estado.ARDIDO)
+	assert_array(cierre.lealtad).is_empty()
+
+
+# T30: con la victoria, la atacante caida se queda esperando su destino (sesion 2).
+func test_victoria_la_atacante_no_se_va() -> void:
+	var plantel: Plantel = _plantel()
+	_victoria(plantel)
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.VICTORIA)
+	_assert_valido(cierre)
+	assert_array(cierre.se_fueron).is_empty()
+	assert_int(plantel.criatura("ocarra_n1").estado).is_equal(Criatura.Estado.CAIDA)
+
+
+# T30 (S-65): sin una atacante caida (aca, ya fuera del tablero), la victoria no
+# deja destino pendiente y la lealtad se aplica en el cierre, como siempre.
+func test_victoria_sin_atacante_caida_aplica_la_lealtad() -> void:
+	var plantel: Plantel = _plantel()
+	_tumbar(plantel, ["ocarra_s1"])
+	VidaCero.sacar_del_tablero(plantel.criatura("ocarra_n1"), Surcos.new())
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.VICTORIA)
+	_assert_valido(cierre)
+	assert_str(cierre.destino_pendiente).is_empty()
+	assert_object(cierre.acumulador).is_null()
+	assert_int(cierre.lealtad.size()).is_equal(4)
+	assert_int(plantel.criatura("rodauva_1").lealtad).is_equal(9)

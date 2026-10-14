@@ -141,19 +141,22 @@ const AVISO_GUARDAR_CAIDA_MANA: String = "aviso.guardar_caida.mana_insuficiente"
 const AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS: String = "aviso.guardar_caida.sin_objetivos"
 # T28 (Sistema.md 11.7, Mundo.md 9): la huida del Maestro. El boton y los
 # sucesos de declarar y de irse (con o sin caidas, hueco {caida}) estan en
-# es.json; la marca, la linea del panel, la previsualizacion y por que el boton
-# esta deshabilitado, no (claves propuestas, pedido de Mundo.md 9).
+# es.json; la marca y la linea del panel, no (claves propuestas, pedido de
+# Mundo.md 9).
 const ACCION_HUIR: String = "accion.huir"
 const HUIDA_MAESTRO_DECLARAR: String = "huida.maestro.declarar"
 const HUIDA_MAESTRO_SIN_CAIDAS: String = "huida.maestro.sin_caidas"
 const HUIDA_MAESTRO_CON_CAIDAS: String = "huida.maestro.con_caidas"
 const MARCA_HUIDA_DECLARADA: String = "marca.huida_declarada"
 const PANEL_HUIDA_DECLARADA: String = "panel.huida_declarada"
-const HUIDA_PREVIA_ALCANZA: String = "huida.previa.alcanza"
-const HUIDA_PREVIA_NO_ALCANZA: String = "huida.previa.no_alcanza"
-const HUIDA_PREVIA_SIN_ENEMIGAS: String = "huida.previa.sin_enemigas"
-const HUIDA_PREVIA_DANIO_MAXIMO: String = "huida.previa.danio_maximo"
-const HUIDA_PREVIA_PUEDE_CAER: String = "huida.previa.puede_caer"
+# T30 (Mundo.md 1.5 v1.4): las de la previsualizacion, las del Worldbuilder. La
+# de las caidas que moririan no tiene texto todavia (pedido al Worldbuilder).
+const HUIDA_PREVIA_TITULO: String = "huida.previa.titulo"
+const HUIDA_PREVIA_ACTUAN: String = "huida.previa.actuan"
+const HUIDA_PREVIA_NINGUNA: String = "huida.previa.ninguna"
+const HUIDA_PREVIA_ALCANZAN: String = "huida.previa.alcanzan"
+const HUIDA_PREVIA_NO_ALCANZAN: String = "huida.previa.no_alcanzan"
+const HUIDA_PREVIA_CAES: String = "huida.previa.caes"
 const HUIDA_PREVIA_CAIDAS: String = "huida.previa.caidas"
 const AVISO_HUIR_ACCION_USADA: String = "aviso.huir.accion_usada"
 const AVISO_HUIR_YA_SE_MOVIO: String = "aviso.huir.ya_se_movio"
@@ -172,6 +175,16 @@ const RESULTADO_LEVANTADAS: String = "resultado.levantadas"
 const RESULTADO_CAIDAS_GUARDADAS: String = "resultado.caidas_guardadas"
 const RESULTADO_CAPTURAS: String = "resultado.capturas"
 const RESULTADO_ATACANTE_PENDIENTE: String = "resultado.atacante_pendiente"
+# T30 (Mundo.md 4.6): el ataque nocturno. nocturno.base es complemento (A.2.1):
+# la base y la linea de la especie. Los botones y tooltips del destino van por
+# opcion (boton_destino, tooltip_destino) y la linea de comer con una especie
+# suelta es una clave propia (comer_suelta, A.2: el codigo elige la clave).
+const NOCTURNO_BASE: String = "nocturno.base"
+const NOCTURNO_ATACANTE_CAIDA: String = "nocturno.atacante.caida"
+const NOCTURNO_PERDONAR: String = "nocturno.perdonar"
+const NOCTURNO_PERDONAR_TRIBU: String = "nocturno.perdonar.tribu"
+const NOCTURNO_SELLAR: String = "nocturno.sellar"
+const NOCTURNO_COMER: String = "nocturno.comer"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -199,12 +212,14 @@ const FIJAS: Array[String] = [
 	ACCION_GUARDAR_CAIDA, GUARDAR_CAIDA, GUARDAR_CAIDA_TOOLTIP, AVISO_GUARDAR_CAIDA_ACCION_USADA,
 	AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE, AVISO_GUARDAR_CAIDA_MANA, AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS,
 	ACCION_HUIR, HUIDA_MAESTRO_DECLARAR, HUIDA_MAESTRO_SIN_CAIDAS, HUIDA_MAESTRO_CON_CAIDAS,
-	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_ALCANZA, HUIDA_PREVIA_NO_ALCANZA,
-	HUIDA_PREVIA_SIN_ENEMIGAS, HUIDA_PREVIA_DANIO_MAXIMO, HUIDA_PREVIA_PUEDE_CAER, HUIDA_PREVIA_CAIDAS,
+	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_TITULO, HUIDA_PREVIA_ACTUAN,
+	HUIDA_PREVIA_NINGUNA, HUIDA_PREVIA_ALCANZAN, HUIDA_PREVIA_NO_ALCANZAN, HUIDA_PREVIA_CAES, HUIDA_PREVIA_CAIDAS,
 	AVISO_HUIR_ACCION_USADA, AVISO_HUIR_YA_SE_MOVIO,
 	PANEL_RESCATISTA, PANEL_SIN_RESCATISTA, MARCA_RESCATISTA, RESULTADO_RESCATISTA, PERMADEATH,
 	RESULTADO_MUERTAS, RESULTADO_LEVANTADAS, RESULTADO_CAIDAS_GUARDADAS, RESULTADO_CAPTURAS,
 	RESULTADO_ATACANTE_PENDIENTE,
+	NOCTURNO_BASE, NOCTURNO_ATACANTE_CAIDA, NOCTURNO_PERDONAR, NOCTURNO_PERDONAR_TRIBU, NOCTURNO_SELLAR,
+	NOCTURNO_COMER,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -418,6 +433,34 @@ static func motivo_huir(motivo: ResultadoAccion.Motivo) -> String:
 	return ""
 
 
+# T30 (Mundo.md 4.6): el boton y el tooltip de una opcion del destino de la
+# atacante (DestinoAtacante.OPCIONES).
+static func boton_destino(opcion: String) -> String:
+	return "nocturno.boton.%s" % opcion
+
+
+static func tooltip_destino(opcion: String) -> String:
+	return "nocturno.%s.tooltip" % opcion
+
+
+# T30 (Mundo.md 4.6): la linea de comer cuando hay una suelta de esa especie
+# (nocturno.comer.zancajunco_suelto). Se muestra solo si existe.
+static func comer_suelta(especie_id: String) -> String:
+	return "%s.%s_suelto" % [NOCTURNO_COMER, especie_id]
+
+
+# T30: por que el boton de sellar de nuevo esta deshabilitado
+# (Combate.motivo_destino), o "" si el motivo no se muestra. Las dos claves son
+# las del sellado en combate (Mundo.md 4.6 comparte pergamino.sin_blanco).
+static func motivo_destino(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.SIN_PERGAMINO:
+			return PERGAMINO_SIN_BLANCO
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_SELLAR_MANA
+	return ""
+
+
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:
 	var claves: Array[String] = []
@@ -437,6 +480,9 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		_sumar(claves, fuente_desglose(fuente))
 	for motivo in _MOTIVOS_DESTAPE:
 		_sumar(claves, suceso_destape(motivo))
+	for opcion in DestinoAtacante.OPCIONES:
+		_sumar(claves, boton_destino(opcion))
+		_sumar(claves, tooltip_destino(opcion))
 	var rutas: Array = datos.keys()
 	rutas.sort()
 	var especies: Array[String] = []
@@ -531,6 +577,10 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 		for variante_huida in ["%s.%s" % [HUIDA_SALVAJE, especie], "%s.%s" % [HUIDA_SE_QUEDA, especie]]:
 			if existentes.has(variante_huida):
 				_sumar(claves, variante_huida)
+		# T30: el complemento del golpe inicial y la linea de comer con una suelta.
+		for variante_nocturno in ["%s.%s" % [NOCTURNO_BASE, especie], comer_suelta(especie)]:
+			if existentes.has(variante_nocturno):
+				_sumar(claves, variante_nocturno)
 		# T22: el choque de la Lanzadera se pide con la especie de la movida.
 		var variante_choque: String = "%s.%s" % [LANZADERA_CHOQUE, especie]
 		if existentes.has(variante_choque):

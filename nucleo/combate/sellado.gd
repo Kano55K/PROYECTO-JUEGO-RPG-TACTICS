@@ -1,4 +1,5 @@
-# Sistema.md 4.1 a 4.3 y 2.3 (T24): la regla de sellar en combate, sin estado.
+# Sistema.md 4.1 a 4.3 y 2.3 (T24): la regla de sellar en combate, sin estado (y,
+# desde T30, el porcentaje y la lealtad al resellar de 4.4).
 # Los numeros salen de tablas/sellado.json (tramos x rango), CostosMana (T26: el
 # costo de sellar con el descuento), tablas/balanza.json (rango maximo sellable y
 # ajuste a la lealtad inicial, leidos de la fila del Maestro),
@@ -21,6 +22,8 @@ var _tramos: Array = []
 # T26: la regla de los costos de mana, compartida con invocar (ReglasCombate).
 var _costos: CostosMana
 var _lealtad_base: int = 0
+# Sistema.md 4.4 (T30): la lealtad base al resellar (tablas/lealtad.json).
+var _lealtad_resellar: int = 0
 var _lealtad_minima: int = 0
 var _alcance: int = 0
 
@@ -30,7 +33,8 @@ var _alcance: int = 0
 static func desde_datos(tabla_sellado: Dictionary, costos: CostosMana, tabla_lealtad: Dictionary,
 		tabla_combate: Dictionary) -> Sellado:
 	if not tabla_sellado.has("tramos") or costos == null \
-			or not tabla_lealtad.has("minimo") or not tabla_combate.has("alcance_sellar"):
+			or not tabla_lealtad.has("minimo") or not tabla_lealtad.has("resellar") \
+			or not tabla_combate.has("alcance_sellar"):
 		return null
 	var caminos: Dictionary = tabla_lealtad.get("inicial_por_camino", {})
 	if not caminos.has(_CAMINO_COMBATE):
@@ -40,6 +44,7 @@ static func desde_datos(tabla_sellado: Dictionary, costos: CostosMana, tabla_lea
 	regla._costos = costos
 	regla._lealtad_base = caminos[_CAMINO_COMBATE]
 	regla._lealtad_minima = tabla_lealtad["minimo"]
+	regla._lealtad_resellar = tabla_lealtad["resellar"]
 	regla._alcance = tabla_combate["alcance_sellar"]
 	return regla
 
@@ -80,3 +85,15 @@ func rango_permitido(especie: Especie, maestro: Maestro) -> bool:
 # Sistema.md 4.1: la distancia Manhattan maxima del Maestro a la objetivo.
 func alcance() -> int:
 	return _alcance
+
+
+# Sistema.md 4.4 (T30): resellar tira con la fila de vida <= 25 %, el primer
+# tramo (el Cargador los exige de menor a mayor vida), del rango de la especie.
+func porcentaje_resellar(especie: Especie) -> int:
+	return ((_tramos[0] as Dictionary)["pct_por_rango"] as Array)[especie.rango() - 1]
+
+
+# Sistema.md 4.4 (T30): la lealtad al resellar mas el ajuste de la balanza, nunca
+# menos que el minimo de la escala (5.1), como lealtad_inicial.
+func lealtad_resellar(maestro: Maestro) -> int:
+	return maxi(_lealtad_minima, _lealtad_resellar + (maestro.fila_balanza()["ajuste_lealtad_inicial"] as int))

@@ -1,7 +1,7 @@
 # 00 — VISIÓN DEL JUEGO
 
-> **Estado:** v1.4 — **MVP definido, rasgos en revisión** · **Dueño:** Director Creativo · **Última actualización:** 11/10/2026
-> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2. La v1.3 cambia la geometría de las relaciones (vecinas en 8) y el tablero de referencia (12 × 12): ver Escala 3. La v1.4 agrega **los Legados y sus Sombras** a Ideas en espera (10): no toca el MVP ni la 0a.
+> **Estado:** v1.6 — **MVP definido, rasgos en revisión** · **Dueño:** Director Creativo · **Última actualización:** 13/10/2026
+> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2. La v1.3 cambia la geometría de las relaciones (vecinas en 8) y el tablero de referencia (12 × 12): ver Escala 3. La v1.4 agrega **los Legados y sus Sombras** a Ideas en espera (10). La v1.5 define **qué da cada uno de los 18 legados** (verbo y perfil de atributos), el boceto de estadísticas del juego completo y las reglas nuevas de generación e inversión (10). La v1.6 agrega **Más allá de Valdelumbre** a Ideas en espera (10), enmienda la sección 8 (coleccionar es el camino del Soplo) y reordena las Capas 4 y 5. Ni la v1.4, ni la v1.5, ni la v1.6 tocan el MVP ni la 0a.
 > Este documento es la fuente de verdad. Ningún agente puede contradecirlo sin proponer un cambio y registrarlo en `Decisiones.md`.
 > **Documentos subordinados:** `Sistema.md` (reglas y números) · `Mundo.md` (mundo, regiones y criaturas) · `Arquitectura.md` (decisiones técnicas y plan de construcción). Este documento define **qué** y **por qué**; los números viven en `Sistema.md`, y el detalle del mundo, en `Mundo.md`.
 > **`Decisiones.md` es el historial, no la fuente de verdad:** registra cómo se llegó a cada regla. Queda fuera de `docs/` (Claude Code no lo lee) y es opcional en el conocimiento del proyecto.
@@ -98,8 +98,9 @@ El mundo es luminoso y aventurero, pero la supervivencia no perdona. El hambre p
 - Al cumplirse el plazo, la partida cierra con un **epílogo que lee la tribu**: quién sigue, quién es leal, a quién perdiste y cómo (comida, abandono, muerte en combate, hambre).
 - **Sin puntaje numérico.** Llegar al final ya es sobrevivir; el epílogo dice *cómo* sobreviviste. El final es la regla de oro vista de frente.
 - **Ningún final premia vaciar la tribu.** Comerse a una criatura el último día pesa en el epílogo igual que el primero: el plazo no puede convertirse en permiso para la crueldad sin consecuencias.
-- **Las rayas y las golondrinas** marcan el plazo (`Mundo.md` 4.10): las **rayas** de carbón cuentan los días en la interfaz y en una viga del Molino; las **golondrinas** del techo del Molino son la señal del mundo, se van antes del alba del último día y no tienen mecánica. Sin simular clima (Capa 2) ni explicar el pasado del Maestro (Capas 3 y 4).
+- **Las rayas y las golondrinas** marcan el plazo (`Mundo.md` 4.10): las **rayas** de carbón cuentan los días en la interfaz y en una viga del Molino; las **golondrinas** del techo del Molino son la señal del mundo, se van antes del alba del último día y no tienen mecánica. Sin simular clima (Capa 2) ni explicar el pasado del Maestro (Capas 3 y 5).
 - **Por qué:** sin un final, la única forma de terminar es morir, y la tribu bien cuidada nunca ve su recompensa. El plazo le da horizonte al reloj de supervivencia (Pilar 4) y el epílogo convierte al vínculo en el resultado de la partida (Pilar 3 y regla de oro).
+- **En el juego completo** (13/10/2026): por ahora no hay final definido; el juego completo es de **exploración abierta**, y las misiones principales llegan con la historia (Capa 5). **Criterio:** cualquier final futuro **lee a la tribu**, como el epílogo del MVP.
 
 ## 6. Sistemas centrales (resumen)
 
@@ -171,7 +172,7 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
   - **Por qué:** un Maestro solo, en sus primeros días, moriría sin haber tomado ninguna decisión sobre su tribu, y eso contradice la sección 8. Una compañera ya leal regalaría la regla de oro. Con una compañera que todavía no es leal, la regla de oro es la lección del día 1: *si la cuidás, te va a salvar; todavía no*.
   - **Criterios:** rango 1, **de trabajo** (el jugador tiene que salir a buscar quién pelee, Pilar 2, y el Maestro carga con el combate al principio, Pilar 1) y con su comida favorita cerca del Molino.
   - **Es la Rodauva, la dueña del Molino**: ya vivía junto a la piedra del fuego cuando llegó el Maestro (ver `Mundo.md` 4.8). La relación se invierte: el recién llegado es él.
-  - La apertura **no explica el pasado del Maestro**: ese hueco depende de la clase (Capa 3) y de la historia principal (Capa 4).
+  - La apertura **no explica el pasado del Maestro**: ese hueco depende de la clase (Capa 3) y de la historia principal (Capa 5).
 - **Puede haber varias criaturas de la misma especie** en la tribu. La **Rodauva es el piso de supervivencia**: abundante y fácil de domesticar. Muchas Rodauvas aseguran un mínimo de comida, no una partida fácil: una tribu de Rodauvas recolecta bien y pelea mal (Pilar 2).
 - En el MVP **no hay tipos ni linajes**. A futuro, el sistema de linajes es **los Legados y sus Sombras** (Ideas en espera, 10): conceptos de la hechura de los Nueve, nunca elementos como fuego, agua o planta, y sin multiplicadores de daño.
 
@@ -249,7 +250,7 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 
 **Caídas en combate:**
 - Una criatura de la tribu que llega a 0 de vida queda **caída**: si se gana el combate, se levanta con 1 de vida; si se pierde o se huye, **muere** y su pergamino arde.
-- **Si el Maestro cae, el combate termina.** La rescatista lo arrastra al campamento y **las caídas quedan atrás y mueren**: la que te salva no puede cargar a todas.
+- **Si el Maestro cae, el combate termina.** La rescatista lo arrastra al campamento y **las caídas quedan atrás y mueren**: la que te salva no puede cargar a todas. *(En el juego completo hay una sola excepción: las criaturas de Desapego siguen peleando; ver Ideas en espera, 10. El MVP no cambia.)*
 - Una salvaje en 0 huye (ver 6.3). La atacante nocturna, en cambio, queda caída para que el Maestro decida (ver 6.4).
 - El Maestro puede **guardar a una caída** gastando su acción y maná: sobrevive en su pergamino aunque después se pierda el combate. Hay que decidirlo **antes** de caer.
 - El Maestro puede **huir**: el combate termina al final de la ronda y las caídas que quedan en el tablero mueren.
@@ -281,7 +282,7 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 **Pergaminos:**
 - El pergamino es **el hilo entre el Maestro y la criatura**. Cada criatura de la tribu, suelta o guardada, ocupa uno.
 - **La cantidad de pergaminos limita el tamaño de la tribu.** Los pergaminos **nunca** son un recurso de supervivencia: no se administran día a día.
-- **Todo vínculo roto quema el pergamino:** abandono, perdón a una atacante y muerte de la criatura (incluido que sea comida). La tribu lo ve arder.
+- **Todo vínculo roto quema el pergamino:** abandono, perdón a una atacante y muerte de la criatura (incluido que sea comida). La tribu lo ve arder. *(En el juego completo, también la venta: ver Más allá de Valdelumbre, 10.)*
 - El Maestro arranca con una **cantidad fija** de pergaminos.
 
 **El ritual de sangre** — la única forma de obtener pergaminos nuevos en el MVP:
@@ -335,7 +336,7 @@ Fuera del Molino, cada noche el Maestro arma un campamento. Entra completo en el
 ## 8. Lo que el juego NO es
 
 - No es un Pokémon: no hay entrenador espectador, ni combates 1v1 clásicos, ni tipos elementales. **Los Legados y sus Sombras** (10) no son elementos ni una tabla de efectividad: sus ciclos actúan sobre la carga, nunca multiplican el daño.
-- No es un juego de colección: guardar criaturas sin vínculo tiene un costo, y la tribu está limitada por los pergaminos.
+- No es un juego de colección **por defecto**. Coleccionar es el camino del **Soplo**, y se paga con la regla de oro: los esbirros no rescatan, y a un Maestro coleccionista nadie lo arrastra al Molino. Todo vínculo roto, incluida la venta, quema el pergamino. La tribu está limitada por los pergaminos.
 - No es un juego de acción en tiempo real.
 - No es un mundo generado proceduralmente (el mapa es fijo; el azar vive en los eventos).
 - No es un juego que castiga sin sentido: la muerte siempre es consecuencia de decisiones, y las apuestas se muestran antes de hacerlas.
@@ -363,7 +364,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - Captura por ambos caminos.
 - Lealtad simple (valor numérico con cuatro estados), obediencia y **1** tipo de relación (se llevan bien / se llevan mal).
 - Abandono durante la recuperación, abandono nocturno y ataque nocturno.
-- **Sin Legados ni Sombras** (Ideas en espera, 10).
+- **Sin Legados ni Sombras** (Ideas en espera, 10), y sin las estadísticas del juego completo: el MVP usa sus cinco estadísticas (`Sistema.md` 11.1).
 
 **Mundo**
 - **1** región: **Valdelumbre**, con el campamento (el Molino Callado) y **3** destinos de riesgo creciente: los Huertos de Almiar (bajo), el Vado de los Juncos (medio) y el Robledal Hondo (alto).
@@ -391,8 +392,11 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 | 1 | Crafteo y mejoras del campamento (reparar el Molino: destapar la acequia) · Estados negativos con efectos distintos (Empacho, Tripa negra, Fiebre del hongo) |
 | 2 | Clima, estaciones, ciclo día/noche |
 | 3 | Más clases y ramas del Maestro |
-| 4 | Facciones, reinos, historia principal |
-| 5 | Economía, comercio, NPCs |
+| 4 | **Economía, comercio, NPCs** · **Más allá de Valdelumbre** (salidas, ciudades, lo hondo, trabajos y misiones; ver Ideas en espera) *(antes Capa 5; reordenado el 13/10/2026)* |
+| 5 | **Facciones, reinos, historia principal y misiones principales** *(antes Capa 4)* |
+
+- **Por qué el reorden:** salir del valle necesita comercio antes que reinos.
+- **Dependencias de la Capa 4:** el antídoto necesita los estados de la Capa 1, y acampar fuera de la ciudad expuesto al clima necesita la Capa 2. Si la primera porción llega antes, entra sin esos objetos y sin clima.
 
 **La Capa 0 se divide en dos** `DECIDIDO`:
 - **0a — rebanada de combate:** tablero, relaciones, sellado, caída y rescate. Se juega con escenarios fijos, panel de parámetros y semilla de azar fija. Vista cenital en los hitos 0a.1 y 0a.2; **isométrica antes de cualquier playtest de criterios de éxito**.
@@ -420,7 +424,46 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 
 **Ideas en espera** (aprobadas en espíritu, sin capa asignada):
 
-- **Los Legados y sus Sombras** *(nombre provisorio; aprobado como diseño el 10/10/2026)*. Es el sistema de linajes del juego completo: reemplaza a los "linajes de hechura" de la v1.3. Son **18**: los **Nueve legados** (1 a 9) y sus **nueve Sombras** (10 a 18), en una rueda.
+- **Más allá de Valdelumbre** *(aprobado en espíritu el 13/10/2026; Capa 4)*. Es el mundo del juego completo, fijo y diseñado a mano.
+  - **Cinco salidas** desde el valle:
+
+    | # | Salida | Sale desde | Lo que promete | Ciudad |
+    |---|---|---|---|---|
+    | 1 | **Aguas abajo** (llanura del río) | El Molino (boca del valle) | La salida civilizada: comercio, trabajos, poca captura | La más cercana: la primera ciudad |
+    | 2 | **Las colinas** (lomas, cuencas) | Los Huertos | Pastoreo, aldeas, encargos de campo para las criaturas de trabajo | Pueblo con mercado, a distancia media |
+    | 3 | **La meseta** (altiplano, cañones, desierto) | El Vado | Escasez de agua y comida, criaturas duras | Lejana: caravanas, no ciudad |
+    | 4 | **Aguas arriba** (cordillera) | El Robledal (cruzando el río) | El riesgo más alto, criaturas de rango alto, paso a otra región | Ninguna: refugios |
+    | 5 | **La boca** *(provisorio)* | Una cueva en la ladera de la montaña | Lo hondo: de solo ida y fuera de todo mapa que se venda | Ninguna |
+
+    - **La ciudad está cerca de lo seguro y lejos de lo valioso.** Es la curva de Valdelumbre (fruta, pescado, carne) llevada al mapa: ninguna salida es la mejor (Pilar 2).
+    - Los caminos se pueden reencontrar más adelante: el mundo es un grafo, no un árbol.
+  - **Lo hondo:** lugares misteriosos, accesibles desde temprano, con acceso condicionado (la crecida, la noche, un paso que se derrumba detrás). El lugar no se mueve (mapa fijo), pero volver no está garantizado. Nadie vende el mapa de lo hondo.
+    - **Lo hondo siempre avisa, con señales y nunca con porcentajes.** Avisa el mundo (huesos en la entrada, un frío que sale de adentro, un rumor de que nadie volvió) y avisa la tribu (la Ocarra no quiere entrar, la Rodauva se enrolla en la boca). Entrar después de las señales **es la decisión**: se respeta la sección 8.
+    - El rescate también rige adentro: la regla de oro llega a lo hondo.
+  - **La ciudad:**
+    - **El hambre se paga con plata**: en la ciudad, la comida se compra; afuera, el hambre vuelve a regir. El reloj cambia de forma, no desaparece (Pilar 4).
+    - **El basural** es la comida de emergencia de la ciudad, con criaturas carroñeras que viven de él.
+    - **Las criaturas pagan el corral por día**, o acampan con el Maestro fuera de la ciudad, expuestas a bandidos, emboscadas y clima. **El corral protege, pero no une:** ahí no ganan lealtad, porque no conviven con el Maestro (Pilar 3).
+    - **Quedarse en la ciudad siempre gasta más de lo que dan sus trabajos.** Si no, la ciudad sería un refugio infinito y el Molino dejaría de importar.
+  - **Comprar y vender criaturas:**
+    - **Vender rompe el vínculo:** el pergamino arde, la tribu lo ve y pierde confianza, y el epílogo lo cuenta. El comprador la sella con un pergamino propio.
+    - **Comprar** exige un pergamino en blanco del Maestro, y la criatura arranca con lealtad baja: los pergaminos siguen limitando la tribu.
+    - **Nada del cuerpo de una criatura se vende**: ni su carne, ni sus partes, ni sus prendas. Comerse una criatura nunca rinde (6.5), y la venta no puede ser la forma de que rinda.
+    - **Coleccionar es el camino del Soplo** (sección 8): el Barro manda por vínculo; el Soplo, por dominio.
+  - **Trabajos:** a las criaturas se les encargan trabajos según su aptitud (arar, acarrear, vigilar, pescar). Las de trabajo ganan en los encargos de oficio; las de combate, en los de pelea (Pilar 2).
+  - **Misiones:** son **expediciones**, nunca "matá 5 de X". Se planean, se compra el mapa del viaje y se preparan. Las presas son difíciles de encontrar: los rumores dicen que hay una manada por acá o por allá, nada seguro. Elegir la misión es parte del desafío.
+    - **Caza y captura** de una o varias criaturas, iguales o distintas.
+    - **Carteles de recompensa** (viva o muerta). "Muerta" vale solo para **individuos marcados** (por ejemplo, una criatura que se come el ganado de un pueblo): la salvaje en 0 de vida sigue huyendo (6.3).
+    - **Criminales:** son **Maestros renegados con su propia tribu**, con las mismas reglas que el jugador (obediencia, Encono, cobardía, rescate). Son un espejo: un Maestro del Soplo con sus esbirros, o uno del Barro al que su tribu defiende hasta el final.
+  - **Mochila y objetos:** la comida cuesta plata y espacio. Se compran objetos de viaje (antorchas, tela, herramientas, antídoto, repelente, estacas, cuerdas de cuero, montura) y equipo.
+    - **Cada objeto de tienda tiene que generar una decisión que otro no genera** (misma regla que las estadísticas, `Sistema.md` 11.1). Si dos resuelven lo mismo, sale uno.
+    - **El fuego sigue encendiéndose con tiempo** (6.9); lo comprado lo acelera, nunca es obligatorio.
+    - El antídoto depende de los estados de la Capa 1, y el repelente, de las emboscadas.
+  - **Las criaturas solo llevan aparejos de trabajo y carga** (alforjas, arnés, montura): suman espacio de mochila y permiten encargos, nunca nada en combate. Lo que distingue a una criatura sigue siendo su especie (Pilar 2). El Maestro es el único que se equipa para pelear.
+  - **Restricciones de mundo:** ninguna ciudad confirma adónde fueron los de Almiar (`Mundo.md` 4.2).
+  - **Primera porción propuesta:** aguas abajo, la primera ciudad, el corral, los encargos de trabajo, una misión de captura por rumores y la boca. Prueba la ciudad, la expedición y lo hondo antes de multiplicar el contenido.
+  - **Espera porque** es un juego entero arriba del MVP: economía, inventario, objetos, monturas, rumores, carteles, Maestros enemigos, lo hondo y cinco regiones con su arte.
+- **Los Legados y sus Sombras** *(nombre provisorio; aprobado como diseño el 10/10/2026; los 18 legados se definieron el 12/10/2026)*. Es el sistema de linajes del juego completo: reemplaza a los "linajes de hechura" de la v1.3. Son **18**: los **Nueve legados** (1 a 9) y sus **nueve Sombras** (10 a 18), en una rueda.
   - **La rueda:**
 
     | # | Legado | # | Sombra |
@@ -429,7 +472,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
     | 2 | Crecimiento | 11 | Drenaje |
     | 3 | Movimiento | 12 | Quietud |
     | 4 | Liviandad | 13 | Presión |
-    | 5 | Intemperie / Exteriorización *(nombre pendiente)* | 14 | Protección |
+    | 5 | Intemperie *(provisorio)* | 14 | Protección |
     | 6 | Sonido | 15 | Silencio |
     | 7 | Sinceridad | 16 | Ilusión |
     | 8 | Unión | 17 | Desapego |
@@ -437,33 +480,90 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 
   - **Cuatro ciclos, que se cuentan por distancia en la rueda y actúan sobre la carga, nunca sobre el daño.** No hay tabla de efectividad: cada legado tiene exactamente una relación de cada ciclo.
     - **Generación (+1):** cada legado genera al siguiente (Lleno → Crecimiento → … → Inspiración → Lleno).
-    - **Potenciación (+4):** cada legado resuena con el que está cuatro casilleros adelante (Lleno → 5, Crecimiento → Sonido…).
+    - **Potenciación (+4):** cada legado resuena con el que está cuatro casilleros adelante (Lleno → Intemperie, Crecimiento → Sonido…).
     - **Anulación (+8):** cada legado anula al que está ocho casilleros adelante (Lleno anula Disciplina, Vacío anula Inspiración…).
     - **Inversión (+9):** cada legado se invierte en su Sombra, y cada Sombra en su legado (Lleno ↔ Vacío).
     - **Regla que se desprende:** la Sombra de un legado anula a quien lo genera (+9 +8 = −1). La Sombra no ataca al legado: ataca su raíz.
-  - **Criaturas:** cada una está **atada a dos legados**, que definen cómo recibe la carga. Su ataque normal y sus habilidades ponen puntos de uno de ellos, según convenga y según la criatura (por ejemplo, el Zancajunco, Ilusión y Crecimiento: con Hacerse junco carga Ilusión; con el ataque normal, Crecimiento).
+  - **Criaturas:** cada una está **atada a dos legados**, un **principal** y un **secundario**, que definen cómo recibe la carga. Su ataque normal y sus habilidades ponen puntos de uno de ellos, según convenga y según la criatura (por ejemplo, el Zancajunco, Ilusión y Crecimiento: con Hacerse junco carga Ilusión; con el ataque normal, Crecimiento).
+    - **Lo que distingue a una criatura** de las demás son tres cosas: sus **atributos base**, sus **activas** y su **combinación de legados**.
+  - **Qué da cada legado** (12/10/2026):
+    - **Un perfil de atributos:** **dos estadísticas altas y dos bajas**. El perfil inclina la ficha de la especie; cuánto pesa frente a la ficha, y cómo se reparte entre el legado principal y el secundario, lo define Sistemas.
+      - **Cada par de la rueda es un eje en espejo:** las altas de uno son las bajas del otro. Lleno ↔ Vacío es la excepción: los dos son lentos, porque su espejo es de dónde sale el poder (el cuerpo o el espíritu).
+      - **Dos legados pueden compartir sus altas si sus bajas son distintas;** lo que no se repite es el perfil completo.
+    - **Un verbo:** una frase corta que dice cómo juega. **No es una regla del juego:** es la guía para diseñar las activas de las especies de ese legado. Las mecánicas (curar, drenar, auras, áreas) las ponen las **activas de cada especie**. Una especie puede romper su verbo a propósito, si Mundo tiene un motivo.
+    - La identidad de un legado está sobre todo en su verbo: es lo que el jugador reconoce en el tablero. El perfil lo sostiene.
+  - **Estadísticas del juego completo** *(boceto, sujeto a cambios)*. El MVP sigue con sus cinco estadísticas y sin Defensa (`Sistema.md` 11.1).
+
+    | Estadística | Qué abarca |
+    |---|---|
+    | **Fuerza** | Daño físico, anclarse a la tierra, levantar objetos pesados |
+    | **Agilidad** | Evasión, probabilidad de golpear dos veces, escapar de un agarre |
+    | **Constitución** | Vida, regeneración de vida, defensa, bloqueo, resistencia a estados y a enfermedades |
+    | **Sabiduría** | Percepción, resistencia a estados mentales, supervivencia, encontrar alimento |
+    | **Espíritu** | Resistencia mágica, poder espiritual (daño mágico), maná, regeneración de maná, capacidad de curación |
+    | **Resistencia** | Capacidad de fatiga, movimiento, velocidad, iniciativa |
+    | **Suerte** | **Solo los picos:** golpe brillante, turno de más, hallazgos raros. **Nunca es un dado escondido:** todo lo que toca se muestra como probabilidad antes de actuar (sección 8). La captura, los incidentes y la huida no dependen de ella |
+
+    - **No hay Inteligencia:** Espíritu cubre el daño mágico. Una estadística entra solo si genera una decisión que otra no genera (`Sistema.md` 11.1). La Suerte la genera: elegir entre lo seguro y lo variable.
+  - **Los 18 legados:**
+
+    | # | Legado | Verbo | Altas | Bajas |
+    |---|---|---|---|---|
+    | 1 | **Lleno** | Aguanta con el cuerpo: el tanque físico. Come mucho | Fuerza, Constitución | Resistencia (poco movimiento e iniciativa) |
+    | 10 | **Vacío** | Aguanta con el espíritu: el tanque mágico. Cuerpo casi nulo | Espíritu, Sabiduría | Fuerza, Constitución, Resistencia |
+    | 2 | **Crecimiento** | Polo de la naturaleza y soporte: cura dando de su propia vida. Su curación es de a poco; el Remiendo del Maestro es la curación de urgencia (Pilar 1) | Constitución, Espíritu | Fuerza, Agilidad |
+    | 11 | **Drenaje** | Absorbe la vida de quien tenga cerca, enemigas y aliadas; tiene que seguir pegando para sostenerse. **Solitario:** si a una aliada no le gusta que la drenen, su relación con la que la drena empeora durante un par de días (por la rueda, les molesta a las de Crecimiento y de Lleno) | Fuerza, Agilidad | Constitución, Espíritu |
+    | 3 | **Movimiento** | Cuanto más se mueve, más ayuda: una presencia que está | Resistencia, Agilidad | Constitución, Sabiduría |
+    | 12 | **Quietud** | El estandarte del equipo: cuanto más quieta, más sostiene. Genera un aura distinta según la especie (maná, vida o atributos): una presencia sin estar | Constitución, Sabiduría | Resistencia, Agilidad |
+    | 4 | **Liviandad** | No la atrapan ni la sujetan: se escurre, atraviesa y no la pueden empujar | Agilidad, Espíritu | Fuerza, Resistencia |
+    | 13 | **Presión** | Sujeta, aplasta y empuja: decide dónde se quedan las otras. Lleno aguanta; Presión mueve a las demás | Fuerza, Resistencia | Agilidad, Espíritu |
+    | 5 | **Intemperie** | No se protege ni se refugia, y sobrevive igual: esquiva en vez de aguantar y sabe vivir afuera | Agilidad, Sabiduría | Constitución, Resistencia |
+    | 14 | **Protección** | Aguanta y cubre a las demás: se pone delante y recibe por ellas. Erizarse es su modelo | Constitución, Resistencia | Agilidad, Sabiduría |
+    | 6 | **Sonido** | Activas de área: soporte, daño o tanque según la especie. Fuera del combate, comunica: avisa, llama y alerta | Espíritu, Resistencia | Constitución, Agilidad |
+    | 15 | **Silencio** | Calla: algunas especies apagan su zona. Fuera del combate, no se la oye (sigilo) | Constitución, Agilidad | Espíritu, Resistencia |
+    | 7 | **Sinceridad** | Revela: destapa a las ocultas, sus golpes no se esquivan ni se desvían, y la engañan poco. Fuera del combate, detecta trampas y engaños | Fuerza, Sabiduría | Agilidad, Espíritu |
+    | 16 | **Ilusión** | Oculta, confunde y desvía. Fuera del combate, distrae y evita encuentros. Hacerse junco es Ilusión | Agilidad, Espíritu | Fuerza, Sabiduría |
+    | 8 | **Unión** | Tiende lazos en el combate: cuanto más fuerte el lazo, más fuerte el combo y la unión. Sufre más una muerte en el grupo | Sabiduría, Resistencia | Fuerza, Espíritu |
+    | 17 | **Desapego** | Corta lazos: al atacar, corta los que teje Unión, de los dos bandos. Cuanto más sola, más fuerte: sin vecinas cerca, y como última criatura de su bando en pie. Su lealtad cambia más lento, para subir y para bajar, pero nunca es inmune (regla de oro). Es la única que sigue peleando cuando cae el Maestro (ver abajo) | Fuerza, Espíritu | Sabiduría, Resistencia |
+    | 9 | **Disciplina** | Constancia: rinde parejo, mejora repitiendo y obedece aunque tenga hambre o esté herida. Fuera del combate, guardias y trabajo de todos los días | Fuerza, Resistencia | Suerte, Sabiduría |
+    | 18 | **Inspiración** | El momento: picos (golpe brillante, turno de más) con probabilidad visible. Fuera del combate, eventos raros y hallazgos | Suerte, Sabiduría | Fuerza, Resistencia |
+
+    - **Contrajuego entre soportes:** Silencio es la respuesta natural al estandarte de Quietud y a las áreas de Sonido; Desapego, a los lazos de Unión.
+    - **Fuera del combate**, Sonido, Silencio, Sinceridad, Ilusión, Intemperie y Disciplina se usan en lo que ya existe en la 0b (guardias, emboscadas, ataque nocturno, eventos del mapa de nodos): el sistema llega al día (Pilar 4) sin inventar sistemas nuevos.
   - **El almacén de carga:** cada unidad tiene uno, con un **umbral** (entre 6 y 10, lo define Sistemas).
     - Todo legado que entra **suma**, aunque no tenga relación con lo que ya había.
     - **Solo la anulación resta:** quita puntos del legado anulado, y lo que sobra se pierde (anular nunca carga). Sirve para atacar (desarmar a un enemigo) o para defender (evitar que una aliada explote).
     - **Potenciación:** cuando se dispara, el ataque **no carga su propio legado**: carga solo el legado potenciado, con **+1 punto** (por ejemplo, 2 de Crecimiento entran como 3 de Sonido). Se dispara si el legado potenciado **ya está en el almacén** del objetivo o **es uno de sus dos legados propios**.
     - **Se ve y se cuenta:** el almacén es una sola barra segmentada por legado, con el dominante marcado, y la interfaz avisa antes si un golpe lo llena (sección 8).
+  - **Hacia dónde se invierte** (12/10/2026): **siempre a la Sombra de un legado propio** de la criatura, nunca a la del dominante del almacén. Una criatura tiene a lo sumo dos inversiones posibles, y el jugador las aprende.
+    - Se invierte en la Sombra de su legado propio **con más carga** en el almacén. Si ninguno de los dos tiene carga, o están empatados, en la Sombra de su **legado principal**.
+    - El almacén sigue importando: cargar el secundario de una criatura elige hacia dónde explota.
   - **Lo decide quien completa el umbral:**
-    - **Un enemigo → explosión e inversión.** Durante algunos turnos, la unidad **defiende como un solo legado: la Sombra del legado dominante** del almacén. Gana sus beneficios, aunque muchas veces contradigan su punto fuerte, y lo sufre si es su opuesto. Al terminar la inversión queda **extenuada** *(provisorio)*.
-    - **La propia criatura o una aliada → el Maestro elige:** **generación** (el almacén se convierte en 1 punto del legado siguiente, sin extenuación) o **inversión** (como arriba, más pérdida de lealtad). Invertir a una propia es un **sacrificio táctico**.
-    - **Empate en el dominante:** gana el legado de quien completó el umbral.
+    - **Un enemigo → explosión e inversión.** Durante algunos turnos, la unidad **toma solo la forma de pegar de la Sombra, con sus atributos de siempre**: queda desacoplada y casi inservible (por ejemplo, una de Lleno pega con Espíritu, que casi no tiene; una de Vacío pega con Fuerza). Al terminar la inversión queda **extenuada** *(provisorio)*.
+    - **La propia criatura o una aliada → el Maestro elige:**
+      - **Generación:** defiende como el **legado siguiente** de la rueda y gana sus atributos. Cuesta **fatiga** (Resistencia), **nunca extenuación**.
+      - **Inversión:** toma **el cuerpo entero de la Sombra**: sus atributos y su forma de pegar. Es buena en combate, pero queda extenuada y pierde lealtad. Invertir a una propia es un **sacrificio táctico**.
+      - **La generación cansa; la inversión agota.**
     - Dar el último punto es una decisión táctica, y cargar a una aliada es una apuesta: si un enemigo la termina, explota del lado equivocado.
   - **Extenuada:** solo por inversión, nunca por generación. Queda inservible el resto del combate y del día: no trabaja, no hace guardia ni pelea, y no puede volver a acumular. **Sigue comiendo y puede rescatar al Maestro**: la regla de oro no depende de un estado de combate.
   - **Lo que no le gusta a una criatura** es la Sombra o el anulador de cualquiera de sus legados (Mundo puede agregar casos por especie). Una sola regla para lo que le duele:
     - Si se lo carga **el Maestro, una aliada o ella misma** (o el Maestro elige invertirla), pierde **lealtad**: es una decisión del jugador.
     - Si se lo carga **un enemigo**, pierde **obediencia** durante el combate: la sufre, pero el vínculo no se rompe por la acción de otro (sección 8).
+  - **Si cae el Maestro, Desapego sigue peleando** (12/10/2026; solo en el juego completo, el MVP no cambia):
+    - La rescatista, que **siempre es una leal**, se lleva al Maestro, y las demás criaturas de pie se van con ellos. **El combate sigue solo con las de Desapego** contra lo que quede del enemigo.
+    - **Si ganan, las caídas de la tribu se salvan**, porque no queda nadie que las remate. Si caen ellas también, las caídas mueren como siempre.
+    - **Desapego no rescata ni salva al Maestro:** la regla de oro no cambia. Desapego no pelea por el Maestro; pelea porque no lo necesita. La que no se ata a nadie salva a las que sí se ataban.
   - **El Maestro, avatar de los legados:** no está atado a ninguno; manifiesta la naturaleza de cualquiera por su equipo y su magia. El **arma** define su legado de ataque y la **armadura**, sus dos legados defensivos. Elige el equipo **antes del combate**, y cambiar de arma en combate le gasta el turno: no puede ser el anulador universal. Si manifiesta un legado que no le gusta a una criatura de su tribu, ella lo siente.
   - **La rueda del árbol:** la construcción del Maestro. Su afinidad con los legados nace de su clase y **crece con la tribu que elige y por la rueda**: se expande a los legados vecinos, y acercarse a las Sombras de sus legados cuesta más. **Especializarse limita; nunca es gratis.** No es un árbol aparte: sale de la rueda, la clase y la tribu (decisión del 01/10: clases distintas sin sistemas nuevos).
   - **Criterios de visión:**
-    - La explosión es **un evento, no ruido**: una o dos por combate en las unidades clave.
+    - La explosión es **un evento, no ruido**: una o dos por combate en las unidades clave. La generación no puede volverse la jugada de cada ronda: por eso cuesta fatiga.
     - Explotar a un enemigo **no puede valer más** que bajarle la vida.
     - El beneficio de invertir a una propia **nunca puede superar** la extenuación y la lealtad perdida.
     - La tribu pesa más que el enfrentamiento: los legados nunca reemplazan a la afinidad, los combos ni el Encono (Pilar 3).
-  - **Espera porque** es un sistema grande (18 estados con su trueque, arte e interfaz, equipo del Maestro) y el MVP no tiene linajes. Las armas y armaduras dependen además del crafteo (Capa 1). Se le asigna capa cuando el MVP valide la tribu.
+    - **Ningún legado anula al Maestro:** un Silencio enemigo no lo deja sin magia todo el combate y una Protección no lo escuda todo el combate. Es un problema que se resuelve, no una anulación (Pilar 1 y regla de oro).
+    - **Un equipo entero de Desapego no puede ser la jugada óptima:** es la excepción anti-tribu que se elige (Pilar 2), no el camino eficiente.
+    - **Toda área y todo pico se ven antes** de confirmar (sección 8).
+  - **Espera porque** es un sistema grande: 18 perfiles con su verbo, las estadísticas del juego completo, la explosión y la inversión, relaciones entre individuos que cambian durante la partida, el combate que sigue tras la caída del Maestro, arte e interfaz, y el equipo del Maestro. Las armas y armaduras dependen además del crafteo (Capa 1). Se le asigna capa cuando el MVP valide la tribu.
 - **La Mudanza** *(nombre provisorio)*. Cada criatura tiene un **defecto de naturaleza** (la Rodauva, la cobardía; la Ocarra, la impulsividad; el Zancajunco, la ariscura; el Surcón, el letargo). Superarlo gracias al vínculo con el Maestro la transforma. Condiciones de visión:
   - **La barra de zozobra** *(nombre provisorio)*: cada criatura tiene una barra que se llena por causas propias de su naturaleza. Al llenarse, la criatura llega a su límite: **se quiebra** (aparece su defecto; los quiebres repetidos pueden llevar a la **involución**) o **lo supera** (queda lista para mudar). Superar el defecto es el **disparador general** de la Mudanza.
   - **Superarlo no es azar puro:** depende de la **obediencia** y de las **afines vecinas**, y la probabilidad se muestra antes. La regla de oro también decide quién se crece. *(Así se diferencia de la tirada de Darkest Dungeon.)*
@@ -490,7 +590,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - **La subyugación** *(provisorio)*. Es el hechizo del polo Soplo: la forma eficiente de obligar. Baja la lealtad y dura hasta que el Maestro la suelte. Mientras dura, **retiene maná de la reserva** y achica el tope de combate. La criatura subyugada es un **esbirro**: **nunca rescata**. Si el maná que el Maestro recupera al dormir no cubre lo retenido, esa noche se suelta y puede abandonar o atacar.
   - **El Barro manda por vínculo; el Soplo, por dominio.** Ningún camino es gratis: el que domina tiene fuerza, pero nadie lo va a arrastrar al Molino.
   - Entra con la capa de la Mudanza o con una rama Soplo (Capa 3).
-- **El santuario de escribas:** pergaminos a cambio de monedas. Depende de la economía (Capa 5).
+- **El santuario de escribas:** pergaminos a cambio de monedas. Depende de la economía (Capa 4).
 - **El Tasajero y la despensa:** cuando el Tasajero sea reclutable, si el Maestro cae y el Tasajero está famélico, no lo arrastra al campamento sino a su despensa; famélico, también empieza a "guardar" al más débil del grupo. **Condición de visión:** debe ser un evento del que se puede escapar, no una muerte instantánea.
 - **La despensa como pasiva:** reserva de comida de emergencia que no se echa a perder.
 - **El Surcón cava bajo las reservas** del campamento cuando está famélico.
@@ -500,6 +600,11 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 ## 11. Preguntas abiertas
 
 - [ ] Nombre del juego y del mundo.
+- [ ] ¿Cómo termina una partida del juego completo? Por ahora es exploración abierta, y las misiones principales llegan con la Capa 5. **Criterio:** cualquier final lee a la tribu (regla de oro).
+- [ ] Más allá de Valdelumbre: geografía, nombres y rastros de las 5 salidas y de la primera ciudad; señales de la boca y de lo hondo, por especie; quiénes son los Maestros renegados; qué criaturas viven del basural; cómo se lee en el lore que vender rompe el hilo, y su línea del epílogo (Worldbuilder)
+- [ ] Más allá de Valdelumbre: costo del corral por día frente a lo que rinden los trabajos; espacio de mochila de cada aparejo; lealtad que cuesta una venta frente a comerse una criatura; regla de los individuos marcados que valen "muertos"; días del Molino a la primera ciudad (Sistemas)
+- [ ] ¿Hacia dónde arrastra la rescatista al Maestro que cae en lo hondo o en la ciudad? (Sistemas)
+- [ ] Más allá de Valdelumbre: ¿la IA de bando sirve igual para un Maestro enemigo con tribu? ¿La Escala 1 admite varias regiones? (Arquitecto, al darle capa)
 - [ ] Muda colectiva: ¿basta con que una Rodauva haya superado su cobardía, o tienen que superarla las cinco? ¿Es reversible? (al darle capa).
 - [ ] Nombre final de la barra de zozobra (Worldbuilder).
 - [ ] Número final de los Nueve (Worldbuilder). Los Legados y sus Sombras proponen fijarlo en 9.
@@ -516,10 +621,23 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [ ] Con vecinas en 8: ¿bajan el bono de afinidad y la probabilidad de incidente? (Sistemas)
 - [ ] Despliegues de A a H en 12 × 12 con contacto en la ronda 2 y bandos que se crucen en la cola (Sistemas)
 - [ ] ¿En qué capa entran los Legados y sus Sombras? (al validar la tribu en el MVP)
-- [ ] Legados: nombre del casillero 5 (Intemperie o Exteriorización); nombre del sistema ("Legados"); quién modeló a las Sombras; si cada criatura lleva un legado de los Nueve y una Sombra, o dos cualesquiera; justificaciones de las anulaciones Intemperie → Presión, Sinceridad → Silencio, Unión → Ilusión y Disciplina → Desapego (Worldbuilder)
+- [ ] Legados: confirmar el nombre **Intemperie** del casillero 5 o proponer otro con el mismo sentido; nombre del sistema ("Legados"); quién modeló a las Sombras; si cada criatura lleva un legado de los Nueve y una Sombra, o dos cualesquiera; justificaciones de las anulaciones Intemperie → Presión, Sinceridad → Silencio, Unión → Ilusión y Disciplina → Desapego, y de por qué Lleno potencia a Intemperie (Worldbuilder)
 - [ ] Legados: nombres finales de la explosión y de "extenuada"; qué legados le caen mal a cada especie, más allá de la regla de la rueda; por qué el Maestro tiene afinidad con algunos legados y no con todos (Worldbuilder)
-- [ ] Legados: umbral del almacén (6 a 10); duración de la inversión; trueque de cada uno de los 18 estados; cuánta lealtad y obediencia cuesta una carga que no le gusta; costos de especialización en la rueda del árbol (Sistemas)
+- [ ] Legados: los 18 verbos en el lenguaje del mundo; por qué el Lleno come mucho; por qué Drenaje y Desapego son solitarios y qué hace que una de Desapego se quede con el Maestro; cómo se comunican las de Sonido y por qué no se oye a las de Silencio; la escena de la de Desapego que se queda peleando mientras se llevan al Maestro; qué legado principal y secundario lleva cada especie (Worldbuilder, al darle capa)
+- [ ] Legados: umbral del almacén (6 a 10); duración de la inversión; cuánta lealtad y obediencia cuesta una carga que no le gusta; costos de especialización en la rueda del árbol (Sistemas)
+- [ ] Legados: cuánto pesa el perfil frente a la ficha de la especie y cómo se reparte entre el legado principal y el secundario; cuánta fatiga cuesta la generación y cuánto dura; daño físico y mágico, con la defensa y la resistencia mágica que trae; cuánto mueve la Suerte cada pico (Sistemas)
+- [ ] Legados: números de cada verbo: curación de Crecimiento y vida que paga; drenaje, distancia y pérdida por turno sin pegar; días que dura la relación empeorada por drenaje; alcance y fuerza de las auras de Quietud y si se suman; forma y tamaño de las áreas de Sonido y Silencio, y si el silencio afecta a las aliadas según la especie; costo de cubrir de Protección; cómo crece un lazo de Unión; cuánto más fuerte es Desapego sola y su tope si además es la última (Sistemas)
+- [ ] Legados: cómo sigue el combate después de la caída del Maestro con las de Desapego (cómo se gana, qué pasa si caen) (Sistemas; Arquitecto al darle capa)
+- [ ] Legados: ¿cómo se invierte el Maestro, que no está atado a ningún legado? (al darle capa)
 - [ ] Legados: ¿qué pasa con una salvaje extenuada? ¿Huye o es más fácil de sellar? (compite con "debilitar y sellar", 6.3; Sistemas)
+- [x] ~~Orden del roadmap para salir del valle~~ → Economía, comercio y NPCs pasan a la Capa 4; facciones, reinos e historia, a la Capa 5 (10).
+- [x] ~~¿Cómo se venden y compran criaturas?~~ → Vender rompe el vínculo: el pergamino arde, la tribu lo ve y el epílogo lo cuenta; el comprador sella con un pergamino propio (10).
+- [x] ~~¿El juego es de colección?~~ → No por defecto: coleccionar es el camino del Soplo y se paga con la regla de oro (8).
+- [x] ~~¿Las criaturas usan equipo?~~ → Solo aparejos de trabajo y carga, sin efecto en combate (10).
+- [x] ~~¿Lo hondo puede matar sin aviso?~~ → No: siempre avisa, con señales del mundo y de la tribu, nunca con porcentajes (10).
+- [x] ~~¿Qué da cada legado?~~ → Un perfil de atributos (dos altas y dos bajas, en espejo dentro del par) y un verbo que guía las activas de sus especies (10).
+- [x] ~~¿Se suma Inteligencia como estadística?~~ → No: Espíritu cubre el daño mágico. Se suma Suerte, solo para los picos y siempre visible (10).
+- [x] ~~¿Hacia qué Sombra se invierte una criatura?~~ → A la de su legado propio con más carga; en empate o sin carga, a la de su principal (10).
 - [x] ~~¿La afinidad y el foco cuerpo a cuerpo se excluyen?~~ → No: las relaciones miran las 8 vecinas; los combos no miran la posición (Escala 3, 6.4).
 - [x] ~~¿Tablero más grande? (A-2)~~ → 12 × 12 de referencia, con contacto en la ronda 2 y cámara móvil (Escala 3, 9).
 - [x] ~~¿Los bandos se intercalan en la cola?~~ → Sí, ya funciona: el orden es por Velocidad de cada unidad (Escala 3).
@@ -665,12 +783,37 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | 10/10/2026 | Los Legados y sus Sombras (rueda de 18) reemplazan a los linajes de hechura como norte; quedan en Ideas en espera, fuera de la 0a y la 0b | Alcance congelado; el MVP no tiene linajes |
 | 10/10/2026 | Cuatro ciclos por distancia en la rueda (generación +1, potenciación +4, anulación +8, inversión +9), que actúan sobre la carga y nunca multiplican el daño | Sin tabla de efectividad: el sistema queda propio (sección 8) |
 | 10/10/2026 | Almacén de carga por unidad: todo legado suma, solo la anulación resta y su sobrante se pierde | La anulación es la única limpieza; la carga es una apuesta |
-| 10/10/2026 | Quien completa el umbral decide: un enemigo → explosión e inversión; una aliada o la propia → el Maestro elige generación o inversión; en un empate gana el legado de quien completó | Dar el último punto es una decisión táctica; invertir a una propia es un sacrificio con costo |
-| 10/10/2026 | La invertida defiende como un solo legado (la Sombra del dominante) y después queda extenuada el resto del combate y del día; sigue comiendo y puede rescatar | Se lee en un ícono; la consecuencia del combate llega al día (Pilar 4); la regla de oro no depende de un estado de combate |
+| 10/10/2026 | Quien completa el umbral decide: un enemigo → explosión e inversión; una aliada o la propia → el Maestro elige generación o inversión | Dar el último punto es una decisión táctica; invertir a una propia es un sacrificio con costo |
+| 10/10/2026 | La invertida queda extenuada el resto del combate y del día; sigue comiendo y puede rescatar | La consecuencia del combate llega al día (Pilar 4); la regla de oro no depende de un estado de combate |
 | 10/10/2026 | Potenciación: carga solo el legado potenciado, con +1, si ya está en el almacén o es un legado propio del objetivo | El ciclo actúa sobre la carga; premia leer el almacén |
 | 10/10/2026 | Lo que no le gusta = Sombra o anulador de sus legados; carga propia o aliada → lealtad; carga enemiga → obediencia | El vínculo solo se rompe por decisiones del jugador (sección 8) |
 | 10/10/2026 | El Maestro es avatar de los legados: arma = legado de ataque, armadura = dos legados defensivos; equipo elegido antes del combate y cambio de arma con costo de turno | Pilar 1 sin que el Maestro sea el anulador universal |
 | 10/10/2026 | La rueda del árbol: la afinidad del Maestro crece con la tribu que elige y por la rueda; especializarse limita | Construcción profunda sin un árbol aparte; el Maestro crece con su tribu (Pilares 1 y 3) |
+| 12/10/2026 | Una criatura se distingue por sus atributos base, sus activas y su combinación de legados; cada criatura tiene un legado principal y uno secundario | Identidad de cada especie entre más de 100 sin una tabla de tipos |
+| 12/10/2026 | Cada legado da un perfil de atributos (dos altas y dos bajas, en espejo dentro del par; Lleno ↔ Vacío es la excepción) y un verbo que guía las activas de sus especies, sin reglas globales | Invertir le da vuelta a la criatura justo en lo que es buena; identidad reconocible sin 18 reglas para programar |
+| 12/10/2026 | Dos legados pueden compartir sus altas si sus bajas son distintas; el perfil completo no se repite | 18 legados no entran en 15 combinaciones de dos altas |
+| 12/10/2026 | Boceto de estadísticas del juego completo: Fuerza, Agilidad, Constitución, Sabiduría, Espíritu, Resistencia y Suerte; sin Inteligencia; el MVP sigue con sus cinco | Base de los perfiles sin tocar el alcance congelado; cada estadística genera una decisión propia |
+| 12/10/2026 | La Suerte rige solo los picos y siempre se muestra como probabilidad | Es la estadística de Inspiración, no un dado escondido (sección 8) |
+| 12/10/2026 | Los 18 legados quedan definidos con verbo y perfil (tabla de la sección 10) | Sistema completo en papel |
+| 12/10/2026 | La inversión va a la Sombra de un legado propio (el de más carga; en empate o sin carga, el principal); reemplaza "la Sombra del dominante" y la regla de empate del 10/10 | Cada criatura tiene a lo sumo dos inversiones, que se aprenden; el almacén sigue decidiendo hacia dónde explota |
+| 12/10/2026 | Inversión por enemigo: toma solo la forma de pegar de la Sombra; inversión propia: toma el cuerpo entero de la Sombra, con extenuación y pérdida de lealtad | Una sola regla para el desacople; el sacrificio táctico sigue teniendo costo |
+| 12/10/2026 | Generación: defiende como el legado siguiente y gana sus atributos; cuesta fatiga, nunca extenuación (reemplaza "1 punto del legado siguiente") | La generación cansa y la inversión agota; la explosión sigue siendo un evento |
+| 12/10/2026 | El Remiendo es la curación de urgencia; la de las criaturas es de a poco | Las criaturas que curan no reemplazan al Maestro (Pilar 1) |
+| 12/10/2026 | Drenar a una aliada a la que no le gusta empeora su relación con la que drena durante un par de días | El costo de Drenaje recae en el vínculo de la tribu (Pilares 3 y 4) |
+| 12/10/2026 | Desapego, al atacar, corta los lazos de Unión de los dos bandos; es más fuerte sin vecinas y como última criatura de su bando; su lealtad cambia más lento, nunca es inmune | Espejo exacto de Unión; la regla de oro sigue intacta |
+| 12/10/2026 | Si cae el Maestro, solo las de Desapego siguen peleando; la rescatista (leal) se lleva al Maestro con las demás; si las de Desapego ganan, las caídas se salvan. Solo en el juego completo | Desapego no pelea por el Maestro: no lo necesita; el rescate sigue siendo de una leal (regla de oro) |
+| 13/10/2026 | Más allá de Valdelumbre: 5 salidas desde el valle (aguas abajo con la primera ciudad, las colinas, la meseta, aguas arriba y la boca); la ciudad está cerca de lo seguro y lejos de lo valioso. Post-MVP, Capa 4 | Exploración con elección sobre un mapa fijo; ninguna salida es la mejor (Pilar 2) |
+| 13/10/2026 | Lo hondo: lugares misteriosos accesibles desde temprano, con acceso condicionado; siempre avisa con señales del mundo y de la tribu, nunca con porcentajes | Miedo y descubrimiento sin contradecir la sección 8 |
+| 13/10/2026 | La boca: cueva en la ladera de la montaña, quinta salida, de solo ida y fuera de los mapas que se venden | Completa las 5 salidas con un lugar hondo |
+| 13/10/2026 | Vender una criatura rompe el vínculo: el pergamino arde, la tribu lo ve y el epílogo lo cuenta; el comprador sella con un pergamino propio. Comprar exige un pergamino en blanco y arranca con lealtad baja. Nada del cuerpo de una criatura se vende | Respeta el lore del hilo; la venta no puede ser la forma de que comer rinda (6.5) |
+| 13/10/2026 | Sección 8 enmendada: no es un juego de colección por defecto; coleccionar es el camino del Soplo y se paga con la regla de oro | El Barro manda por vínculo y el Soplo por dominio; la colección queda como elección con costo |
+| 13/10/2026 | Las criaturas solo llevan aparejos de trabajo y carga, sin efecto en combate | La especie sigue definiendo a la criatura (Pilar 2); la mochila depende de las de trabajo |
+| 13/10/2026 | Trabajos encargados a las criaturas según su aptitud; misiones como expediciones con rumores y mapas (nunca "matá 5 de X"); carteles de recompensa, con "muerta" solo para individuos marcados; criminales como Maestros renegados con tribu propia | Pilar 2; el desafío está en elegir y preparar la misión; reutiliza el sistema de la tribu |
+| 13/10/2026 | En la ciudad, el hambre se paga con plata; afuera vuelve a regir. Basural con criaturas carroñeras. Corral por día que protege pero no une, o campamento afuera expuesto a bandidos, emboscadas y clima. Quedarse en la ciudad siempre gasta más de lo que dan sus trabajos | El reloj cambia de forma, no desaparece (Pilar 4); la ciudad no reemplaza al Molino (Pilar 3) |
+| 13/10/2026 | La comida cuesta plata y espacio; cada objeto de tienda debe generar una decisión propia; el fuego sigue siendo de tiempo y lo comprado solo lo acelera | Prepararse es parte del juego sin inflar la tienda; respeta 6.9 |
+| 13/10/2026 | Primera porción post-MVP: aguas abajo, la primera ciudad, el corral, los encargos, una misión de captura por rumores y la boca | Probar la ciudad, la expedición y lo hondo antes de multiplicar el contenido |
+| 13/10/2026 | El juego completo es de exploración abierta, sin final definido; cualquier final futuro lee a la tribu | El epílogo es la regla de oro vista de frente |
+| 13/10/2026 | Capas reordenadas: economía, comercio y NPCs pasan a la Capa 4; facciones, reinos, historia y misiones principales, a la Capa 5 | Salir del valle necesita comercio antes que reinos |
 
 ## 13. Registro de versiones
 
@@ -690,3 +833,5 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | v1.2 | 05/10/2026 | La atacante nocturna se va si el Maestro cae antes de decidir, sin cambio de lealtad (6.4, responde P-024). La prenda en el epílogo pasa a Ideas en espera (10). Preguntas abiertas: se cierran la encuesta de E y F, la prenda y la atacante (11). Registro del 05/10 (12) |
 | v1.3 | 07/10/2026 | **Geometría y tablero.** Adyacencia en 4 para mover, atacar, guardar y la Caza; las relaciones miran las 8 vecinas; los combos no miran la posición; tablero de referencia 12 × 12 con cámara móvil y contacto en la ronda 2; bandos intercalados en la cola (Escala 3). Vecinas en 6.4 y en la nota del Tasajero (6.2). MVP actualizado (9). Orden de trabajo del 07/10 y vecinas en la barra de zozobra y la Muda colectiva (10). Preguntas abiertas: nuevas para Sistemas sobre afinidad e incidentes en 8 y despliegues en 12 × 12; cerradas afinidad y foco, tablero e intercalado (11). Registro del 07/10 (12) |
 | v1.4 | 11/10/2026 | **Los Legados y sus Sombras** en Ideas en espera: rueda de 18, cuatro ciclos sobre la carga, almacén con explosión, inversión y extenuación, lo que no le gusta a cada criatura, el Maestro avatar y la rueda del árbol (10). Reemplazan a los linajes de hechura (6.2) y se nombran en el Maestro (6.1), en "no es" (8) y en el MVP como fuera de alcance (9). Preguntas abiertas: nuevas para Worldbuilder y Sistemas; cerrada la de cómo funcionan los linajes (11). Registro del 10/10 (12). Sin cambios en la 0a ni en la 0b |
+| v1.5 | 12/10/2026 | **Los 18 legados definidos.** Legado principal y secundario; perfil de atributos y verbo de cada legado; boceto de siete estadísticas del juego completo con Suerte y sin Inteligencia; tabla de los 18; casillero 5 = Intemperie (provisorio); inversión hacia la Sombra de un legado propio; inversión por enemigo (solo la forma de pegar) y propia (el cuerpo entero); generación con fatiga; Desapego sigue peleando si cae el Maestro; criterios de visión nuevos (10). Nota de la excepción de Desapego en 6.6 y estadísticas fuera del MVP (9). Preguntas abiertas: nuevas para Worldbuilder y Sistemas; cerradas qué da cada legado, Inteligencia y hacia dónde se invierte (11). Registro del 12/10 (12). Sin cambios en la 0a ni en la 0b |
+| v1.6 | 13/10/2026 | **Más allá de Valdelumbre** en Ideas en espera (Capa 4): 5 salidas con la ciudad cerca de lo seguro; lo hondo, que siempre avisa con señales; la boca; la ciudad (hambre con plata, basural, corral que protege pero no une); compra y venta de criaturas que rompe el vínculo; trabajos; misiones como expediciones, carteles y Maestros renegados; mochila y objetos; aparejos de trabajo para las criaturas; primera porción propuesta (10). Sección 8 enmendada: coleccionar es el camino del Soplo. Venta en los vínculos rotos (6.7). Final del juego completo: exploración abierta, cualquier final lee a la tribu (5). Capas 4 y 5 reordenadas, con dependencias; referencias a la historia (5, 6.2) y a los escribas (10) actualizadas. Preguntas abiertas nuevas y cerradas (11). Registro del 13/10 (12). Sin cambios en la 0a ni en la 0b |
