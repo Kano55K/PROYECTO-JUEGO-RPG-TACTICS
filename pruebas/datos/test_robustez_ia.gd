@@ -1,8 +1,9 @@
 extends GdUnitTestSuite
 
 # Arquitectura.md A.6 ("Robustez de la IA", desde T20) y D-005: test permanente
-# con datos/ real. Juega los 11 escenarios con 10 semillas cada uno (la del
-# escenario y las 9 de _SEMILLAS_EXTRA, puestas en una copia del escenario), con
+# con datos/ real. Juega los 10 escenarios y la variante D con balanza 4 (T31)
+# con 10 semillas cada uno (la del escenario y las 9 de _SEMILLAS_EXTRA,
+# puestas en una copia del escenario), con
 # el jugador esperando (JugadorEsperando, el mismo ayudante del test de
 # contacto), hasta el fin del combate o la ronda 12. Exige que ningun combate
 # termine con error(): la IA nunca devuelve una accion que el Turno rechace.
@@ -28,7 +29,9 @@ func before() -> void:
 # escenario, la semilla, la ronda, la unidad y el error (la decision de la IA y
 # el motivo con que el Turno la rechazo).
 func _robustez(escenario_id: String) -> void:
-	var escenario: Dictionary = _datos["escenarios/%s.json" % escenario_id]
+	# T31 (A.9): d_rivales_balanza4 es la variante de D armada como en el panel.
+	var escenario: Dictionary = VariantesEscenario.escenario(_datos, escenario_id)
+	assert_dict(escenario).override_failure_message(escenario_id).is_not_empty()
 	var semillas: Array[int] = [escenario["semilla"] as int]
 	semillas.append_array(_SEMILLAS_EXTRA)
 	var fallas: Array[String] = []
@@ -93,7 +96,7 @@ func test_d_rivales_hambriento() -> void:
 
 
 func test_d_rivales_balanza4() -> void:
-	_robustez("d_rivales_balanza4")
+	_robustez(VariantesEscenario.D_BALANZA_4)
 
 
 func test_e_cobardia() -> void:
@@ -116,13 +119,17 @@ func test_h_soplo() -> void:
 	_robustez("h_soplo")
 
 
-# Los 11 escenarios de datos/ son los que juega este test.
-func test_estan_los_11_escenarios() -> void:
+# Los 10 escenarios de datos/ y la variante de D con balanza 4 son los que juega
+# este test. Reescrito por A.9, T31: d_rivales_balanza4.json se borro y la
+# variante se arma con EdicionEscenario.
+func test_estan_los_10_escenarios_y_la_variante() -> void:
 	var escenarios: Array[String] = []
 	for clave: String in _datos.keys():
 		if clave.begins_with("escenarios/"):
 			escenarios.append(clave.trim_prefix("escenarios/").trim_suffix(".json"))
 	escenarios.sort()
-	assert_array(escenarios).is_equal(["a_dia_1", "b_muro", "c_tasajero", "d_rivales_balanza4",
+	assert_array(escenarios).is_equal(["a_dia_1", "b_muro", "c_tasajero",
 			"d_rivales_hambriento", "d_rivales_normal", "e_cobardia", "e_cobardia_afines", "f_rescate",
 			"g_ataque_nocturno", "h_soplo"])
+	assert_array(VariantesEscenario.nombres()).is_equal([VariantesEscenario.D_BALANZA_4])
+	assert_dict(VariantesEscenario.escenario(_datos, VariantesEscenario.D_BALANZA_4)).is_not_empty()

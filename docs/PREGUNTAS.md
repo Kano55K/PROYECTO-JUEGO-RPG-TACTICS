@@ -681,7 +681,7 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Cerrada en:** T30
 
 ## P-047 — En G el resellado falla siempre por la semilla fija
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T30-fix
 - **Fecha:** 13/10/2026
@@ -691,4 +691,5 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Opciones:** A) se deja así hasta T31 (panel de parámetros y semilla), y la prueba manual del éxito se hace con otra semilla en una copia de los datos (`--datos=`). B) G cambia de semilla (dato del escenario, decisión del staff). — Recomendación técnica: A (la política de semillas no se toca en un fix).
 - **Bloquea:** no
 - **Mientras tanto:** no se cambió ninguna semilla ni la política. Los tests de T30-fix buscan en el núcleo una semilla que sale y otra que falla.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (del prompt de T31, copiada con autorización del usuario) la semilla fija se mantiene; elegir otra semilla es el panel de parámetros de T31.
+- **Cerrada en:** T31

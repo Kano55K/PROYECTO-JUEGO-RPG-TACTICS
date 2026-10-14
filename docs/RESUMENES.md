@@ -2914,6 +2914,99 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   4. El éxito: copiar `datos/` a otra carpeta, cambiar `semilla` de G (por ejemplo, 1) y abrir con `-- --datos=<carpeta>`; si sale, la Ocarra Guardada, la línea del nuevo sello, la lealtad final y Volver.
 - **Para la próxima sesión:** nada: tarea terminada.
 
+## T31 · sesión 1 · 14/10/2026
+- **Rama:** tarea/T31-panel (desde `develop` en `0db1df0`; T29-ajustes todavía no está en `develop`)
+- **Estado:** EN CURSO (sigue en la sesión 2: el panel en pantalla)
+- **Hecho:**
+  - `Cargador.validar_escenario(escenario, esquema, datos)`: valida un escenario suelto contra los datos ya cargados con el mismo `Validador` y el mismo `_chequear_cruzados` que `cargar_carpeta`, sin copiar ningún chequeo. Corre sobre ese escenario, las especies y `tablas/balanza.json`. Revisa ids, especies, posiciones dentro del tablero y `mana_entrada` ≤ reserva.
+  - `EdicionEscenario` (`pantalla/parametros/`, `RefCounted`, sin nodos):
+    - Edita una copia: `campos`, `campo`, `valor`, `cambiar`, `escenario`, `difiere` y `validar` (errores del cargador, con la `ruta` del campo; `tribu[0]` se traduce al id).
+    - Rangos y toggles del esquema `escenario`. El máximo de `mana_entrada` es la reserva de la balanza actual.
+    - Pasar a guardada pone la posición en `null`. Volver a suelta devuelve la del archivo; sin posición en el archivo, da `MOTIVO_SIN_POSICION_EN_ARCHIVO`.
+    - Nunca recorta un valor ni escribe en disco.
+  - `GuardadoCombate.guardar(combate, carpeta, editado = false)`: con una variante que difiere del archivo, guarda `<escenario>_editado_<semilla>_<n>` (`SUFIJO_EDITADO`).
+  - Comprobación previa del criterio 7: D normal con balanza 4, armada con `EdicionEscenario`, es **igual** a `d_rivales_balanza4.json` salvo `id` y `_nota` (test en verde antes del borrado; el `diff` de los archivos también da solo `id`, `_nota` y `balanza`). Después se borró `datos/escenarios/d_rivales_balanza4.json`.
+  - `VariantesEscenario` (`pruebas/datos/variantes_escenario.gd`): arma "D con balanza 4" como en el panel, así contacto, robustez y métricas siguen jugándola.
+- **Archivos:**
+  - Creados: `pantalla/parametros/edicion_escenario.gd`, `pruebas/datos/variantes_escenario.gd`, `pruebas/datos/test_parametros_datos.gd`, `pruebas/pantalla/parametros/test_edicion_escenario.gd`, `pruebas/fixtures/parametros/escenario_parametros.json` y `pruebas/fixtures/parametros/esquema_otro/_esquemas/{escenario,comunes}.schema.json`.
+  - Modificados: `nucleo/datos/cargador.gd`, `pantalla/combate/guardado_combate.gd`, `pruebas/pantalla/test_guardado_combate.gd` y los tests reescritos de abajo, `CLAUDE.md` (Estado actual).
+  - Borrado: `datos/escenarios/d_rivales_balanza4.json` (la huella no cambia: excluye `escenarios/`).
+- **Tests:** 12 nuevos, total 871. Suite completa: 870 pasan y 1 falla, intermitente: `pruebas/pantalla/test_vista_rescate.gd::test_botonera_entra_en_la_ventana` ("Expecting 1152.000000 but was 1458.000000", línea 95). No se tocó en esta tarea y pasa al correr su archivo solo (3/3). Es el que corrige T29-ajustes, todavía sin mergear a `develop`.
+  - Reescritos (referencia **A.9, T31**: se borró `d_rivales_balanza4.json`):
+    - `test_datos_completos.gd`: `_ESCENARIOS` sin el archivo; `test_estan_los_once_escenarios` → `test_estan_los_diez_escenarios`; `test_semillas_compartidas` y `test_d_balanza4_es_d_normal_con_balanza_4` toman la variante de `VariantesEscenario`.
+    - `test_contacto.gd`: `_contexto` y el test de D arman `d_rivales_balanza4` con `VariantesEscenario` (los criterios no cambian).
+    - `test_robustez_ia.gd`: `test_d_rivales_balanza4` juega la variante con sus 10 semillas; `test_estan_los_11_escenarios` → `test_estan_los_10_escenarios_y_la_variante`.
+    - `test_metricas_escenarios.gd`: `test_los_11_escenarios_dan_metricas_validas` → `test_los_10_escenarios_y_la_variante_dan_metricas_validas`.
+    - 11 → 10: `test_combate.gd` (9), `test_plantel_escenarios.gd` (×3), `test_principal.gd` (2), `test_vista_combate.gd` (3) y `test_vista_camara.gd` (4).
+- **Criterio de terminado (sesión 1):** cumplido punto por punto:
+  1. Cada campo cambia solo ese campo; el original y el archivo quedan iguales.
+  2. Con `esquema_otro`, el máximo de la balanza es 3, y 4 da el error "menor o igual a 3" con su campo.
+  3. El error de `mana_entrada` tiene el mismo `campo`, `esperado` y `recibido` que el del cargador con `escenario_mana_entrada/mayor.json`. Bajar la balanza no recorta el maná.
+  4. Guardada y suelta se comportan como pide P-023, con motivo cuando no hay posición en el archivo.
+  5. Aparecen los toggles del esquema, y `toggle_prueba` aparece sin código nuevo.
+  6. C con la Rodauva guardada valida y llega al primer turno del jugador.
+  7. D con balanza 4 = el archivo, salvo `id` y `_nota` (comprobado antes del borrado).
+  8. La variante guarda con `_editado`, y el `Reproductor` da el mismo registro; sin cambios, el nombre de siempre.
+  9. Archivo borrado; pasan el permanente de datos, contacto, robustez y métricas con 10 escenarios.
+  Los criterios 10 a 16 son de la sesión 2.
+- **Lecturas declaradas:** ninguna de reglas. Supuestos de herramienta, aprobados en el plan:
+  - El máximo de `mana_entrada` en `campos()` es la reserva de la balanza actual.
+  - "Por defecto" (`null`) sale del `type` del esquema, así que también aparece en `maestro.hambre`.
+- **Claves de texto nuevas sin texto:** ninguna (el panel es de desarrollo).
+- **Preguntas:** nuevas ninguna. **P-047:** el usuario autorizó en el chat copiar la respuesta del prompt de T31 ("la semilla fija se mantiene; elegir otra es el panel de T31") y cerrarla. El permiso de la herramienta bloqueó la edición de `docs/PREGUNTAS.md`, así que sigue `ABIERTA` en el archivo: falta pasarla a mano, o con permiso, a `CERRADA` (`Cerrada en: T31`).
+- **Para la próxima sesión:** sesión 2:
+  - Panel en pantalla: selector → panel → Jugar, semilla +1, errores junto al campo, Restaurar, R con la variante y volver con la última variante.
+  - La vista pasa `difiere()` a `GuardadoCombate`.
+  - Criterios 10 a 16 y la prueba manual.
+
+## T31 · sesión 2 · 14/10/2026
+- **Rama:** tarea/T31-panel
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera.
+- **Hecho (sesiones 1 y 2):**
+  - Sesión 1 (modelo, validación y grabación, sin nodos): `Cargador.validar_escenario` (mismo `Validador` y mismo `_chequear_cruzados` que una carpeta), `EdicionEscenario` (copia editable; rangos y toggles del esquema; P-023 al guardar y soltar; nunca recorta ni escribe en disco), `GuardadoCombate.guardar(..., editado)` con `_editado`, comprobación de D con balanza 4 = `d_rivales_balanza4.json` salvo `id` y `_nota`, borrado de ese archivo (10 escenarios) y `VariantesEscenario` para los tests que la jugaban.
+  - Sesión 2 (panel en pantalla):
+    - `EdicionEscenario.restaurar()`, `cambios()` y `sobre(original, datos, esquema)` → `{edicion, no_aplicados}`. Una variante recargada es el archivo nuevo más los cambios: un campo que no se tocó toma el valor nuevo del disco, y un cambio que ya no se puede aplicar vuelve con su ruta y su motivo (no se pierde en silencio).
+    - `PanelParametros` (`pantalla/parametros/panel_parametros.tscn`), pantalla de desarrollo sin claves de texto. Tiene una fila por campo de `campos()` con la ruta y sus límites, el control y el error en rojo. Entero → `SpinBox` con los límites del esquema y `allow_greater`/`allow_lesser`: no recorta, el error lo da `validar()`. Los campos con `null` suman el `CheckBox` "por defecto". Opción → `OptionButton` (si el cambio no se aplica, el motivo queda junto al campo). Booleano → `CheckButton`. La semilla tiene botón `+1`. Botones `Volver`, `Restaurar` ("Restaurar del archivo") y `Jugar`, este último deshabilitado mientras haya errores. Los errores sin campo editable van en `ErroresGenerales`.
+    - `Principal`: selector → `abrir_panel(id)` → `Jugar` → `abrir_escenario(id)`, que juega la variante (`variante(id)`, en memoria) y pasa `difiere()` a `VistaCombate.empezar(..., editado)`. Volver al selector conserva la variante de cada escenario. `recargar()` rearma todas las variantes sobre los datos nuevos: si la abierta no valida, tiene cambios sin aplicar o se estaba en el panel, vuelve al panel con el error; si no, reinicia el combate con la variante.
+    - P-047 pasó a `CERRADA` (`Cerrada en: T31`), con la respuesta del prompt copiada con la autorización del usuario.
+- **Archivos:**
+  - Creados (tarea): `pantalla/parametros/edicion_escenario.gd`, `pantalla/parametros/panel_parametros.gd` y `.tscn`, `pruebas/datos/variantes_escenario.gd`, `pruebas/datos/test_parametros_datos.gd`, `pruebas/pantalla/parametros/test_edicion_escenario.gd`, `pruebas/pantalla/parametros/test_panel_parametros.gd`, `pruebas/pantalla/test_principal_parametros.gd`, `pruebas/fixtures/parametros/escenario_parametros.json` y `pruebas/fixtures/parametros/esquema_otro/_esquemas/{escenario,comunes}.schema.json`.
+  - Modificados (tarea): `nucleo/datos/cargador.gd`, `pantalla/combate/guardado_combate.gd`, `pantalla/combate/vista_combate.gd`, `pantalla/principal.gd`, `pantalla/principal.tscn`, `pruebas/pantalla/test_guardado_combate.gd`, los tests reescritos de la sesión 1, `CLAUDE.md` (Estado actual) y `docs/PREGUNTAS.md` (P-047).
+  - Borrado: `datos/escenarios/d_rivales_balanza4.json`.
+- **Tests:** 29 nuevos en la tarea (12 en la sesión 1 y 17 en la 2). Total 888, **todos pasan** (suite completa con `-c`, sin errores ni advertencias de scripts). El intermitente `test_vista_rescate.gd::test_botonera_entra_en_la_ventana` de la sesión 1 no se repitió.
+  - Sesión 2: 4 en `test_edicion_escenario.gd` (restaurar, cambios, `sobre` con y sin cambios no aplicados), 9 en `test_panel_parametros.gd` y 4 en `test_principal_parametros.gd`.
+  - Reescritos (sesión 1, referencia **A.9, T31**, se borró `d_rivales_balanza4.json`): `test_datos_completos.gd` (`test_estan_los_diez_escenarios`, `test_semillas_compartidas`, `test_d_balanza4_es_d_normal_con_balanza_4`), `test_contacto.gd`, `test_robustez_ia.gd` (`test_d_rivales_balanza4`, `test_estan_los_10_escenarios_y_la_variante`), `test_metricas_escenarios.gd` (`test_los_10_escenarios_y_la_variante_dan_metricas_validas`) y de 11 a 10 en `test_combate.gd` (9), `test_plantel_escenarios.gd` (×3), `test_principal.gd` (2), `test_vista_combate.gd` (3) y `test_vista_camara.gd` (4).
+- **Criterio de terminado:** cumplido punto por punto:
+  1. Cada campo cambia solo ese campo; el original y el archivo no cambian.
+  2. Los rangos salen del esquema: con `esquema_otro`, el máximo de la balanza es 3 y fuera de rango da error con su campo.
+  3. El error de `mana_entrada` es el mismo que da el cargador.
+  4. Guardada y suelta cumplen P-023, con motivo cuando no hay posición en el archivo.
+  5. Están todos los toggles del esquema, y `toggle_prueba` aparece sin código nuevo.
+  6. C con la Rodauva guardada llega al primer turno.
+  7. D con balanza 4 es igual al archivo borrado, salvo `id` y `_nota`.
+  8. La variante se guarda con `_editado` y se reproduce igual.
+  9. Archivo borrado y tests en 10.
+  10. Un control por campo, con los límites del esquema (también los de `esquema_otro`).
+  11. Con un error, `Jugar` queda deshabilitado (el clic no juega) y el error se ve junto al campo; al corregirlo se habilita.
+  12. `+1` con el mouse → el evento `inicio` trae la semilla + 1.
+  13. "Restaurar del archivo" devuelve la edición y los controles al archivo.
+  14. R reinicia con la variante (semilla y `mana_entrada`); con la reserva bajada en una copia de los datos, vuelve al panel con el error y `Jugar` deshabilitado.
+  15. Se jugaron hasta el final dos variantes (A con semilla + 1, D con balanza 4) y el contenido de todos los archivos de `datos/` es igual antes y después; la corrida editada se guardó como `a_dia_1_editado_<semilla>_1` y la sin cambios con el nombre de siempre.
+  16. Suite completa en verde, sin advertencias nuevas.
+- **Lecturas declaradas:** ninguna de reglas. Supuestos de herramienta:
+  - El máximo de `mana_entrada` es la reserva de la balanza actual.
+  - "Por defecto" sale del `type` del esquema.
+  - Al destildar "por defecto", el número arranca en el máximo del campo, si no en el mínimo, si no en 0 (no se calcula el valor por defecto real, que es del núcleo).
+  - Tras R, la variante es el archivo nuevo más los cambios.
+- **Claves de texto nuevas sin texto:** ninguna (el panel es de desarrollo).
+- **Preguntas:** nuevas, ninguna. Cerrada P-047.
+- **Prueba manual (para el usuario):**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → D normal → en el panel, balanza 4 → Jugar. En el panel del Maestro, la vida y el daño tienen que ser los de la balanza 4.
+  3. Volver, elegir C → Rodauva en `guardada` → Jugar. La Rodauva no está en el tablero y se puede invocar.
+  4. G → `+1` varias veces → Jugar, tumbar a la Ocarra y elegir "Sellar de nuevo". Con alguna semilla tiene que salir.
+  5. En el panel de G, destildar "por defecto" de `maestro.mana_entrada` y poner 9: aparece el error y Jugar se deshabilita. "Restaurar del archivo" lo arregla.
+  6. En `registros/`, las corridas editadas llevan `_editado` en el nombre, y ningún archivo de `datos/escenarios/` cambió de fecha.
 ## T29-ajustes · sesión 1 · 14/10/2026
 - **Rama:** tarea/T29-ajustes
 - **Estado:** TERMINADA (pendiente de PR)

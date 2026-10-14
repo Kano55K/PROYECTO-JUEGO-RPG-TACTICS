@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 # Arquitectura.md B.3.1 (T42) y D-003: la camara movil de la vista de combate,
 # con el runner de escenas de GdUnit4. El fixture de 12 x 12 (A.6) con los
-# datos de prueba, y los 11 escenarios de datos/ solo para ver que abren bien.
+# datos de prueba, y los 10 escenarios de datos/ solo para ver que abren bien.
 # T20-ajustes (D-006): el mouse se manda como eventos con su position, nunca
 # con el cursor del sistema.
 const _ESCENA: String = "res://pantalla/combate/vista_combate.tscn"
@@ -309,7 +309,7 @@ func test_zoom_respeta_minimo_y_maximo() -> void:
 	assert_float(vista.camara().zoom.x).is_equal_approx(vista.zoom_minimo, _EPSILON)
 
 
-# (4) Los 11 escenarios de datos/ y el fixture de 12 x 12 abren con la camara
+# (4) Los 10 escenarios de datos/ y el fixture de 12 x 12 abren con la camara
 # dentro de los limites y el zoom en su rango.
 func test_escenarios_abren_dentro_de_los_limites() -> void:
 	var carga: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_DATOS)
@@ -319,7 +319,8 @@ func test_escenarios_abren_dentro_de_los_limites() -> void:
 	for ruta in datos.keys():
 		if (ruta as String).begins_with(_PREFIJO_ESCENARIOS):
 			rutas.append(ruta)
-	assert_int(rutas.size()).is_equal(11)
+	# A.9, T31: 10 desde que se borro d_rivales_balanza4.json.
+	assert_int(rutas.size()).is_equal(10)
 	for ruta in rutas:
 		var runner: GdUnitSceneRunner = _vista(datos[ruta], datos)
 		await runner.simulate_frames(1)

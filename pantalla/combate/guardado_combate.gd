@@ -7,12 +7,17 @@ class_name GuardadoCombate
 extends RefCounted
 
 const SUFIJO_RESULTADO: String = "_resultado.json"
+# T31: una variante editada en el panel se guarda como
+# <escenario>_editado_<semilla>_<n>, para no mezclarla con las del archivo.
+const SUFIJO_EDITADO: String = "_editado"
 
 
-# Devuelve la ruta sin extension, o "" si no se pudo escribir.
-static func guardar(combate: Combate, carpeta: String) -> String:
+# Devuelve la ruta sin extension, o "" si no se pudo escribir. editado: si el
+# escenario jugado difiere del archivo (EdicionEscenario.difiere).
+static func guardar(combate: Combate, carpeta: String, editado: bool = false) -> String:
 	DirAccess.make_dir_recursive_absolute(carpeta)
-	var prefijo: String = "%s_%d_" % [combate.contexto().escenario_id, combate.contexto().semilla]
+	var prefijo: String = "%s%s_%d_" % [combate.contexto().escenario_id, SUFIJO_EDITADO if editado else "",
+			combate.contexto().semilla]
 	var n: int = 1
 	while FileAccess.file_exists(carpeta.path_join(prefijo + str(n)) + ".json"):
 		n += 1

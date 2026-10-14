@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 # Arquitectura.md B.2 (T12, sesion 1): contexto, bucle y registro del combate
-# (A.7), con fixtures (A.6) salvo el test 9, que usa los 11 escenarios de datos/.
+# (A.7), con fixtures (A.6) salvo el test 9, que usa los 10 escenarios de datos/.
 # Sistema.md 5.2, 9.2 y 11.5. Los numeros de vida y danio son la comprobacion:
 # el codigo los lee de las fichas, la balanza y las tablas de prueba.
 const _CARPETA: String = "res://pruebas/fixtures/combate/"
@@ -372,7 +372,7 @@ func test_registro_determinista() -> void:
 		assert_str(segundo[i]).is_equal(primero[i])
 
 
-# (9) Con datos/ real: los 11 escenarios arman su combate y llegan al primer
+# (9) Con datos/ real: los 10 escenarios arman su combate y llegan al primer
 # turno del jugador sin errores. Una unidad del tablero con posicion null se
 # rechaza; una guardada con null, no (P-023).
 func test_once_escenarios_reales_llegan_al_jugador() -> void:
@@ -390,7 +390,8 @@ func test_once_escenarios_reales_llegan_al_jugador() -> void:
 		var combate: Combate = Combate.empezar(contexto)
 		assert_str(combate.error()).override_failure_message(ruta).is_empty()
 		assert_bool(combate.esperando_jugador()).override_failure_message(ruta).is_true()
-	assert_int(cantidad).is_equal(11)
+	# A.9, T31: 10 desde que se borro d_rivales_balanza4.json.
+	assert_int(cantidad).is_equal(10)
 
 	var sin_posicion: Dictionary = (datos["escenarios/a_dia_1.json"] as Dictionary).duplicate(true)
 	(sin_posicion["maestro"] as Dictionary)["posicion"] = null

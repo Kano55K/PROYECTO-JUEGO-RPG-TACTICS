@@ -112,6 +112,8 @@ var _armador: ArmadorTextos = null
 var _estados: EstadosUnidad = null
 var _avisos_carga: Array[Dictionary] = []
 var _carpeta_registros: String = _CARPETA_REGISTROS
+# T31: el escenario es una variante del panel que difiere del archivo.
+var _editado: bool = false
 # Lineas de sucesos ya armadas y cuantas lineas del registro ya se leyeron.
 var _sucesos: Array[String] = []
 var _lineas_leidas: int = 0
@@ -197,10 +199,12 @@ func _ready() -> void:
 
 # escenario y datos: los del Cargador. avisos_carga: sus avisos, para el panel
 # de depuracion. carpeta_registros: donde se guardan la grabacion y el registro
-# al terminar ("" = res://registros).
+# al terminar ("" = res://registros). editado: si el escenario es una variante
+# del panel que difiere del archivo (T31: lo guardado lleva _editado).
 func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dictionary] = [],
-		carpeta_registros: String = "") -> void:
+		carpeta_registros: String = "", editado: bool = false) -> void:
 	_avisos_carga = avisos_carga
+	_editado = editado
 	if not carpeta_registros.is_empty():
 		_carpeta_registros = carpeta_registros
 	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
@@ -944,7 +948,7 @@ func _despues_de_un_cambio() -> void:
 	_sucesos.append_array(lectura.sucesos(_lineas_leidas))
 	_lineas_leidas = _combate.registro().lineas().size()
 	if _combate.terminado() and not _combate.esperando_destino() and _guardado.is_empty():
-		_guardado = GuardadoCombate.guardar(_combate, _carpeta_registros)
+		_guardado = GuardadoCombate.guardar(_combate, _carpeta_registros, _editado)
 		if _guardado.is_empty():
 			_mostrar_mensaje("No se pudo guardar la partida en " + _carpeta_registros)
 		else:

@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://pantalla/principal.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://pantalla/parametros/panel_parametros.tscn" id="2_panel"]
 
 [node name="Principal" type="Control"]
 layout_mode = 3
@@ -36,5 +37,9 @@ offset_left = 16.0
 offset_top = 16.0
 offset_right = 256.0
 offset_bottom = 400.0
+
+[node name="PanelParametros" parent="." instance=ExtResource("2_panel")]
+visible = false
+layout_mode = 1
 
 [node name="ContenedorVista" type="Node" parent="."]

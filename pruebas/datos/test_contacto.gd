@@ -32,8 +32,11 @@ func _datos() -> Dictionary:
 	return carga["datos"]
 
 
+# T31 (A.9): d_rivales_balanza4 es la variante de D armada como en el panel.
 func _contexto(datos: Dictionary, escenario_id: String) -> ContextoCombate:
-	var contexto: ContextoCombate = ContextoCombate.armar(datos["escenarios/%s.json" % escenario_id], datos)
+	var escenario: Dictionary = VariantesEscenario.escenario(datos, escenario_id)
+	assert_dict(escenario).override_failure_message(escenario_id).is_not_empty()
+	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
 	assert_bool(contexto.valido).override_failure_message(escenario_id).is_true()
 	return contexto
 
@@ -220,7 +223,7 @@ func test_d_rivales_vecinas_y_ataque_en_la_ronda_2() -> void:
 	var datos: Dictionary = _datos()
 	for escenario_id in _D:
 		var combate: Combate = _jugar(datos, escenario_id, 2)
-		var inicio: Dictionary = datos["escenarios/%s.json" % escenario_id]
+		var inicio: Dictionary = VariantesEscenario.escenario(datos, escenario_id)
 		var casillas: Dictionary = {}
 		for criatura in inicio["tribu"]:
 			casillas[criatura["id"]] = Vector2i(criatura["posicion"][0], criatura["posicion"][1])

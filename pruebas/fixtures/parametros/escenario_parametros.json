@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "escenario_parametros",
+  "_nota": "Arquitectura.md B.4 (T31, sesion 1). Un campo editable de cada clase: Maestro con valores explicitos, una suelta con posicion, una guardada sin posicion (no se puede soltar) y una enemiga",
+  "tipo": "test",
+  "semilla": 5,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 6] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "guardada", "lealtad": 8, "hambre": 2, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [2, 1] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

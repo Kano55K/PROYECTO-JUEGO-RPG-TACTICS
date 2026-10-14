@@ -1,0 +1,256 @@
+{
+  "title": "Contexto de combate (escenario), fixture de T31",
+  "description": "T31 (tests 2 y 5): copia de datos/_esquemas/escenario.schema.json con la balanza hasta 3 y un toggle de mas (toggle_prueba).",
+  "type": "object",
+  "required": [
+    "id",
+    "tipo",
+    "semilla",
+    "tablero",
+    "maestro",
+    "tribu",
+    "enemigas",
+    "pergaminos_en_blanco",
+    "golpe_inicial"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "$ref": "comunes.schema.json#/$defs/nota"
+    },
+    "id": {
+      "$ref": "comunes.schema.json#/$defs/id"
+    },
+    "tipo": {
+      "enum": [
+        "test",
+        "nodo",
+        "emboscada",
+        "nocturno"
+      ]
+    },
+    "semilla": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tablero": {
+      "type": "object",
+      "required": [
+        "ancho",
+        "alto"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ancho": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "alto": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        }
+      }
+    },
+    "maestro": {
+      "type": "object",
+      "required": [
+        "balanza",
+        "poder",
+        "regeneracion",
+        "posicion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "balanza": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "poder": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "regeneracion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "vida": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "mana_entrada": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "hambre": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 10
+        },
+        "enfermedades": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "posicion": {
+          "$ref": "comunes.schema.json#/$defs/posicion"
+        },
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        }
+      }
+    },
+    "tribu": {
+      "description": "El orden de la lista es el orden de la tribu (desempate de iniciativa y de rescate)",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/criatura_tribu"
+      }
+    },
+    "enemigas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/enemiga"
+      }
+    },
+    "pergaminos_en_blanco": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "golpe_inicial": {
+      "description": "A.7 y Sistema.md 9.2: id de la atacante que golpea antes de la ronda 1, o null si no hay golpe",
+      "$ref": "comunes.schema.json#/$defs/id_o_null"
+    },
+    "toggles": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "afines_contra_cobardia": {
+          "type": "boolean"
+        },
+        "toggle_prueba": {
+          "type": "boolean"
+        },
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "criatura_tribu": {
+      "type": "object",
+      "required": [
+        "id",
+        "especie",
+        "estado",
+        "lealtad",
+        "hambre"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        },
+        "id": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "especie": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "estado": {
+          "enum": [
+            "suelta",
+            "guardada"
+          ]
+        },
+        "lealtad": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "hambre": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "enfermedades": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "vida": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "posicion": {
+          "$ref": "comunes.schema.json#/$defs/posicion"
+        }
+      }
+    },
+    "enemiga": {
+      "type": "object",
+      "required": [
+        "id",
+        "especie",
+        "comportamiento"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": {
+          "$ref": "comunes.schema.json#/$defs/nota"
+        },
+        "id": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "especie": {
+          "$ref": "comunes.schema.json#/$defs/id"
+        },
+        "comportamiento": {
+          "enum": [
+            "salvaje",
+            "atacante_nocturna"
+          ],
+          "description": "atacante_nocturna: lógica de salvaje, no huye y queda caída en 0 (Sistema.md 9.2)"
+        },
+        "hambre": {
+          "description": "Solo para la atacante nocturna (Sistema.md 9.1: famélica). No cambia el combate: no suma hambre (7.2) y se trata como obediencia ≤ 3 (10.7); queda como contexto de su destino (9.3)",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "vida": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "enfermedades": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "posicion": {
+          "$ref": "comunes.schema.json#/$defs/posicion"
+        }
+      }
+    }
+  }
+}
