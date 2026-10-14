@@ -1,0 +1,72 @@
+{
+  "$schema": "../_esquemas/alarmas.schema.json",
+  "_nota": "Sistema.md 11.9, Cómo se mide y Umbrales de alarma (D-015). Proporciones en % entero (cuenta × 100 contra umbral × n) y promedios en décimas. Las semillas de playtest son arbitrarias (T33) y distintas de las de escenarios/; las comparten todas las variantes (11.9: C y H, las dos D, las dos E)",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1101, 2203, 3307, 4409, 5501, 6607, 7703, 8809, 9901, 10007],
+  "alarmas": [
+    {
+      "_nota": "Sistema.md 11.9, A. Día 1: más del 80% de los primeros intentos de sellado en el mismo tramo de probabilidad (métrica 7). Tramo = el % mostrado (P-048)",
+      "id": "a_mismo_tramo",
+      "escenarios": ["a_dia_1"],
+      "calculo": "primer_sellado_mismo_tramo",
+      "parametros": { "umbral_pct": 80 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, B. Muro: menos del 30% de las partidas terminan en huida o en victoria (desenlace)",
+      "id": "b_huir_no_se_lee",
+      "escenarios": ["b_muro"],
+      "calculo": "desenlace_proporcion",
+      "parametros": { "desenlaces": ["huida", "victoria"], "comparacion": "menor_que", "umbral_pct": 30 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, C. Tasajero: más de 5 rondas de pelea en más del 20% de las partidas (métrica 1)",
+      "id": "c_rondas_largas",
+      "escenarios": ["c_tasajero"],
+      "calculo": "rondas_pelea_mayor_que",
+      "parametros": { "rondas": 5, "umbral_pct": 20 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, C. Tasajero: promedio de rondas de pelea fuera de 2 a 3,5 (métrica 1), en décimas",
+      "id": "c_rondas_promedio",
+      "escenarios": ["c_tasajero"],
+      "calculo": "rondas_pelea_promedio_fuera",
+      "parametros": { "desde_decimas": 20, "hasta_decimas": 35 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, C. Tasajero: la Rodauva muere en más del 50% de las partidas en que empezó suelta (métrica 11)",
+      "id": "c_rodauva_muere",
+      "escenarios": ["c_tasajero"],
+      "calculo": "muere_si_empezo_suelta",
+      "parametros": { "especie": "rodauva", "umbral_pct": 50 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, D. Normal: menos del 20% de los combates con al menos 1 incidente (métrica 4; de la tribu, P-049). Vale también para la variante con la balanza 4",
+      "id": "d_rivales_invisibles",
+      "escenarios": ["d_rivales_normal"],
+      "calculo": "combates_con_incidente",
+      "parametros": { "bando": "tribu", "umbral_pct": 20 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, D. Hambriento: derrota en más del 50% de las partidas (desenlace)",
+      "id": "d_castigo_derrota",
+      "escenarios": ["d_rivales_hambriento"],
+      "calculo": "desenlace_proporcion",
+      "parametros": { "desenlaces": ["derrota_por_caida"], "comparacion": "mayor_que", "umbral_pct": 50 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, D. Hambriento: 3 o más golpes por incidente por combate, en promedio (métrica 4; de la tribu, P-049), en décimas",
+      "id": "d_castigo_golpes",
+      "escenarios": ["d_rivales_hambriento"],
+      "calculo": "golpes_incidente_promedio",
+      "parametros": { "bando": "tribu", "umbral_decimas": 30 }
+    },
+    {
+      "_nota": "Sistema.md 11.9, H. Soplo: victorias en H por debajo del 20% (desenlace)",
+      "id": "h_build_trampa",
+      "escenarios": ["h_soplo"],
+      "calculo": "desenlace_proporcion",
+      "parametros": { "desenlaces": ["victoria"], "comparacion": "menor_que", "umbral_pct": 20 }
+    }
+  ]
+}

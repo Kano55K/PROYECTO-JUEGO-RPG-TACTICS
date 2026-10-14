@@ -1,0 +1,54 @@
+{
+  "title": "Ficha de playtest",
+  "description": "Arquitectura.md D-015 (T33). Se escribe junto al resultado de cada combate terminado (<nombre>_playtest.json): de qué grupo es la partida y quién la jugó. No es un archivo de datos/: lo escribe la pantalla y lo lee AlarmasPlaytest. El resultado del núcleo no cambia.",
+  "type": "object",
+  "required": [
+    "escenario",
+    "variante",
+    "semilla",
+    "indice_semilla",
+    "jugador"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "$ref": "comunes.schema.json#/$defs/nota"
+    },
+    "escenario": {
+      "$ref": "comunes.schema.json#/$defs/id"
+    },
+    "variante": {
+      "description": "Los cambios del panel (EdicionEscenario.cambios: ruta -> valor) sin la semilla. Vacía si no hay cambios",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "integer",
+          "boolean",
+          "string",
+          "null"
+        ]
+      }
+    },
+    "semilla": {
+      "type": "integer"
+    },
+    "indice_semilla": {
+      "description": "Posición (desde 1) de la semilla en playtest/alarmas.json semillas, o null si no es una de ellas",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "jugador": {
+      "description": "Lo que se escribió en el selector, o null si quedó vacío",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

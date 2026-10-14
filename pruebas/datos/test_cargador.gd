@@ -254,3 +254,55 @@ func test_rasgos_v13() -> void:
 	for nombre in ["con_modos_valida", "erizarse_valida"]:
 		var errores: Array[Dictionary] = _cargar_ficha_rasgo(nombre)["errores"]
 		assert_array(errores).override_failure_message(str(errores)).is_empty()
+
+
+# --- Alarmas de 11.9 (T33, D-015) --------------------------------------------
+
+func _errores_alarmas(carpeta: String) -> Array[Dictionary]:
+	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + carpeta)
+	var errores: Array[Dictionary] = resultado["errores"]
+	if not errores.is_empty():
+		assert_bool(resultado["datos"] == null).is_true()
+	return errores
+
+
+func test_t33_alarmas_validas_cargan() -> void:
+	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + "alarmas_valida")
+	var errores: Array[Dictionary] = resultado["errores"]
+	assert_array(errores).override_failure_message(str(errores)).is_empty()
+	assert_bool((resultado["datos"] as Dictionary).has("playtest/alarmas.json")).is_true()
+
+
+# (2) Un calculo sin uno de sus parametros.
+func test_t33_alarma_sin_su_parametro() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_parametro_faltante")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.comparacion")
+
+
+# (2) Un parametro de otro calculo.
+func test_t33_alarma_con_parametro_ajeno() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_parametro_ajeno")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.rondas")
+
+
+# (2) Un escenario que no esta en escenarios/.
+func test_t33_alarma_con_escenario_inexistente() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_escenario_inexistente")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].escenarios[1]")
+	assert_str(errores[0]["recibido"] as String).is_equal("z_no_existe")
+
+
+func test_t33_alarmas_repetidas_y_especie_inexistente() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_repetidas")
+	var campos: Array[String] = []
+	for error in errores:
+		assert_str(error["archivo"] as String).is_equal("playtest/alarmas.json")
+		campos.append(error["campo"] as String)
+	campos.sort()
+	assert_array(campos).is_equal(["alarmas[0].parametros.especie", "alarmas[1].id", "semillas[2]"])

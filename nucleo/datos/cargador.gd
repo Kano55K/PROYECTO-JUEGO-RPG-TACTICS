@@ -149,6 +149,9 @@ func _esquema_para_ruta(ruta_relativa: String) -> String:
 			return partes[partes.size() - 1].get_basename()
 		"textos":
 			return "textos"
+		"playtest":
+			# D-015 (T33): playtest/alarmas.json -> alarmas.
+			return partes[partes.size() - 1].get_basename()
 		_:
 			return ""
 
@@ -237,6 +240,50 @@ func _chequear_cruzados(datos_por_archivo: Dictionary, errores: Array[Dictionary
 	_chequear_posiciones_en_tablero(datos_por_archivo, errores)
 	_chequear_rasgos(datos_por_archivo, errores)
 	_chequear_mana_entrada(datos_por_archivo, errores)
+	_chequear_alarmas(datos_por_archivo, especies_validas, errores)
+
+
+# D-015 (T33), como los rasgos (A.2.2): cada calculo trae sus parametros y
+# ninguno ajeno (AlarmasPlaytest.PARAMETROS); los escenarios y la especie
+# nombrados existen; las semillas y los ids de alarma no se repiten. Sin el
+# archivo no se revisa nada (fixtures parciales).
+func _chequear_alarmas(datos_por_archivo: Dictionary, especies_validas: Dictionary, errores: Array[Dictionary]) -> void:
+	var ruta: String = AlarmasPlaytest.ARCHIVO
+	if not datos_por_archivo.has(ruta):
+		return
+	var config: Dictionary = datos_por_archivo[ruta]
+
+	var semillas: Array = config["semillas"]
+	for i in range(semillas.size()):
+		if semillas.find(semillas[i]) < i:
+			errores.append(_error(ruta, "semillas[%d]" % [i], "una semilla sin repetir", semillas[i]))
+
+	var ids: Dictionary = {}
+	var alarmas: Array = config["alarmas"]
+	for i in range(alarmas.size()):
+		var alarma: Dictionary = alarmas[i]
+		if ids.has(alarma["id"]):
+			errores.append(_error(ruta, "alarmas[%d].id" % [i], "un id de alarma sin repetir", alarma["id"]))
+		ids[alarma["id"]] = true
+
+		var escenarios: Array = alarma["escenarios"]
+		for j in range(escenarios.size()):
+			if not datos_por_archivo.has("escenarios/%s.json" % [escenarios[j]]):
+				errores.append(_error(ruta, "alarmas[%d].escenarios[%d]" % [i, j], "un escenario existente en escenarios/",
+						escenarios[j]))
+
+		var calculo: String = alarma["calculo"]
+		var propios: Array = AlarmasPlaytest.PARAMETROS[calculo]
+		var parametros: Dictionary = alarma["parametros"]
+		for parametro in propios:
+			if not parametros.has(parametro):
+				errores.append(_error(ruta, "alarmas[%d].parametros.%s" % [i, parametro], "presente (parametro de %s)" % calculo, null))
+		for clave in parametros.keys():
+			if clave != "_nota" and not propios.has(clave):
+				errores.append(_error(ruta, "alarmas[%d].parametros.%s" % [i, clave], "solo parametros de %s" % calculo, clave))
+		if parametros.has("especie") and not especies_validas.has(parametros["especie"]):
+			errores.append(_error(ruta, "alarmas[%d].parametros.especie" % [i], "una especie existente en especies/",
+					parametros["especie"]))
 
 
 # Arquitectura.md A.2.2 (Rasgos y modos). Cada efecto trae sus parametros y ninguno ajeno; la ficha lleva velocidad si

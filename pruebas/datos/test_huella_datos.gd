@@ -61,3 +61,21 @@ func test_huella_cambia_con_numeros_y_no_con_notas_ni_textos() -> void:
 			copia[clave] = original[clave]
 		invertido[ruta] = copia
 	assert_str(HuellaDatos.calcular(invertido)).is_equal(huella)
+
+
+# T33 (3), A.7 y D-015: playtest/ queda fuera de la huella. Ajustar un umbral
+# no invalida grabaciones.
+func test_t33_cambiar_un_umbral_no_cambia_la_huella() -> void:
+	var datos: Dictionary = _datos()
+	var huella: String = HuellaDatos.calcular(datos)
+	var lectura: Dictionary = LectorFixture.leer("res://pruebas/fixtures/playtest/alarmas.json", "alarmas")
+	var errores: Array[Dictionary] = lectura["errores"]
+	assert_array(errores).override_failure_message(str(errores)).is_empty()
+
+	var con_alarmas: Dictionary = datos.duplicate(true)
+	con_alarmas["playtest/alarmas.json"] = lectura["datos"]
+	assert_str(HuellaDatos.calcular(con_alarmas)).is_equal(huella)
+	var alarma: Dictionary = ((con_alarmas["playtest/alarmas.json"] as Dictionary)["alarmas"] as Array)[0]
+	(alarma["parametros"] as Dictionary)["umbral_pct"] = 70
+	(con_alarmas["playtest/alarmas.json"] as Dictionary)["partidas_por_grupo"] = 12
+	assert_str(HuellaDatos.calcular(con_alarmas)).is_equal(huella)

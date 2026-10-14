@@ -693,3 +693,29 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Mientras tanto:** no se cambió ninguna semilla ni la política. Los tests de T30-fix buscan en el núcleo una semilla que sale y otra que falla.
 - **Respuesta:** (del prompt de T31, copiada con autorización del usuario) la semilla fija se mantiene; elegir otra semilla es el panel de parámetros de T31.
 - **Cerrada en:** T31
+
+## P-048 — Qué es "el mismo tramo de probabilidad" en la alarma de A
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T33
+- **Fecha:** 14/10/2026
+- **Fuente:** `Sistema.md` 11.9, Umbrales de alarma, fila A ("Más del 80% de los primeros intentos de sellado en el mismo tramo de probabilidad (50% o 80%)", métrica 7)
+- **Duda:** ¿"tramo" es el % de sellado mostrado en el primer intento (el que guarda la métrica 7)?
+- **Caso que la dispara:** la métrica 7 guarda solo el % mostrado de cada intento (`sellados[].porcentaje`), no el tramo de vida de 4.1. En A la Ocarra es de rango 1, así que cada tramo de 4.1 da un % distinto (80, 50, 20, 5) y contar por % es lo mismo que contar por tramo. Con 10 partidas, si 9 primeros intentos fueron con 50 % y 1 con 80 %, salta (90 > 80).
+- **Opciones:** A) tramo = el % mostrado del primer intento; se cuenta el valor más frecuente, sea cual sea. B) solo cuentan los primeros intentos en 50 % o en 80 % (los de 20 % o 5 % no entran en la cuenta). — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A (lectura declarada): `AlarmasPlaytest`, cálculo `primer_sellado_mismo_tramo`. Si la respuesta es B, se suma un parámetro con los tramos que cuentan.
+- **Respuesta:** _(la completa el staff)_
+
+## P-049 — De qué bando se cuentan los incidentes de las alarmas de D
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T33
+- **Fecha:** 14/10/2026
+- **Fuente:** `Sistema.md` 11.9, Umbrales de alarma, filas D. Normal ("Menos del 20% de los combates con al menos 1 incidente") y D. Hambriento ("3 o más golpes por incidente por combate, en promedio"), métrica 4 (por bando desde T23)
+- **Duda:** ¿Las dos alarmas de D cuentan solo los incidentes de la tribu, o también los de las enemigas?
+- **Caso que la dispara:** desde T20 las salvajes también tiran incidente, y la métrica 4 los separa por bando. Lo que mide D son las rivales aliadas de la tribu (Ocarra y Zancajunco). En D las salvajes (Surcón y Rodauva) se llevan bien, así que hoy las enemigas nunca suman incidentes y las dos lecturas dan el mismo número; con otra composición (por ejemplo, el panel) podrían diferir.
+- **Opciones:** A) solo la tribu. B) los dos bandos sumados. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A (lectura declarada): el bando es un parámetro de la alarma (`bando: "tribu"` en `datos/playtest/alarmas.json`), así que la respuesta B sería sumar una opción al parámetro.
+- **Respuesta:** _(la completa el staff)_
