@@ -71,6 +71,31 @@ func esquema_resuelto(ruta_carpeta: String, nombre_esquema: String) -> Dictionar
 	return {"errores": errores, "esquema": esquema}
 
 
+# T31 (Arquitectura.md B.4): valida un escenario suelto (una variante del panel)
+# contra los datos ya cargados, con el mismo Validador y los mismos chequeos
+# cruzados que cargar_carpeta. esquema: el de escenario, de esquema_resuelto.
+# Devuelve {"errores": Array[Dictionary], "datos": Variant}, con datos null si
+# hay al menos un error. El archivo de cada error es escenarios/<id>.json.
+func validar_escenario(escenario: Dictionary, esquema: Dictionary, datos: Dictionary) -> Dictionary:
+	var ruta: String = "escenarios/%s.json" % [str(escenario.get("id", ""))]
+	var resultado: Dictionary = Validador.new().validar(escenario, esquema, ruta)
+	var errores: Array[Dictionary] = resultado["errores"]
+	if not errores.is_empty():
+		return {"errores": errores, "datos": null}
+
+	# Solo lo que los chequeos de un escenario consultan: sus especies y la
+	# balanza. El resto de los datos ya paso los suyos al cargarse.
+	var datos_por_archivo: Dictionary = {ruta: resultado["datos"]}
+	for clave in datos.keys():
+		var clave_str: String = clave as String
+		if clave_str.begins_with("especies/") or clave_str == "tablas/balanza.json":
+			datos_por_archivo[clave_str] = datos[clave]
+	_chequear_cruzados(datos_por_archivo, errores)
+	if not errores.is_empty():
+		return {"errores": errores, "datos": null}
+	return {"errores": errores, "datos": resultado["datos"]}
+
+
 # --- Lectura de archivos ---------------------------------------------------
 
 func _listar_archivos_json(carpeta: String, relativo: String = "") -> Array[String]:

@@ -24,7 +24,7 @@ func test_datos_rotos_muestran_error() -> void:
 	assert_object((runner.scene() as Principal).vista()).is_null()
 
 
-# (2) Con datos/ real arranca sin errores y lista los 11 escenarios.
+# (2) Con datos/ real arranca sin errores y lista los 10 escenarios.
 func test_datos_reales_listan_los_escenarios() -> void:
 	var runner: GdUnitSceneRunner = _principal("res://datos")
 	await runner.simulate_frames(1)
@@ -33,7 +33,8 @@ func test_datos_reales_listan_los_escenarios() -> void:
 	assert_bool(runner.find_child("PantallaError").visible).is_false()
 	assert_bool(runner.find_child("SelectorEscenario").visible).is_true()
 	var ids: Array[String] = principal.ids_escenarios()
-	assert_int(ids.size()).is_equal(11)
+	# A.9, T31: 10 desde que se borro d_rivales_balanza4.json.
+	assert_int(ids.size()).is_equal(10)
 	var textos_botones: Array[String] = []
 	for boton in runner.find_child("SelectorEscenario").get_children():
 		textos_botones.append((boton as Button).text)

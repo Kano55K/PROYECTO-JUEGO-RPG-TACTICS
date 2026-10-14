@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 
-# Arquitectura.md B.3 (T23) y D-011, con datos/ real (A.6): los 11 escenarios
+# Arquitectura.md B.3 (T23) y D-011, con datos/ real (A.6): los 10 escenarios
+# y la variante de D con balanza 4 (T31, VariantesEscenario)
 # jugados con el jugador esperando (JugadorEsperando, como test_contacto y
 # test_robustez_ia) hasta el fin o la ronda 12 dan metricas validas contra el
 # esquema `resultado`, sin ningun float. En A, B, C, D y H la ronda del primer
@@ -30,7 +31,7 @@ func before() -> void:
 
 # Juega el escenario y devuelve sus metricas (las del resultado si termino).
 func _metricas(escenario_id: String) -> Dictionary:
-	var escenario: Dictionary = _datos["escenarios/%s.json" % escenario_id]
+	var escenario: Dictionary = VariantesEscenario.escenario(_datos, escenario_id)
 	var contexto: ContextoCombate = ContextoCombate.armar(escenario, _datos)
 	assert_bool(contexto.valido).override_failure_message(escenario_id).is_true()
 	var combate: Combate = Combate.empezar(contexto)
@@ -65,13 +66,16 @@ func _tiene_float(valor: Variant) -> bool:
 	return false
 
 
-func test_los_11_escenarios_dan_metricas_validas() -> void:
+# Reescrito por A.9, T31: d_rivales_balanza4.json se borro; la variante se
+# arma con EdicionEscenario y sigue en la lista.
+func test_los_10_escenarios_y_la_variante_dan_metricas_validas() -> void:
 	var escenarios: Array[String] = []
 	for clave: String in _datos.keys():
 		if clave.begins_with("escenarios/"):
 			escenarios.append(clave.trim_prefix("escenarios/").trim_suffix(".json"))
 	escenarios.sort()
-	assert_int(escenarios.size()).is_equal(11)
+	assert_int(escenarios.size()).is_equal(10)
+	escenarios.append_array(VariantesEscenario.nombres())
 	for escenario_id in escenarios:
 		var metricas: Dictionary = _metricas(escenario_id)
 		if _PRIMER_ATAQUE_EN_2.has(escenario_id):
