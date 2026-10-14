@@ -6,14 +6,26 @@ const _VIEWPORT: Vector2 = Vector2(400, 200)
 
 
 func _limites() -> Rect2:
-	# Esquinas (centros de casilla) en (0,0) y (600,300), margen 50.
-	return EncuadreCamara.limites(Vector2(0, 0), Vector2(600, 300), 50.0)
+	# Esquinas (centros de casilla) en (0,0) y (600,300), margen 50. D-013 (T32):
+	# limites recibe todas las esquinas; con estas dos comprueba lo mismo.
+	return EncuadreCamara.limites(PackedVector2Array([Vector2(0, 0), Vector2(600, 300)]), 50.0)
 
 
 func test_limites_son_las_esquinas_con_margen() -> void:
 	assert_object(_limites()).is_equal(Rect2(-50, -50, 700, 400))
-	# Las esquinas en cualquier orden dan lo mismo.
-	assert_object(EncuadreCamara.limites(Vector2(600, 300), Vector2(0, 0), 50.0)).is_equal(Rect2(-50, -50, 700, 400))
+	# Las esquinas en cualquier orden dan lo mismo (D-013: firma con arreglo).
+	assert_object(EncuadreCamara.limites(PackedVector2Array([Vector2(600, 300), Vector2(0, 0)]), 50.0)) \
+			.is_equal(Rect2(-50, -50, 700, 400))
+
+
+# T32 (D-013 (4)): en rombo, las cuatro esquinas dan el rectangulo que las
+# contiene; dos esquinas opuestas no alcanzan.
+func test_limites_de_un_rombo() -> void:
+	var rombo: PackedVector2Array = PackedVector2Array([Vector2(0, 0), Vector2(300, 150), Vector2(-300, 150),
+			Vector2(0, 300)])
+	assert_object(EncuadreCamara.limites(rombo, 50.0)).is_equal(Rect2(-350, -50, 700, 400))
+	var dos: Rect2 = EncuadreCamara.limites(PackedVector2Array([rombo[0], rombo[3]]), 50.0)
+	assert_bool(dos.has_point(rombo[1])).is_false()
 
 
 func test_acotar_zoom() -> void:

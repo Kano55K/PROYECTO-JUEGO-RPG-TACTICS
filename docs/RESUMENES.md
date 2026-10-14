@@ -3032,3 +3032,94 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`. En verde aunque se mueva la ventana de Godot durante la corrida.
   2. F5 → F: la botonera del turno del Maestro se ve igual que antes.
 - **Para la próxima sesión:** nada: tarea terminada.
+## T32 · sesión 1 · 14/10/2026
+- **Rama:** tarea/T32-isometrica
+- **Estado:** EN CURSO (sigue en la sesión 2)
+- **Hecho:**
+  - **Vista isométrica por defecto (D-013).** `VistasTablero` (`pantalla/combate/vistas_tablero.gd`) es el único lugar que elige el `TileSet`.
+    - Isométrica: `casillas_isometrica.tres`, rombo `DIAMOND_DOWN` de 128 × 64, con el borde de cada casilla visible.
+    - Cenital: el `casillas_cenital.tres` de T13, sin cambios.
+    - Los dos tienen las mismas fuentes y coordenadas de atlas, así que las constantes de marcas de `VistaCombate` no cambiaron.
+  - **Elegir la vista al arrancar.** `-- --vista=cenital` (`ArgumentosPantalla.vista`). Con un valor desconocido, `Principal` muestra la pantalla de error con los valores válidos y no carga los datos, ni al arrancar ni con R; `VistaCombate.empezar` muestra el `Mensaje` y no arma el combate.
+  - **Capas.** `VistaCombate._aplicar_vista()` pone el `TileSet` en `Tablero` y en cada hija `TileMapLayer`. Ninguna capa lleva `tile_set` en el `.tscn`, así que la capa `Ortogonales` de la sesión 2 lo va a tomar sola.
+  - **Profundidad.** Las capas de marcas (`Afines`, `Rivales`, `RivalesEnemigas`, `DestinosHechizo` y `AlcanzanHuida`, que antes iban encima) pasan a estar antes que `Unidades`: quedan debajo de las fichas. `Unidades` tiene `y_sort_enabled`, así que la ficha de adelante tapa a la de atrás.
+  - **Cámara.** `EncuadreCamara.limites(esquinas, margen)` toma un arreglo, y `_encuadrar` le pasa las 4 esquinas por `map_to_local`. El resto de T42 no cambió.
+  - **Conversión del mouse:** la de D-006 y D-012, sin cambios.
+  - **Búsqueda de píxeles a mano** en `pantalla/` y `pruebas/pantalla/`: no hay ninguna posición de casilla escrita a mano. Los números que aparecen son de la cámara, de la ventana, de `MousePrueba` o de la franja de botones.
+- **Archivos:**
+  - Creados: `pantalla/combate/vistas_tablero.gd`, `casillas_isometrica.tres`, `casilla_iso_placeholder.svg`, `marcas_iso_placeholder.svg` (con sus `.import`) y `pruebas/pantalla/test_vista_isometrica.gd`.
+  - Modificados: `pantalla/argumentos.gd`, `pantalla/principal.gd`, `pantalla/combate/vista_combate.gd`, `vista_combate.tscn`, `encuadre_camara.gd`, `pruebas/pantalla/test_argumentos.gd`, `test_principal.gd`, `test_encuadre_camara.gd`, `CLAUDE.md` (Estado actual) y `docs/RESUMENES.md`.
+- **Tests:**
+  - 13 nuevos, en total 901, y todos pasan (suite completa 901/901).
+  - Nuevos:
+    - `test_vista_isometrica.gd`: (1) ida y vuelta y fichas, en las dos vistas; (2) clic y hover con zoom y la cámara movida, incluido un punto del rectángulo de la casilla que cae en la vecina; (3) `TileSet` de las capas; (4) límites de las 4 esquinas; (5) profundidad; (6) los 10 escenarios de `datos/` en isométrica; vista desconocida en la vista.
+    - `test_argumentos.gd`: 3.
+    - `test_principal.gd`: `test_vista_cenital_abre_la_de_t13` y `test_vista_desconocida_no_arranca`.
+    - `test_encuadre_camara.gd`: `test_limites_de_un_rombo`.
+  - Reescritos (D-013, sin cambiar lo que comprueban): `test_encuadre_camara.gd::_limites` y `test_limites_son_las_esquinas_con_margen`, que pasan las mismas dos esquinas con la firma de arreglo.
+  - Los demás tests de pantalla corren ahora en isométrica (es la vista por defecto) y pasan sin cambios.
+- **Criterio de terminado (sesión 1):** cumplido punto por punto, del 1 al 7.
+  - Consola: la única advertencia nueva es la del test de vista desconocida ("Vista desconocida: rara…"), y es a propósito.
+  - Los `ReglasCombate: falta la regla …` y el `Remote Debugger` ya salían antes de esta sesión.
+- **Supuestos:** el tamaño de casilla isométrica es 128 × 64 (presentación, en el `.tres`); `--vista=` vacío se ignora, igual que `--datos=`.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna (el error de vista es de desarrollo).
+- **Preguntas:** nuevas ninguna; cerradas ninguna.
+- **Para la próxima sesión:**
+  - Capa `Ortogonales` (criterio 8): 4 vecinas de `Tablero`, solo en el turno del jugador.
+  - Revisión de cada marca en isométrica (criterio 9).
+  - Criterios 10 y 11.
+  - Prueba manual completa: es la descripción del PR.
+## T32 · sesión 2 · 14/10/2026
+- **Rama:** tarea/T32-isometrica
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho (tarea entera):**
+  - **Sesión 1, vista isométrica por defecto (D-013).**
+    - `VistasTablero` es el único lugar que elige el `TileSet`: rombo `DIAMOND_DOWN` de 128 × 64 por defecto, y el cenital de T13 como vista de desarrollo con `-- --vista=cenital`.
+    - Con un valor desconocido, el juego muestra el error y no arranca.
+    - Todas las capas toman el `TileSet` del tablero; ninguna lo lleva en el `.tscn`.
+    - Las fichas se ordenan por `y` (`Unidades.y_sort_enabled`), y las marcas del suelo quedan debajo de las fichas.
+    - Los límites de la cámara salen de las 4 esquinas por `map_to_local`.
+    - La conversión del mouse (D-006, D-012) no cambió, y no había píxeles escritos a mano.
+  - **Sesión 2, lectura de la adyacencia (A.3, riesgo).**
+    - Capa `Tablero/Ortogonales`, marca `10:0`: doble contorno cian, en los dos `TileSet`.
+    - En el turno del jugador, con el mouse sobre una unidad de la tribu o sobre una casilla de `casillas_para_mover`, marca `Tablero.vecinas` de esa casilla (T06). No hay ninguna cuenta propia de la pantalla.
+    - Fuera del turno del jugador, durante la secuencia de la IA y fuera del tablero, no marca nada.
+    - La forma es distinta de la de afines y rivales (elipses punteadas) y de la de rivales enemigas (rombo violeta).
+  - **Revisión de marcas en isométrica.** Las revisé una por una: surcos con el color del dueño, oculta y bono, modo del Tasajero en la ficha y en la cola, zona de Caza, afines, rivales, rivales enemigas, huida de las salvajes y del Maestro, sellar, guardar a una caída e invocar.
+    - Cada una tiene su test: la capa marca las casillas del núcleo y está alineada con el tablero (mismo `TileSet`, sin transformación propia, mismo `map_to_local`), y la ficha queda en `map_to_local` de su casilla.
+    - Revisión visual: capturas temporales de los 10 escenarios en isométrica, al abrir, con el mouse sobre la propia y sobre una casilla para mover. El script de captura no se commiteó.
+    - No hubo que corregir nada.
+- **Archivos (tarea entera):**
+  - Creados: `pantalla/combate/vistas_tablero.gd`, `casillas_isometrica.tres`, `casilla_iso_placeholder.svg`, `marcas_iso_placeholder.svg` (con sus `.import`), y en `pruebas/pantalla/` `test_vista_isometrica.gd`, `test_vista_ortogonales.gd` y `test_vista_marcas_isometrica.gd`.
+  - Modificados: `pantalla/argumentos.gd`, `pantalla/principal.gd`, `pantalla/combate/vista_combate.gd`, `vista_combate.tscn`, `encuadre_camara.gd`, `casillas_cenital.tres` (marca `10:0`), `marcas_placeholder.svg` (marca ortogonal cenital), `pruebas/pantalla/test_argumentos.gd`, `test_principal.gd`, `test_encuadre_camara.gd`, `CLAUDE.md` (Estado actual) y `docs/RESUMENES.md`.
+- **Tests:**
+  - 27 nuevos en la tarea (13 en la sesión 1, 14 en la sesión 2), en total 915, y todos pasan (suite completa 915/915).
+  - Sesión 2: `test_vista_ortogonales.gd` (3: centro, borde y esquina; casilla para mover sí, enemiga, vacía y fuera del tablero no; secuencia de la IA) y `test_vista_marcas_isometrica.gd` (11, uno por marca o grupo).
+  - Reescritos (sesión 1, D-013, sin cambiar lo que comprueban): `test_encuadre_camara.gd::_limites` y `test_limites_son_las_esquinas_con_margen`, por la firma de `limites` con arreglo.
+  - Los demás tests de pantalla corren en isométrica sin cambios.
+- **Criterio de terminado:** cumplido punto por punto, del 1 al 11.
+  - (8) `test_vista_ortogonales.gd`.
+  - (9) `test_vista_marcas_isometrica.gd`.
+  - (10) los tests anteriores pasan; los reescritos, arriba.
+  - (11) 915/915. En la consola, la única advertencia nueva es la del test de vista desconocida (a propósito). Los `ReglasCombate: falta la regla …` y el `Remote Debugger` ya salían antes.
+- **Supuestos:**
+  - Casilla isométrica de 128 × 64 (presentación).
+  - `--vista=` vacío se ignora, igual que `--datos=`.
+  - "Unidad propia" es cualquier unidad de la tribu en el tablero (el Maestro, una criatura suelta o una caída), no solo la del turno.
+  - La marca ortogonal sale en cualquier modo del turno (cavar, invocar…).
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nuevas ninguna; cerradas ninguna.
+- **Para el Director Creativo (de la revisión visual, no se tocaron):**
+  - Con las fichas ordenadas por profundidad, el texto de marcas debajo de una ficha puede quedar tapado por la ficha de adelante.
+  - El panel de la unidad (derecha) pisa los sucesos de abajo a la derecha, igual que en cenital.
+  - La marca de las 4 ortogonales es un placeholder (Arte / UI).
+- **Cómo probarlo:**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → jugar los 10 escenarios en isométrica, con el mouse y moviendo la cámara (flechas, rueda, botón del medio).
+  3. En cada uno: pasar el mouse sobre una unidad propia y comprobar que se entiende cuáles son sus 4 vecinas (doble rombo cian). Mover, atacar, cavar (E), ocultar al Zancajunco (C), guardar a una caída (F), sellar (A) e invocar (C con la Rodauva guardada desde el panel), sin errores de casilla.
+  4. Mirar que una ficha adelante tape a la de atrás, y que surcos, zona de Caza y marcas de afines y rivales queden debajo de las fichas.
+  5. Abrir con `-- --vista=cenital` (en PowerShell: `& $env:GODOT_BIN --path . -- --vista=cenital`) y jugar A: se ve como antes. Con `-- --vista=rara`, la pantalla de error.
+  6. Anotar todo lo que se lea mal en isométrica: va al Director Creativo.
+- **Para la próxima sesión:** nada: tarea terminada.

@@ -1,39 +1,32 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://pantalla/combate/vista_combate.gd" id="1_script"]
-[ext_resource type="TileSet" path="res://pantalla/combate/casillas_cenital.tres" id="2_casillas"]
 
 [node name="VistaCombate" type="Node2D"]
 script = ExtResource("1_script")
 
 [node name="Tablero" type="TileMapLayer" parent="."]
-tile_set = ExtResource("2_casillas")
 
 [node name="Surcos" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
 
 [node name="Zona" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
 
 [node name="Marcas" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
-
-[node name="Unidades" type="Node2D" parent="Tablero"]
 
 [node name="Afines" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
 
 [node name="Rivales" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
 
 [node name="RivalesEnemigas" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
 
 [node name="DestinosHechizo" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
 
 [node name="AlcanzanHuida" type="TileMapLayer" parent="Tablero"]
-tile_set = ExtResource("2_casillas")
+
+[node name="Ortogonales" type="TileMapLayer" parent="Tablero"]
+
+[node name="Unidades" type="Node2D" parent="Tablero"]
+y_sort_enabled = true
 
 [node name="PausaIA" type="Timer" parent="."]
 one_shot = true

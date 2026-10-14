@@ -20,6 +20,9 @@ const _ESQUEMA_ESCENARIO: String = "escenario"
 @export var carpeta_datos: String = ""
 # Vacia: res://registros (donde la vista guarda grabacion y registro).
 @export var carpeta_registros: String = ""
+# T32 (D-013). Vacia: se usa la linea de comandos (`-- --vista=<nombre>`) o la
+# vista por defecto de VistasTablero.
+@export var vista_tablero: String = ""
 
 var _carpeta: String = ""
 var _datos: Dictionary = {}
@@ -47,6 +50,10 @@ func _ready() -> void:
 	_carpeta = carpeta_datos
 	if _carpeta.is_empty():
 		_carpeta = ArgumentosPantalla.carpeta_datos(OS.get_cmdline_user_args())
+	if vista_tablero.is_empty():
+		vista_tablero = ArgumentosPantalla.vista(OS.get_cmdline_user_args())
+	if not _vista_valida():
+		return
 	if _cargar():
 		_mostrar_selector()
 
@@ -116,6 +123,7 @@ func abrir_escenario(escenario_id: String) -> VistaCombate:
 		escenario = edicion.escenario()
 		editado = edicion.difiere()
 	_vista = _ESCENA_VISTA.instantiate()
+	_vista.vista_tablero = vista_tablero
 	_contenedor_vista.add_child(_vista)
 	_vista.volver.connect(_volver_al_selector)
 	_vista.empezar(escenario, _datos, _avisos, carpeta_registros, editado)
@@ -128,6 +136,8 @@ func abrir_escenario(escenario_id: String) -> VistaCombate:
 # del escenario abierto ya no valida (o un cambio no se pudo volver a aplicar),
 # o si se estaba en el panel, vuelve al panel con el error.
 func recargar() -> void:
+	if not _vista_valida():
+		return
 	var en_panel: bool = _panel.visible
 	_cerrar_vista()
 	_panel.visible = false
@@ -211,6 +221,20 @@ func _volver_al_selector() -> void:
 	_panel.visible = false
 	_escenario_actual = ""
 	_mostrar_selector()
+
+
+# T32 (D-013): con una vista desconocida el juego no arranca: solo la pantalla
+# de error (de desarrollo), sin datos ni selector.
+func _vista_valida() -> bool:
+	var error: String = VistasTablero.error(vista_tablero)
+	if error.is_empty():
+		return true
+	printerr("[vista] ", error)
+	_texto_errores.text = error
+	_pantalla_error.visible = true
+	_selector.visible = false
+	_panel.visible = false
+	return false
 
 
 func _mostrar_errores() -> void:

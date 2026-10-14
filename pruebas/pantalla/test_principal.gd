@@ -166,3 +166,36 @@ func _escribir(ruta: String, contenido: String) -> void:
 	var archivo: FileAccess = FileAccess.open(ruta, FileAccess.WRITE)
 	archivo.store_string(contenido)
 	archivo.close()
+
+
+# T32 (7, D-013): con la vista cenital, el tablero usa el TileSet de T13.
+func test_vista_cenital_abre_la_de_t13() -> void:
+	var principal: Principal = auto_free(load(_ESCENA).instantiate())
+	principal.carpeta_datos = "res://datos"
+	principal.vista_tablero = VistasTablero.CENITAL
+	var runner: GdUnitSceneRunner = scene_runner(principal)
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = principal.abrir_escenario("a_dia_1")
+	assert_str(vista.vista_tablero).is_equal(VistasTablero.CENITAL)
+	assert_object(vista.tablero().tile_set).is_same(VistasTablero.tile_set(VistasTablero.CENITAL))
+	assert_bool(vista.combate().esperando_jugador()).is_true()
+
+
+# T32 (7, D-013): una vista desconocida da su error y no arranca: ni datos, ni
+# selector, ni vista.
+func test_vista_desconocida_no_arranca() -> void:
+	var principal: Principal = auto_free(load(_ESCENA).instantiate())
+	principal.carpeta_datos = "res://datos"
+	principal.vista_tablero = "rara"
+	var runner: GdUnitSceneRunner = scene_runner(principal)
+	await runner.simulate_frames(1)
+	assert_bool(runner.find_child("PantallaError").visible).is_true()
+	assert_str((runner.find_child("TextoErrores") as Label).text).contains("rara")
+	assert_bool(runner.find_child("SelectorEscenario").visible).is_false()
+	assert_array(principal.ids_escenarios()).is_empty()
+	assert_object(principal.vista()).is_null()
+	principal.recargar()
+	await runner.simulate_frames(1)
+	assert_bool(runner.find_child("PantallaError").visible).is_true()
+	assert_bool(runner.find_child("SelectorEscenario").visible).is_false()
+	assert_object(principal.vista()).is_null()
