@@ -13,7 +13,7 @@
 - **Cerrada en:** T10
 
 ## P-002 — Afines de la atacante comida por el Maestro
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T04
 - **Fecha:** 03/10/2026
@@ -24,6 +24,7 @@
 - **Bloquea:** no. `tablas/lealtad.json` guarda `eventos.comer_atacante: -2` y `eventos.muerte_en_el_grupo_afines: -4`; la regla se programa en T10.
 - **Mientras tanto:** solo están los datos; no hay código que elija.
 - **Respuesta:** `Sistema.md` 5.2 v1.1 (03/10/2026): opción A. −2 en total a todas las sueltas, incluidas sus afines; reemplaza a la fila de muerte en el grupo y no suma el −3 extra. Se aplica en T30.
+- **Cerrada en:** T30
 
 ## P-003 — Tramos de obediencia y estados de lealtad
 - **Estado:** CERRADA
@@ -327,7 +328,7 @@
 - **Cerrada en:** T12 (sin cambios de código)
 
 ## P-024 — Destino de la atacante nocturna caída si el combate termina en derrota
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T12
 - **Fecha:** 04/10/2026
@@ -338,6 +339,7 @@
 - **Bloquea:** no (se necesita antes de T30)
 - **Mientras tanto:** programado con A en `nucleo/combate/resultado_combate.gd`, `ResultadoCombate.armar`: toma la criatura `ATACANTE_NOCTURNA` en estado `CAIDA` sin mirar `cierre.fin`, con un comentario que remite a esta pregunta y a S-20. Test: `pruebas/combate/test_contrato.gd`, `test_resultados_validan_contra_el_esquema` (test 11 de T12, caso G con la atacante en 0: `atacante_pendiente = "ocarra_1"`). Ese test cubre la atacante caída en una victoria. Ningún test arma una derrota con la atacante caída. Si Sistemas elige B, cambia una condición de `armar` y se suma ese caso al test 11.
 - **Respuesta:** `Sistema.md` 9.2, paso 6 (v1.4 y v1.5) y Visión 6.4 v1.2: opción B. Si el combate nocturno termina en derrota, la atacante se va, también si ya estaba caída: su pergamino arde, vuelve a ser salvaje y no hay `atacante_pendiente`. Su ida no cambia la lealtad de nadie. Cambia una condición de `ResultadoCombate.armar` y se suma la derrota al test 11 de T12. Se aplica en T30.
+- **Cerrada en:** T30
 
 ## P-025 — Guardar a una caída y la consulta única de objetivo
 - **Estado:** CERRADA
@@ -665,7 +667,7 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Cerrada en:** T29
 
 ## P-046 — Vida de la atacante resellada
-- **Estado:** RESPONDIDA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T30
 - **Fecha:** 13/10/2026
@@ -676,3 +678,4 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Bloquea:** no
 - **Mientras tanto:** el usuario respondió en la sesión 2 de T30 y se programó con esa respuesta (abajo).
 - **Respuesta:** el usuario, en el chat de la sesión 2 de T30 (13/10/2026): "Queda con 10 puntos de vida". Programado como `tablas/combate.json` `vida_al_resellar` = 10 (esquema `combate`, requerido); los fixtures de combate llevan 1 (D-009). Falta que Sistemas lo pase a `Sistema.md` 4.4.
+- **Cerrada en:** T30

@@ -145,6 +145,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 autowrap_mode = 3
 
+[node name="BotonesDestino" type="HFlowContainer" parent="Interfaz/PantallaResultado/Contenido"]
+layout_mode = 2
+
 [node name="BotonVolver" type="Button" parent="Interfaz/PantallaResultado/Contenido"]
 layout_mode = 2
 

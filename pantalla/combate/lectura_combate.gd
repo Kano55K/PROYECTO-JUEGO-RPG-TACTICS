@@ -323,9 +323,16 @@ func suceso(evento: Dictionary) -> Array[String]:
 		"movimiento":
 			return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(ClavesTextos.ACCION_MOVER)])]
 		"ataque":
-			return [_SEPARADOR.join([nombre(evento["atacante"]), _armador.armar(ClavesTextos.ACCION_ATACAR),
-					"%s −%d (%d → %d)" % [nombre(evento["objetivo"]), evento["desglose"]["total"],
-					evento["vida_antes"], evento["vida_despues"]]])]
+			return [_linea_ataque(evento)]
+		# T30 (Sistema.md 9.2, Mundo.md 4.6): el despertar (base y la linea de la
+		# especie, complemento) y el golpe con sus numeros.
+		"golpe_inicial":
+			var lineas_golpe: Array[String] = _armador.armar_lineas(ClavesTextos.NOCTURNO_BASE,
+					_hueco(evento["atacante"]), _sujeto(evento["atacante"]))
+			lineas_golpe.append(_linea_ataque(evento))
+			return lineas_golpe
+		"destino_atacante":
+			return lineas_destino(evento)
 		"accion":
 			if evento["accion"]["tipo"] == "erizarse":
 				return [_SEPARADOR.join([nombre(evento["unidad"]), _armador.armar(_clave_rasgo(evento["unidad"]))])]
@@ -408,6 +415,81 @@ func suceso(evento: Dictionary) -> Array[String]:
 		"encono":
 			return [_armador.armar(ClavesTextos.ENCONO_SUBE, _hueco(evento["unidad"]))]
 	return []
+
+
+# "Atacante · Atacar · Objetivo −danio (antes → despues)", con los numeros del
+# evento (`ataque` o `golpe_inicial`, A.7).
+func _linea_ataque(evento: Dictionary) -> String:
+	return _SEPARADOR.join([nombre(evento["atacante"]), _armador.armar(ClavesTextos.ACCION_ATACAR),
+			"%s −%d (%d → %d)" % [nombre(evento["objetivo"]), evento["desglose"]["total"],
+			evento["vida_antes"], evento["vida_despues"]]])
+
+
+# T30 (Sistema.md 9.3 y 4.4, Mundo.md 4.6): las lineas de una salida del destino
+# (evento `destino_atacante`): perdonada, la de perdonar y la de la tribu;
+# sellada, la del nuevo sello; comida, la de comer y la de cada especie suelta de
+# la tribu que tenga su clave (comer_suelta); sellado fallido, la del sellado en
+# combate (4.6 no tiene una propia).
+func lineas_destino(evento: Dictionary) -> Array[String]:
+	var atacante: String = evento["atacante"]
+	match evento["resultado"]:
+		DestinoAtacante.RESULTADO_PERDONADA:
+			return [_armador.armar(ClavesTextos.NOCTURNO_PERDONAR, _hueco(atacante)),
+					_armador.armar(ClavesTextos.NOCTURNO_PERDONAR_TRIBU)]
+		DestinoAtacante.RESULTADO_SELLADA:
+			return [_armador.armar(ClavesTextos.NOCTURNO_SELLAR, _hueco(atacante))]
+		DestinoAtacante.RESULTADO_COMIDA:
+			var lineas: Array[String] = [_armador.armar(ClavesTextos.NOCTURNO_COMER, _hueco(atacante))]
+			var vistas: Array[String] = []
+			for criatura in _plantel.criaturas():
+				var clave: String = ClavesTextos.comer_suelta(criatura.especie.id())
+				if criatura.bando == Criatura.Bando.TRIBU and criatura.estado == Criatura.Estado.SUELTA \
+						and not vistas.has(clave) and _armador.tiene(clave):
+					vistas.append(clave)
+					lineas.append(_armador.armar(clave))
+			return lineas
+		DestinoAtacante.RESULTADO_SELLADO_FALLIDO:
+			return [_armador.armar(ClavesTextos.SELLAR_FALLO, _hueco(atacante), _sujeto(atacante))]
+	return []
+
+
+# T30 (Sistema.md 9.3 y 4.4): los botones del destino de la atacante, [{opcion,
+# texto, tooltip, habilitado}] en el orden de DestinoAtacante.OPCIONES, solo si el
+# combate espera el destino. Si ya fallo un sellado, sellar no esta (quedan
+# perdonar y comer). Sellar lleva el costo y el % que da la regla; habilitado y el
+# motivo del tooltip salen de Combate.motivo_destino.
+func botones_destino() -> Array[Dictionary]:
+	var botones: Array[Dictionary] = []
+	if not _combate.esperando_destino():
+		return botones
+	var regla: DestinoAtacante = _combate.contexto().destino_atacante
+	var especie: Especie = _plantel.criatura(_combate.resultado().atacante_pendiente).especie
+	for opcion in DestinoAtacante.OPCIONES:
+		var motivo: ResultadoAccion.Motivo = _combate.motivo_destino(opcion)
+		if motivo == ResultadoAccion.Motivo.SELLAR_YA_FALLO:
+			continue
+		var texto: String = _armador.armar(ClavesTextos.boton_destino(opcion))
+		if opcion == DestinoAtacante.OPCION_SELLAR:
+			texto += " (%d %s · %d%%)" % [regla.costo(especie, _plantel.maestro), _armador.armar(ClavesTextos.PANEL_MANA),
+					regla.porcentaje(especie)]
+		var tooltip: Array[String] = [_armador.armar(ClavesTextos.tooltip_destino(opcion))]
+		var clave_motivo: String = ClavesTextos.motivo_destino(motivo)
+		if not clave_motivo.is_empty():
+			tooltip.append(_armador.armar(clave_motivo))
+		botones.append({"opcion": opcion, "texto": texto, "tooltip": "\n".join(tooltip),
+				"habilitado": motivo == ResultadoAccion.Motivo.NINGUNO})
+	return botones
+
+
+# T30: el ultimo evento `destino_atacante` del registro que cerro la noche (no un
+# sellado fallido), o {}.
+func _destino_final() -> Dictionary:
+	var registro: Array[Dictionary] = _combate.registro().lineas()
+	for indice in range(registro.size() - 1, -1, -1):
+		var evento: Dictionary = registro[indice]
+		if evento["tipo"] == "destino_atacante" and evento["resultado"] != DestinoAtacante.RESULTADO_SELLADO_FALLIDO:
+			return evento
+	return {}
 
 
 # T19 (Sistema.md 10.5 y 10.6, Mundo.md 5), con la primera de sus rivales. La
@@ -544,6 +626,14 @@ func resultado(datos: Dictionary) -> Array[String]:
 	if datos.get("atacante_pendiente") != null:
 		lineas.append("%s: %s" % [_armador.armar(ClavesTextos.RESULTADO_ATACANTE_PENDIENTE),
 				_nombre_en_resultado(datos, datos["atacante_pendiente"])])
+		# T30 (Mundo.md 4.6): mientras espera su destino.
+		if _combate.esperando_destino():
+			lineas.append(_armador.armar(ClavesTextos.NOCTURNO_ATACANTE_CAIDA, _hueco(datos["atacante_pendiente"])))
+	# T30: con el destino elegido, sus lineas, antes de la lealtad de la noche.
+	if datos.get("destino_atacante") != null and datos["destino_atacante"]["opcion"] != null:
+		var destino: Dictionary = _destino_final()
+		if not destino.is_empty():
+			lineas.append_array(lineas_destino(destino))
 	if not (datos["lealtad_cambios"] as Array).is_empty():
 		lineas.append(_armador.armar(ClavesTextos.RESULTADO_LEALTAD))
 		for cambio in datos["lealtad_cambios"]:
@@ -935,6 +1025,10 @@ func _suceso_estado(id_unidad: String, estado: String) -> Array[String]:
 			return [_armador.armar(ClavesTextos.MAESTRO_CAIDA)]
 		return []
 	if estado == _ESTADO_CAIDA:
+		# T30 (Mundo.md 4.6): la atacante nocturna cae con su linea propia, en lugar
+		# de la de caida (las dos dicen que cae y no se levanta).
+		if _plantel.criatura(id_unidad).comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA:
+			return [_armador.armar(ClavesTextos.NOCTURNO_ATACANTE_CAIDA, _hueco(id_unidad))]
 		# caida.* es complemento (A.2.1): la base y la linea de la especie.
 		return _armador.armar_lineas(ClavesTextos.CAIDA, _hueco(id_unidad), _sujeto(id_unidad))
 	if estado == _ESTADO_FUERA:

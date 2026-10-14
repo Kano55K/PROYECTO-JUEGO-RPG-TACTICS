@@ -74,6 +74,8 @@ const _NOMBRE_BOTON_SELLAR: String = "Sellar"
 const _NOMBRE_BOTON_GUARDAR_CAIDA: String = "GuardarCaida"
 # T28 (Sistema.md 11.7): el boton Huir.
 const _NOMBRE_BOTON_HUIR: String = "Huir"
+# T30 (Sistema.md 9.3): los botones del destino de la atacante, uno por opcion.
+const _PREFIJO_BOTON_DESTINO: String = "Destino_"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -181,6 +183,8 @@ var _limites: Rect2 = Rect2()
 @onready var _pantalla_resultado: Control = $Interfaz/PantallaResultado
 @onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/Desplazable/TextoResultado
 @onready var _boton_volver: Button = $Interfaz/PantallaResultado/Contenido/BotonVolver
+# T30: los botones del destino de la atacante (Destino_<opcion>).
+@onready var _botones_destino: HFlowContainer = $Interfaz/PantallaResultado/Contenido/BotonesDestino
 @onready var _depuracion: TextEdit = $Interfaz/PanelDepuracion
 @onready var _pausa: Timer = $PausaIA
 
@@ -583,6 +587,15 @@ func _dibujar_alcanzan_huida() -> void:
 			_capa_alcanzan_huida.set_cell(_casilla_de(foto, enemiga["unidad"]), _FUENTE_MARCAS, _MARCA_ALCANZA_HUIDA)
 
 
+# T30 (Sistema.md 9.3): un boton del destino de la atacante aplica esa opcion,
+# solo si el combate espera el destino y Combate.motivo_destino la deja.
+func pulsar_destino(opcion: String) -> bool:
+	if _combate == null or not _combate.esperando_destino() \
+			or _combate.motivo_destino(opcion) != ResultadoAccion.Motivo.NINGUNO:
+		return false
+	return _aplicar(Accion.destino_atacante(opcion))
+
+
 # T26: el boton Guardar aplica la accion de la criatura del turno.
 func pulsar_guardar() -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
@@ -924,12 +937,13 @@ func _ficha(unidad_id: String) -> FichaUnidad:
 
 
 # Lo nuevo del registro pasa a los sucesos; con el combate terminado se guarda
-# una sola vez. Despues, se redibuja todo desde el nucleo.
+# una sola vez. T30: si la atacante espera su destino, despues de elegirlo (la
+# grabacion lleva esa accion). Despues, se redibuja todo desde el nucleo.
 func _despues_de_un_cambio() -> void:
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
 	_sucesos.append_array(lectura.sucesos(_lineas_leidas))
 	_lineas_leidas = _combate.registro().lineas().size()
-	if _combate.terminado() and _guardado.is_empty():
+	if _combate.terminado() and not _combate.esperando_destino() and _guardado.is_empty():
 		_guardado = GuardadoCombate.guardar(_combate, _carpeta_registros)
 		if _guardado.is_empty():
 			_mostrar_mensaje("No se pudo guardar la partida en " + _carpeta_registros)
@@ -1237,6 +1251,21 @@ func _dibujar_resultado(lectura: LecturaCombate) -> void:
 		return
 	_texto_resultado.text = "\n".join(lectura.resultado(resultado.a_diccionario()))
 	_boton_volver.text = _armador.armar(ClavesTextos.RESULTADO_VOLVER)
+	# T30 (Sistema.md 9.3): mientras la atacante espera su destino, sus botones
+	# (LecturaCombate.botones_destino) y no se puede volver sin elegir.
+	_boton_volver.visible = not _combate.esperando_destino()
+	for hijo in _botones_destino.get_children():
+		_botones_destino.remove_child(hijo)
+		hijo.queue_free()
+	for datos_boton in lectura.botones_destino():
+		var opcion: String = datos_boton["opcion"]
+		var boton: Button = Button.new()
+		boton.name = _PREFIJO_BOTON_DESTINO + opcion
+		boton.text = datos_boton["texto"]
+		boton.tooltip_text = datos_boton["tooltip"]
+		boton.disabled = not datos_boton["habilitado"]
+		boton.pressed.connect(pulsar_destino.bind(opcion))
+		_botones_destino.add_child(boton)
 
 
 # Pantalla de desarrollo: registro crudo y avisos, con ids y datos tecnicos.

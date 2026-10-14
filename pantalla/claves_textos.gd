@@ -175,6 +175,16 @@ const RESULTADO_LEVANTADAS: String = "resultado.levantadas"
 const RESULTADO_CAIDAS_GUARDADAS: String = "resultado.caidas_guardadas"
 const RESULTADO_CAPTURAS: String = "resultado.capturas"
 const RESULTADO_ATACANTE_PENDIENTE: String = "resultado.atacante_pendiente"
+# T30 (Mundo.md 4.6): el ataque nocturno. nocturno.base es complemento (A.2.1):
+# la base y la linea de la especie. Los botones y tooltips del destino van por
+# opcion (boton_destino, tooltip_destino) y la linea de comer con una especie
+# suelta es una clave propia (comer_suelta, A.2: el codigo elige la clave).
+const NOCTURNO_BASE: String = "nocturno.base"
+const NOCTURNO_ATACANTE_CAIDA: String = "nocturno.atacante.caida"
+const NOCTURNO_PERDONAR: String = "nocturno.perdonar"
+const NOCTURNO_PERDONAR_TRIBU: String = "nocturno.perdonar.tribu"
+const NOCTURNO_SELLAR: String = "nocturno.sellar"
+const NOCTURNO_COMER: String = "nocturno.comer"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -208,6 +218,8 @@ const FIJAS: Array[String] = [
 	PANEL_RESCATISTA, PANEL_SIN_RESCATISTA, MARCA_RESCATISTA, RESULTADO_RESCATISTA, PERMADEATH,
 	RESULTADO_MUERTAS, RESULTADO_LEVANTADAS, RESULTADO_CAIDAS_GUARDADAS, RESULTADO_CAPTURAS,
 	RESULTADO_ATACANTE_PENDIENTE,
+	NOCTURNO_BASE, NOCTURNO_ATACANTE_CAIDA, NOCTURNO_PERDONAR, NOCTURNO_PERDONAR_TRIBU, NOCTURNO_SELLAR,
+	NOCTURNO_COMER,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
@@ -421,6 +433,34 @@ static func motivo_huir(motivo: ResultadoAccion.Motivo) -> String:
 	return ""
 
 
+# T30 (Mundo.md 4.6): el boton y el tooltip de una opcion del destino de la
+# atacante (DestinoAtacante.OPCIONES).
+static func boton_destino(opcion: String) -> String:
+	return "nocturno.boton.%s" % opcion
+
+
+static func tooltip_destino(opcion: String) -> String:
+	return "nocturno.%s.tooltip" % opcion
+
+
+# T30 (Mundo.md 4.6): la linea de comer cuando hay una suelta de esa especie
+# (nocturno.comer.zancajunco_suelto). Se muestra solo si existe.
+static func comer_suelta(especie_id: String) -> String:
+	return "%s.%s_suelto" % [NOCTURNO_COMER, especie_id]
+
+
+# T30: por que el boton de sellar de nuevo esta deshabilitado
+# (Combate.motivo_destino), o "" si el motivo no se muestra. Las dos claves son
+# las del sellado en combate (Mundo.md 4.6 comparte pergamino.sin_blanco).
+static func motivo_destino(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.SIN_PERGAMINO:
+			return PERGAMINO_SIN_BLANCO
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_SELLAR_MANA
+	return ""
+
+
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:
 	var claves: Array[String] = []
@@ -440,6 +480,9 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		_sumar(claves, fuente_desglose(fuente))
 	for motivo in _MOTIVOS_DESTAPE:
 		_sumar(claves, suceso_destape(motivo))
+	for opcion in DestinoAtacante.OPCIONES:
+		_sumar(claves, boton_destino(opcion))
+		_sumar(claves, tooltip_destino(opcion))
 	var rutas: Array = datos.keys()
 	rutas.sort()
 	var especies: Array[String] = []
@@ -534,6 +577,10 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 		for variante_huida in ["%s.%s" % [HUIDA_SALVAJE, especie], "%s.%s" % [HUIDA_SE_QUEDA, especie]]:
 			if existentes.has(variante_huida):
 				_sumar(claves, variante_huida)
+		# T30: el complemento del golpe inicial y la linea de comer con una suelta.
+		for variante_nocturno in ["%s.%s" % [NOCTURNO_BASE, especie], comer_suelta(especie)]:
+			if existentes.has(variante_nocturno):
+				_sumar(claves, variante_nocturno)
 		# T22: el choque de la Lanzadera se pide con la especie de la movida.
 		var variante_choque: String = "%s.%s" % [LANZADERA_CHOQUE, especie]
 		if existentes.has(variante_choque):
