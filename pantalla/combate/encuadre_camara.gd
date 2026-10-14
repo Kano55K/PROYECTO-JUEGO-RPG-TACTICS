@@ -6,10 +6,12 @@ class_name EncuadreCamara
 extends RefCounted
 
 
-# El rectangulo entre dos esquinas (en cualquier orden), agrandado por margen
-# de cada lado.
-static func limites(esquina_a: Vector2, esquina_b: Vector2, margen: float) -> Rect2:
-	var rectangulo: Rect2 = Rect2(esquina_a, Vector2.ZERO).expand(esquina_b)
+# El rectangulo que contiene todas las esquinas (en cualquier orden), agrandado
+# por margen de cada lado. T32 (D-013 (4)): en rombo hacen falta las cuatro.
+static func limites(esquinas: PackedVector2Array, margen: float) -> Rect2:
+	var rectangulo: Rect2 = Rect2(esquinas[0], Vector2.ZERO)
+	for esquina in esquinas:
+		rectangulo = rectangulo.expand(esquina)
 	return rectangulo.grow(margen)
 
 

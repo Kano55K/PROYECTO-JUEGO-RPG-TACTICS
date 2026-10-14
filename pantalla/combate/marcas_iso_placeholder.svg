@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="64" viewBox="0 0 1280 64">
+  <polygon points="64,5 118,32 64,59 10,32" fill="#3c78d8" fill-opacity="0.35" stroke="#3c78d8" stroke-width="2"/>
+  <polygon points="192,5 246,32 192,59 138,32" fill="#d83c3c" fill-opacity="0.35" stroke="#d83c3c" stroke-width="3"/>
+  <polygon points="320,12 360,32 320,52 280,32" fill="#5a3d1e" stroke="#3c78d8" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="448,12 488,32 448,52 408,32" fill="#5a3d1e" stroke="#d83c3c" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="576,2 636,32 576,62 516,32" fill="#e8a33c" fill-opacity="0.22" stroke="#e8a33c" stroke-width="2" stroke-dasharray="6 4"/>
+  <polygon points="704,5 758,32 704,59 650,32" fill="#8a5a2b" fill-opacity="0.35" stroke="#c48a4a" stroke-width="3"/>
+  <polygon points="832,6 884,32 832,58 780,32" fill="none" stroke="#ffd94d" stroke-width="5"/>
+  <ellipse cx="960" cy="32" rx="40" ry="26" fill="none" stroke="#4dd97a" stroke-width="4" stroke-dasharray="8 4"/>
+  <ellipse cx="1088" cy="32" rx="40" ry="26" fill="none" stroke="#d83c3c" stroke-width="4" stroke-dasharray="8 4"/>
+  <polygon points="1216,8 1240,32 1216,56 1192,32" fill="#9b4dd9" fill-opacity="0.35" stroke="#9b4dd9" stroke-width="4"/>
+</svg>

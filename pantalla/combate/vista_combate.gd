@@ -1,8 +1,10 @@
-# Arquitectura.md B.2 (T13): la vista del combate, cenital y con placeholders.
+# Arquitectura.md B.2 (T13): la vista del combate, con placeholders.
 # Arma el combate (la IA juega hasta el primer turno del jugador) y se redibuja
 # entera desde el nucleo: no guarda copias del estado de reglas. Casilla <->
-# pantalla solo con map_to_local / local_to_map (A.3): T32 cambia solo el
-# tileset. El mouse sale de sus eventos, nunca del cursor del sistema (D-006).
+# pantalla solo con map_to_local / local_to_map (A.3). T32 (D-013): isometrica
+# por defecto y cenital de desarrollo; el TileSet sale de VistasTablero y lo
+# toman todas las capas. El mouse sale de sus eventos, nunca del cursor del
+# sistema (D-006).
 # Sesion 2: el jugador juega con el mouse (InterpreteClic y botones),
 # ve las marcas, el desglose de previsualizar_ataque y los sucesos del registro;
 # al terminar, se guardan solos la grabacion y el registro y se ve el resultado.
@@ -106,6 +108,9 @@ const DISPOSITIVO_CUALQUIERA: int = -1000
 # cualquiera; los tests ponen el suyo (MousePrueba) para que el cursor real de
 # la maquina no pise sus eventos.
 @export var dispositivo_mouse: int = DISPOSITIVO_CUALQUIERA
+# T32 (D-013): la vista del tablero (VistasTablero). Se aplica al entrar al
+# arbol y al empezar.
+@export var vista_tablero: String = VistasTablero.POR_DEFECTO
 
 var _combate: Combate = null
 var _armador: ArmadorTextos = null
@@ -195,6 +200,7 @@ func _ready() -> void:
 	_boton_terminar.pressed.connect(pulsar_terminar)
 	_boton_volver.pressed.connect(volver.emit)
 	_pausa.timeout.connect(_siguiente_paso)
+	_aplicar_vista()
 
 
 # escenario y datos: los del Cargador. avisos_carga: sus avisos, para el panel
@@ -207,6 +213,11 @@ func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dicti
 	_editado = editado
 	if not carpeta_registros.is_empty():
 		_carpeta_registros = carpeta_registros
+	var error_vista: String = VistasTablero.error(vista_tablero)
+	if not error_vista.is_empty():
+		_mostrar_mensaje(error_vista)
+		return
+	_aplicar_vista()
 	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
 	if not contexto.valido:
 		# Pantalla de desarrollo: muestra el motivo tecnico.
@@ -792,16 +803,29 @@ func _casilla_del_mouse() -> Vector2i:
 	return _tablero.local_to_map(_tablero.get_global_transform_with_canvas().affine_inverse() * _posicion_mouse)
 
 
+# T32 (D-013 (2)): el TileSet de la vista lo elige VistasTablero, y todas las
+# capas del tablero toman el del tablero (ninguna guarda el suyo). Con una
+# vista desconocida queda vacio: empezar muestra el error.
+func _aplicar_vista() -> void:
+	_tablero.tile_set = VistasTablero.tile_set(vista_tablero)
+	for hijo in _tablero.get_children():
+		if hijo is TileMapLayer:
+			(hijo as TileMapLayer).tile_set = _tablero.tile_set
+
+
 # T42 (D-003), al abrir: los limites salen de map_to_local de las esquinas del
 # tablero del escenario. Si entra entero con el zoom minimo se encuadra entero;
 # si no, se centra en el Maestro (EncuadreCamara.inicial). Despues, la camara
 # solo la mueve el jugador.
 func _encuadrar() -> void:
 	var tablero_combate: Tablero = _combate.contexto().tablero
-	var esquina_a: Vector2 = _tablero.to_global(_tablero.map_to_local(Vector2i(0, 0)))
-	var esquina_b: Vector2 = _tablero.to_global(_tablero.map_to_local(
-			Vector2i(tablero_combate.ancho - 1, tablero_combate.alto - 1)))
-	_limites = EncuadreCamara.limites(esquina_a, esquina_b, margen)
+	var ultima_x: int = tablero_combate.ancho - 1
+	var ultima_y: int = tablero_combate.alto - 1
+	# T32 (D-013 (4)): las cuatro esquinas; en rombo, dos no alcanzan.
+	var esquinas: PackedVector2Array = PackedVector2Array()
+	for casilla in [Vector2i(0, 0), Vector2i(ultima_x, 0), Vector2i(0, ultima_y), Vector2i(ultima_x, ultima_y)]:
+		esquinas.append(_tablero.to_global(_tablero.map_to_local(casilla)))
+	_limites = EncuadreCamara.limites(esquinas, margen)
 	var centro_maestro: Variant = null
 	var casilla_maestro: Vector2i = _casilla_de(_combate.instantanea(), Maestro.ID)
 	if casilla_maestro != Criatura.SIN_POSICION:
