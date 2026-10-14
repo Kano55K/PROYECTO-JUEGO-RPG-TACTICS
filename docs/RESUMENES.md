@@ -2913,3 +2913,29 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   3. Elegir Perdonar: se ven la línea del fallo y después las del perdón, la lealtad y Volver.
   4. El éxito: copiar `datos/` a otra carpeta, cambiar `semilla` de G (por ejemplo, 1) y abrir con `-- --datos=<carpeta>`; si sale, la Ocarra Guardada, la línea del nuevo sello, la lealtad final y Volver.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T29-ajustes · sesión 1 · 14/10/2026
+- **Rama:** tarea/T29-ajustes
+- **Estado:** TERMINADA (pendiente de PR)
+- **Causa encontrada:** el test medía la botonera contra la ventana que dejaba la suite. El 1458 de ancho visible (con `canvas_items` + `expand`) corresponde a una ventana de proporción 2,25, y ningún código del proyecto ni de GdUnit4 la deja así. Evidencia, con un registro temporal de cada `size_changed` de la ventana raíz en tres suites completas (859/859 las tres, sin el 1458):
+  - El único código que cambia el tamaño es `test_mouse_prueba.gd::test_ventana_chica`: pasa a 200 × 120 (ancho visible 1152 × 691, más alto, nunca más ancho) y su `after_test` la devuelve a 1152 × 648 en las tres corridas.
+  - GdUnit4 solo alterna entre minimizada y en ventana (`move_window_to_foreground`/`background`): sin `size_changed`, y restaurar desde minimizada vuelve a 1152 × 648 en (107, 60).
+  - Maximizada en la pantalla de esta máquina (1366 × 768) da 1366 × 745 y un ancho visible de 1188, no 1458.
+  - El usuario confirmó que en las corridas que fallaron sacó la ventana de Godot con Alt + Tab mientras corría la suite: el tamaño cambió desde fuera de los tests. El test no debía depender de eso.
+- **Hecho:** `test_botonera_entra_en_la_ventana` fija la ventana antes de medir (`_fijar_ventana`: modo ventana y 1152 × 648; espera, con tope de 120 frames, a que el tamaño, `get_final_transform()` y `get_visible_rect()` lo reflejen, y un frame más para que el `HFlowContainer` se reacomode; si no llega, falla con el tamaño, el modo y la transformación). `after_test` deja el tamaño y el modo como los encontró. La espera va solo antes de medir: no hay eventos en este test.
+- **Archivos:** modificados `pruebas/pantalla/test_vista_rescate.gd`, `CLAUDE.md` (Tests y Estado actual) y `docs/RESUMENES.md`. Lo temporal del diagnóstico (`pruebas/pantalla/_diag_ventana.gd`, las llamadas en `test_humo.gd`, `azar/test_generador_azar.gd`, `test_mouse_prueba.gd` y `test_vista_rescate.gd`, y un test de experimento de modos) se revirtió.
+- **Tests:** 0 nuevos, total 859. Tocado uno: `test_vista_rescate.gd::test_botonera_entra_en_la_ventana`, para que no dependa del tamaño de la ventana que deja la suite (A.6, D-012). Ninguna aserción cambió de significado (el ancho sigue comprobándose en 1152, con `_VENTANA.x` en lugar de `_ANCHO_VENTANA`). Suites completas: tres con el registro temporal, 859/859; con el código final, la corrió el usuario: todos pasan.
+- **Pruebas temporales (revertidas):**
+  - Sin la corrección, ventana forzada a 1458 × 648 justo antes de medir: falla como el intermitente.
+  - Con la corrección, forzada a 1458 × 820, 1458 × 648 y 200 × 120: pasa las tres veces.
+  - Un botón de 1300 px de más en `Botones`: falla ("Hechizo_martillazo fuera: …", "Extra fuera: …"). 60 botones normales de más: falla. Un solo botón normal de más: pasa, porque el `HFlowContainer` lo baja a otra fila y entra (es lo que la botonera tiene que hacer desde T29).
+- **Búsqueda en `pruebas/`:** ningún otro test compara el tamaño de la ventana o del viewport con un número fijo. `test_mouse_prueba.gd`, `test_vista_dispositivo_mouse.gd` y `test_vista_camara.gd` usan `get_viewport_rect().size` de forma relativa (franja de botones, encuadre, centro): no cambian.
+- **Criterio de terminado:** 1 causa con evidencia (arriba). 2 determinista con 1458 × 820, 1458 × 648 y 200 × 120. 3 sigue sirviendo (falla con botones que no entran). 4 ninguna aserción cambió de significado. 5 suites en verde (tres de diagnóstico y la del usuario con el código final). 6 sin errores ni advertencias nuevas.
+- **Supuestos:** fijar la ventana es lo que pide la tarea para un test de medición de layout; D-012 lo descartó solo para los tests de mouse.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nuevas ninguna; cerradas ninguna. P-047 sigue `ABIERTA`.
+- **Cómo probarlo:**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`. En verde aunque se mueva la ventana de Godot durante la corrida.
+  2. F5 → F: la botonera del turno del Maestro se ve igual que antes.
+- **Para la próxima sesión:** nada: tarea terminada.

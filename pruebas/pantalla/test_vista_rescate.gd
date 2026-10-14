@@ -15,7 +15,11 @@ const _ESCENARIO_RESCATE: String = "res://pruebas/fixtures/combate/escenario_res
 const _ESCENARIO_BOTONES: String = "res://pruebas/fixtures/combate/escenario_huida_maestro_combate.json"
 const _TEXTOS: String = "res://pruebas/fixtures/pantalla/es_rasgos.json"
 const _VELOCIDAD_MAESTRO: int = 9
-const _ANCHO_VENTANA: float = 1152.0
+# La ventana del juego (project.godot). El test la fija antes de medir: la
+# suite completa puede dejarla en otro tamaño (T29-ajustes).
+const _VENTANA: Vector2i = Vector2i(1152, 648)
+# Frames que se esperan, antes de medir, a que la ventana cambie.
+const _TOPE_FRAMES: int = 120
 const _LEAL: String = "zancajunco_1"
 const _TOPE_TURNOS: int = 10
 # Textos de prueba de las claves propuestas.
@@ -25,6 +29,24 @@ const _TEXTOS_PRUEBA: Dictionary = {
 	"marca.rescatista": "Te rescata",
 	"resultado.rescatista": "Te rescató",
 }
+
+var _tamanio_original: Vector2i = Vector2i.ZERO
+var _modo_original: Window.Mode = Window.MODE_WINDOWED
+
+
+# Deja la ventana como la encontro el test que la fijo.
+func after_test() -> void:
+	if _tamanio_original == Vector2i.ZERO:
+		return
+	var ventana: Window = get_tree().root
+	ventana.size = _tamanio_original
+	if ventana.mode != _modo_original:
+		ventana.mode = _modo_original
+	for _i in range(_TOPE_FRAMES):
+		if ventana.size == _tamanio_original:
+			break
+		await get_tree().process_frame
+	_tamanio_original = Vector2i.ZERO
 
 
 func _vista(escenario_ruta: String, textos_extra: Dictionary, velocidad_maestro: int = 0) -> GdUnitSceneRunner:
@@ -42,6 +64,32 @@ func _vista(escenario_ruta: String, textos_extra: Dictionary, velocidad_maestro:
 	MousePrueba.preparar(runner.scene() as VistaCombate)
 	(runner.scene() as VistaCombate).empezar(escenario, datos)
 	return runner
+
+
+# Pone la ventana en 1152 x 648 (y en modo ventana) y espera, antes de medir, a
+# que el tamaño, la transformacion final y el viewport lo reflejen; despues un
+# frame mas para que la botonera (HFlowContainer) se reacomode.
+func _fijar_ventana(runner: GdUnitSceneRunner) -> void:
+	var ventana: Window = get_tree().root
+	_tamanio_original = ventana.size
+	_modo_original = ventana.mode
+	if ventana.mode != Window.MODE_WINDOWED:
+		ventana.mode = Window.MODE_WINDOWED
+	ventana.size = _VENTANA
+	for _i in range(_TOPE_FRAMES):
+		if _ventana_fijada(ventana):
+			break
+		await runner.simulate_frames(1)
+	assert_bool(_ventana_fijada(ventana)).override_failure_message(
+			"la ventana no quedo en %s: %s, modo %d, %s, %s" % [_VENTANA, ventana.size, ventana.mode,
+			ventana.get_visible_rect().size, ventana.get_final_transform()]).is_true()
+	await runner.simulate_frames(1)
+
+
+func _ventana_fijada(ventana: Window) -> bool:
+	return ventana.mode == Window.MODE_WINDOWED and ventana.size == _VENTANA \
+			and ventana.get_final_transform().is_equal_approx(Transform2D.IDENTITY) \
+			and ventana.get_visible_rect().size == Vector2(_VENTANA)
 
 
 func _ficha(vista: VistaCombate, unidad_id: String) -> FichaUnidad:
@@ -87,12 +135,13 @@ func test_cambia_al_redibujar() -> void:
 func test_botonera_entra_en_la_ventana() -> void:
 	var runner: GdUnitSceneRunner = _vista(_ESCENARIO_BOTONES, {}, _VELOCIDAD_MAESTRO)
 	await runner.simulate_frames(2)
+	await _fijar_ventana(runner)
 	var vista: VistaCombate = runner.scene()
 	assert_str(vista.combate().turno_actual().unidad_id).is_equal(Maestro.ID)
 	var botones: Control = runner.find_child("Botones")
 	assert_object(botones).is_instanceof(HFlowContainer)
 	var ventana: Rect2 = vista.get_viewport_rect()
-	assert_float(ventana.size.x).is_equal(_ANCHO_VENTANA)
+	assert_float(ventana.size.x).is_equal(float(_VENTANA.x))
 	var nombres: Array[String] = []
 	for hijo in botones.get_children():
 		var boton: Button = hijo as Button
