@@ -8,10 +8,10 @@ extends GdUnitTestSuite
 # Si un dia G cambia y no se llega a tumbar a la Ocarra, no se tocan
 # coordenadas: se anota en docs/PREGUNTAS.md.
 const _CARPETA_DATOS: String = "res://datos"
-const _ESCENARIO: String = "escenarios/g_ataque_nocturno.json"
+const _ESCENARIO: String = JugadorG.ESCENARIO
 const _FICHA_OCARRA: String = "especies/ocarra.json"
 const _TEXTOS: String = "textos/es.json"
-const _OCARRA: String = "ocarra_1"
+const _OCARRA: String = JugadorG.OCARRA
 # Mundo.md 1.5 y 4.6, copiados de es.json (con la Ocarra y el Zancajunco).
 const _TEXTO_BASE: String = "Te despierta el silencio. El Molino cruje como siempre, pero algo dejó de respirar junto al fuego. Cuando abrís los ojos, la Ocarra ya está encima tuyo."
 const _TEXTO_BASE_OCARRA: String = "No grazna. Eso es lo que más te asusta: la Ocarra nunca hizo nada en silencio."
@@ -19,7 +19,6 @@ const _TEXTO_ZANCAJUNCO: String = "El Zancajunco se acerca a comer con vos. Es e
 const _VIDA_MAESTRO: int = 200
 const _VIDA_TRAS_EL_GOLPE: int = 160
 const _COSTO_RESELLAR: int = 2
-const _TOPE_ACCIONES: int = 300
 
 var _datos: Dictionary = {}
 
@@ -55,42 +54,10 @@ func _ultimo(combate: Combate, tipo: String) -> Dictionary:
 	return encontrado
 
 
-# Un turno del jugador, todo desde las consultas del Turno: si la Ocarra es
-# objetivo, la ataca; si no, se acerca a ella por la casilla de casillas_para_mover
-# que mas acorta la distancia (Tablero.distancia) y la ataca si puede. Despues,
-# lo que obligue una regla, y termina.
-func _jugar_turno(combate: Combate) -> void:
-	var plantel: Plantel = combate.contexto().plantel
-	var turno: Turno = combate.turno_actual()
-	var ocarra: Vector2i = plantel.criatura(_OCARRA).posicion
-	if not turno.objetivos_para_atacar().has(_OCARRA):
-		var unidad: Vector2i = plantel.maestro.posicion if turno.unidad_id == Maestro.ID \
-				else plantel.criatura(turno.unidad_id).posicion
-		var mejor: Vector2i = Criatura.SIN_POSICION
-		var distancia: int = Tablero.distancia(unidad, ocarra)
-		for casilla in turno.casillas_para_mover():
-			if Tablero.distancia(casilla, ocarra) < distancia:
-				distancia = Tablero.distancia(casilla, ocarra)
-				mejor = casilla
-		if mejor != Criatura.SIN_POSICION:
-			assert_bool(combate.aplicar(Accion.mover(mejor)).valida).is_true()
-	if not combate.terminado() and combate.turno_actual().objetivos_para_atacar().has(_OCARRA):
-		assert_bool(combate.aplicar(Accion.atacar(_OCARRA)).valida).is_true()
-	if combate.terminado():
-		return
-	assert_str(JugadorEsperando.lo_obligado(combate)).is_empty()
-	if not combate.terminado():
-		assert_bool(combate.aplicar(Accion.terminar()).valida).is_true()
-
-
+# G jugado con JugadorG (todo desde las consultas del Turno) hasta el destino.
 func _jugar_hasta_el_destino() -> Combate:
 	var combate: Combate = _combate()
-	for _i in range(_TOPE_ACCIONES):
-		assert_str(combate.error()).is_empty()
-		if combate.terminado():
-			break
-		assert_bool(combate.esperando_jugador()).is_true()
-		_jugar_turno(combate)
+	assert_str(JugadorG.hasta_el_destino(combate)).is_empty()
 	assert_int(combate.fin()).is_equal(FinCombate.Fin.VICTORIA)
 	assert_bool(combate.esperando_destino()).is_true()
 	return combate

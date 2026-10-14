@@ -2887,3 +2887,29 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   8. En B, pasar el mouse sobre Huir: la previsualización usa los textos nuevos (salvo la línea de caídas, en `[FALTA]`).
   9. Anotar los `[FALTA]` que aparezcan y comprobar que en `registros/` la grabación de G lleva la acción `destino_atacante`.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T30-fix · sesión 1 · 13/10/2026
+- **Rama:** tarea/T30-fix-resellar
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - Diagnóstico (prompt `docs/tareas/prompt_T30-fix_resellar.md`):
+    - a) En `registros/` hay una sola grabación de G con un sellado: `g_ataque_nocturno_777_4.jsonl`: `mana` 4 → 2 (`resellar`), `tirada` `entero(1, 100)` índice 0 = **82**, `destino_atacante` `sellado_fallido`, después `perdonar`. Las otras (777_3 perdonar, 777_5 comer, 777_1 y 777_2 con datos viejos) no sellan. Ninguna tiene otra tirada antes del destino. Los demás intentos del usuario no quedaron grabados: la grabación se guarda cuando el destino se resuelve.
+    - b) **Causa de los fallos:** G tiene `semilla` 777 y R recarga la misma. Sin tiradas antes del destino, el resellado es siempre la tirada 0 del generador de combate de 777 = 82 > 80. Reproducida dos veces con `herramientas/reproducir.gd` (mismo 82). No se cambió la política de semillas: P-047.
+    - c) Sin bug: `Porcentajes.tirar` = `entero(1, 100) <= pct`; el botón y `DestinoAtacante.resolver` usan la misma `porcentaje(especie)` (80). Con 2000 semillas: 1598 éxitos (79,9 %).
+    - d) **Bug de pantalla:** `LecturaCombate.resultado()` solo mostraba el destino final y saltaba el `sellado_fallido`; el fallo quedaba solo en `Sucesos`, tapado por la pantalla de resultado, y el maná no se veía.
+  - Corrección (solo `pantalla/`): `resultado()` muestra las líneas de todos los `destino_atacante` en orden (`_eventos_destino`, sale `_destino_final`); tras un `sellado_fallido`, la línea del fallo (`sellar.fallo` o su variante de especie) y `panel.mana` con el maná que quedó.
+  - Ayudante `JugadorG` (`pruebas/datos/jugador_g.gd`), sacado de `test_ataque_nocturno_g.gd` sin cambiar su juego.
+- **Archivos:** creados `pruebas/datos/jugador_g.gd`, `pruebas/datos/test_resellar_g.gd`, `pruebas/pantalla/test_vista_resellar_g.gd`; modificados `pantalla/combate/lectura_combate.gd`, `pruebas/datos/test_ataque_nocturno_g.gd`, `pruebas/pantalla/test_lectura_nocturno.gd`, `pruebas/pantalla/test_vista_nocturno.gd`, `docs/PREGUNTAS.md`, `CLAUDE.md` (Estado actual).
+- **Tests:** 5 nuevos, total 859. Suite completa: 858 pasan y 1 falla, intermitente: `pruebas/pantalla/test_vista_rescate.gd::test_botonera_entra_en_la_ventana` ("Expecting 1152 but was 1458", el ancho de la ventana durante la suite). No se tocó en esta tarea; pasa solo (dos veces) y con toda `res://pruebas/pantalla` (179/179). Se avisa al usuario: se corrige en su propia tarea.
+  - Los de pantalla dieron rojo antes de la corrección (el fallo no estaba en `TextoResultado`) y verde después. El éxito con `datos/` reales ya se veía bien.
+- **Criterio de terminado:** 1 causa con valores del registro: b (semilla) y d (pantalla); c descartada. 2 estadístico 79,9 % (± 3 de 80). 3 % de la consulta = % de la tirada registrada (test). 4 éxito y fallo en la pantalla de resultado con `datos/` reales (tests de vista). 5 la regla de 4.4 no cambió: tras un fallo solo perdonar y comer (tests). 6 suite: verde salvo el intermitente de arriba; los `ERROR: ReglasCombate: falta la regla…` de la consola son los esperados de los tests de reglas faltantes.
+- **Lecturas declaradas:** ninguna.
+- **Claves de texto nuevas sin texto:** ninguna. Propuesta para el Worldbuilder: la variante `sellar.fallo.ocarra` no dice que el maná se gastó (la general sí); la pantalla lo muestra con la línea `Maná: N`. Si se quiere una línea propia para el fallo del resellado, es una clave nueva de `es.json`.
+- **Supuestos:** el estadístico pone a la Ocarra caída a mano en un Plantel nuevo de G (no juega 2000 combates); el generador sale de `GeneradorAzar.derivado(semilla, "combate")`, como en `ContextoCombate`. El texto del botón de sellar sigue leyendo costo y % de la regla (la misma función que la tirada); el test de vista comprueba que coincide con `previsualizar_destino`.
+- **Preguntas:** nueva P-047 (ARQUITECTO, no bloquea); cerradas ninguna.
+- **Cómo probarlo (manual):**
+  1. Suite completa: `addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → G → tumbar a la Ocarra → "Sellar de nuevo (2 Maná · 80%)". Con la semilla 777 falla siempre (P-047): tiene que verse la línea del fallo de la Ocarra y `Maná: 2`, la Ocarra Caída, y quedar Perdonar y Comer, sin Volver.
+  3. Elegir Perdonar: se ven la línea del fallo y después las del perdón, la lealtad y Volver.
+  4. El éxito: copiar `datos/` a otra carpeta, cambiar `semilla` de G (por ejemplo, 1) y abrir con `-- --datos=<carpeta>`; si sale, la Ocarra Guardada, la línea del nuevo sello, la lealtad final y Volver.
+- **Para la próxima sesión:** nada: tarea terminada.
