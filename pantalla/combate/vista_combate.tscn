@@ -23,6 +23,8 @@ script = ExtResource("1_script")
 
 [node name="AlcanzanHuida" type="TileMapLayer" parent="Tablero"]
 
+[node name="Ortogonales" type="TileMapLayer" parent="Tablero"]
+
 [node name="Unidades" type="Node2D" parent="Tablero"]
 y_sort_enabled = true
 

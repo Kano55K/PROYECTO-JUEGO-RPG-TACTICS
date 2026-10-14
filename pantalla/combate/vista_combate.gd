@@ -34,6 +34,9 @@ const _MARCA_AFIN: Vector2i = Vector2i(7, 0)
 const _MARCA_RIVAL: Vector2i = Vector2i(8, 0)
 # T19: las rivales enemigas que la harian tirar Encono o cobardia desde ahi.
 const _MARCA_RIVAL_ENEMIGA: Vector2i = Vector2i(9, 0)
+# T32 (A.3, riesgo): las 4 vecinas ortogonales (el cuerpo) de la casilla bajo el
+# mouse; una forma distinta de la de afines y rivales (las 8 del vinculo).
+const _MARCA_ORTOGONAL: Vector2i = Vector2i(10, 0)
 # T17: las aliadas que se pueden Secundar (la misma marca de "elegir" que cavar).
 const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
 # T22: las objetivos del hechizo elegido (la misma marca de "elegir") y, con el
@@ -174,6 +177,7 @@ var _limites: Rect2 = Rect2()
 @onready var _capa_rivales_enemigas: TileMapLayer = $Tablero/RivalesEnemigas
 @onready var _capa_destinos: TileMapLayer = $Tablero/DestinosHechizo
 @onready var _capa_alcanzan_huida: TileMapLayer = $Tablero/AlcanzanHuida
+@onready var _capa_ortogonales: TileMapLayer = $Tablero/Ortogonales
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -323,6 +327,7 @@ func sobre_casilla(casilla: Vector2i) -> void:
 	_capa_rivales.clear()
 	_capa_rivales_enemigas.clear()
 	_capa_destinos.clear()
+	_capa_ortogonales.clear()
 	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
 	# las fichas todavia no.
 	if _combate == null or _en_secuencia:
@@ -334,6 +339,7 @@ func sobre_casilla(casilla: Vector2i) -> void:
 		_tooltip_mostrado = lectura.tooltip_unidad(unidad)
 	if _combate.esperando_jugador():
 		var turno: Turno = _combate.turno_actual()
+		_dibujar_ortogonales(turno, unidad, casilla)
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
 		if not _hechizo_elegido.is_empty():
 			_mostrar_hechizo(turno, foto, casilla)
@@ -440,6 +446,27 @@ func aviso_mostrado() -> String:
 
 
 # T41: las casillas de las unidades marcadas como afines ahora.
+# T32: las casillas que marca la capa Ortogonales.
+func casillas_ortogonales() -> Array[Vector2i]:
+	return _capa_ortogonales.get_used_cells()
+
+
+# T32 (A.3, riesgo; Sistema.md 11.3, "el cuerpo mira 4"): con el mouse sobre una
+# unidad de la tribu o sobre una casilla para mover, sus 4 vecinas ortogonales.
+# Salen de Tablero.vecinas (T06), nunca de una cuenta de la pantalla.
+func _dibujar_ortogonales(turno: Turno, unidad: String, casilla: Vector2i) -> void:
+	if not _es_de_la_tribu(unidad) and not turno.casillas_para_mover().has(casilla):
+		return
+	for vecina in _combate.contexto().tablero.vecinas(casilla):
+		_capa_ortogonales.set_cell(vecina, _FUENTE_MARCAS, _MARCA_ORTOGONAL)
+
+
+func _es_de_la_tribu(unidad: String) -> bool:
+	if unidad.is_empty():
+		return false
+	return unidad == Maestro.ID or _combate.contexto().plantel.criatura(unidad).bando == Criatura.Bando.TRIBU
+
+
 func casillas_afines() -> Array[Vector2i]:
 	return _capa_afines.get_used_cells()
 
@@ -999,6 +1026,7 @@ func _dibujar_marcas() -> void:
 	_capa_rivales.clear()
 	_capa_rivales_enemigas.clear()
 	_capa_destinos.clear()
+	_capa_ortogonales.clear()
 	_dibujar_alcanzan_huida()
 	if not _combate.esperando_jugador():
 		return
