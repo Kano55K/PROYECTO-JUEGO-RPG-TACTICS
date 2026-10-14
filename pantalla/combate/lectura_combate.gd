@@ -481,15 +481,14 @@ func botones_destino() -> Array[Dictionary]:
 	return botones
 
 
-# T30: el ultimo evento `destino_atacante` del registro que cerro la noche (no un
-# sellado fallido), o {}.
-func _destino_final() -> Dictionary:
-	var registro: Array[Dictionary] = _combate.registro().lineas()
-	for indice in range(registro.size() - 1, -1, -1):
-		var evento: Dictionary = registro[indice]
-		if evento["tipo"] == "destino_atacante" and evento["resultado"] != DestinoAtacante.RESULTADO_SELLADO_FALLIDO:
-			return evento
-	return {}
+# T30-fix: los eventos `destino_atacante` del registro, en orden (un sellado
+# fallido y, si ya se eligio, la salida que cerro la noche).
+func _eventos_destino() -> Array[Dictionary]:
+	var eventos: Array[Dictionary] = []
+	for evento in _combate.registro().lineas():
+		if evento["tipo"] == "destino_atacante":
+			eventos.append(evento)
+	return eventos
 
 
 # T19 (Sistema.md 10.5 y 10.6, Mundo.md 5), con la primera de sus rivales. La
@@ -629,11 +628,13 @@ func resultado(datos: Dictionary) -> Array[String]:
 		# T30 (Mundo.md 4.6): mientras espera su destino.
 		if _combate.esperando_destino():
 			lineas.append(_armador.armar(ClavesTextos.NOCTURNO_ATACANTE_CAIDA, _hueco(datos["atacante_pendiente"])))
-	# T30: con el destino elegido, sus lineas, antes de la lealtad de la noche.
-	if datos.get("destino_atacante") != null and datos["destino_atacante"]["opcion"] != null:
-		var destino: Dictionary = _destino_final()
-		if not destino.is_empty():
-			lineas.append_array(lineas_destino(destino))
+	# T30: las lineas de cada salida del destino, en orden, antes de la lealtad de
+	# la noche. T30-fix: tambien la de un sellado fallido mientras sigue esperando,
+	# con el mana que le quedo al Maestro (antes no se veia).
+	for destino in _eventos_destino():
+		lineas.append_array(lineas_destino(destino))
+		if destino["resultado"] == DestinoAtacante.RESULTADO_SELLADO_FALLIDO:
+			lineas.append("%s: %d" % [_armador.armar(ClavesTextos.PANEL_MANA), datos["maestro"]["mana"]])
 	if not (datos["lealtad_cambios"] as Array).is_empty():
 		lineas.append(_armador.armar(ClavesTextos.RESULTADO_LEALTAD))
 		for cambio in datos["lealtad_cambios"]:

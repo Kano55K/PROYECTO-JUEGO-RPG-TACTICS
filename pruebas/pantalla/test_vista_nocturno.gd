@@ -23,6 +23,7 @@ const _TEXTOS_PRUEBA: Dictionary = {
 	"nocturno.perdonar.tooltip": "Se va libre.",
 	"nocturno.sellar.tooltip": "Vuelve sin confianza.",
 	"nocturno.comer.tooltip": "Te da de comer.",
+	"sellar.fallo": "El hilo se suelta.",
 	"resultado.volver": "Volver",
 }
 
@@ -117,6 +118,8 @@ func test_clic_en_sellar_que_falla() -> void:
 	MousePrueba.clic_en(_centro(runner.find_child("Destino_sellar") as Button))
 	await runner.simulate_frames(1)
 	assert_bool(vista.combate().esperando_destino()).is_true()
+	# T30-fix: el fallo se ve en la pantalla de resultado.
+	assert_str((runner.find_child("TextoResultado") as Label).text).contains("El hilo se suelta.")
 	assert_array(_botones_destino(runner)).is_equal(["Destino_perdonar", "Destino_comer"])
 	assert_bool(vista.pulsar_destino("sellar")).is_false()
 	assert_bool(vista.pulsar_destino("comer")).is_true()

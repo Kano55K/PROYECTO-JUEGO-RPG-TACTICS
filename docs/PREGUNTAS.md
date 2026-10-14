@@ -679,3 +679,16 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Mientras tanto:** el usuario respondió en la sesión 2 de T30 y se programó con esa respuesta (abajo).
 - **Respuesta:** el usuario, en el chat de la sesión 2 de T30 (13/10/2026): "Queda con 10 puntos de vida". Programado como `tablas/combate.json` `vida_al_resellar` = 10 (esquema `combate`, requerido); los fixtures de combate llevan 1 (D-009). Falta que Sistemas lo pase a `Sistema.md` 4.4.
 - **Cerrada en:** T30
+
+## P-047 — En G el resellado falla siempre por la semilla fija
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T30-fix
+- **Fecha:** 13/10/2026
+- **Fuente:** `Arquitectura.md` B ("Semillas: arbitrarias…") y A.11 (azar: una semilla por partida); `datos/escenarios/g_ataque_nocturno.json` (`semilla: 777`)
+- **Duda:** ¿Se deja que G (y R, que recarga el mismo escenario) jueguen siempre con la semilla 777 hasta que T31 permita cambiarla, aunque eso haga que el resellado falle en todas las pruebas manuales?
+- **Caso que la dispara:** en G no hay ninguna tirada antes del destino, así que "Sellar de nuevo" es siempre la tirada 0 del generador de combate de la semilla 777: `entero(1, 100)` = **82**, y con 80 % falla siempre (grabación `registros/g_ataque_nocturno_777_4.jsonl`: `mana` 4 → 2 `resellar`, `tirada` índice 0 resultado 82, `destino_atacante` `sellado_fallido`; reproducida dos veces con `herramientas/reproducir.gd`, mismo 82). El usuario lo vio 6 de 6 veces. La cuenta está bien: con 2000 semillas distintas sale 1598 veces (79,9 %, `pruebas/datos/test_resellar_g.gd`).
+- **Opciones:** A) se deja así hasta T31 (panel de parámetros y semilla), y la prueba manual del éxito se hace con otra semilla en una copia de los datos (`--datos=`). B) G cambia de semilla (dato del escenario, decisión del staff). — Recomendación técnica: A (la política de semillas no se toca en un fix).
+- **Bloquea:** no
+- **Mientras tanto:** no se cambió ninguna semilla ni la política. Los tests de T30-fix buscan en el núcleo una semilla que sale y otra que falla.
+- **Respuesta:** _(la completa el staff)_

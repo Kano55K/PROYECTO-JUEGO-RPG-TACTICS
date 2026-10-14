@@ -195,3 +195,26 @@ func test_resultado_pendiente_y_final() -> void:
 	assert_int(lealtad).is_greater(perdon)
 	# rodauva_1, leal de 8: +1 de la victoria y +1 del perdon (Sistema.md 9.3 y 5.2).
 	assert_array(final).contains(["Rodauva: 8 → 10"])
+
+
+# T30-fix: tras un sellado fallido, el resultado (que sigue esperando) muestra la
+# linea del fallo y el mana que quedo, despues de la atacante caida. Si despues
+# se perdona, se ven las dos salidas en orden.
+func test_resultado_tras_un_sellado_fallido() -> void:
+	var escenario: Dictionary = MesaDestino.escenario()
+	escenario["semilla"] = MesaDestino.SEMILLA_FALLA
+	var lectura: LecturaCombate = _lectura_destino(escenario)
+	assert_bool(_combate.aplicar(Accion.destino_atacante("sellar")).valida).is_true()
+	var mana: Dictionary = _ultimo("mana")
+	assert_str(mana["motivo"]).is_equal(DestinoAtacante.MOTIVO_RESELLAR)
+	var pendiente: Array[String] = lectura.resultado(_combate.resultado().a_diccionario())
+	var caida: int = pendiente.find("La Ocarra cae y espera.")
+	var fallo: int = pendiente.find("El hilo se suelta.")
+	assert_int(caida).is_greater(-1)
+	assert_int(fallo).is_greater(caida)
+	assert_int(pendiente.find("Maná: %d" % mana["a"])).is_equal(fallo + 1)
+
+	assert_bool(_combate.aplicar(Accion.destino_atacante("perdonar")).valida).is_true()
+	var final: Array[String] = lectura.resultado(_combate.resultado().a_diccionario())
+	assert_int(final.find("Perdonas a la Ocarra.")).is_greater(final.find("El hilo se suelta."))
+	assert_int(final.find("El hilo se suelta.")).is_greater(-1)
