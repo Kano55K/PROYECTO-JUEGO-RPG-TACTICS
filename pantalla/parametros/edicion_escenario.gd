@@ -125,6 +125,38 @@ func difiere() -> bool:
 	return _escenario != _original
 
 
+# T31, sesion 2: "Restaurar del archivo".
+func restaurar() -> void:
+	_escenario = _original.duplicate(true)
+
+
+# Las rutas cuyo valor difiere del archivo, en el orden de campos(): {ruta:
+# valor}. La posicion de una guardada no es un campo: la sigue su estado.
+func cambios() -> Dictionary:
+	var resultado: Dictionary = {}
+	for candidato in campos():
+		var ruta: String = candidato["ruta"]
+		var actual: Variant = valor(ruta)
+		if actual != _contenedor(_original, ruta).get(_nombre(ruta)):
+			resultado[ruta] = actual
+	return resultado
+
+
+# T31, sesion 2 (recarga): una edicion nueva sobre el escenario y los datos
+# recien leidos, con los cambios de esta. Devuelve {edicion, no_aplicados}:
+# no_aplicados = [{ruta, motivo}] de los cambios que el archivo nuevo ya no
+# admite (nunca se pierden en silencio). Esta edicion no cambia.
+func sobre(original: Dictionary, datos: Dictionary, esquema: Dictionary) -> Dictionary:
+	var nueva: EdicionEscenario = EdicionEscenario.new(original, datos, esquema)
+	var no_aplicados: Array[Dictionary] = []
+	var pendientes: Dictionary = cambios()
+	for ruta in pendientes.keys():
+		var motivo: String = nueva.cambiar(ruta, pendientes[ruta])
+		if not motivo.is_empty():
+			no_aplicados.append({"ruta": ruta, "motivo": motivo})
+	return {"edicion": nueva, "no_aplicados": no_aplicados}
+
+
 # Los errores de la variante, del Cargador (mismo validador y mismos chequeos
 # cruzados que un archivo). Cada error suma "ruta": la del campo editable que
 # lo causa, o "" si no es de un campo editable.

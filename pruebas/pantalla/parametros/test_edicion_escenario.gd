@@ -277,3 +277,67 @@ func test_5_toggles_del_esquema() -> void:
 	assert_str(edicion.cambiar("toggles.toggle_prueba", true)).is_empty()
 	assert_bool(edicion.valor("toggles.toggle_prueba")).is_true()
 	assert_array(edicion.validar()).is_empty()
+
+
+# Sesion 2 (13): restaurar vuelve la copia al escenario del archivo.
+func test_restaurar_vuelve_al_archivo() -> void:
+	var edicion: EdicionEscenario = _edicion()
+	assert_str(edicion.cambiar("maestro.balanza", 3)).is_empty()
+	assert_str(edicion.cambiar("tribu.rodauva_1.estado", "guardada")).is_empty()
+	assert_str(edicion.cambiar("toggles.afines_contra_cobardia", true)).is_empty()
+	assert_bool(edicion.difiere()).is_true()
+	edicion.restaurar()
+	assert_bool(edicion.difiere()).is_false()
+	assert_dict(edicion.escenario()).is_equal(_escenario())
+
+
+# Sesion 2 (14): los cambios son las rutas cuyo valor difiere del archivo, en
+# el orden de campos(). La posicion no es un campo: va con el estado.
+func test_cambios_respecto_del_archivo() -> void:
+	var edicion: EdicionEscenario = _edicion()
+	assert_dict(edicion.cambios()).is_empty()
+	assert_str(edicion.cambiar("tribu.rodauva_1.estado", "guardada")).is_empty()
+	assert_str(edicion.cambiar("maestro.balanza", 3)).is_empty()
+	assert_str(edicion.cambiar("maestro.poder", 1)).is_empty()
+	var cambios: Dictionary = edicion.cambios()
+	assert_array(cambios.keys()).contains_exactly(["maestro.balanza", "tribu.rodauva_1.estado"])
+	assert_int(cambios["maestro.balanza"] as int).is_equal(3)
+	assert_str(cambios["tribu.rodauva_1.estado"] as String).is_equal("guardada")
+
+
+# Sesion 2 (14): tras una recarga, la variante es el archivo nuevo mas los
+# cambios. Un campo que no se toco toma el valor nuevo del disco.
+func test_sobre_otro_archivo_aplica_los_cambios() -> void:
+	var edicion: EdicionEscenario = _edicion()
+	assert_str(edicion.cambiar("maestro.balanza", 3)).is_empty()
+	assert_str(edicion.cambiar("tribu.rodauva_1.estado", "guardada")).is_empty()
+	var nuevo: Dictionary = _escenario()
+	_poner(nuevo, "maestro.poder", 2)
+
+	var rearmada: Dictionary = edicion.sobre(nuevo, _datos(), _esquema(_CARPETA_ESQUEMA_REAL))
+	assert_array(rearmada["no_aplicados"] as Array).is_empty()
+	var otra: EdicionEscenario = rearmada["edicion"]
+	assert_object(otra).is_not_same(edicion)
+	assert_int(otra.valor("maestro.poder") as int).is_equal(2)
+	assert_int(otra.valor("maestro.balanza") as int).is_equal(3)
+	assert_str(otra.valor("tribu.rodauva_1.estado") as String).is_equal("guardada")
+	assert_that(_leer(otra.escenario(), "tribu.rodauva_1.posicion")).is_null()
+	assert_array(otra.validar()).is_empty()
+	# La edicion vieja no cambio.
+	assert_int(edicion.valor("maestro.poder") as int).is_equal(1)
+
+
+# Sesion 2 (14): un cambio que el archivo nuevo ya no admite no se pierde en
+# silencio: vuelve con su ruta y su motivo.
+func test_sobre_otro_archivo_informa_lo_no_aplicado() -> void:
+	var edicion: EdicionEscenario = _edicion()
+	assert_str(edicion.cambiar("tribu.rodauva_1.lealtad", 2)).is_empty()
+	var nuevo: Dictionary = _escenario()
+	(nuevo["tribu"] as Array).remove_at(0)
+
+	var rearmada: Dictionary = edicion.sobre(nuevo, _datos(), _esquema(_CARPETA_ESQUEMA_REAL))
+	var no_aplicados: Array = rearmada["no_aplicados"]
+	assert_int(no_aplicados.size()).is_equal(1)
+	assert_str(no_aplicados[0]["ruta"] as String).is_equal("tribu.rodauva_1.lealtad")
+	assert_str(no_aplicados[0]["motivo"] as String).is_equal(EdicionEscenario.MOTIVO_CAMPO_NO_EDITABLE)
+	assert_bool((rearmada["edicion"] as EdicionEscenario).difiere()).is_false()
