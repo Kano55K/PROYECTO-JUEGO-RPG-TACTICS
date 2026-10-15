@@ -170,23 +170,36 @@ func test_f_sin_caidas_guardadas() -> void:
 
 # --- G: comer en mas del 70 % (destino de la atacante) ------------------------
 
-func _lote_g(comer: int) -> Array[Dictionary]:
+# fallo_y_comer: cuantas de las que no comen resellan, fallan y despues comen
+# (P-051 v1.8: cuentan como sellar).
+func _lote_g(comer: int, fallo_y_comer: int = 0) -> Array[Dictionary]:
 	var partidas: Array[Dictionary] = MesaPlaytest.lote("g_ataque_nocturno", 12)
 	for i in range(10):
-		var destino: Dictionary = {"opcion": "comer", "resultado": "comida"}
-		if i >= comer:
-			destino = {"opcion": "perdonar", "resultado": "perdonada"} if i % 2 == 0 \
-					else {"opcion": "sellar", "resultado": "sellada"}
+		var destino: Dictionary = {"opcion": "comer", "resultado": "comida", "primera_opcion": "comer"}
+		if i >= comer + fallo_y_comer:
+			destino = {"opcion": "perdonar", "resultado": "perdonada", "primera_opcion": "perdonar"} if i % 2 == 0 \
+					else {"opcion": "sellar", "resultado": "sellada", "primera_opcion": "sellar"}
+		elif i >= comer:
+			destino = {"opcion": "comer", "resultado": "comida", "primera_opcion": "sellar"}
 		(partidas[i]["resultado"] as Dictionary)["destino_atacante"] = destino
 	# P-051: una derrota (se fue) y una partida sin destino no entran en n.
 	(partidas[10]["resultado"] as Dictionary)["desenlace"] = "derrota_por_caida"
-	(partidas[10]["resultado"] as Dictionary)["destino_atacante"] = {"opcion": null, "resultado": "se_fue"}
+	(partidas[10]["resultado"] as Dictionary)["destino_atacante"] = {"opcion": null, "resultado": "se_fue",
+			"primera_opcion": null}
 	return partidas
 
 
 func test_g_comer_siempre() -> void:
 	_assert_alarma(_estado(_lote_g(7), "g_ataque_nocturno", "g_comer_siempre"), AlarmasPlaytest.ESTADO_OK, 70, 10)
 	_assert_alarma(_estado(_lote_g(8), "g_ataque_nocturno", "g_comer_siempre"), AlarmasPlaytest.ESTADO_ALARMA, 80, 10)
+
+
+# T45 (P-051, Sistema.md 11.9 v1.8): cuenta la primera opcion elegida. Con 7 que
+# comen y 3 que resellan, fallan y despues comen, comer es el 70 %, no el 100 %.
+func test_g_fallo_y_comer_cuenta_como_sellar() -> void:
+	_assert_alarma(_estado(_lote_g(7, 3), "g_ataque_nocturno", "g_comer_siempre"), AlarmasPlaytest.ESTADO_OK, 70, 10)
+	_assert_alarma(_estado(_lote_g(8, 2), "g_ataque_nocturno", "g_comer_siempre"),
+			AlarmasPlaytest.ESTADO_ALARMA, 80, 10)
 
 
 # --- H contra C: victorias de H mas de 20 puntos por encima (desenlace) -------

@@ -17,7 +17,7 @@ func _assert_se_fue(combate: Combate) -> Dictionary:
 	var errores: Array[Dictionary] = MesaNocturno.errores_esquema(resultado, "resultado")
 	assert_array(errores).override_failure_message(str(errores)).is_empty()
 	assert_object(resultado["atacante_pendiente"]).is_null()
-	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": null, "resultado": "se_fue"})
+	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": null, "resultado": "se_fue", "primera_opcion": null})
 	var atacante: Dictionary = {}
 	for unidad: Dictionary in resultado["unidades"]:
 		if unidad["id"] == MesaNocturno.ATACANTE:

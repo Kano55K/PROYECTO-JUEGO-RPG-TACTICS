@@ -28,6 +28,7 @@ const _ORDEN_SELLAR: Array[ResultadoAccion.Motivo] = [
 	ResultadoAccion.Motivo.FUERA_DE_ALCANCE,
 	ResultadoAccion.Motivo.NO_SELLABLE,
 	ResultadoAccion.Motivo.RANGO_ALTO,
+	ResultadoAccion.Motivo.SIN_PROBABILIDAD,
 	ResultadoAccion.Motivo.MANA_INSUFICIENTE,
 ]
 # T27: los motivos de una caida de _motivo_guardar_caida, en el orden en que los
@@ -1203,20 +1204,24 @@ func _remiendo(hechizo_id: String, objetivo_id: String, aplica: bool) -> Resulta
 
 # Sistema.md 4.1 a 4.3 y 2.3 (T24): el Maestro sella a una salvaje de pie. Gasta
 # la accion y conserva el movimiento. El % sale de la vida de ahora (Sellado);
-# erizada no lo cambia (S-51). Se paga el mana; con % > 0, una tirada del
-# generador de combate; con 0, sin tirada y falla (S-50). Si falla, el pergamino
-# no se gasta (S-49). Si sale, el primer pergamino en blanco queda ocupado por
-# ella y deja el tablero como fuera (sus surcos se cierran). La cadena (10.2) y
-# el fin (11.5) los mira _resolver despues, como en cualquier accion.
+# erizada no lo cambia (S-51). Se paga el mana y se tira con el generador de
+# combate. Con 0 % no se puede intentar (4.1 v1.8, S-50, T45): el rechazo
+# SIN_PROBABILIDAD igual lleva el 0 % y el costo, para mostrarlos. Si falla, el
+# pergamino no se gasta (S-49). Si sale, el primer pergamino en blanco queda
+# ocupado por ella y deja el tablero como fuera (sus surcos se cierran). La
+# cadena (10.2) y el fin (11.5) los mira _resolver despues, como en cualquier accion.
 func _sellar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	var motivo: ResultadoAccion.Motivo = _motivo_sellar(objetivo_id)
-	if motivo != ResultadoAccion.Motivo.NINGUNO:
+	if motivo != ResultadoAccion.Motivo.NINGUNO and motivo != ResultadoAccion.Motivo.SIN_PROBABILIDAD:
 		return ResultadoAccion.rechazada(motivo)
 	var maestro: Maestro = _plantel.maestro
 	var criatura: Criatura = _plantel.criatura(objetivo_id)
-	var resultado: ResultadoAccion = ResultadoAccion.aceptada()
+	var resultado: ResultadoAccion = ResultadoAccion.aceptada() if motivo == ResultadoAccion.Motivo.NINGUNO \
+			else ResultadoAccion.rechazada(motivo)
 	resultado.porcentaje = _sellado.porcentaje_de(criatura)
 	resultado.costo = _sellado.costo(criatura.especie, maestro)
+	if not resultado.valida:
+		return resultado
 	if resultado.costo != 0:
 		resultado.mana = {"de": maestro.mana, "a": maestro.mana - resultado.costo}
 	if not aplica:
@@ -1224,11 +1229,8 @@ func _sellar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 	maestro.mana -= resultado.costo
 	accion_usada = true
 	ataques_restantes = 0
-	var tiro: Variant = null
-	var logrado: bool = false
-	if (resultado.porcentaje as int) > 0:
-		tiro = Porcentajes.tiro(_azar)
-		logrado = Porcentajes.sale(tiro, resultado.porcentaje)
+	var tiro: int = Porcentajes.tiro(_azar)
+	var logrado: bool = Porcentajes.sale(tiro, resultado.porcentaje)
 	var pergamino_id: Variant = null
 	if logrado:
 		var pergamino: Pergamino = _plantel.pergamino_en_blanco()
@@ -1245,8 +1247,9 @@ func _sellar(objetivo_id: String, aplica: bool) -> ResultadoAccion:
 # consultas y la pantalla. Primero lo del Maestro (_motivo_puede_sellar); despues
 # la objetivo, en el orden de _ORDEN_SELLAR: la consulta unica (Objetivos HOSTIL:
 # de pie y no oculta, S-21; el bando lo mira la accion), salvaje, distancia
-# Manhattan <= alcance, ficha sellable, rango <= el maximo de la balanza y, al
-# final, el mana del costo de esa objetivo. Nada se decide por el id.
+# Manhattan <= alcance, ficha sellable, rango <= el maximo de la balanza, un %
+# mayor que 0 (4.1 v1.8, S-50, T45; recien ahi se puede calcular) y, al final,
+# el mana del costo de esa objetivo. Nada se decide por el id.
 func _motivo_sellar(objetivo_id: String) -> ResultadoAccion.Motivo:
 	var motivo: ResultadoAccion.Motivo = _motivo_puede_sellar()
 	if motivo != ResultadoAccion.Motivo.NINGUNO:
@@ -1267,6 +1270,8 @@ func _motivo_sellar(objetivo_id: String) -> ResultadoAccion.Motivo:
 		return ResultadoAccion.Motivo.NO_SELLABLE
 	if not _sellado.rango_permitido(criatura.especie, _plantel.maestro):
 		return ResultadoAccion.Motivo.RANGO_ALTO
+	if _sellado.porcentaje_de(criatura) == 0:
+		return ResultadoAccion.Motivo.SIN_PROBABILIDAD
 	if _plantel.maestro.mana < _sellado.costo(criatura.especie, _plantel.maestro):
 		return ResultadoAccion.Motivo.MANA_INSUFICIENTE
 	return ResultadoAccion.Motivo.NINGUNO

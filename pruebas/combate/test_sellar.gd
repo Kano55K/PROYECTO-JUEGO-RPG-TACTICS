@@ -98,7 +98,15 @@ func test_un_caso_por_motivo_en_orden() -> void:
 	mesa = MesaSellar.new({Maestro.ID: _MAESTRO_EN, "r2_s1": _A_DOS}, 1)
 	_solo(mesa, "r2_s1")
 	_caso(mesa, mesa.turno(), "r2_s1", ResultadoAccion.Motivo.RANGO_ALTO)
-	# 12 Mana insuficiente (2 contra un costo de 3).
+	# 12 Sin probabilidad (T45, Sistema.md 4.1 v1.8, S-50): rango 2 con la vida
+	# completa y la balanza 2 da 0 %. Va antes que el mana: con 0 % y sin mana,
+	# el motivo es la probabilidad.
+	mesa = MesaSellar.new({Maestro.ID: _MAESTRO_EN, "r2_s1": _A_DOS})
+	_solo(mesa, "r2_s1")
+	turno = mesa.turno()
+	mesa.plantel.maestro.mana = 0
+	_caso(mesa, turno, "r2_s1", ResultadoAccion.Motivo.SIN_PROBABILIDAD)
+	# 13 Mana insuficiente (2 contra un costo de 3).
 	mesa = MesaSellar.new({Maestro.ID: _MAESTRO_EN, "ocarra_s1": _A_DOS})
 	_solo(mesa, "ocarra_s1")
 	turno = mesa.turno()
@@ -215,20 +223,48 @@ func test_exito_sin_ser_la_ultima_sigue_el_combate() -> void:
 	assert_int(resultado.fin).is_equal(FinCombate.Fin.EN_CURSO)
 
 
-# (7) S-50: con 0 % (rango 2 con la vida completa) no hay tirada, falla y el mana
-# se gasta igual.
-func test_cero_por_ciento_sin_tirada() -> void:
+# (7) Reescrito en T45 (Sistema.md 4.1 v1.8, S-50: "con 0 % no se puede
+# intentar"). Antes, con 0 % se gastaba el mana y fallaba sin tirar. Ahora, una
+# salvaje de rango 2 con mas de 75 % de vida (19 de 24) y la balanza 2 se
+# rechaza con SIN_PROBABILIDAD: sin gastar mana ni accion, sin tocar el
+# generador, y el 0 % se sigue viendo en la previsualizacion. motivo_sellar dice
+# lo mismo que validar. Con 18 de 24 (75 %: 10 %), vale; el 5 % de la Ocarra
+# entera (rango 1) vale en test_fallo.
+func test_sin_probabilidad() -> void:
 	var mesa: MesaSellar = MesaSellar.new({Maestro.ID: _MAESTRO_EN, "r2_s1": _A_DOS})
+	_solo(mesa, "r2_s1")
+	mesa.plantel.criatura("r2_s1").vida = 19
 	var azar: GeneradorAzar = GeneradorAzar.new(_SEMILLA_SALE)
 	var turno: Turno = mesa.turno(Maestro.ID, azar)
 	var tiradas: int = azar.historial().size()
+	var antes: String = mesa.foto(turno)
 	var resultado: ResultadoAccion = turno.aplicar(Accion.sellar("r2_s1"))
-	assert_int(resultado.porcentaje).is_equal(0)
+	assert_bool(resultado.valida).is_false()
+	assert_int(resultado.motivo).is_equal(ResultadoAccion.Motivo.SIN_PROBABILIDAD)
+	assert_int(turno.motivo_sellar()).is_equal(ResultadoAccion.Motivo.SIN_PROBABILIDAD)
+	assert_str(mesa.foto(turno)).is_equal(antes)
 	assert_int(azar.historial().size()).is_equal(tiradas)
-	assert_dict(resultado.evento).is_equal({"tipo": "sellado", "objetivo": "r2_s1", "porcentaje": 0, "tiro": null,
-			"resultado": "fallido", "pergamino": null})
-	assert_int(mesa.plantel.maestro.mana).is_equal(3)
-	assert_bool(turno.accion_usada).is_true()
+	assert_int(mesa.plantel.maestro.mana).is_equal(8)
+	assert_bool(turno.accion_usada).is_false()
+	var previa: ResultadoAccion = turno.previsualizar_sellar("r2_s1")
+	assert_int(previa.motivo).is_equal(ResultadoAccion.Motivo.SIN_PROBABILIDAD)
+	assert_int(previa.porcentaje).is_equal(0)
+	assert_int(previa.costo).is_equal(5)
+	# Con 10 %, vale.
+	mesa.plantel.criatura("r2_s1").vida = 18
+	assert_int(turno.motivo_sellar()).is_equal(ResultadoAccion.Motivo.NINGUNO)
+	resultado = turno.aplicar(Accion.sellar("r2_s1"))
+	assert_bool(resultado.valida).is_true()
+	assert_int(resultado.porcentaje).is_equal(10)
+
+
+# (7) T45 (Sistema.md 4.1 v1.8, S-50): la salvaje con 0 % no esta en
+# objetivos_para_sellar; con 10 % si.
+func test_sin_probabilidad_no_es_objetivo() -> void:
+	var mesa: MesaSellar = MesaSellar.new({Maestro.ID: _MAESTRO_EN, "r2_s1": _A_DOS, "ocarra_s1": Vector2i(4, 5)})
+	assert_array(mesa.turno().objetivos_para_sellar()).contains_exactly(["ocarra_s1"])
+	mesa.plantel.criatura("r2_s1").vida = 18
+	assert_array(mesa.turno().objetivos_para_sellar()).contains_exactly(["ocarra_s1", "r2_s1"])
 
 
 # Accion.sellar ida y vuelta (registro y grabacion, A.7).

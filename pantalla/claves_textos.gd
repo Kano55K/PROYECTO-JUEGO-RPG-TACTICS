@@ -108,6 +108,8 @@ const AVISO_SELLAR_NO_SELLABLE: String = "aviso.sellar.no_sellable"
 const AVISO_SELLAR_OCULTA: String = "aviso.sellar.oculta"
 const AVISO_SELLAR_NO_SALVAJE: String = "aviso.sellar.no_salvaje"
 const AVISO_SELLAR_SIN_OBJETIVOS: String = "aviso.sellar.sin_objetivos"
+# T45 (Sistema.md 4.1 v1.8, S-50): clave confirmada por el Arquitecto; falta en es.json v1.5.
+const AVISO_SELLAR_SIN_PROBABILIDAD: String = "aviso.sellar.sin_probabilidad"
 # T25 (Sistema.md 11.7): la huida de las salvajes. La marca y el tooltip del %
 # no existen en es.json (nombres propuestos). El suceso de la huida es
 # huida.salvaje con la variante de la especie (estan las cinco); el de quedarse,
@@ -206,6 +208,7 @@ const FIJAS: Array[String] = [
 	ACCION_SELLAR, SELLAR_TOOLTIP, SELLAR_EXITO, SELLAR_FALLO, SELLAR_FALLO_ERIZADA, SELLAR_RANGO_ALTO,
 	PERGAMINO_SIN_BLANCO, AVISO_SELLAR_ACCION_USADA, AVISO_SELLAR_MANA, AVISO_SELLAR_FUERA_DE_ALCANCE,
 	AVISO_SELLAR_NO_SELLABLE, AVISO_SELLAR_OCULTA, AVISO_SELLAR_NO_SALVAJE, AVISO_SELLAR_SIN_OBJETIVOS,
+	AVISO_SELLAR_SIN_PROBABILIDAD,
 	MARCA_HUIDA, HUIDA_PORCENTAJE,
 	ACCION_GUARDAR, GUARDAR, GUARDAR_TOOLTIP, ACCION_INVOCAR, INVOCAR, INVOCAR_TOOLTIP,
 	AVISO_INVOCAR_YA_SE_MOVIO, AVISO_INVOCAR_ACCION_USADA, AVISO_INVOCAR_MANA, AVISO_INVOCAR_SIN_CASILLA_LIBRE,
@@ -381,6 +384,8 @@ static func motivo_sellar(motivo: ResultadoAccion.Motivo) -> String:
 			return AVISO_SELLAR_NO_SELLABLE
 		ResultadoAccion.Motivo.RANGO_ALTO:
 			return SELLAR_RANGO_ALTO
+		ResultadoAccion.Motivo.SIN_PROBABILIDAD:
+			return AVISO_SELLAR_SIN_PROBABILIDAD
 		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
 			return AVISO_SELLAR_MANA
 		ResultadoAccion.Motivo.SIN_OBJETIVOS:

@@ -34,10 +34,13 @@ func _datos() -> Dictionary:
 
 
 # maestro_en: otra casilla para el Maestro (Criatura.SIN_POSICION: la del escenario).
-func _vista(maestro_en: Vector2i = Criatura.SIN_POSICION) -> GdUnitSceneRunner:
+# vida_surcon: otra vida para el Surcon salvaje (-1: la del escenario).
+func _vista(maestro_en: Vector2i = Criatura.SIN_POSICION, vida_surcon: int = -1) -> GdUnitSceneRunner:
 	var escenario: Dictionary = LectorFixture.leer(_ESCENARIO, "escenario")["datos"]
 	if maestro_en != Criatura.SIN_POSICION:
 		escenario["maestro"]["posicion"] = [maestro_en.x, maestro_en.y]
+	if vida_surcon >= 0:
+		escenario["enemigas"][0]["vida"] = vida_surcon
 	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
 	(runner.scene() as VistaCombate).pausa_ia = 0.0
 	MousePrueba.preparar(runner.scene() as VistaCombate)
@@ -116,6 +119,23 @@ func test_boton_deshabilitado_con_el_motivo() -> void:
 	assert_str(boton.tooltip_text).is_equal("[FALTA: aviso.sellar.fuera_de_alcance]")
 	assert_bool(vista.pulsar_sellar()).is_false()
 	assert_bool(vista.eligiendo_sellar()).is_false()
+
+
+# T45 (Sistema.md 4.1 v1.8, S-50): con el Surcon entero (24 de 24, rango 2 y
+# balanza 3: 0 %), el boton esta deshabilitado con aviso.sellar.sin_probabilidad
+# (falta en es.json v1.5) y el 0 % se sigue viendo sobre la salvaje.
+func test_boton_deshabilitado_sin_probabilidad() -> void:
+	var runner: GdUnitSceneRunner = _vista(Criatura.SIN_POSICION, 24)
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = runner.scene()
+	_hasta_el_maestro(vista)
+	assert_int(vista.combate().turno_actual().motivo_sellar()).is_equal(ResultadoAccion.Motivo.SIN_PROBABILIDAD)
+	var boton: Button = runner.find_child("Sellar")
+	assert_bool(boton.disabled).is_true()
+	assert_str(boton.tooltip_text).is_equal("[FALTA: aviso.sellar.sin_probabilidad]")
+	assert_bool(vista.pulsar_sellar()).is_false()
+	assert_int(vista.combate().porcentaje_sellado("surcon_s1")).is_equal(0)
+	assert_str(_ficha(vista, "surcon_s1").texto_marcas()).contains("0%")
 
 
 # (10) El % sobre la salvaje (marca de la ficha y tooltip) es el de

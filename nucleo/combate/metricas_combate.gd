@@ -63,6 +63,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 	var distancias: Array = []
 	var usos: Dictionary = {}
 	var encierros: Dictionary = {}
+	# 14 (T45, D-016): unidad -> cantidad de eventos invocacion.
+	var invocaciones: Dictionary = {}
 	var activas: Dictionary = {"surcos": 0, "ocultos": 0, "destapes_contacto": 0, "bonos_cobrados": 0,
 			"bonos_perdidos": 0, "cambios_modo": []}
 
@@ -136,6 +138,8 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 			"cambio_modo":
 				(activas["cambios_modo"] as Array).append({"unidad": linea["unidad"], "de": linea["de"],
 						"a": linea["a"], "ronda": ronda})
+			"invocacion":
+				invocaciones[linea["unidad"]] = invocaciones.get(linea["unidad"], 0) + 1
 			"encierro":
 				encierros[linea["unidad"]] = encierros.get(linea["unidad"], 0) + 1
 			"sellado":
@@ -155,6 +159,7 @@ static func calcular(escenario: Dictionary, lineas: Array[Dictionary]) -> Dictio
 		muertes.append({"unidad": unidad_id, "causa": desenlace})
 	activas["usos"] = _usos_en_orden(bandos, usos)
 	activas["encierros"] = _encierros_en_orden(bandos, encierros)
+	activas["invocaciones"] = _invocaciones_en_orden(bandos, invocaciones)
 
 	return {
 		# 1
@@ -236,3 +241,12 @@ static func _encierros_en_orden(bandos: Dictionary, encierros: Dictionary) -> Ar
 		if encierros.has(unidad_id):
 			lista.append({"unidad": unidad_id, "turnos": encierros[unidad_id]})
 	return lista
+
+
+# T45 (D-016): {unidad: cantidad}, solo las invocadas, en el orden del escenario.
+static func _invocaciones_en_orden(bandos: Dictionary, invocaciones: Dictionary) -> Dictionary:
+	var en_orden: Dictionary = {}
+	for unidad_id in bandos.keys():
+		if invocaciones.has(unidad_id):
+			en_orden[unidad_id] = invocaciones[unidad_id]
+	return en_orden

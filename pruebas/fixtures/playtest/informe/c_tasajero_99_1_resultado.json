@@ -5,7 +5,7 @@
 	"maestro": {"vida": 10, "posicion": [0, 0], "mana": 0, "hambre": 3},
 	"unidades": [], "levantadas": [], "muertas": [], "capturas": [], "lealtad_cambios": [],
 	"pergaminos": {"en_blanco": 0, "ardidos": []},
-	"atacante_pendiente": null, "destino_atacante": {"opcion": "comer", "resultado": "comida"},
+	"atacante_pendiente": null, "destino_atacante": {"opcion": "comer", "resultado": "comida", "primera_opcion": "comer"},
 	"metricas": {
 		"rondas": {"totales": 4, "primer_ataque": 2, "de_pelea": 3},
 		"secundar": {"usos": 0},
@@ -16,6 +16,6 @@
 		"sellados": [], "capturas_perdidas": [], "caidas": [], "caidas_guardadas": [], "muertes": [],
 		"rescate": null, "distancia_maestro": {"turnos": 2, "suma": 5},
 		"activas": {"usos": [], "surcos": 0, "ocultos": 0, "destapes_contacto": 0, "bonos_cobrados": 0,
-				"bonos_perdidos": 0, "cambios_modo": [], "encierros": []}
+				"bonos_perdidos": 0, "cambios_modo": [], "encierros": [], "invocaciones": {}}
 	}
 }

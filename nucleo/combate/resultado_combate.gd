@@ -27,10 +27,12 @@ const DESTINO_SE_FUE: String = "se_fue"
 # id de la atacante nocturna caida tras una victoria, que espera su destino
 # (Sistema.md 9.3), o "".
 var atacante_pendiente: String = ""
-# Sistema.md 9.2 y 9.3 (T30): {opcion, resultado} o {} (null en el diccionario).
-# Con la derrota o la huida (P-024, S-66), {opcion: null, resultado: se_fue}. Con
-# la victoria, lo pone el Combate cuando el destino se decide (perdonada, sellada
-# o comida); mientras espera, {} y atacante_pendiente.
+# Sistema.md 9.2 y 9.3 (T30): {opcion, resultado, primera_opcion} o {} (null en el
+# diccionario). Con la derrota o la huida (P-024, S-66), {opcion: null, resultado:
+# se_fue, primera_opcion: null}. Con la victoria, lo pone el Combate cuando el
+# destino se decide (perdonada, sellada o comida); mientras espera, {} y
+# atacante_pendiente. primera_opcion (T45, P-051, 11.9 v1.8): la primera opcion
+# elegida (sellar, si se resello, fallo y despues se eligio otra).
 var destino_atacante: Dictionary = {}
 # Sistema.md 11.9 (T23, D-011): MetricasCombate.calcular sobre el registro
 # completo. La llena el Combate despues del evento `cierre`.
@@ -77,7 +79,7 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 		if atacante != null:
 			resultado.atacante_pendiente = atacante.id
 	if not cierre.se_fueron.is_empty():
-		resultado.destino_atacante = {"opcion": null, "resultado": DESTINO_SE_FUE}
+		resultado.destino_atacante = {"opcion": null, "resultado": DESTINO_SE_FUE, "primera_opcion": null}
 	resultado._maestro = {
 		"vida": plantel.maestro.vida,
 		"posicion": Plantel.casilla_a_lista(plantel.maestro.posicion),
