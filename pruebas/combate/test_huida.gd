@@ -6,7 +6,7 @@ extends GdUnitTestSuite
 # el 25 % es 7,5) y especie_huida_1 (1 %); la Rodauva (50 %, vida 8), la Ocarra
 # (0 %) y el Tasajero (25 %, vida 30, Caza hasta el 50 %) de la fixture.
 # GeneradorAzar.new(1) tira primero 98 (se queda); GeneradorAzar.new(6), 7.
-# Sistema.md 11.7, 11.3 paso 2, 9.2 punto 5 y S-52.
+# Sistema.md 11.7 v1.8, 11.3 paso 2, 9.2 punto 5 y S-52.
 const _CARPETA: String = "res://pruebas/fixtures/combate/"
 const _HUYE: String = "huye_s1"
 const _QUEDA: String = "queda_s1"
@@ -22,20 +22,20 @@ const _RODAUVA_TRIBU: String = "rodauva_1"
 func test_umbral_de_vida() -> void:
 	var mesa: MesaHuida = MesaHuida.new({_HUYE: 7, _RODAUVA_S: 2})
 	var huida: Huida = mesa.reglas.huida
-	assert_int(huida.porcentaje(_HUYE, mesa.plantel, false)).is_equal(100)
-	assert_int(huida.porcentaje(_RODAUVA_S, mesa.plantel, false)).is_equal(50)
+	assert_int(huida.porcentaje(_HUYE, mesa.plantel)).is_equal(100)
+	assert_int(huida.porcentaje(_RODAUVA_S, mesa.plantel)).is_equal(50)
 	mesa.plantel.criatura(_HUYE).vida = 8
 	mesa.plantel.criatura(_RODAUVA_S).vida = 3
-	assert_int(huida.porcentaje(_HUYE, mesa.plantel, false)).is_equal(0)
-	assert_int(huida.porcentaje(_RODAUVA_S, mesa.plantel, false)).is_equal(0)
+	assert_int(huida.porcentaje(_HUYE, mesa.plantel)).is_equal(0)
+	assert_int(huida.porcentaje(_RODAUVA_S, mesa.plantel)).is_equal(0)
 
 
 # (1) Una especie con 0 % (la Ocarra, "valiente de mas") no huye aunque este
-# por debajo del umbral.
+# por debajo del umbral. Reescrito en T45 (Sistema.md 11.7 v1.8, S-52): sale el
+# +25 de la acobardada, asi que ya no hay caso en que la Ocarra tire.
 func test_especie_con_cero() -> void:
 	var mesa: MesaHuida = MesaHuida.new({_OCARRA: 3})
-	assert_int(mesa.reglas.huida.porcentaje(_OCARRA, mesa.plantel, false)).is_equal(0)
-	assert_int(mesa.reglas.huida.porcentaje(_OCARRA, mesa.plantel, true)).is_equal(25)
+	assert_int(mesa.reglas.huida.porcentaje(_OCARRA, mesa.plantel)).is_equal(0)
 
 
 # (1) S-52: la enconada no huye. En el paso 2 cuenta como enconada la que tiene
@@ -44,28 +44,28 @@ func test_enconada_con_encono_al_maximo_da_cero() -> void:
 	var mesa: MesaHuida = MesaHuida.new({_HUYE: 7})
 	var huida: Huida = mesa.reglas.huida
 	mesa.plantel.criatura(_HUYE).encono = 3
-	assert_int(huida.porcentaje(_HUYE, mesa.plantel, false)).is_equal(0)
-	assert_int(huida.porcentaje(_HUYE, mesa.plantel, true)).is_equal(0)
+	assert_int(huida.porcentaje(_HUYE, mesa.plantel)).is_equal(0)
 	mesa.plantel.criatura(_HUYE).encono = 2
-	assert_int(huida.porcentaje(_HUYE, mesa.plantel, false)).is_equal(100)
+	assert_int(huida.porcentaje(_HUYE, mesa.plantel)).is_equal(100)
 
 
-# (1) La acobardada suma 25 (parametro, S-52) y se recorta a 100. Al empezar el
-# turno nunca cuenta como acobardada: porcentaje_al_empezar = sin el +25.
-func test_acobardada_suma_y_recorta() -> void:
+# (1) Reescrito en T45 (Sistema.md 11.7 v1.8, S-52): sale el +25 de la
+# acobardada. El % es el de la ficha (Rodauva 50; la de 100, sin pasarse), el
+# mismo que tira el Turno al empezar.
+func test_el_porcentaje_es_el_de_la_ficha() -> void:
 	var mesa: MesaHuida = MesaHuida.new({_RODAUVA_S: 2, _HUYE: 7})
 	var huida: Huida = mesa.reglas.huida
-	assert_int(huida.porcentaje(_RODAUVA_S, mesa.plantel, true)).is_equal(75)
-	assert_int(huida.porcentaje(_HUYE, mesa.plantel, true)).is_equal(100)
-	assert_int(huida.porcentaje_al_empezar(_RODAUVA_S, mesa.plantel)).is_equal(50)
-	assert_int(huida.porcentaje_al_empezar(_HUYE, mesa.plantel)).is_equal(100)
+	assert_int(huida.porcentaje(_RODAUVA_S, mesa.plantel)).is_equal(50)
+	assert_int(huida.porcentaje(_HUYE, mesa.plantel)).is_equal(100)
+	assert_int(huida.tirar(_RODAUVA_S, mesa.plantel, GeneradorAzar.new(1))["porcentaje"]).is_equal(50)
 
 
 # (1) Sin un dato de tablas/combate.json la regla no se arma (sin valores por defecto).
+# Reescrito en T45 (Sistema.md 11.7 v1.8, S-52): sale acobardada_pts.
 func test_sin_un_dato_no_se_arma() -> void:
 	var tabla: Dictionary = LectorFixture.leer(_CARPETA + "combate.json", "combate")["datos"]
 	assert_object(Huida.desde_datos(tabla)).is_not_null()
-	for camino in [["huida_salvaje", "umbral_vida_pct"], ["huida_salvaje", "acobardada_pts"], ["encono", "max_puntos"]]:
+	for camino in [["huida_salvaje", "umbral_vida_pct"], ["encono", "max_puntos"]]:
 		var copia: Dictionary = tabla.duplicate(true)
 		(copia[camino[0]] as Dictionary).erase(camino[1])
 		assert_object(Huida.desde_datos(copia)).override_failure_message(str(camino)).is_null()
@@ -76,7 +76,7 @@ func test_sin_un_dato_no_se_arma() -> void:
 func test_solo_salvajes() -> void:
 	var mesa: MesaHuida = MesaHuida.new({_ATACANTE: 1, _RODAUVA_TRIBU: 1, Maestro.ID: 1})
 	for unidad_id in [_ATACANTE, _RODAUVA_TRIBU, Maestro.ID]:
-		assert_int(mesa.reglas.huida.porcentaje_al_empezar(unidad_id, mesa.plantel)) \
+		assert_int(mesa.reglas.huida.porcentaje(unidad_id, mesa.plantel)) \
 				.override_failure_message(unidad_id).is_equal(0)
 		var azar: GeneradorAzar = GeneradorAzar.new(1)
 		var turno: Turno = mesa.turno(unidad_id, azar)
@@ -89,7 +89,7 @@ func test_solo_salvajes() -> void:
 func test_fuera_da_cero() -> void:
 	var mesa: MesaHuida = MesaHuida.new({_HUYE: 0})
 	VidaCero.sacar_del_tablero(mesa.plantel.criatura(_HUYE), mesa.surcos)
-	assert_int(mesa.reglas.huida.porcentaje_al_empezar(_HUYE, mesa.plantel)).is_equal(0)
+	assert_int(mesa.reglas.huida.porcentaje(_HUYE, mesa.plantel)).is_equal(0)
 
 
 # (3) Huye: una tirada; queda fuera, sin posicion, con sus surcos cerrados, y el

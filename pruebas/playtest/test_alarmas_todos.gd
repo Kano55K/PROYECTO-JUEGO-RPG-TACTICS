@@ -48,8 +48,10 @@ func _usos(unidad: String, erizarse: int, hacerse_junco: int) -> Dictionary:
 
 
 # C con la tribu y el Tasajero en resultado.unidades; "usada" partidas usan
-# Erizarse. Una enemiga que se eriza no cuenta como uso de la tribu.
-func _lote_erizarse(usada: int, variante: Dictionary = {}, estado_final: String = "suelta") -> Array[Dictionary]:
+# Erizarse. Una enemiga que se eriza no cuenta como uso de la tribu. invocada:
+# en las 10, la metrica 14 dice que rodauva_1 fue invocada una vez (D-016).
+func _lote_erizarse(usada: int, variante: Dictionary = {}, estado_final: String = "suelta",
+		invocada: bool = false) -> Array[Dictionary]:
 	var partidas: Array[Dictionary] = MesaPlaytest.lote("c_tasajero", 10, 3, variante)
 	for i in range(10):
 		(partidas[i]["resultado"] as Dictionary)["unidades"] = [
@@ -62,6 +64,8 @@ func _lote_erizarse(usada: int, variante: Dictionary = {}, estado_final: String 
 		if i < usada:
 			usos.append(_usos("rodauva_1", 1, 0))
 		(MesaPlaytest.metricas(partidas[i])["activas"] as Dictionary)["usos"] = usos
+		if invocada:
+			(MesaPlaytest.metricas(partidas[i])["activas"] as Dictionary)["invocaciones"] = {"rodauva_1": 1}
 	return partidas
 
 
@@ -80,18 +84,50 @@ func test_activa_no_disponible_no_cuenta() -> void:
 			AlarmasPlaytest.ESTADO_INSUFICIENTE, null, 0)
 
 
-# (9) Empezo guardada y termino en el tablero: la invocaron, estuvo disponible.
+# (9) Reescrito en T45 (D-016, P-052; Sistema.md 11.9 v1.8): disponible = empezo
+# suelta o fue invocada (metrica 14, invocaciones). La Rodauva empieza guardada,
+# se invoca, no se eriza (salvo en 1) y termina guardada otra vez: entra en n.
 func test_activa_invocada_esta_disponible() -> void:
 	var guardada: Dictionary = {"tribu.rodauva_1.estado": "guardada"}
-	_assert_alarma(_estado(_lote_erizarse(1, guardada, "caida"), "c_tasajero", "todos_activa_erizarse", guardada),
-			AlarmasPlaytest.ESTADO_ALARMA, 10, 10)
+	_assert_alarma(_estado(_lote_erizarse(1, guardada, "guardada", true), "c_tasajero", "todos_activa_erizarse",
+			guardada), AlarmasPlaytest.ESTADO_ALARMA, 10, 10)
 
 
-# (9) Si la uso, estuvo disponible, aunque haya terminado guardada.
-func test_activa_usada_esta_disponible() -> void:
+# (9) Reescrito en T45 (D-016, P-052; Sistema.md 11.9 v1.8): sale la deduccion de
+# T33. Empezo guardada y no fue invocada: no estuvo disponible, aunque el
+# resultado diga que termino caida o tenga usos.
+func test_sin_invocar_no_esta_disponible() -> void:
 	var guardada: Dictionary = {"tribu.rodauva_1.estado": "guardada"}
-	_assert_alarma(_estado(_lote_erizarse(2, guardada, "guardada"), "c_tasajero", "todos_activa_erizarse", guardada),
-			AlarmasPlaytest.ESTADO_OK, 100, 2)
+	_assert_alarma(_estado(_lote_erizarse(2, guardada, "caida"), "c_tasajero", "todos_activa_erizarse", guardada),
+			AlarmasPlaytest.ESTADO_INSUFICIENTE, null, 0)
+
+
+# T45 (D-016, criterio 6): con la variante desconocida (resultado sin ficha) no se
+# sabe con que estado empezo, pero la invocada esta disponible: la Rodauva
+# invocada que no se eriza entra en n como no usada.
+func test_activa_invocada_en_la_variante_desconocida() -> void:
+	var partidas: Array[Dictionary] = _lote_erizarse(1, {}, "guardada", true)
+	for partida in partidas:
+		var errores: Array[Dictionary] = MesaPlaytest.errores(partida)
+		assert_array(errores).override_failure_message(str(errores)).is_empty()
+		partida["ficha"] = FichaPlaytest.desconocida(partida["resultado"], MesaPlaytest.semillas())
+	var alarma: Dictionary = {}
+	for grupo in (MesaPlaytest.calcular(partidas)["grupos"] as Array):
+		if grupo["escenario"] == "c_tasajero" and grupo["variante"] == null:
+			for candidata in (grupo["alarmas"] as Array):
+				if candidata["id"] == "todos_activa_erizarse":
+					alarma = candidata
+	assert_dict(alarma).is_not_empty()
+	assert_that(alarma["valor"]).is_equal(10)
+	assert_int(alarma["n"] as int).is_equal(10)
+	# Sin la invocacion, con la variante desconocida no entra.
+	for partida in partidas:
+		(MesaPlaytest.metricas(partida)["activas"] as Dictionary)["invocaciones"] = {}
+	for grupo in (MesaPlaytest.calcular(partidas)["grupos"] as Array):
+		if grupo["escenario"] == "c_tasajero" and grupo["variante"] == null:
+			for candidata in (grupo["alarmas"] as Array):
+				if candidata["id"] == "todos_activa_erizarse":
+					assert_int(candidata["n"] as int).is_equal(0)
 
 
 # (9) Otra especie con el mismo efecto (especie_prueba, ocultarse) es la misma

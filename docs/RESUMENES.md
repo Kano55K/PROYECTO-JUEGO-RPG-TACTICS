@@ -3288,3 +3288,89 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Abrir el `.csv` en una planilla: una fila por combate.
   6. Cambiar un umbral en `datos/playtest/alarmas.json` y volver a correr la herramienta: el umbral cambia en el informe, y las grabaciones se siguen reproduciendo sin aviso de huella.
 - **Para la próxima sesión:** nada: tarea terminada. Queda el PR a `develop` y, después, que Sistemas conteste P-048 a P-052.
+
+## T45 · sesión 1 · 15/10/2026
+- **Rama:** tarea/T45-ajustes-v18
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - **Al empezar:** las respuestas de P-048 a P-052 no estaban en `docs/PREGUNTAS.md`. Con autorización del usuario, las copié de `Sistema.md` 15 v1.8 (P-048 a P-051) y de D-016 (P-052). P-048, P-049 y P-050 pasaron a `CERRADA` sin cambios de código; P-051 y P-052, al final.
+  - **S-50, sellar al 0 % no se permite** (`Sistema.md` 4.1 v1.8):
+    - `ResultadoAccion.Motivo.SIN_PROBABILIDAD`, al final del enum.
+    - `Turno._motivo_sellar` lo revisa después de `RANGO_ALTO` (desde ahí se puede calcular el %) y antes de `MANA_INSUFICIENTE`. También está en `_ORDEN_SELLAR`.
+    - `objetivos_para_sellar` y `motivo_sellar` lo toman solos.
+    - El rechazo lleva `porcentaje` (0) y `costo`: `previsualizar_sellar` sigue mostrando el 0 %, igual que `Combate.porcentaje_sellado`.
+    - Sale de `_sellar` la rama "con 0 %, sin tirada".
+    - Pantalla: `ClavesTextos.AVISO_SELLAR_SIN_PROBABILIDAD` (en `motivo_sellar` y `FIJAS`). El botón Sellar queda deshabilitado con ese tooltip.
+  - **S-52, sale el +25 de huida de la acobardada** (11.7 v1.8). El campo es `tablas/combate.json` `huida_salvaje.acobardada_pts`. Orden: esquema → datos → los seis `pruebas/fixtures/combate/combate*.json` → código. `Huida.porcentaje(id, plantel)` pierde el parámetro y absorbe a `porcentaje_al_empezar`, que sale (`Combate.porcentaje_huida` usa `porcentaje`). "Enconada = Encono en el máximo" no cambia. La huella cambió.
+  - **P-051:**
+    - El resultado lleva `destino_atacante.primera_opcion`, la primera opción aplicada. La guarda `Combate._primera_opcion_destino` en `_aplicar_destino`; es `null` con `se_fue`. La opción la eligió el usuario en el plan.
+    - Esquema `resultado`: `primera_opcion` requerida, con el mismo enum que `opcion`.
+    - `AlarmasPlaytest` (`destino_atacante_proporcion`) y la columna `destino_atacante` del CSV leen `primera_opcion`: resellar, fallar y después comer cuenta como `sellar`.
+  - **D-016 (P-052):**
+    - `MetricasCombate`: `activas.invocaciones` (`{unidad: cantidad}`) desde los eventos `invocacion`, solo las invocadas y en el orden del escenario. Es requerido en el esquema `resultado`.
+    - `AlarmasPlaytest._activa_poco_usada`: disponible = empezó suelta **o** fue invocada. Sale la deducción de T33 ("terminó fuera del pergamino o usó la activa") y la constante `_ESTADO_GUARDADA`.
+    - `SalidaInformePlaytest`: columna `activas_invocaciones` (suma), entre `activas_encierros` y `destino_atacante`.
+    - `informe_esperado.csv` y los resultados de `pruebas/fixtures/playtest/informe/` al día (el `.csv.import` keep no cambió).
+  - **`Mundo.md` v1.5:** ya estaba así desde T25 y T29, así que no cambió código.
+    - `huida.salvaje.se_queda` se usa solo si existe.
+    - `panel.rescatista`, `resultado.rescatista` y `resultado.atacante_pendiente` se arman como "etiqueta: nombre".
+    - Los títulos de lista se piden sin datos.
+    - Lo comprueba un test con `es.json` real. `ClavesTextos.usadas` suma la clave nueva.
+- **Archivos:**
+  - **Creados:** `pruebas/datos/test_s52.gd` y `pruebas/datos/test_textos_v15.gd`.
+  - **Modificados:**
+    - Datos: `datos/_esquemas/combate.schema.json`, `datos/_esquemas/resultado.schema.json` y `datos/tablas/combate.json`.
+    - Núcleo: `nucleo/combate/{resultado_accion,turno,huida,combate,resultado_combate,metricas_combate}.gd` y `nucleo/playtest/alarmas_playtest.gd`.
+    - Pantalla y herramientas: `pantalla/claves_textos.gd` y `herramientas/salida_informe_playtest.gd`.
+    - Fixtures: los seis `pruebas/fixtures/combate/combate*.json`, cuatro resultados de `pruebas/fixtures/playtest/informe/` e `informe_esperado.csv`.
+    - Tests: `pruebas/combate/{test_sellar,test_huida,test_destino_combate,test_atacante_se_va,test_metricas_combate,test_guardar_invocar_combate}.gd`, `pruebas/pantalla/test_vista_sellar.gd`, `pruebas/playtest/{mesa_playtest,test_alarmas_e_h,test_alarmas_todos}.gd` y `pruebas/herramientas/test_informe_playtest.gd`.
+    - Documentos: `docs/PREGUNTAS.md` y `CLAUDE.md` ("Estado actual").
+- **Tests:** 10 nuevos, total 991, todos pasan (sí). En la consola, solo lo que ya estaba (los `push_error` esperados de `ReglasCombate`, el depurador remoto del runner y el aviso de vista desconocida de T32).
+- **Tests reescritos** (uno por uno, con la sección que los cambia):
+  - `test_sellar.gd::test_cero_por_ciento_sin_tirada` → `test_sin_probabilidad` (4.1 v1.8, S-50: antes gastaba maná y fallaba sin tirar; ahora se rechaza).
+  - `test_huida.gd::test_especie_con_cero` (11.7 v1.8, S-52: sale la aserción de 25 con acobardada).
+  - `test_huida.gd::test_enconada_con_encono_al_maximo_da_cero` (11.7 v1.8: sale la llamada con acobardada).
+  - `test_huida.gd::test_acobardada_suma_y_recorta` → `test_el_porcentaje_es_el_de_la_ficha` (11.7 v1.8, S-52).
+  - `test_huida.gd::test_sin_un_dato_no_se_arma` (11.7 v1.8: sale el camino `acobardada_pts`).
+  - `test_alarmas_todos.gd::test_activa_invocada_esta_disponible` (11.9 v1.8 y D-016: ahora con `invocaciones`).
+  - `test_alarmas_todos.gd::test_activa_usada_esta_disponible` → `test_sin_invocar_no_esta_disponible` (11.9 v1.8 y D-016: sale la deducción de T33).
+  - Suman `primera_opcion` (11.9 v1.8, P-051): `test_destino_combate.gd` (`test_perdonar`, `test_sellar_de_nuevo_sale`, `test_sellar_de_nuevo_falla_y_quedan_perdonar_y_comer`, `test_comer`), `test_atacante_se_va.gd::_assert_se_fue` y el `_lote_g` de `test_alarmas_e_h.gd`.
+  - Solo cambia la firma de `Huida.porcentaje`: el resto de las llamadas de `test_huida.gd`.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. `test_sellar::test_sin_probabilidad`: `r2_s1` (rango 2, 19 de 24, balanza 2) se rechaza con `SIN_PROBABILIDAD`, sin cambiar maná, acción ni generador. `motivo_sellar` = motivo de `validar`, y la previsualización trae 0 % y costo 5.
+     - Con 18 de 24 vale con **10 %**: la tabla de 4.1 da 10 % para rango 2 entre 51 y 75 %. El caso "con 5 % vale" es la Ocarra entera de rango 1 (`test_fallo`).
+     - `test_un_caso_por_motivo_en_orden` suma el caso (con 0 % y sin maná, gana la probabilidad).
+     - `test_vista_sellar::test_boton_deshabilitado_sin_probabilidad`: botón deshabilitado, tooltip `[FALTA: aviso.sellar.sin_probabilidad]` y 0 % en la ficha.
+  2. `test_sellar::test_sin_probabilidad_no_es_objetivo`.
+  3. `test_s52.gd`: `datos/` carga, `combate.json` no tiene el campo y una copia del fixture con el campo no valida. `test_huida`: el % es el de la ficha.
+  4. `test_destino_combate::test_fallo_y_comer_la_primera_opcion_es_sellar` (el resultado valida), `test_alarmas_e_h::test_g_fallo_y_comer_cuenta_como_sellar` y `test_informe_playtest::test_csv_primera_opcion_e_invocaciones`.
+  5. `test_metricas_combate::test_metrica_14_invocaciones` (registro armado) y `test_guardar_invocar_combate::test_metrica_14_invocaciones`: combate con una invocación que termina en huida; el resultado valida.
+  6. `test_alarmas_todos::test_activa_invocada_esta_disponible` (variante conocida) y `test_activa_invocada_en_la_variante_desconocida`.
+  7. Con `datos/` real pasan el permanente, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios`, `test_alarmas_datos` y los de T22 a T33.
+  8. Suite completa en verde.
+- **Tabla de cotejo:**
+
+  | valor | archivo y campo | sección |
+  |---|---|---|
+  | 25 (sale) | `tablas/combate.json` `huida_salvaje.acobardada_pts` | 11.7 v1.8, S-52: sale el +25 |
+  | 25 (sin cambios) | `tablas/combate.json` `huida_salvaje.umbral_vida_pct` | 11.7 |
+
+- **Supuestos técnicos:**
+  - `SIN_PROBABILIDAD` va antes que el maná: una salvaje entera de rango 2 o 3 da "sin probabilidad" aunque falte maná.
+  - Con la variante desconocida, `activa_poco_usada` cuenta solo a las invocadas, porque no se sabe con qué estado empezó la tribu (igual que en `muere_si_empezo_suelta`).
+  - `primera_opcion` es un campo del resultado (A.7), no una métrica.
+- **Lecturas declaradas:** ninguna nueva.
+- **Claves de texto nuevas sin texto:** `aviso.sellar.sin_probabilidad` (confirmada por el Arquitecto; falta en `es.json` v1.5).
+- **Preguntas:** nuevas ninguna. Cerradas P-048, P-049, P-050, P-051 y P-052.
+- **Corrección a la lista de prueba del prompt:** en A la Ocarra es de rango 1: entera da 5 % y Sellar queda **habilitado**. El 0 % solo existe con rango 2 o 3, así que el botón deshabilitado se prueba en F.
+- **Prueba manual (para el usuario):**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → `f_rescate` → Jugar. En el turno del Maestro, con el Zancajunco y el Surcón enteros:
+     - El botón Sellar está deshabilitado y su tooltip dice `[FALTA: aviso.sellar.sin_probabilidad]`. Si alguna está fuera de alcance, puede decir "fuera de alcance".
+     - El 0 % se ve sobre las dos.
+     - Al bajar una a 75 % o menos, el botón se habilita.
+  3. F5 → `a_dia_1` → Jugar: la Ocarra entera muestra 5 % y Sellar está habilitado.
+  4. F5 → `g_ataque_nocturno` → ganar → Sellar de nuevo hasta que falle (cambiar la semilla en el panel si hace falta) → Comer.
+  5. Correr el informe: `& $env:GODOT_BIN --headless --path . --script res://herramientas/informe_playtest.gd -- registros`. En `registros/informe_playtest.csv` está la columna `activas_invocaciones`, y la partida de G figura con `destino_atacante` = `sellar`.
+  6. `git status`: nada de `registros/` aparece como cambio.
+- **Para la próxima sesión:** nada: tarea terminada. Sigue T46.

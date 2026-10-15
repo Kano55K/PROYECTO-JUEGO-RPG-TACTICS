@@ -52,9 +52,8 @@
   },
   "enfermedad_danio_pct": -25,
   "huida_salvaje": {
-    "_nota": "Sistema.md 11.7: tiran con vida <= 25%; acobardada +25 puntos. El % por especie esta en especies/",
-    "umbral_vida_pct": 25,
-    "acobardada_pts": 25
+    "_nota": "Sistema.md 11.7: tiran con vida <= 25%. Sin el +25 de la acobardada (11.7 v1.8, S-52; T45). El % por especie esta en especies/",
+    "umbral_vida_pct": 25
   },
   "alcance_sellar": 2,
   "alcance_guardar_caida": 2,

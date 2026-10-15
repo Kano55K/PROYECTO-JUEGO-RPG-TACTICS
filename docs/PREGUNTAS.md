@@ -695,7 +695,7 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Cerrada en:** T31
 
 ## P-048 — Qué es "el mismo tramo de probabilidad" en la alarma de A
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T33
 - **Fecha:** 14/10/2026
@@ -705,10 +705,11 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Opciones:** A) tramo = el % mostrado del primer intento; se cuenta el valor más frecuente, sea cual sea. B) solo cuentan los primeros intentos en 50 % o en 80 % (los de 20 % o 5 % no entran en la cuenta). — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** programado con A (lectura declarada): `AlarmasPlaytest`, cálculo `primer_sellado_mismo_tramo`. Si la respuesta es B, se suma un parámetro con los tramos que cuentan.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (de `Sistema.md` 15 v1.8, copiada con autorización del usuario) `Sistema.md` 11.9 v1.8 (15/10/2026): opción A. 'Tramo' es el % mostrado en el primer intento; se cuenta el valor más frecuente, sea cual sea. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T45
 
 ## P-049 — De qué bando se cuentan los incidentes de las alarmas de D
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T33
 - **Fecha:** 14/10/2026
@@ -718,10 +719,11 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Opciones:** A) solo la tribu. B) los dos bandos sumados. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** programado con A (lectura declarada): el bando es un parámetro de la alarma (`bando: "tribu"` en `datos/playtest/alarmas.json`), así que la respuesta B sería sumar una opción al parámetro.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (de `Sistema.md` 15 v1.8, copiada con autorización del usuario) `Sistema.md` 11.9 v1.8: opción A. Las dos alarmas de D cuentan solo los incidentes de la tribu. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T45
 
 ## P-050 — Qué son "las partidas con caídas" en la alarma de guardar caídas de F
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T33
 - **Fecha:** 14/10/2026
@@ -731,10 +733,11 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Opciones:** A) solo cuentan las partidas con alguna caída de una criatura de la tribu. B) cuenta cualquier caída de la métrica 9. — Recomendación técnica: A.
 - **Bloquea:** no
 - **Mientras tanto:** programado con A (lectura declarada) en `AlarmasPlaytest`, cálculo `sin_caidas_guardadas`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (de `Sistema.md` 15 v1.8, copiada con autorización del usuario) `Sistema.md` 11.9 v1.8: opción A. 'Partidas con caídas' son las partidas con al menos una caída de una criatura de la tribu. Ya programado así: no cambia código ni tests.
+- **Cerrada en:** T45
 
 ## P-051 — Sobre qué partidas se mide "comer" en la alarma de G
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** SISTEMAS
 - **Tarea:** T33
 - **Fecha:** 14/10/2026
@@ -744,10 +747,11 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Opciones:** A) sobre las partidas con un destino elegido. B) sobre todas las partidas. — Recomendación técnica: A, porque la señal es "comer es siempre la respuesta" cuando hay que responder.
 - **Bloquea:** no
 - **Mientras tanto:** programado con A (lectura declarada) en `AlarmasPlaytest`, cálculo `destino_atacante_proporcion`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (de `Sistema.md` 15 v1.8, copiada con autorización del usuario) `Sistema.md` 11.9 v1.8: opción A, precisada. Se mide sobre las partidas con un destino elegido, y cuenta la **primera** opción elegida: resellar, fallar y después comer no cuenta como comer. Si `destino_atacante_proporcion` hoy cuenta el resultado final, cambia una condición y se suma ese caso al test.
+- **Cerrada en:** T45 (el resultado suma `destino_atacante.primera_opcion`; la alarma y la columna del CSV la leen)
 
 ## P-052 — El resultado no registra las invocaciones: una activa puede quedar fuera de "disponible"
-- **Estado:** ABIERTA
+- **Estado:** CERRADA
 - **Para:** ARQUITECTO
 - **Tarea:** T33
 - **Fecha:** 14/10/2026
@@ -757,4 +761,5 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Opciones:** A) aceptar la deducción (pierde ese caso). B) sumar a la métrica 14 las invocaciones por unidad, en una tarea propia, y que `activa_poco_usada` las lea. — Recomendación técnica: B si la alarma se va a usar para decidir; A alcanza para la 0a.
 - **Bloquea:** no
 - **Mientras tanto:** programado con A en `AlarmasPlaytest._activa_poco_usada`.
-- **Respuesta:** _(la completa el staff)_
+- **Respuesta:** (de `Arquitectura.md` v0.52, D-016, copiada con autorización del usuario) Opción B: `MetricasCombate` suma a la métrica 14 `invocaciones` (`{unidad: cantidad}`) desde los eventos `invocacion`, y `activa_poco_usada` cuenta como disponible a la criatura de la tribu que empezó suelta **o** fue invocada. Se aplica en T45.
+- **Cerrada en:** T45

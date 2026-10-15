@@ -126,7 +126,8 @@ func test_perdonar() -> void:
 		MesaDestino.AFIN: ["victoria"],
 	})
 	var resultado: Dictionary = combate.resultado().a_diccionario()
-	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "perdonar", "resultado": "perdonada"})
+	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "perdonar", "resultado": "perdonada",
+			"primera_opcion": "perdonar"})
 	assert_object(resultado["atacante_pendiente"]).is_null()
 	assert_array(resultado["pergaminos"]["ardidos"]).contains_exactly([MesaDestino.PERGAMINO_ATACANTE])
 	_valida_esquema(resultado, "resultado")
@@ -178,7 +179,8 @@ func test_sellar_de_nuevo_sale() -> void:
 	assert_dict(MesaDestino.lealtades(combate)).is_equal({MesaDestino.LEAL: 9, MesaDestino.NEUTRAL: 7,
 			MesaDestino.DE_DIEZ: 10, MesaDestino.AFIN: 6, MesaDestino.GUARDADA: 6})
 	var resultado: Dictionary = combate.resultado().a_diccionario()
-	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "sellar", "resultado": "sellada"})
+	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "sellar", "resultado": "sellada",
+			"primera_opcion": "sellar"})
 	assert_int(resultado["pergaminos"]["en_blanco"]).is_equal(0)
 	assert_int(resultado["maestro"]["mana"]).is_equal(6)
 	_valida_esquema(resultado, "resultado")
@@ -207,8 +209,26 @@ func test_sellar_de_nuevo_falla_y_quedan_perdonar_y_comer() -> void:
 	assert_int(pendiente["maestro"]["mana"]).is_equal(6)
 	_aplicar_valida(combate, Accion.destino_atacante(DestinoAtacante.OPCION_PERDONAR))
 	assert_bool(combate.esperando_destino()).is_false()
+	# P-051 (Sistema.md 11.9 v1.8, T45): la primera opcion elegida fue sellar.
 	assert_dict(combate.resultado().a_diccionario()["destino_atacante"]).is_equal({"opcion": "perdonar",
-			"resultado": "perdonada"})
+			"resultado": "perdonada", "primera_opcion": "sellar"})
+
+
+# (T45, P-051, Sistema.md 11.9 v1.8) Resellar, fallar y despues comer: la primera
+# opcion elegida es sellar (la alarma de G y el CSV la leen de primera_opcion).
+# El resultado valida.
+func test_fallo_y_comer_la_primera_opcion_es_sellar() -> void:
+	var escenario: Dictionary = MesaDestino.escenario()
+	escenario["semilla"] = MesaDestino.SEMILLA_FALLA
+	var combate: Combate = _pendiente(escenario)
+	_aplicar_valida(combate, Accion.destino_atacante(DestinoAtacante.OPCION_SELLAR))
+	assert_bool(combate.esperando_destino()).is_true()
+	_aplicar_valida(combate, Accion.destino_atacante(DestinoAtacante.OPCION_COMER))
+	assert_bool(combate.esperando_destino()).is_false()
+	var resultado: Dictionary = combate.resultado().a_diccionario()
+	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "comer", "resultado": "comida",
+			"primera_opcion": "sellar"})
+	_valida_esquema(resultado, "resultado")
 
 
 # (12) y P-002: comer -2 a todas las sueltas, tambien a la afin de la Ocarra (sin
@@ -224,7 +244,8 @@ func test_comer() -> void:
 			MesaDestino.DE_DIEZ: 9, MesaDestino.AFIN: 4, MesaDestino.GUARDADA: 6})
 	assert_array(MesaDestino.motivos(combate)[MesaDestino.AFIN]).is_equal(["victoria", "comer_atacante"])
 	var resultado: Dictionary = combate.resultado().a_diccionario()
-	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "comer", "resultado": "comida"})
+	assert_dict(resultado["destino_atacante"]).is_equal({"opcion": "comer", "resultado": "comida",
+			"primera_opcion": "comer"})
 	assert_array(resultado["metricas"]["muertes"]).is_empty()
 	_valida_esquema(resultado, "resultado")
 

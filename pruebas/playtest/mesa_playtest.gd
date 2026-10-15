@@ -72,7 +72,7 @@ static func partida(escenario: String, jugador: Variant, semilla: int, variante:
 			"sellados": [], "capturas_perdidas": [], "caidas": [], "caidas_guardadas": [], "muertes": [],
 			"rescate": null, "distancia_maestro": {"turnos": 0, "suma": 0},
 			"activas": {"usos": [], "surcos": 0, "ocultos": 0, "destapes_contacto": 0, "bonos_cobrados": 0,
-					"bonos_perdidos": 0, "cambios_modo": [], "encierros": []},
+					"bonos_perdidos": 0, "cambios_modo": [], "encierros": [], "invocaciones": {}},
 		},
 	}
 	var ficha: Dictionary = {"escenario": escenario, "variante": variante.duplicate(true), "semilla": semilla,

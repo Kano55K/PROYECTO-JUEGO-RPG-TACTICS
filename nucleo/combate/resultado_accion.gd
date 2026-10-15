@@ -112,6 +112,8 @@ enum Motivo {
 	OPCION_INVALIDA,
 	# Sistema.md 4.4: si sellar de nuevo fallo, solo quedan perdonar y comer.
 	SELLAR_YA_FALLO,
+	# Sistema.md 4.1 v1.8 (T45, S-50): con 0 % no se puede intentar sellar.
+	SIN_PROBABILIDAD,
 }
 
 var valida: bool
@@ -136,7 +138,8 @@ var mana: Dictionary = {}
 var evento: Dictionary = {}
 # Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24) y en el resellado del
 # destino (4.4, T30): el % que se muestra antes de gastar el mana y el costo. En una invocacion valida (T26) y al guardar a una
-# caida (T27), el costo. Lo mismo al validar y al aplicar.
+# caida (T27), el costo. Lo mismo al validar y al aplicar. Tambien en el sellado
+# rechazado por SIN_PROBABILIDAD (T45): el 0 % se sigue mostrando (4.1 v1.8).
 var porcentaje: Variant = null
 var costo: int = 0
 # Solo al guardar a una caida (Sistema.md 11.5, T27): {de, a} de la vida de la caida

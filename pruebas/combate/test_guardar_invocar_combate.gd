@@ -101,6 +101,28 @@ func test_ronda_de_entrada() -> void:
 	assert_array(_rondas_con_turno(combate, _GUARDADA)).is_equal([2])
 
 
+# T45 (D-016, P-052; Sistema.md 11.9 v1.8, metrica 14): la invocacion de este
+# combate aparece en activas.invocaciones ({unidad: cantidad}, desde los eventos
+# `invocacion`) y el resultado valida contra su esquema. Para terminar el combate,
+# en la ronda 2 el Maestro declara la huida (T28) y los demas terminan.
+func test_metrica_14_invocaciones() -> void:
+	var combate: Combate = _combate()
+	_guardar_e_invocar(combate)
+	assert_str(combate.turno_actual().unidad_id).is_equal(_RODAUVA)
+	_aplicar_valida(combate, Accion.terminar())
+	assert_str(combate.turno_actual().unidad_id).is_equal(Maestro.ID)
+	_aplicar_valida(combate, Accion.huir())
+	for _i in range(10):
+		if combate.terminado():
+			break
+		_aplicar_valida(combate, Accion.terminar())
+	assert_bool(combate.terminado()).is_true()
+	var resultado: Dictionary = combate.resultado().a_diccionario()
+	assert_dict(resultado["metricas"]["activas"]["invocaciones"]).is_equal({_RODAUVA: 1})
+	var errores: Array[Dictionary] = MesaNocturno.errores_esquema(resultado, "resultado")
+	assert_array(errores).override_failure_message(str(errores)).is_empty()
+
+
 # (7) S-56: la que se guardo en esta ronda se invoca en la misma; no vuelve a
 # actuar en esta ronda y si en la siguiente.
 func test_guardada_en_la_ronda_se_invoca_en_la_misma() -> void:

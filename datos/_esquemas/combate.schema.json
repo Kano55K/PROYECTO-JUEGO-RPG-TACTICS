@@ -234,16 +234,12 @@
     "huida_salvaje": {
       "type": "object",
       "required": [
-        "umbral_vida_pct",
-        "acobardada_pts"
+        "umbral_vida_pct"
       ],
       "additionalProperties": false,
       "properties": {
         "umbral_vida_pct": {
           "$ref": "comunes.schema.json#/$defs/pct"
-        },
-        "acobardada_pts": {
-          "$ref": "comunes.schema.json#/$defs/puntos"
         },
         "_nota": {
           "$ref": "comunes.schema.json#/$defs/nota"

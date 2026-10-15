@@ -28,7 +28,7 @@ const COLUMNAS: Array[String] = [
 	"rescatista", "distancia_maestro_turnos", "distancia_maestro_suma",
 	"activas_erizarse", "activas_cavar", "activas_hacerse_junco", "activas_surcos", "activas_ocultos",
 	"activas_destapes_contacto", "activas_bonos_cobrados", "activas_bonos_perdidos",
-	"activas_cambios_modo", "activas_encierros", "destino_atacante",
+	"activas_cambios_modo", "activas_encierros", "activas_invocaciones", "destino_atacante",
 ]
 # Celda de la variante desconocida (resultado sin ficha) y de la columna
 # rescatista cuando el Maestro cayo sin nadie que lo rescate.
@@ -178,7 +178,7 @@ static func _fila(archivo: String, resultado: Dictionary, ficha: Dictionary) -> 
 		rescatista = PERMADEATH if m["rescate"]["rescatista"] == null else m["rescate"]["rescatista"]
 	var destino: Variant = null
 	if resultado["destino_atacante"] != null:
-		destino = resultado["destino_atacante"]["opcion"]
+		destino = resultado["destino_atacante"]["primera_opcion"]
 	return [
 		archivo, ficha["escenario"], _celda_variante(ficha["variante"]), ficha["semilla"],
 		ficha["indice_semilla"], ficha["jugador"], resultado["desenlace"],
@@ -197,7 +197,8 @@ static func _fila(archivo: String, resultado: Dictionary, ficha: Dictionary) -> 
 		_suma(activas["usos"], MetricasCombate.ACTIVAS[0]), _suma(activas["usos"], MetricasCombate.ACTIVAS[1]),
 		_suma(activas["usos"], MetricasCombate.ACTIVAS[2]), activas["surcos"], activas["ocultos"],
 		activas["destapes_contacto"], activas["bonos_cobrados"], activas["bonos_perdidos"],
-		_cantidad(activas["cambios_modo"]), _suma(activas["encierros"], "turnos"), destino,
+		_cantidad(activas["cambios_modo"]), _suma(activas["encierros"], "turnos"),
+		_suma_valores(activas["invocaciones"]), destino,
 	]
 
 
@@ -218,6 +219,14 @@ static func _suma(lista: Variant, campo: String) -> Variant:
 	var total: int = 0
 	for fila in (lista as Array):
 		total += fila[campo] as int
+	return total
+
+
+# T45 (D-016): la suma de los valores de un {unidad: cantidad}.
+static func _suma_valores(por_unidad: Dictionary) -> int:
+	var total: int = 0
+	for cantidad in por_unidad.values():
+		total += cantidad as int
 	return total
 
 

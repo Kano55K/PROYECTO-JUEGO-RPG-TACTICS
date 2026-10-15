@@ -81,7 +81,6 @@ const COMPARACION_MENOR_QUE: String = "menor_que"
 const _RUTA_SEMILLA: String = "semilla"
 const _RUTA_ESTADO_TRIBU: String = "tribu.%s.estado"
 const _ESTADO_SUELTA: String = "suelta"
-const _ESTADO_GUARDADA: String = "guardada"
 const _BANDO_TRIBU: String = "tribu"
 const _VICTORIA: String = "victoria"
 const _CIEN: int = 100
@@ -275,15 +274,16 @@ static func _medir(alarma: Dictionary, partidas: Array, escenario: String, datos
 			return _proporcion(sin_guardar, con_caidas, parametros["umbral_pct"], COMPARACION_MAYOR_QUE)
 		CALCULO_DESTINO_ATACANTE_PROPORCION:
 			# Sobre las partidas con un destino elegido (P-051): sin atacante
-			# caida, o si se fue (opcion null), no entra.
+			# caida, o si se fue (primera_opcion null), no entra. Cuenta la primera
+			# opcion elegida (11.9 v1.8, T45): resellar, fallar y comer es sellar.
 			var elegido: int = 0
 			var de_la_lista: int = 0
 			for partida in partidas:
 				var destino: Variant = _resultado(partida)["destino_atacante"]
-				if destino == null or (destino as Dictionary)["opcion"] == null:
+				if destino == null or (destino as Dictionary)["primera_opcion"] == null:
 					continue
 				elegido += 1
-				if (parametros["opciones"] as Array).has((destino as Dictionary)["opcion"]):
+				if (parametros["opciones"] as Array).has((destino as Dictionary)["primera_opcion"]):
 					de_la_lista += 1
 			return _proporcion(de_la_lista, elegido, parametros["umbral_pct"], COMPARACION_MAYOR_QUE)
 		CALCULO_DISTANCIA_MAESTRO_MAYOR_QUE:
@@ -376,9 +376,10 @@ static func _muere_si_empezo_suelta(parametros: Dictionary, partidas: Array, esc
 	return _proporcion(murio, n, parametros["umbral_pct"], COMPARACION_MAYOR_QUE)
 
 
-# Metrica 14. Disponible (Arquitectura.md 10.5) = una criatura de la tribu cuya
-# ficha tiene el efecto estuvo en el tablero: empezo suelta, termino fuera de
-# su pergamino (la invocaron) o uso la activa (P-052). n = partidas con alguna
+# Metrica 14. Disponible (Arquitectura.md 10.5, D-016) = una criatura de la tribu
+# cuya ficha tiene el efecto empezo suelta o fue invocada (metrica 14,
+# invocaciones; T45, P-052). Con la variante desconocida no se sabe con que
+# estado empezo: cuenta solo si fue invocada. n = partidas con alguna
 # disponible; cuenta = alguna de ellas la uso. Salta por debajo del umbral.
 static func _activa_poco_usada(parametros: Dictionary, partidas: Array, escenario: String,
 		datos: Dictionary) -> Dictionary:
@@ -392,16 +393,17 @@ static func _activa_poco_usada(parametros: Dictionary, partidas: Array, escenari
 		var usos: Dictionary = {}
 		for fila in (_metricas(partida)["activas"]["usos"] as Array):
 			usos[fila["unidad"]] = fila[accion]
+		var invocaciones: Dictionary = _metricas(partida)["activas"]["invocaciones"]
 		var alguna_disponible: bool = false
 		var alguna_usada: bool = false
 		for unidad in (_resultado(partida)["unidades"] as Array):
 			if unidad["bando"] != _BANDO_TRIBU or _efecto_de(unidad["especie"], datos) != efecto:
 				continue
-			var usos_propios: int = usos.get(unidad["id"], 0)
-			if _estado_inicial(unidad["id"], variante, archivo) != _ESTADO_SUELTA 					and unidad["estado"] == _ESTADO_GUARDADA and usos_propios == 0:
+			if _estado_inicial(unidad["id"], variante, archivo) != _ESTADO_SUELTA \
+					and (invocaciones.get(unidad["id"], 0) as int) == 0:
 				continue
 			alguna_disponible = true
-			alguna_usada = alguna_usada or usos_propios > 0
+			alguna_usada = alguna_usada or (usos.get(unidad["id"], 0) as int) > 0
 		if alguna_disponible:
 			disponible += 1
 			if alguna_usada:

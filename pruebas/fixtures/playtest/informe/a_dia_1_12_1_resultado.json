@@ -25,6 +25,6 @@
 				{"unidad": "tasajero_1", "erizarse": 0, "cavar": 1, "hacerse_junco": 1}],
 				"surcos": 1, "ocultos": 1, "destapes_contacto": 1, "bonos_cobrados": 1,
 				"bonos_perdidos": 0, "cambios_modo": [{"unidad": "tasajero_1", "de": "caza", "a": "cuenta", "ronda": 3}],
-				"encierros": [{"unidad": "tasajero_1", "turnos": 2}, {"unidad": "rodauva_1", "turnos": 1}]}
+				"encierros": [{"unidad": "tasajero_1", "turnos": 2}, {"unidad": "rodauva_1", "turnos": 1}], "invocaciones": {}}
 	}
 }

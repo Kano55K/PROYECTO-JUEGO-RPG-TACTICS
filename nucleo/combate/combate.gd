@@ -41,6 +41,8 @@ var _cadena_volcados: int = 0
 # antes de cerrar (para los de este combate, tambien los del destino).
 var _destino_pendiente: String = ""
 var _sellar_fallido: bool = false
+# T45 (P-051, Sistema.md 11.9 v1.8): la primera opcion de destino aplicada ("" si ninguna).
+var _primera_opcion_destino: String = ""
 var _cierre: ResultadoCierre = null
 var _ardidos_antes: Array[String] = []
 
@@ -258,7 +260,7 @@ func costo_guardar_caida(unidad_id: String) -> Variant:
 # huida que tiraria la unidad si su turno empezara ahora (Huida, la misma cuenta
 # que la tirada); 0 si no tira.
 func porcentaje_huida(unidad_id: String) -> int:
-	return _contexto.huida.porcentaje_al_empezar(unidad_id, _plantel)
+	return _contexto.huida.porcentaje(unidad_id, _plantel)
 
 
 # Sistema.md 6 (T29, D-005): quien rescataria al Maestro si cayera ahora, con la
@@ -719,6 +721,8 @@ func _aplicar_destino(accion: Accion) -> ResultadoAccion:
 		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
 		return resultado
 	_acciones_jugador.append({"unidad": Maestro.ID, "accion": accion.a_diccionario()})
+	if _primera_opcion_destino.is_empty():
+		_primera_opcion_destino = accion.opcion
 	if not resultado.mana.is_empty():
 		_registrar({"tipo": "mana", "unidad": Maestro.ID, "de": resultado.mana["de"], "a": resultado.mana["a"],
 				"motivo": DestinoAtacante.MOTIVO_RESELLAR}, 0)
@@ -733,7 +737,8 @@ func _aplicar_destino(accion: Accion) -> ResultadoAccion:
 		_cierre.lealtad = resultado.lealtad
 	_resultado = ResultadoCombate.armar(_contexto, _cierre, _cola.ronda, _ardidos_del_combate())
 	if _destino_pendiente.is_empty():
-		_resultado.destino_atacante = {"opcion": accion.opcion, "resultado": nombre_resultado}
+		_resultado.destino_atacante = {"opcion": accion.opcion, "resultado": nombre_resultado,
+				"primera_opcion": _primera_opcion_destino}
 	_resultado.metricas = MetricasCombate.calcular(_contexto.escenario, _registro.lineas())
 	resultado.fin = _fin
 	return resultado

@@ -299,13 +299,17 @@
       "pattern": "^[a-z0-9_]+$"
     },
     "destino_atacante": {
-      "description": "Sistema.md 9.2 y 9.3 (T30): null si no hubo atacante nocturna que resolver; si no, la opción elegida y su resultado. Con la derrota o la huida (P-024, S-66), opcion null y resultado se_fue. Con la victoria y la atacante caída, null mientras el destino está pendiente (atacante_pendiente); después, la opción final y perdonada, sellada o comida (un sellado fallido no es final)",
+      "description": "Sistema.md 9.2 y 9.3 (T30): null si no hubo atacante nocturna que resolver; si no, la opción elegida y su resultado. Con la derrota o la huida (P-024, S-66), opcion null y resultado se_fue. Con la victoria y la atacante caída, null mientras el destino está pendiente (atacante_pendiente); después, la opción final y perdonada, sellada o comida (un sellado fallido no es final). primera_opcion (T45, P-051, 11.9 v1.8): la primera opción elegida (sellar si se reselló, falló y después se eligió otra); null si se fue",
       "type": ["object", "null"],
-      "required": ["opcion", "resultado"],
+      "required": ["opcion", "resultado", "primera_opcion"],
       "additionalProperties": false,
       "properties": {
         "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
         "opcion": {
+          "type": ["string", "null"],
+          "enum": ["perdonar", "sellar", "comer", null]
+        },
+        "primera_opcion": {
           "type": ["string", "null"],
           "enum": ["perdonar", "sellar", "comer", null]
         },
@@ -483,9 +487,9 @@
           }
         },
         "activas": {
-          "description": "Métrica 14: activas (por el tipo de la acción) y terreno",
+          "description": "Métrica 14: activas (por el tipo de la acción) y terreno. invocaciones desde T45 (D-016)",
           "type": "object",
-          "required": ["usos", "surcos", "ocultos", "destapes_contacto", "bonos_cobrados", "bonos_perdidos", "cambios_modo", "encierros"],
+          "required": ["usos", "surcos", "ocultos", "destapes_contacto", "bonos_cobrados", "bonos_perdidos", "cambios_modo", "encierros", "invocaciones"],
           "additionalProperties": false,
           "properties": {
             "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
@@ -538,6 +542,11 @@
                   "turnos": { "type": "integer", "minimum": 1 }
                 }
               }
+            },
+            "invocaciones": {
+              "description": "T45 (D-016, P-052): unidad -> cantidad de eventos invocacion. Solo las invocadas, en el orden del escenario",
+              "type": "object",
+              "additionalProperties": { "type": "integer", "minimum": 1 }
             }
           }
         }

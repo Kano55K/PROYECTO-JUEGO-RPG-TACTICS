@@ -186,6 +186,21 @@ func test_metrica_14_activas_y_terreno() -> void:
 			{"unidad": "tasajero_s1", "turnos": 2}])
 
 
+# T45 (D-016, P-052; Sistema.md 11.9 v1.8): metrica 14, invocaciones por unidad
+# ({unidad: cantidad}) desde los eventos `invocacion`, en el orden del
+# escenario y solo las invocadas. Sin invocaciones, {}.
+func test_metrica_14_invocaciones() -> void:
+	var metricas: Dictionary = _calcular([{"tipo": "ronda"},
+			{"tipo": "invocacion", "unidad": "ocarra_1", "casilla": [1, 1]},
+			{"tipo": "invocacion", "unidad": "cardo_1", "casilla": [1, 2]},
+			{"tipo": "fin_ronda"}, {"tipo": "ronda"},
+			{"tipo": "invocacion", "unidad": "ocarra_1", "casilla": [1, 1]}] + _cierre())
+	var invocaciones: Dictionary = metricas["activas"]["invocaciones"]
+	assert_dict(invocaciones).is_equal({"cardo_1": 1, "ocarra_1": 2})
+	assert_array(invocaciones.keys()).is_equal(["cardo_1", "ocarra_1"])
+	assert_dict(_calcular([{"tipo": "ronda"}] + _cierre())["activas"]["invocaciones"]).is_empty()
+
+
 # (7) Metricas 9 y 11 en una victoria (con una caida que se levanta) y en una
 # derrota con muertas (el Maestro cae: P-043); 12 (T29), y 7 vacia (T24).
 # T27: la 10 deja de estar en null; sin eventos guardado_caida, lista vacia.

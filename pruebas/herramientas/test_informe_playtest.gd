@@ -107,6 +107,23 @@ func test_escribe_el_informe_json_y_csv() -> void:
 	assert_str(resumen).contains("Avisos: 3")
 
 
+# T45 (P-051 y D-016; Sistema.md 11.9 v1.8): la columna destino_atacante es la
+# primera opcion elegida (resellar, fallar y comer -> sellar) y
+# activas_invocaciones, la suma de las invocaciones de la metrica 14.
+func test_csv_primera_opcion_e_invocaciones() -> void:
+	var partida: Dictionary = MesaPlaytest.partida("g_ataque_nocturno", "j1", MesaPlaytest.semillas()[0])
+	var resultado: Dictionary = partida["resultado"]
+	resultado["destino_atacante"] = {"opcion": "comer", "resultado": "comida", "primera_opcion": "sellar"}
+	(resultado["metricas"]["activas"] as Dictionary)["invocaciones"] = {"rodauva_1": 2, "ocarra_1": 1}
+	assert_array(MesaPlaytest.errores(partida)).is_empty()
+	var lectura: Dictionary = {"resultados": [resultado], "fichas": [partida["ficha"]], "archivos": ["g"]}
+	var filas: Array[String] = SalidaInformePlaytest.filas_csv(lectura)
+	var cabecera: PackedStringArray = filas[0].split(",")
+	var celdas: PackedStringArray = filas[1].split(",")
+	assert_str(celdas[cabecera.find("destino_atacante")]).is_equal("sellar")
+	assert_str(celdas[cabecera.find("activas_invocaciones")]).is_equal("3")
+
+
 # Dentro del proyecto (registros/), el CSV va con su .import "keep": si no, el
 # editor lo importa como archivo de traducciones. Fuera, no hace falta.
 func test_dentro_del_proyecto() -> void:
