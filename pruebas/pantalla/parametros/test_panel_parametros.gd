@@ -231,3 +231,62 @@ func test_volver() -> void:
 	panel.volver.connect(func() -> void: pulsadas[0] += 1)
 	MousePrueba.clic_en(_centro(runner.find_child("Volver") as Button))
 	assert_int(pulsadas[0]).is_equal(1)
+
+
+# T33, sesion 3 (11): el selector "Semilla de playtest" pone la semilla de la
+# lista (las del fixture de alarmas, MesaPlaytest), por la misma edicion: la
+# validacion pasa y el +1 sigue igual. Una semilla que no es de la lista
+# muestra "playtest -".
+func _panel_playtest(edicion: EdicionEscenario, semillas: Array) -> GdUnitSceneRunner:
+	var runner: GdUnitSceneRunner = scene_runner(auto_free(load(_ESCENA).instantiate()))
+	(runner.scene() as PanelParametros).abrir(edicion, [], semillas)
+	return runner
+
+
+func _elegir_playtest(panel: PanelParametros, indice: int) -> void:
+	var lista: OptionButton = panel.control_semilla_playtest()
+	lista.select(indice)
+	lista.item_selected.emit(indice)
+
+
+func test_t33_semilla_de_playtest() -> void:
+	var semillas: Array = MesaPlaytest.semillas()
+	var edicion: EdicionEscenario = _edicion()
+	var runner: GdUnitSceneRunner = _panel_playtest(edicion, semillas)
+	await runner.simulate_frames(1)
+	var panel: PanelParametros = runner.scene()
+	var lista: OptionButton = panel.control_semilla_playtest()
+	assert_object(lista).is_not_null()
+	assert_str(lista.name).is_equal("SemillaPlaytest")
+	assert_int(lista.item_count).is_equal(semillas.size() + 1)
+	assert_str(lista.get_item_text(lista.selected)).is_equal(PanelParametros.SIN_SEMILLA_PLAYTEST)
+
+	_elegir_playtest(panel, 3)
+	assert_int(edicion.valor("semilla") as int).is_equal(semillas[2])
+	assert_int(int((panel.control("semilla") as SpinBox).value)).is_equal(semillas[2])
+	assert_str(lista.get_item_text(lista.selected)).is_equal("3")
+	assert_bool(panel.puede_jugar()).is_true()
+
+	panel.pulsar_semilla_playtest(10)
+	assert_int(edicion.valor("semilla") as int).is_equal(semillas[9])
+	assert_str(lista.get_item_text(lista.selected)).is_equal("10")
+
+	# El +1 sigue igual: la semilla siguiente, que no es de la lista.
+	MousePrueba.clic_en(_centro(runner.find_child("SemillaMasUno") as Button))
+	assert_int(edicion.valor("semilla") as int).is_equal(semillas[9] + 1)
+	assert_str(lista.get_item_text(lista.selected)).is_equal(PanelParametros.SIN_SEMILLA_PLAYTEST)
+
+	# Una semilla de la lista puesta a mano tambien se muestra por su indice.
+	(panel.control("semilla") as SpinBox).value = semillas[1]
+	assert_str(lista.get_item_text(lista.selected)).is_equal("2")
+
+	# Elegir "playtest -" no cambia nada.
+	_elegir_playtest(panel, 0)
+	assert_int(edicion.valor("semilla") as int).is_equal(semillas[1])
+
+
+func test_t33_sin_semillas_de_playtest_no_hay_selector() -> void:
+	var runner: GdUnitSceneRunner = _panel(_edicion())
+	await runner.simulate_frames(1)
+	assert_object((runner.scene() as PanelParametros).control_semilla_playtest()).is_null()
+	assert_object(runner.find_child("SemillaPlaytest", true, false)).is_null()

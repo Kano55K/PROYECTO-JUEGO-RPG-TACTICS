@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": ["id", "tablero"],
+  "additionalProperties": false,
+  "properties": {
+    "_nota": { "type": "string" },
+    "id": { "type": "string" },
+    "tablero": {
+      "type": "object",
+      "required": ["ancho", "alto"],
+      "additionalProperties": false,
+      "properties": {
+        "ancho": { "type": "integer" },
+        "alto": { "type": "integer" }
+      }
+    }
+  }
+}

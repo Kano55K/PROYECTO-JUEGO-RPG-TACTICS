@@ -1,0 +1,12 @@
+{
+  "_nota": "T33: semilla repetida, id de alarma repetido y especie inexistente",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 1],
+  "alarmas": [
+    { "id": "doble", "escenarios": ["c_tasajero"], "calculo": "muere_si_empezo_suelta",
+      "parametros": { "especie": "no_existe", "umbral_pct": 50 } },
+    { "id": "doble", "escenarios": ["c_tasajero"], "calculo": "rondas_pelea_mayor_que",
+      "parametros": { "rondas": 5, "umbral_pct": 20 } }
+  ]
+}

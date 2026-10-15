@@ -3,18 +3,22 @@
 # como <escenario>_<semilla>_<n>. n es el primer numero libre de la carpeta, asi
 # no se pisa una partida anterior. Lo reproduce herramientas/reproducir.gd.
 # T23 (D-011): ademas, el resultado con sus metricas, como <...>_<n>_resultado.json.
+# T33 (D-015): y la ficha de playtest (FichaPlaytest), como <...>_<n>_playtest.json,
+# solo cuando se escribe el resultado.
 class_name GuardadoCombate
 extends RefCounted
 
 const SUFIJO_RESULTADO: String = "_resultado.json"
+const SUFIJO_PLAYTEST: String = "_playtest.json"
 # T31: una variante editada en el panel se guarda como
 # <escenario>_editado_<semilla>_<n>, para no mezclarla con las del archivo.
 const SUFIJO_EDITADO: String = "_editado"
 
 
 # Devuelve la ruta sin extension, o "" si no se pudo escribir. editado: si el
-# escenario jugado difiere del archivo (EdicionEscenario.difiere).
-static func guardar(combate: Combate, carpeta: String, editado: bool = false) -> String:
+# escenario jugado difiere del archivo (EdicionEscenario.difiere). ficha: la de
+# playtest ({} = no se escribe).
+static func guardar(combate: Combate, carpeta: String, editado: bool = false, ficha: Dictionary = {}) -> String:
 	DirAccess.make_dir_recursive_absolute(carpeta)
 	var prefijo: String = "%s%s_%d_" % [combate.contexto().escenario_id, SUFIJO_EDITADO if editado else "",
 			combate.contexto().semilla]
@@ -28,8 +32,11 @@ static func guardar(combate: Combate, carpeta: String, editado: bool = false) ->
 	var lineas: Array[String] = combate.registro().lineas_json()
 	if not _escribir(base + ".jsonl", "\n".join(lineas) + "\n"):
 		return ""
-	if combate.resultado() != null and not guardar_resultado(combate, base):
-		return ""
+	if combate.resultado() != null:
+		if not guardar_resultado(combate, base):
+			return ""
+		if not ficha.is_empty() and not _escribir(base + SUFIJO_PLAYTEST, JSON.stringify(ficha, "\t", true)):
+			return ""
 	return base
 
 

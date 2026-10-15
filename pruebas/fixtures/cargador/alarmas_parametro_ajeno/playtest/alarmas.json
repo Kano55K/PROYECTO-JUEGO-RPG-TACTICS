@@ -1,0 +1,10 @@
+{
+  "_nota": "T33 (2): rondas no es parámetro de combates_con_incidente",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "ajeno", "escenarios": ["c_tasajero"], "calculo": "combates_con_incidente",
+      "parametros": { "bando": "tribu", "umbral_pct": 20, "rondas": 5 } }
+  ]
+}

@@ -12,6 +12,9 @@ signal volver
 
 const _RUTA_SEMILLA: String = "semilla"
 const _COLOR_ERROR: Color = Color(1, 0.45, 0.45, 1)
+# T33: la opcion del selector de semilla de playtest cuando la semilla no es de
+# la lista (la primera; las demas son "1" a "10").
+const SIN_SEMILLA_PLAYTEST: String = "playtest -"
 
 var _edicion: EdicionEscenario = null
 # ruta -> el control del valor (SpinBox, OptionButton o CheckButton).
@@ -27,6 +30,9 @@ var _motivos: Dictionary = {}
 var _no_aplicados: Array[Dictionary] = []
 var _rutas: Array[String] = []
 var _puede_jugar: bool = false
+# T33 (D-015): las semillas de playtest/alarmas.json y su selector (null sin lista).
+var _semillas_playtest: Array = []
+var _semilla_playtest: OptionButton = null
 
 @onready var _titulo: Label = $Contenido/Titulo
 @onready var _boton_volver: Button = $Contenido/Botones/Volver
@@ -44,9 +50,11 @@ func _ready() -> void:
 
 # Arma los controles de la edicion. no_aplicados: los cambios que una recarga
 # no pudo volver a aplicar (EdicionEscenario.sobre), para mostrarlos.
-func abrir(edicion: EdicionEscenario, no_aplicados: Array[Dictionary] = []) -> void:
+# semillas_playtest (T33): las de playtest/alarmas.json; vacia = sin selector.
+func abrir(edicion: EdicionEscenario, no_aplicados: Array[Dictionary] = [], semillas_playtest: Array = []) -> void:
 	_edicion = edicion
 	_no_aplicados = no_aplicados.duplicate()
+	_semillas_playtest = semillas_playtest.duplicate()
 	_motivos.clear()
 	_armar()
 	_mostrar()
@@ -100,6 +108,20 @@ func pulsar_semilla_mas_uno() -> void:
 	_aplicar(_RUTA_SEMILLA, int(_edicion.valor(_RUTA_SEMILLA)) + 1)
 
 
+# T33: el selector "Semilla de playtest", o null si no hay lista.
+func control_semilla_playtest() -> OptionButton:
+	return _semilla_playtest
+
+
+# T33: pone la semilla de playtest numero indice (1 a 10) de la lista; 0 no
+# cambia nada.
+func pulsar_semilla_playtest(indice: int) -> void:
+	if indice < 1 or indice > _semillas_playtest.size():
+		_mostrar()
+		return
+	_aplicar(_RUTA_SEMILLA, _semillas_playtest[indice - 1])
+
+
 # --- Armado ------------------------------------------------------------------
 
 func _armar() -> void:
@@ -111,6 +133,7 @@ func _armar() -> void:
 	_nombres.clear()
 	_errores.clear()
 	_rutas.clear()
+	_semilla_playtest = null
 	for campo in _edicion.campos():
 		var ruta: String = campo["ruta"]
 		_rutas.append(ruta)
@@ -131,6 +154,14 @@ func _armar() -> void:
 			mas_uno.text = "+1"
 			mas_uno.pressed.connect(pulsar_semilla_mas_uno)
 			fila.add_child(mas_uno)
+			if not _semillas_playtest.is_empty():
+				_semilla_playtest = OptionButton.new()
+				_semilla_playtest.name = "SemillaPlaytest"
+				_semilla_playtest.add_item(SIN_SEMILLA_PLAYTEST)
+				for i in range(_semillas_playtest.size()):
+					_semilla_playtest.add_item(str(i + 1))
+				_semilla_playtest.item_selected.connect(pulsar_semilla_playtest)
+				fila.add_child(_semilla_playtest)
 		_campos.add_child(fila)
 		var error: Label = Label.new()
 		error.add_theme_color_override("font_color", _COLOR_ERROR)
@@ -219,6 +250,9 @@ func _mostrar() -> void:
 			continue
 		(_nombres[ruta] as Label).text = "%s %s" % [ruta, _texto_limites(campo)]
 		_mostrar_valor(campo)
+	if _semilla_playtest != null:
+		var indice: Variant = FichaPlaytest.indice(int(_edicion.valor(_RUTA_SEMILLA)), _semillas_playtest)
+		_semilla_playtest.select(0 if indice == null else indice)
 
 	var por_ruta: Dictionary = {}
 	var generales: Array[String] = []

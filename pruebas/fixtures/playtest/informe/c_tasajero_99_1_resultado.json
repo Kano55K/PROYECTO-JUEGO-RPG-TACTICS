@@ -1,0 +1,21 @@
+{
+	"_nota": "T33, sesion 3: resultado de prueba para la herramienta del informe (forma de MesaPlaytest.partida).",
+	"contexto_id": "c_tasajero", "semilla": 99, "desenlace": "victoria", "rondas": 4,
+	"maestro_caido": false, "rescatista": null, "permadeath": false,
+	"maestro": {"vida": 10, "posicion": [0, 0], "mana": 0, "hambre": 3},
+	"unidades": [], "levantadas": [], "muertas": [], "capturas": [], "lealtad_cambios": [],
+	"pergaminos": {"en_blanco": 0, "ardidos": []},
+	"atacante_pendiente": null, "destino_atacante": {"opcion": "comer", "resultado": "comida"},
+	"metricas": {
+		"rondas": {"totales": 4, "primer_ataque": 2, "de_pelea": 3},
+		"secundar": {"usos": 0},
+		"eslabones": {"cadenas": 0, "suma": 0, "maximo": 0},
+		"incidentes": {"tribu": {"distraida": 0, "golpe": 0}, "enemigas": {"distraida": 0, "golpe": 0}},
+		"encono": {"tribu": 0, "enemigas": 0},
+		"cobardia": {"tribu": {"acobardada": 0, "resistida": 0}, "enemigas": {"acobardada": 0, "resistida": 0}},
+		"sellados": [], "capturas_perdidas": [], "caidas": [], "caidas_guardadas": [], "muertes": [],
+		"rescate": null, "distancia_maestro": {"turnos": 2, "suma": 5},
+		"activas": {"usos": [], "surcos": 0, "ocultos": 0, "destapes_contacto": 0, "bonos_cobrados": 0,
+				"bonos_perdidos": 0, "cambios_modo": [], "encierros": []}
+	}
+}

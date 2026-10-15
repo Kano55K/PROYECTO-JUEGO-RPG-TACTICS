@@ -3123,3 +3123,168 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Abrir con `-- --vista=cenital` (en PowerShell: `& $env:GODOT_BIN --path . -- --vista=cenital`) y jugar A: se ve como antes. Con `-- --vista=rara`, la pantalla de error.
   6. Anotar todo lo que se lea mal en isométrica: va al Director Creativo.
 - **Para la próxima sesión:** nada: tarea terminada.
+
+## T33 · sesión 1 · 14/10/2026
+- **Rama:** tarea/T33-alarmas
+- **Estado:** EN CURSO (sigue en la sesión 2)
+- **Hecho:**
+  - **A-5:** el núcleo **sí usa** `maestro.hambre: null`: `Plantel._crear_maestro` lo resuelve a `maestro.json` `iniciales.hambre` (cita 11.9), y lo prueba `pruebas/fixtures/unidades/escenario_nulos.json`. No se tocó el esquema (como pide el prompt).
+  - Esquema `alarmas` y `datos/playtest/alarmas.json`: 10 partidas por grupo, 3 jugadores, 10 semillas de playtest y 9 alarmas (A, B, C ×3, D normal, D hambriento ×2, H "build trampa"), cada una `{id, escenarios, calculo, parametros}` con su `_nota`. Solo enteros: proporciones en % y promedios en décimas.
+  - Esquema `playtest` (la ficha `{escenario, variante, semilla, indice_semilla, jugador}`), adelantado de la sesión 3 para que las fichas de los tests validen. Todavía no se escribe ninguna ficha.
+  - `HuellaDatos` excluye `playtest/` (A.7, D-015).
+  - `Cargador`: `playtest/` elige el esquema por el nombre del archivo; chequeo cruzado `_chequear_alarmas`: cada cálculo con sus parámetros y ninguno ajeno (lista única en `AlarmasPlaytest.PARAMETROS`), escenarios y especie existentes, semillas e ids de alarma sin repetir.
+  - `AlarmasPlaytest` (`nucleo/playtest/`, estática): agrupa por escenario + variante sin la semilla, cuenta partidas y jugadores distintos (`null` no cuenta), lista semillas y las de fuera de la lista (con aviso), y evalúa cada alarma en todas las variantes de sus escenarios → `{id, calculo, valor, umbral, n, estado}`. Cálculos: `primer_sellado_mismo_tramo`, `desenlace_proporcion`, `rondas_pelea_mayor_que`, `rondas_pelea_promedio_fuera`, `muere_si_empezo_suelta`, `combates_con_incidente`, `golpes_incidente_promedio`.
+- **Archivos:** creados `datos/_esquemas/alarmas.schema.json`, `datos/_esquemas/playtest.schema.json`, `datos/playtest/alarmas.json`, `nucleo/playtest/alarmas_playtest.gd`, `pruebas/playtest/mesa_playtest.gd`, `pruebas/playtest/test_agrupacion_playtest.gd`, `pruebas/playtest/test_alarmas_a_d.gd`, `pruebas/datos/test_alarmas_datos.gd`, `pruebas/fixtures/playtest/alarmas.json`, `pruebas/fixtures/cargador/alarmas_{valida,parametro_faltante,parametro_ajeno,escenario_inexistente,repetidas}/`; modificados `nucleo/datos/cargador.gd`, `nucleo/datos/huella_datos.gd`, `pruebas/datos/test_cargador.gd`, `pruebas/datos/test_huella_datos.gd`, `pruebas/datos/test_esquemas.gd` (suma `alarmas` y `playtest` a la lista de esquemas revisados; ningún test reescrito), `docs/PREGUNTAS.md`, `CLAUDE.md`.
+- **Tests:** 28 nuevos, total 943, todos pasan (sí). Sin `SCRIPT ERROR` en la consola.
+- **Criterio de terminado (sesión 1):** cumplido punto por punto:
+  1. `datos/` carga sin errores (`test_datos_completos`, `test_alarmas_datos`). Falta que el usuario revise la tabla de cotejo de abajo.
+  2. Error con archivo y campo con un cálculo sin su parámetro (`alarmas[0].parametros.comparacion`), con un parámetro ajeno (`alarmas[0].parametros.rondas`) y con un escenario inexistente (`alarmas[0].escenarios[1]`); además, semilla e id repetidos y especie inexistente.
+  3. Cambiar un umbral (y `partidas_por_grupo`) no cambia la huella.
+  4. La misma variante con otra semilla es un grupo; con la balanza 4, otro; una `semilla` dentro de la variante no separa; una semilla fuera de la lista da su aviso.
+  5. 9 partidas, o 10 de 2 jugadores → `insuficiente` con el valor calculado.
+  6. Cada cálculo en el borde (en el umbral `ok`, uno más `alarma`): A 80/90, B 30/20, C >5 rondas 20/30 (5 rondas no cuenta), promedio 20 y 35 ok, 19 y 36 alarma, Rodauva 50/60 (y la variante con la Rodauva guardada no entra en n), D normal 20/10 (los incidentes de las enemigas no cuentan), D hambriento derrota 50/60 y golpes 29/30 ("3 o más"), H 20/10.
+- **Tabla de cotejo** (`datos/playtest/alarmas.json`, contra `Sistema.md` 11.9):
+
+  | Valor | Campo | Sección |
+  |---|---|---|
+  | 10 | `partidas_por_grupo` | 11.9, Cómo se mide ("10 partidas por escenario") |
+  | 3 | `jugadores_minimos` | 11.9, Cómo se mide ("al menos 3 jugadores distintos") |
+  | 10 semillas | `semillas` | 11.9, Cómo se mide ("Se usan 10 semillas") |
+  | 80 | `a_mismo_tramo` `umbral_pct` (>) | Umbrales, A |
+  | huida, victoria · menor_que · 30 | `b_huir_no_se_lee` | Umbrales, B |
+  | 5 · 20 (>) | `c_rondas_largas` `rondas`, `umbral_pct` | Umbrales, C (combate largo) |
+  | 20 · 35 décimas (fuera de) | `c_rondas_promedio` | Umbrales, C ("fuera de 2 a 3,5") |
+  | rodauva · 50 (>) | `c_rodauva_muere` | Umbrales, C (la Rodauva muere) |
+  | tribu · 20 (<) | `d_rivales_invisibles` | Umbrales, D. Normal |
+  | derrota_por_caida · mayor_que · 50 | `d_castigo_derrota` | Umbrales, D. Hambriento |
+  | tribu · 30 décimas (≥) | `d_castigo_golpes` | Umbrales, D. Hambriento ("3 o más") |
+  | victoria · menor_que · 20 | `h_build_trampa` | Umbrales, H (build trampa) |
+
+  Fuera de esta sesión: E (las dos), F (las dos), G, H contra C, y las de "Todos" y "C y E" (sesión 2).
+- **Semillas de playtest:** 1101, 2203, 3307, 4409, 5501, 6607, 7703, 8809, 9901, 10007 (arbitrarias, distintas de las de `escenarios/`). El fixture usa 11 a 20, para que ningún test dependa de las reales.
+- **Supuestos técnicos:** `valor` es la proporción en % o el promedio en décimas, **truncado** (solo para mostrar); la comparación es exacta en enteros. Una alarma sin partidas que medir en un grupo (`n` = 0, por ejemplo A sin ningún sellado) queda `insuficiente` con valor `null`. "Empezó suelta" = `variante["tribu.<id>.estado"]` si está; si no, el estado del archivo del escenario en `datos/`.
+- **Lecturas declaradas:** P-048 (tramo de A = % mostrado del primer intento) y P-049 (incidentes de D solo de la tribu).
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nuevas P-048 (SISTEMAS, no bloquea) y P-049 (SISTEMAS, no bloquea); cerradas ninguna.
+- **Para la próxima sesión:** sesión 2: `tasa_acobardadas_fuera`, `toggle_afines` (informativo), `maestro_cae_sin_rescatista`, `sin_caidas_guardadas`, `destino_atacante_proporcion`, `victorias_diferencia` (H contra C, grupos sin cambios), `distancia_maestro_mayor_que`, `activa_poco_usada` y `encierro_de_efecto`. Cada cálculo nuevo suma su valor al `enum` del esquema `alarmas` (también en las copias de `pruebas/fixtures/cargador/alarmas_*/_esquemas/`) y a `AlarmasPlaytest.PARAMETROS`.
+
+## T33 · sesión 2 · 14/10/2026
+- **Rama:** tarea/T33-alarmas
+- **Estado:** EN CURSO (sigue en la sesión 3)
+- **Hecho:**
+  - Nueve cálculos nuevos en `AlarmasPlaytest`, cada uno con sus parámetros en `PARAMETROS` y en el esquema `alarmas`:
+    - `tasa_acobardadas_fuera` (E): tasa de todas las tiradas juntas del bando; `n` = partidas con alguna tirada.
+    - `toggle_afines` (E, informativo).
+    - `maestro_cae_sin_rescatista` (F).
+    - `sin_caidas_guardadas` (F, P-050).
+    - `destino_atacante_proporcion` (G, P-051).
+    - `victorias_diferencia` (H contra C).
+    - `distancia_maestro_mayor_que` (todos): promedio por combate, `n` = combates con turnos del Maestro desde el primer ataque.
+    - `activa_poco_usada` (todos, P-052).
+    - `encierro_de_efecto` (C y E).
+  - `calcular` devuelve `{grupos, comparaciones, informativas, avisos}`. Las comparaciones (`victorias_diferencia`) y las informativas (`toggle_afines`) no se evalúan por grupo: usan el grupo **sin cambios** de `escenario` y de `comparado_con`. Llevan `n` y `n_comparado`, y salen `insuficiente` si cualquiera de los dos grupos no alcanza. `toggle_afines` da `resultado` `aprobado` / `no_aprobado` / `insuficiente` y su valor es `{escenario, comparado_con}` en %.
+  - El efecto sale de la ficha en `especies/` (`_efecto_de`), nunca del id. La acción de cada efecto está en `ACCION_DE_EFECTO` (con `Turno.EFECTO_ERIZARSE`, `Surcos.EFECTO` y `Junco.EFECTO`).
+  - El estado al empezar es `_estado_inicial`, y ahora también lo usa `muere_si_empezo_suelta` (sin cambio de comportamiento).
+  - `Cargador._chequear_alarmas`: `comparado_con` tiene que existir en `escenarios/`; `efecto` tiene que ser el de alguna ficha; en `activa_poco_usada`, además, tiene que tener activa.
+  - `datos/playtest/alarmas.json` y su fixture: 11 alarmas nuevas, 20 en total (las 16 filas de 11.9; las activas, una por efecto).
+- **Archivos:**
+  - Creados: `pruebas/playtest/test_alarmas_e_h.gd`, `pruebas/playtest/test_alarmas_todos.gd` y `pruebas/fixtures/cargador/alarmas_{comparado_inexistente,efecto_sin_activa,efecto_inexistente}/`.
+  - Modificados:
+    - `nucleo/playtest/alarmas_playtest.gd`, `nucleo/datos/cargador.gd`, `datos/_esquemas/alarmas.schema.json` y `datos/playtest/alarmas.json`.
+    - `pruebas/fixtures/playtest/alarmas.json`, `pruebas/playtest/mesa_playtest.gd`, `pruebas/datos/test_cargador.gd` y `pruebas/datos/test_alarmas_datos.gd`.
+    - `pruebas/fixtures/cargador/alarmas_valida/`: tiene alarmas de las formas nuevas, y su Rodauva de juguete lleva el rasgo `erizarse`.
+    - Las copias del esquema `alarmas` en `pruebas/fixtures/cargador/alarmas_*/_esquemas/`, `docs/PREGUNTAS.md` y `CLAUDE.md`.
+- **Tests:** 23 nuevos, total 966, todos pasan (sí). Ningún test reescrito. Sin `SCRIPT ERROR` en la consola.
+- **Criterio de terminado (sesión 2):** cumplido punto por punto:
+  7. Cada cálculo de la sesión en el borde (en el umbral `ok`, uno más `alarma`):
+     - E: 10 y 60 ok, 9 y 61 alarma (las tiradas de las enemigas no cuentan; vale también para `e_cobardia_afines`).
+     - Toggle: 61/10 y 61/60 aprobado; 60/10, 61/9 y 61/61 no aprobado; con 9 partidas, insuficiente.
+     - F: rescate 60/70; caídas sin guardar 80/90 (las caídas del Maestro o de una enemiga no entran en n).
+     - G: 70/80 (una derrota con `opcion: null` no entra en n).
+     - H contra C: 20 ok, 30 alarma, −100 ok; insuficiente con 9 partidas de C o sin C.
+     - Distancia: 3,0 no es "mayor a 3" y 3,1 sí; 50 ok, 60 alarma.
+     - Activa: 20 ok, 10 alarma (una enemiga erizada no cuenta).
+     - Encierro: 20 ok, 30 alarma, también en E (los encierros de otra unidad no cuentan).
+  8. La alarma de D en el grupo con la balanza 4 mide sus propias partidas (10 alarma) y la normal las suyas (20 ok). H contra C ignora un grupo de C con la Rodauva guardada y uno de H con la balanza 4. El toggle ignora un grupo de E con cambios.
+  9. `especie_prueba` (efecto `ocultarse`, otro id) cuenta como la activa de Hacerse junco, y la Ocarra en el mismo lugar no. Empezar y terminar guardada, sin usos, no entra en `n`. Empezar guardada y terminar caída (invocada) entra, y usarla aunque termine guardada también.
+- **Tabla de cotejo de la sesión** (`datos/playtest/alarmas.json`, contra `Sistema.md` 11.9):
+
+  | Valor | Alarma y campos | Sección |
+  |---|---|---|
+  | tribu · 10 · 60 (fuera de) | `e_acobardadas` (`e_cobardia`, `e_cobardia_afines`) | Umbrales, E. Cobardía |
+  | comparado con `e_cobardia` · tribu · 60 (>) · 10 a 60 | `e_toggle_afines` (`e_cobardia_afines`) | Umbrales, E. Toggle de afines |
+  | 60 (>) | `f_rescate_azaroso` | Umbrales, F (se siente azaroso) |
+  | 80 (>) | `f_guardar_no_se_lee` | Umbrales, F (guardar caídas no se lee) |
+  | comer · 70 (>) | `g_comer_siempre` | Umbrales, G |
+  | comparado con `c_tasajero` · 20 puntos (>) | `h_mas_facil_que_c` (`h_soplo`) | Umbrales, H (más fácil que el Barro) |
+  | 30 décimas (>) · 50 (>) | `todos_maestro_se_esconde` (los 10) | Umbrales, Todos (el Maestro se esconde) |
+  | erizarse / surco / ocultarse · 20 (<) | `todos_activa_erizarse`, `_surco`, `_ocultarse` (los 10) | Umbrales, Todos (una activa no genera decisiones) |
+  | caza_y_cuenta · 20 (>) | `ce_encierro` (`c_tasajero`, `e_cobardia`, `e_cobardia_afines`) | Umbrales, C y E |
+
+- **Supuestos técnicos:**
+  - E mide la tasa de todas las tiradas del grupo juntas ("de las tiradas"), no un promedio de tasas por partida.
+  - En H contra C, el valor es la diferencia en puntos, truncada hacia 0, y puede ser negativa. La comparación es exacta, con el producto cruzado.
+  - En los escenarios sin la criatura de una activa, la alarma queda `insuficiente` con `n` = 0.
+  - Las lecturas de "activa disponible" y "cobardía de la tribu" ya estaban declaradas en `Arquitectura.md` 10.5.
+- **Lecturas declaradas:** P-050 (caídas de F, solo de la tribu), P-051 (comer en G, sobre los destinos elegidos) y P-052 (las invocaciones no están en el resultado).
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nuevas P-050 (SISTEMAS, no bloquea), P-051 (SISTEMAS, no bloquea) y P-052 (ARQUITECTO, no bloquea); cerradas ninguna.
+- **Para la próxima sesión:** sesión 3:
+  - Ficha de playtest (`GuardadoCombate` escribe `_playtest.json`; en G, después del destino).
+  - Campo "Jugador" en el selector y "Semilla de playtest 1 a 10" en el panel.
+  - `herramientas/informe_playtest.gd` con su ayudante: JSON con `grupos`, `comparaciones`, `informativas` (`toggle_afines`) y `avisos`, CSV de una fila por combate y resumen en la consola.
+  - El comando en `CLAUDE.md`. La entrada de la sesión 3 resume la tarea entera, con la prueba manual.
+
+## T33 · sesión 3 · 14/10/2026
+- **Rama:** tarea/T33-alarmas
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera (sesiones 1 a 3) y es la descripción del PR.
+- **Hecho (tarea entera):**
+  - **Sesión 1:** A-5 (el núcleo **sí usa** `maestro.hambre: null`; no se tocó el esquema). Esquema `alarmas` y `datos/playtest/alarmas.json` (10 partidas por grupo, 3 jugadores, 10 semillas de playtest). Esquema `playtest` (la ficha). `HuellaDatos` excluye `playtest/`. Chequeo cruzado del `Cargador` (`_chequear_alarmas`). `AlarmasPlaytest` (`nucleo/playtest/`): agrupación por escenario + variante sin la semilla, jugadores distintos, semillas fuera de la lista y siete cálculos (A a D).
+  - **Sesión 2:** nueve cálculos más (E a H, "todos", "C y E"), las comparaciones entre escenarios (`victorias_diferencia`) y la informativa `toggle_afines`; 20 alarmas en `alarmas.json`.
+  - **Sesión 3:**
+    - `FichaPlaytest` (`nucleo/playtest/ficha_playtest.gd`, estática): `armar` (variante = cambios del panel **sin la semilla**; `indice_semilla` desde 1 o `null`; jugador vacío → `null`), `indice` y `desconocida(resultado, semillas)` para un resultado sin ficha (variante y jugador `null`).
+    - `AlarmasPlaytest` acepta la variante desconocida (`null`): es su propio grupo, nunca el "sin cambios", y su estado inicial es desconocido.
+    - `GuardadoCombate.guardar(..., ficha)` escribe `<nombre>_playtest.json` solo cuando escribe el resultado; `VistaCombate.empezar(..., variante, jugador)` arma la ficha al guardar. En G, después del destino, como la grabación. El resultado del núcleo no cambió.
+    - Selector: campo "Jugador" (`CampoJugador/Jugador`, pantalla de desarrollo, en memoria). Panel de T31: `SemillaPlaytest` ("playtest -", "1" a "10") junto al +1, que no cambió.
+    - `herramientas/informe_playtest.gd` y su ayudante `SalidaInformePlaytest` (`herramientas/salida_informe_playtest.gd`, se prueba sin lanzar Godot). Lee los `_resultado.json` y sus `_playtest.json` (validados contra sus esquemas) y escribe `informe_playtest.json` (`partidas`, `grupos`, `comparaciones`, `informativas` con `toggle_afines`, `avisos`) e `informe_playtest.csv`, más el resumen en la consola. Avisos propios: `sin_ficha`, `ficha_invalida` y `resultado_invalido` (este se saltea). Carpeta vacía o inexistente: no escribe y lo dice.
+    - Dentro del proyecto (`registros/`), la herramienta deja junto al CSV un `informe_playtest.csv.import` con `importer="keep"`: si no, el editor de Godot importa el CSV como archivo de traducciones y llena la carpeta de `.translation`. El CSV esperado del fixture lleva el mismo `.import`.
+    - Comando en `CLAUDE.md` (cmd y PowerShell).
+- **Archivos (tarea entera):**
+  - Creados:
+    - `datos/_esquemas/alarmas.schema.json`, `datos/_esquemas/playtest.schema.json` y `datos/playtest/alarmas.json`.
+    - `nucleo/playtest/alarmas_playtest.gd` y `nucleo/playtest/ficha_playtest.gd`.
+    - `herramientas/informe_playtest.gd` y `herramientas/salida_informe_playtest.gd`.
+    - `pruebas/playtest/` (`mesa_playtest.gd`, `test_agrupacion_playtest.gd`, `test_alarmas_a_d.gd`, `test_alarmas_e_h.gd`, `test_alarmas_todos.gd`, `test_ficha_playtest.gd`), `pruebas/datos/test_alarmas_datos.gd`, `pruebas/herramientas/test_informe_playtest.gd` y `pruebas/pantalla/test_vista_ficha_playtest.gd`.
+    - Fixtures: `pruebas/fixtures/playtest/alarmas.json`, `pruebas/fixtures/playtest/informe/` (cuatro resultados, tres fichas y un resultado roto), `pruebas/fixtures/playtest/informe_esperado.csv` (con su `.csv.import` "keep") y `pruebas/fixtures/cargador/alarmas_*/`.
+  - Modificados: `nucleo/datos/cargador.gd`, `nucleo/datos/huella_datos.gd`, `pantalla/combate/guardado_combate.gd`, `pantalla/combate/vista_combate.gd`, `pantalla/principal.gd`, `pantalla/principal.tscn`, `pantalla/parametros/panel_parametros.gd`; tests `pruebas/datos/test_cargador.gd`, `test_huella_datos.gd`, `test_esquemas.gd`, `pruebas/pantalla/test_guardado_combate.gd`, `test_principal_parametros.gd` y `pruebas/pantalla/parametros/test_panel_parametros.gd` (solo tests nuevos); `docs/PREGUNTAS.md` y `CLAUDE.md`.
+- **Tests:** sesión 3: 15 nuevos (tarea: 66 nuevos). Total 981, todos pasan (sí). Sin `SCRIPT ERROR` en la consola. Ningún test reescrito en toda la tarea.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. a 9. Sesiones 1 y 2 (ver sus entradas, con las tablas de cotejo de las 20 alarmas).
+  10. La ficha valida contra `playtest`, no lleva la semilla en la variante y se escribe junto al resultado, al terminar (`test_ficha_playtest`, `test_guardado_combate::test_t33_guarda_la_ficha_junto_al_resultado`). En G, recién después del destino (`test_vista_ficha_playtest`).
+  11. El selector pone la semilla de la lista (`test_panel_parametros::test_t33_semilla_de_playtest`) y el combate la usa: evento `inicio` y ficha con `indice_semilla` 1 y el jugador (`test_principal_parametros::test_t33_jugador_y_semilla_de_playtest`, `datos/` real).
+  12. Sobre la carpeta de fixtures, el CSV es igual a `informe_esperado.csv` y el JSON tiene los grupos de A (2 partidas, 2 jugadores, todo `insuficiente`, A con valor 100 y `n` 1), C desconocida y C con cambios; ningún `float` en el informe. El resultado sin ficha da `sin_ficha` y el roto `resultado_invalido`. Carpeta vacía o inexistente: no falla, no escribe y lo dice. Probado también por consola: sin `ERROR` del motor (el JSON roto se lee con `JSON.new().parse`).
+  13. Suite completa: 981 tests, 0 errores, 0 fallas. En la consola, solo lo que ya estaba (el depurador remoto del runner, los `push_error` esperados de `ReglasCombate` y el aviso de vista desconocida de T32).
+- **Columnas del CSV** (`SalidaInformePlaytest.COLUMNAS`, separador coma, comillas RFC 4180; `null` = celda vacía):
+  - `archivo` (nombre sin `_resultado.json`), `escenario`, `variante` (JSON compacto de los cambios sin la semilla; vacía sin cambios; `?` desconocida), `semilla`, `indice_semilla`, `jugador`, `desenlace`.
+  - Métrica 1: `rondas_totales`, `rondas_primer_ataque`, `rondas_de_pelea`. 2: `secundar_usos`. 3: `eslabones_cadenas`, `eslabones_suma`, `eslabones_maximo`.
+  - 4: `incidentes_{tribu,enemigas}_{distraida,golpe}`. 5: `encono_tribu`, `encono_enemigas`. 6: `cobardia_{tribu,enemigas}_{acobardada,resistida}`.
+  - 7: `sellados_intentos`, `sellados_logrados`. 8: `capturas_perdidas_huida`, `capturas_perdidas_cero`. 9: `caidas`. 10: `caidas_guardadas`. 11: `muertes`. 12: `rescatista` (id; vacía si el Maestro no cayó; `permadeath` si cayó sin rescatista). 13: `distancia_maestro_turnos`, `distancia_maestro_suma` (enteros, como la métrica).
+  - 14: `activas_erizarse`, `activas_cavar`, `activas_hacerse_junco` (usos sumados), `activas_surcos`, `activas_ocultos`, `activas_destapes_contacto`, `activas_bonos_cobrados`, `activas_bonos_perdidos`, `activas_cambios_modo` (cantidad), `activas_encierros` (turnos sumados).
+  - `destino_atacante` (la opción elegida; vacía si no hubo o fue `se_fue`).
+- **Supuestos técnicos (sesión 3):**
+  - Un resultado sin ficha (o con la ficha rota) forma el grupo "variante desconocida" de su escenario: nunca cuenta como "sin cambios" (comparaciones y toggle), su jugador no cuenta, y como no se sabe con qué estado empezó la tribu, no entra en el `n` de `muere_si_empezo_suelta` (en `activa_poco_usada` cuenta solo si la activa se usó o la criatura terminó fuera del pergamino).
+  - La herramienta toma una ruta relativa desde la raíz del proyecto (`registros` = `res://registros`).
+  - El CSV va con coma; si Excel en castellano no lo separa solo, se abre con "Datos > Desde texto/CSV".
+  - Las semillas de las fichas se resuelven contra `playtest/alarmas.json` al guardar; con datos sin ese archivo (fixtures de pantalla), `indice_semilla` queda `null`.
+- **Semillas de playtest:** 1101, 2203, 3307, 4409, 5501, 6607, 7703, 8809, 9901, 10007.
+- **Lecturas declaradas:** P-048, P-049, P-050, P-051 y P-052 (sesiones 1 y 2); ninguna nueva.
+- **Claves de texto nuevas sin texto:** ninguna (el campo "Jugador" y el selector de semilla son de pantallas de desarrollo).
+- **Preguntas:** nuevas en la tarea P-048 a P-051 (SISTEMAS, no bloquean) y P-052 (ARQUITECTO, no bloquea); en esta sesión ninguna. Cerradas: ninguna.
+- **Prueba manual (para el usuario):**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → escribir un nombre en "Jugador" (arriba, a la derecha de los escenarios) → `a_dia_1` → en el panel, en la fila de `semilla`, elegir "1" en el desplegable "playtest -" → Jugar hasta el final. Repetir con la semilla 2.
+  3. Volver, cambiar el nombre del jugador y jugar 2 partidas de `c_tasajero` con las semillas 1 y 2.
+  4. Correr la herramienta: PowerShell `& $env:GODOT_BIN --headless --path . --script res://herramientas/informe_playtest.gd -- registros` (o en `cmd`: `"%GODOT_BIN%" --headless --path . --script res://herramientas/informe_playtest.gd`). Abrir `registros/informe_playtest.json` y `.csv`: los grupos de A y C, con 2 partidas y 2 jugadores, todo `insuficiente`, con sus valores. Las partidas viejas de `registros/` (sin ficha) aparecen como "variante desconocida" y con el aviso `sin_ficha`.
+  5. Abrir el `.csv` en una planilla: una fila por combate.
+  6. Cambiar un umbral en `datos/playtest/alarmas.json` y volver a correr la herramienta: el umbral cambia en el informe, y las grabaciones se siguen reproduciendo sin aviso de huella.
+- **Para la próxima sesión:** nada: tarea terminada. Queda el PR a `develop` y, después, que Sistemas conteste P-048 a P-052.
