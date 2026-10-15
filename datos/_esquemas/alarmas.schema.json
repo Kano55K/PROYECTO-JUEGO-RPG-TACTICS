@@ -69,7 +69,16 @@
               "rondas_pelea_promedio_fuera",
               "muere_si_empezo_suelta",
               "combates_con_incidente",
-              "golpes_incidente_promedio"
+              "golpes_incidente_promedio",
+              "tasa_acobardadas_fuera",
+              "toggle_afines",
+              "maestro_cae_sin_rescatista",
+              "sin_caidas_guardadas",
+              "destino_atacante_proporcion",
+              "victorias_diferencia",
+              "distancia_maestro_mayor_que",
+              "activa_poco_usada",
+              "encierro_de_efecto"
             ]
           },
           "parametros": {
@@ -126,6 +135,43 @@
                   "tribu",
                   "enemigas"
                 ]
+              },
+              "desde_pct": {
+                "description": "Borde de abajo de un rango en %: por debajo, fuera",
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "hasta_pct": {
+                "description": "Borde de arriba de un rango en %: por encima, fuera",
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "supera_pct": {
+                "description": "El % que el escenario comparado tiene que superar",
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "umbral_puntos": {
+                "description": "Diferencia en puntos de % entre dos escenarios",
+                "type": "integer",
+                "minimum": 0
+              },
+              "comparado_con": {
+                "description": "id de escenarios/ contra el que se compara (su grupo sin cambios)",
+                "$ref": "comunes.schema.json#/$defs/id"
+              },
+              "opciones": {
+                "description": "Opciones del destino de la atacante (resultado, destino_atacante.opcion)",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "enum": [
+                    "perdonar",
+                    "sellar",
+                    "comer"
+                  ]
+                }
+              },
+              "efecto": {
+                "description": "Efecto de un rasgo (especie, rasgo.efecto): lo revisa el cargador",
+                "$ref": "comunes.schema.json#/$defs/id"
               }
             }
           }

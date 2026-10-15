@@ -719,3 +719,42 @@ El comando de tests no cambia. Se descartan: el modo sin ventana, porque GdUnit4
 - **Bloquea:** no
 - **Mientras tanto:** programado con A (lectura declarada): el bando es un parámetro de la alarma (`bando: "tribu"` en `datos/playtest/alarmas.json`), así que la respuesta B sería sumar una opción al parámetro.
 - **Respuesta:** _(la completa el staff)_
+
+## P-050 — Qué son "las partidas con caídas" en la alarma de guardar caídas de F
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T33
+- **Fecha:** 14/10/2026
+- **Fuente:** `Sistema.md` 11.9, Umbrales de alarma, fila F ("Ninguna caída guardada en más del 80% de las partidas con caídas", métricas 9 y 10)
+- **Duda:** ¿"Partidas con caídas" son solo las partidas en que cayó alguna criatura de la tribu?
+- **Caso que la dispara:** la métrica 9 cuenta todas las caídas, también la del Maestro (P-043) y las de las enemigas. Solo se puede guardar a una criatura de la tribu (11.5). En una partida de F en que solo cae el Maestro, no había nada que guardar: con la lectura B esa partida contaría como "ninguna caída guardada".
+- **Opciones:** A) solo cuentan las partidas con alguna caída de una criatura de la tribu. B) cuenta cualquier caída de la métrica 9. — Recomendación técnica: A.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A (lectura declarada) en `AlarmasPlaytest`, cálculo `sin_caidas_guardadas`.
+- **Respuesta:** _(la completa el staff)_
+
+## P-051 — Sobre qué partidas se mide "comer" en la alarma de G
+- **Estado:** ABIERTA
+- **Para:** SISTEMAS
+- **Tarea:** T33
+- **Fecha:** 14/10/2026
+- **Fuente:** `Sistema.md` 11.9, Umbrales de alarma, fila G ("Comer en más del 70% de las partidas", destino de la atacante)
+- **Duda:** ¿El 70 % se mide sobre las partidas en que el jugador eligió un destino, o sobre todas las partidas de G?
+- **Caso que la dispara:** si el Maestro pierde o huye, la atacante se va sin que nadie elija (P-024; `destino_atacante` con `opcion: null`). Con 10 partidas, 7 en que se come y 3 derrotas: sobre las elegidas da 100 % (salta); sobre todas da 70 % (no salta).
+- **Opciones:** A) sobre las partidas con un destino elegido. B) sobre todas las partidas. — Recomendación técnica: A, porque la señal es "comer es siempre la respuesta" cuando hay que responder.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A (lectura declarada) en `AlarmasPlaytest`, cálculo `destino_atacante_proporcion`.
+- **Respuesta:** _(la completa el staff)_
+
+## P-052 — El resultado no registra las invocaciones: una activa puede quedar fuera de "disponible"
+- **Estado:** ABIERTA
+- **Para:** ARQUITECTO
+- **Tarea:** T33
+- **Fecha:** 14/10/2026
+- **Fuente:** `Arquitectura.md` 10.5 (lectura (a) de T33: "disponible" = la criatura estuvo en el tablero, suelta al empezar o invocada) y `Sistema.md` 11.9, fila "Todos: una activa no genera decisiones" (métrica 14)
+- **Duda:** ¿Se acepta que "invocada" se deduzca del resultado, o se suma una métrica de invocaciones (lo que cambia `MetricasCombate`, fuera de T33)?
+- **Caso que la dispara:** ni las métricas ni el resultado guardan las invocaciones. `AlarmasPlaytest` toma como disponible a la criatura que empezó suelta, terminó fuera de su pergamino o usó la activa. Si una Rodauva empieza guardada, la invocan, no se eriza y vuelve a guardarse (o la guardan caída), termina `guardada` sin usos: no cuenta como disponible, aunque estuvo en el tablero. Ese es justo el caso que la alarma quiere ver.
+- **Opciones:** A) aceptar la deducción (pierde ese caso). B) sumar a la métrica 14 las invocaciones por unidad, en una tarea propia, y que `activa_poco_usada` las lea. — Recomendación técnica: B si la alarma se va a usar para decidir; A alcanza para la 0a.
+- **Bloquea:** no
+- **Mientras tanto:** programado con A en `AlarmasPlaytest._activa_poco_usada`.
+- **Respuesta:** _(la completa el staff)_

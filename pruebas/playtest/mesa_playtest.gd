@@ -8,14 +8,41 @@ extends RefCounted
 const _CARPETA_ESQUEMAS: String = "res://datos"
 const _FIXTURE_ALARMAS: String = "res://pruebas/fixtures/playtest/alarmas.json"
 const _FIXTURE_C: String = "res://pruebas/fixtures/combate/escenario_c.json"
+const _CARPETA_UNIDADES: String = "res://pruebas/fixtures/unidades/"
+# T33, sesion 2: escenario -> fixture. Los que no tienen fixture van con la
+# tribu vacia (la alarma de "todos" los nombra; ningun test mira su tribu).
+const _ESCENARIOS: Dictionary = {
+	"a_dia_1": _CARPETA_UNIDADES + "escenario_a.json",
+	"b_muro": _CARPETA_UNIDADES + "escenario_b.json",
+	"c_tasajero": _FIXTURE_C,
+	"d_rivales_normal": "",
+	"d_rivales_hambriento": "",
+	"e_cobardia": _CARPETA_UNIDADES + "escenario_e.json",
+	"e_cobardia_afines": _CARPETA_UNIDADES + "escenario_e.json",
+	"f_rescate": "",
+	"g_ataque_nocturno": _CARPETA_UNIDADES + "escenario_g.json",
+	"h_soplo": "",
+}
+const _ESPECIES: Array[String] = ["ocarra", "rodauva", "surcon", "tasajero", "zancajunco"]
+# Otro id con el efecto ocultarse (T40): el calculo mira el efecto, nunca el id.
+const _FIXTURE_ESPECIE_PRUEBA: String = "res://pruebas/fixtures/pantalla/especie_prueba.json"
 
 
 # Los datos que lee AlarmasPlaytest, como los entrega el Cargador.
 static func datos() -> Dictionary:
-	return {
+	var datos_armados: Dictionary = {
 		AlarmasPlaytest.ARCHIVO: LectorFixture.leer(_FIXTURE_ALARMAS, "alarmas")["datos"],
-		"escenarios/c_tasajero.json": LectorFixture.leer(_FIXTURE_C, "escenario")["datos"],
 	}
+	for id in _ESCENARIOS.keys():
+		var escenario: Dictionary = {"id": id, "tribu": [], "enemigas": []}
+		if not (_ESCENARIOS[id] as String).is_empty():
+			escenario = (LectorFixture.leer(_ESCENARIOS[id], "escenario")["datos"] as Dictionary).duplicate(true)
+			escenario["id"] = id
+		datos_armados["escenarios/%s.json" % [id]] = escenario
+	for id in _ESPECIES:
+		datos_armados["especies/%s.json" % [id]] = LectorFixture.leer(_CARPETA_UNIDADES + id + ".json", "especie")["datos"]
+	datos_armados["especies/especie_prueba.json"] = LectorFixture.leer(_FIXTURE_ESPECIE_PRUEBA, "especie")["datos"]
+	return datos_armados
 
 
 static func semillas() -> Array:
@@ -99,6 +126,30 @@ static func grupo(informe: Dictionary, escenario: String, variante: Dictionary =
 # La alarma de ese id en el grupo, o {}.
 static func alarma(informe: Dictionary, escenario: String, id: String, variante: Dictionary = {}) -> Dictionary:
 	for candidata in (grupo(informe, escenario, variante).get("alarmas", []) as Array):
+		if candidata["id"] == id:
+			return candidata
+	return {}
+
+
+# T33, sesion 2: una fila de resultado.unidades (bando "tribu" o "enemiga").
+static func unidad(id: String, especie: String, bando: String, estado: String = "suelta") -> Dictionary:
+	var de_la_tribu: bool = bando == "tribu"
+	return {"id": id, "especie": especie, "bando": bando, "estado": estado, "vida": 10,
+			"lealtad": 8 if de_la_tribu else null, "hambre": 3 if de_la_tribu else null,
+			"posicion": null if estado == "guardada" else [0, 0]}
+
+
+# La comparacion entre escenarios de ese id, o {}.
+static func comparacion(informe: Dictionary, id: String) -> Dictionary:
+	for candidata in (informe["comparaciones"] as Array):
+		if candidata["id"] == id:
+			return candidata
+	return {}
+
+
+# La alarma informativa de ese id, o {}.
+static func informativa(informe: Dictionary, id: String) -> Dictionary:
+	for candidata in (informe["informativas"] as Array):
 		if candidata["id"] == id:
 			return candidata
 	return {}

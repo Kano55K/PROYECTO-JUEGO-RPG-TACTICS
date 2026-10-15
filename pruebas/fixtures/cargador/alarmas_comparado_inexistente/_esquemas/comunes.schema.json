@@ -1,0 +1,62 @@
+{
+  "title": "Definiciones comunes",
+  "description": "Tipos que reusan los demás esquemas. El validador del juego solo entiende el subconjunto de palabras de Arquitectura.md A.2. El cargador copia cada definición dentro del esquema que la usa: acá no se usan referencias locales (#/$defs/...).",
+  "$defs": {
+    "nota": {
+      "description": "Nota de diseño; el código la ignora (A.2)",
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "id_o_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "puntos": {
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100
+    },
+    "casilla": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "posicion": {
+      "description": "[x, y] con y = 0 arriba, o null: la ubica el jugador en el despliegue (A.2)",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "por_rango": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}

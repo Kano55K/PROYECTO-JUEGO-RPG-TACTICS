@@ -3167,3 +3167,70 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
 - **Claves de texto nuevas sin texto:** ninguna.
 - **Preguntas:** nuevas P-048 (SISTEMAS, no bloquea) y P-049 (SISTEMAS, no bloquea); cerradas ninguna.
 - **Para la próxima sesión:** sesión 2: `tasa_acobardadas_fuera`, `toggle_afines` (informativo), `maestro_cae_sin_rescatista`, `sin_caidas_guardadas`, `destino_atacante_proporcion`, `victorias_diferencia` (H contra C, grupos sin cambios), `distancia_maestro_mayor_que`, `activa_poco_usada` y `encierro_de_efecto`. Cada cálculo nuevo suma su valor al `enum` del esquema `alarmas` (también en las copias de `pruebas/fixtures/cargador/alarmas_*/_esquemas/`) y a `AlarmasPlaytest.PARAMETROS`.
+
+## T33 · sesión 2 · 14/10/2026
+- **Rama:** tarea/T33-alarmas
+- **Estado:** EN CURSO (sigue en la sesión 3)
+- **Hecho:**
+  - Nueve cálculos nuevos en `AlarmasPlaytest`, cada uno con sus parámetros en `PARAMETROS` y en el esquema `alarmas`:
+    - `tasa_acobardadas_fuera` (E): tasa de todas las tiradas juntas del bando; `n` = partidas con alguna tirada.
+    - `toggle_afines` (E, informativo).
+    - `maestro_cae_sin_rescatista` (F).
+    - `sin_caidas_guardadas` (F, P-050).
+    - `destino_atacante_proporcion` (G, P-051).
+    - `victorias_diferencia` (H contra C).
+    - `distancia_maestro_mayor_que` (todos): promedio por combate, `n` = combates con turnos del Maestro desde el primer ataque.
+    - `activa_poco_usada` (todos, P-052).
+    - `encierro_de_efecto` (C y E).
+  - `calcular` devuelve `{grupos, comparaciones, informativas, avisos}`. Las comparaciones (`victorias_diferencia`) y las informativas (`toggle_afines`) no se evalúan por grupo: usan el grupo **sin cambios** de `escenario` y de `comparado_con`. Llevan `n` y `n_comparado`, y salen `insuficiente` si cualquiera de los dos grupos no alcanza. `toggle_afines` da `resultado` `aprobado` / `no_aprobado` / `insuficiente` y su valor es `{escenario, comparado_con}` en %.
+  - El efecto sale de la ficha en `especies/` (`_efecto_de`), nunca del id. La acción de cada efecto está en `ACCION_DE_EFECTO` (con `Turno.EFECTO_ERIZARSE`, `Surcos.EFECTO` y `Junco.EFECTO`).
+  - El estado al empezar es `_estado_inicial`, y ahora también lo usa `muere_si_empezo_suelta` (sin cambio de comportamiento).
+  - `Cargador._chequear_alarmas`: `comparado_con` tiene que existir en `escenarios/`; `efecto` tiene que ser el de alguna ficha; en `activa_poco_usada`, además, tiene que tener activa.
+  - `datos/playtest/alarmas.json` y su fixture: 11 alarmas nuevas, 20 en total (las 16 filas de 11.9; las activas, una por efecto).
+- **Archivos:**
+  - Creados: `pruebas/playtest/test_alarmas_e_h.gd`, `pruebas/playtest/test_alarmas_todos.gd` y `pruebas/fixtures/cargador/alarmas_{comparado_inexistente,efecto_sin_activa,efecto_inexistente}/`.
+  - Modificados:
+    - `nucleo/playtest/alarmas_playtest.gd`, `nucleo/datos/cargador.gd`, `datos/_esquemas/alarmas.schema.json` y `datos/playtest/alarmas.json`.
+    - `pruebas/fixtures/playtest/alarmas.json`, `pruebas/playtest/mesa_playtest.gd`, `pruebas/datos/test_cargador.gd` y `pruebas/datos/test_alarmas_datos.gd`.
+    - `pruebas/fixtures/cargador/alarmas_valida/`: tiene alarmas de las formas nuevas, y su Rodauva de juguete lleva el rasgo `erizarse`.
+    - Las copias del esquema `alarmas` en `pruebas/fixtures/cargador/alarmas_*/_esquemas/`, `docs/PREGUNTAS.md` y `CLAUDE.md`.
+- **Tests:** 23 nuevos, total 966, todos pasan (sí). Ningún test reescrito. Sin `SCRIPT ERROR` en la consola.
+- **Criterio de terminado (sesión 2):** cumplido punto por punto:
+  7. Cada cálculo de la sesión en el borde (en el umbral `ok`, uno más `alarma`):
+     - E: 10 y 60 ok, 9 y 61 alarma (las tiradas de las enemigas no cuentan; vale también para `e_cobardia_afines`).
+     - Toggle: 61/10 y 61/60 aprobado; 60/10, 61/9 y 61/61 no aprobado; con 9 partidas, insuficiente.
+     - F: rescate 60/70; caídas sin guardar 80/90 (las caídas del Maestro o de una enemiga no entran en n).
+     - G: 70/80 (una derrota con `opcion: null` no entra en n).
+     - H contra C: 20 ok, 30 alarma, −100 ok; insuficiente con 9 partidas de C o sin C.
+     - Distancia: 3,0 no es "mayor a 3" y 3,1 sí; 50 ok, 60 alarma.
+     - Activa: 20 ok, 10 alarma (una enemiga erizada no cuenta).
+     - Encierro: 20 ok, 30 alarma, también en E (los encierros de otra unidad no cuentan).
+  8. La alarma de D en el grupo con la balanza 4 mide sus propias partidas (10 alarma) y la normal las suyas (20 ok). H contra C ignora un grupo de C con la Rodauva guardada y uno de H con la balanza 4. El toggle ignora un grupo de E con cambios.
+  9. `especie_prueba` (efecto `ocultarse`, otro id) cuenta como la activa de Hacerse junco, y la Ocarra en el mismo lugar no. Empezar y terminar guardada, sin usos, no entra en `n`. Empezar guardada y terminar caída (invocada) entra, y usarla aunque termine guardada también.
+- **Tabla de cotejo de la sesión** (`datos/playtest/alarmas.json`, contra `Sistema.md` 11.9):
+
+  | Valor | Alarma y campos | Sección |
+  |---|---|---|
+  | tribu · 10 · 60 (fuera de) | `e_acobardadas` (`e_cobardia`, `e_cobardia_afines`) | Umbrales, E. Cobardía |
+  | comparado con `e_cobardia` · tribu · 60 (>) · 10 a 60 | `e_toggle_afines` (`e_cobardia_afines`) | Umbrales, E. Toggle de afines |
+  | 60 (>) | `f_rescate_azaroso` | Umbrales, F (se siente azaroso) |
+  | 80 (>) | `f_guardar_no_se_lee` | Umbrales, F (guardar caídas no se lee) |
+  | comer · 70 (>) | `g_comer_siempre` | Umbrales, G |
+  | comparado con `c_tasajero` · 20 puntos (>) | `h_mas_facil_que_c` (`h_soplo`) | Umbrales, H (más fácil que el Barro) |
+  | 30 décimas (>) · 50 (>) | `todos_maestro_se_esconde` (los 10) | Umbrales, Todos (el Maestro se esconde) |
+  | erizarse / surco / ocultarse · 20 (<) | `todos_activa_erizarse`, `_surco`, `_ocultarse` (los 10) | Umbrales, Todos (una activa no genera decisiones) |
+  | caza_y_cuenta · 20 (>) | `ce_encierro` (`c_tasajero`, `e_cobardia`, `e_cobardia_afines`) | Umbrales, C y E |
+
+- **Supuestos técnicos:**
+  - E mide la tasa de todas las tiradas del grupo juntas ("de las tiradas"), no un promedio de tasas por partida.
+  - En H contra C, el valor es la diferencia en puntos, truncada hacia 0, y puede ser negativa. La comparación es exacta, con el producto cruzado.
+  - En los escenarios sin la criatura de una activa, la alarma queda `insuficiente` con `n` = 0.
+  - Las lecturas de "activa disponible" y "cobardía de la tribu" ya estaban declaradas en `Arquitectura.md` 10.5.
+- **Lecturas declaradas:** P-050 (caídas de F, solo de la tribu), P-051 (comer en G, sobre los destinos elegidos) y P-052 (las invocaciones no están en el resultado).
+- **Claves de texto nuevas sin texto:** ninguna.
+- **Preguntas:** nuevas P-050 (SISTEMAS, no bloquea), P-051 (SISTEMAS, no bloquea) y P-052 (ARQUITECTO, no bloquea); cerradas ninguna.
+- **Para la próxima sesión:** sesión 3:
+  - Ficha de playtest (`GuardadoCombate` escribe `_playtest.json`; en G, después del destino).
+  - Campo "Jugador" en el selector y "Semilla de playtest 1 a 10" en el panel.
+  - `herramientas/informe_playtest.gd` con su ayudante: JSON con `grupos`, `comparaciones`, `informativas` (`toggle_afines`) y `avisos`, CSV de una fila por combate y resumen en la consola.
+  - El comando en `CLAUDE.md`. La entrada de la sesión 3 resume la tarea entera, con la prueba manual.

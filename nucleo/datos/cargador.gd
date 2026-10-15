@@ -244,8 +244,10 @@ func _chequear_cruzados(datos_por_archivo: Dictionary, errores: Array[Dictionary
 
 
 # D-015 (T33), como los rasgos (A.2.2): cada calculo trae sus parametros y
-# ninguno ajeno (AlarmasPlaytest.PARAMETROS); los escenarios y la especie
-# nombrados existen; las semillas y los ids de alarma no se repiten. Sin el
+# ninguno ajeno (AlarmasPlaytest.PARAMETROS); los escenarios (tambien
+# comparado_con) y la especie nombrados existen; un efecto es el de alguna ficha
+# y, en activa_poco_usada, tiene activa; las semillas y los ids de alarma no se
+# repiten. Sin el
 # archivo no se revisa nada (fixtures parciales).
 func _chequear_alarmas(datos_por_archivo: Dictionary, especies_validas: Dictionary, errores: Array[Dictionary]) -> void:
 	var ruta: String = AlarmasPlaytest.ARCHIVO
@@ -257,6 +259,13 @@ func _chequear_alarmas(datos_por_archivo: Dictionary, especies_validas: Dictiona
 	for i in range(semillas.size()):
 		if semillas.find(semillas[i]) < i:
 			errores.append(_error(ruta, "semillas[%d]" % [i], "una semilla sin repetir", semillas[i]))
+
+	# Los efectos de las fichas (rasgo.efecto), para el parametro efecto.
+	var efectos: Dictionary = {}
+	for archivo in datos_por_archivo.keys():
+		var ficha: Dictionary = datos_por_archivo[archivo]
+		if (archivo as String).begins_with("especies/") and ficha.has("rasgo"):
+			efectos[(ficha["rasgo"] as Dictionary)["efecto"]] = true
 
 	var ids: Dictionary = {}
 	var alarmas: Array = config["alarmas"]
@@ -284,6 +293,17 @@ func _chequear_alarmas(datos_por_archivo: Dictionary, especies_validas: Dictiona
 		if parametros.has("especie") and not especies_validas.has(parametros["especie"]):
 			errores.append(_error(ruta, "alarmas[%d].parametros.especie" % [i], "una especie existente en especies/",
 					parametros["especie"]))
+		if parametros.has("comparado_con") \
+				and not datos_por_archivo.has("escenarios/%s.json" % [parametros["comparado_con"]]):
+			errores.append(_error(ruta, "alarmas[%d].parametros.comparado_con" % [i],
+					"un escenario existente en escenarios/", parametros["comparado_con"]))
+		if parametros.has("efecto"):
+			var efecto: String = parametros["efecto"]
+			if calculo == AlarmasPlaytest.CALCULO_ACTIVA_POCO_USADA and not AlarmasPlaytest.ACCION_DE_EFECTO.has(efecto):
+				errores.append(_error(ruta, "alarmas[%d].parametros.efecto" % [i], "un efecto con activa", efecto))
+			elif not efectos.has(efecto):
+				errores.append(_error(ruta, "alarmas[%d].parametros.efecto" % [i],
+						"el efecto de alguna especie de especies/", efecto))
 
 
 # Arquitectura.md A.2.2 (Rasgos y modos). Cada efecto trae sus parametros y ninguno ajeno; la ficha lleva velocidad si

@@ -306,3 +306,30 @@ func test_t33_alarmas_repetidas_y_especie_inexistente() -> void:
 		campos.append(error["campo"] as String)
 	campos.sort()
 	assert_array(campos).is_equal(["alarmas[0].parametros.especie", "alarmas[1].id", "semillas[2]"])
+
+
+# T33, sesion 2: una comparacion contra un escenario que no esta en escenarios/.
+func test_t33_alarma_comparada_con_escenario_inexistente() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_comparado_inexistente")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.comparado_con")
+	assert_str(errores[0]["recibido"] as String).is_equal("z_no_existe")
+
+
+# T33, sesion 2: activa_poco_usada con un efecto sin activa (la alabarda es pasiva).
+func test_t33_alarma_activa_con_efecto_sin_activa() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_efecto_sin_activa")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.efecto")
+	assert_str(errores[0]["recibido"] as String).is_equal("alabarda")
+
+
+# T33, sesion 2: un efecto que ninguna especie de especies/ tiene.
+func test_t33_alarma_con_efecto_de_ninguna_especie() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_efecto_inexistente")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.efecto")
+	assert_str(errores[0]["recibido"] as String).is_equal("caza_y_cuenta")

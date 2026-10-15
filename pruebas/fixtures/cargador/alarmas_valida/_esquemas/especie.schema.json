@@ -3,6 +3,8 @@
   "required": ["id"],
   "additionalProperties": false,
   "properties": {
-    "id": { "type": "string" }
+    "id": { "type": "string" },
+    "velocidad": { "type": "integer" },
+    "rasgo": { "type": "object" }
   }
 }

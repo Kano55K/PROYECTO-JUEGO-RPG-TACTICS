@@ -1,0 +1,10 @@
+{
+  "_nota": "T33, sesión 2: un efecto que no tiene ninguna especie de especies/ (aquí solo está la Rodauva)",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "encierro", "escenarios": ["c_tasajero"], "calculo": "encierro_de_efecto",
+      "parametros": { "efecto": "caza_y_cuenta", "umbral_pct": 20 } }
+  ]
+}
