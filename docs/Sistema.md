@@ -1,7 +1,7 @@
 # SISTEMA — Reglas, números y balance
 
-> **Estado:** Borrador v1.7 · **Dueño:** Diseñador de Sistemas y Balance · **Última actualización:** 08/10/2026
-> **Sincronizado con:** `00_Vision.md` v1.3 · `Mundo.md` v1.0 · `Arquitectura.md` v0.34 · `docs/PREGUNTAS.md` y `docs/RESUMENES.md` al cierre de T21. La v1.7 aplica la **escala ×10 de vida y daño** (A-3; tabla en 11.1): todos los valores de vida, daño y curación de este documento están ya multiplicados por 10 respecto de la v1.6; porcentajes, maná, hambre, lealtad, movimiento, alcance y velocidad no cambian. Responde además P-030 (coordenadas de 12 × 12 aprobadas, 11.9), P-031 a P-033 (Secundar, 10.1 y 11.3), P-034 a P-036 (incidente, 10.2 y 10.4), P-038 a P-040 (Encono y cobardía, 10.5 y 10.6) y S-41 a S-44 (salvajes en el chequeo de rival, 10.5 y 10.6; Famélico en combate, 2.2). La v1.6 sincroniza con la Visión v1.3 (geometría y tablero): qué reglas miran las **4 casillas ortogonales** y cuáles las **8 vecinas** (11.3); afinidad, incidente y cobardía con vecinas en 8, **sin cambiar sus números** (10.3, 10.4, 10.6); incidente con la rival en diagonal (10.4); tablero de **12 × 12** con contacto en la ronda 2 y criterios de despliegue (11.3, 11.9); hambre de combate **cada 6 rondas** (7.2); métricas 1 y 13 contadas desde el primer ataque (11.9); respuestas a P-026 y P-027 (11.8). La v1.5 sincroniza con la Visión v1.2: la atacante que se va si cae el Maestro (9.2, 9.3, 11.5) y su registro en el epílogo (13), la prenda sin consecuencias (3.3) y los playtests sin encuesta (11.9); además, suma lo que mide el hito 0a.1b (11.9) y pone al día los pendientes (15). La v1.4 responde las lecturas declaradas S-21 a S-26 y la P-024 (S-20) del Arquitecto, y cierra las preguntas de `Mundo.md` 9.1 (confianza, golondrinas, aviso al comer y solo se come a una suelta). La v1.3 cierra los números de los rasgos reescritos tras el playtest 0a.1 (Visión 6.2) en una sola pasada de balance: el surco, Hacerse junco y Caza y cuenta (11.2.1 a 11.2.3), y la IA del Tasajero (11.8).
+> **Estado:** Borrador v1.8 · **Dueño:** Diseñador de Sistemas y Balance · **Última actualización:** 15/10/2026
+> **Sincronizado con:** `00_Vision.md` v1.3 · `Mundo.md` v1.4 · `Arquitectura.md` v0.51 · `docs/PREGUNTAS.md` y `docs/RESUMENES.md` al cierre de T33, sesión 2 (14/10/2026). La v1.8 responde las preguntas de T33 (P-048 a P-051, 11.9) y las lecturas declaradas S-27 y S-45 a S-66 de `Arquitectura.md` 10.5: casi todas confirmadas tal como están programadas, con tres cambios. **La huida del Maestro termina justo antes de su próximo turno** (S-63, 11.7; aprobada por el usuario el 15/10/2026, falta reflejarla en la Visión 6.6). **Sellar al 0 % no se permite** (S-50, 4.1). **Sale el +25 de huida de la acobardada** (S-52, 11.7). Además pasa la vida de la atacante resellada a 4.4 (P-046), actualiza la mención de la variante D con la balanza 4 (T31) y suma las alarmas como datos (11.9, D-015). La v1.7 aplica la **escala ×10 de vida y daño** (A-3; tabla en 11.1): todos los valores de vida, daño y curación de este documento están ya multiplicados por 10 respecto de la v1.6; porcentajes, maná, hambre, lealtad, movimiento, alcance y velocidad no cambian. Responde además P-030 (coordenadas de 12 × 12 aprobadas, 11.9), P-031 a P-033 (Secundar, 10.1 y 11.3), P-034 a P-036 (incidente, 10.2 y 10.4), P-038 a P-040 (Encono y cobardía, 10.5 y 10.6) y S-41 a S-44 (salvajes en el chequeo de rival, 10.5 y 10.6; Famélico en combate, 2.2). La v1.6 sincroniza con la Visión v1.3 (geometría y tablero): qué reglas miran las **4 casillas ortogonales** y cuáles las **8 vecinas** (11.3); afinidad, incidente y cobardía con vecinas en 8, **sin cambiar sus números** (10.3, 10.4, 10.6); incidente con la rival en diagonal (10.4); tablero de **12 × 12** con contacto en la ronda 2 y criterios de despliegue (11.3, 11.9); hambre de combate **cada 6 rondas** (7.2); métricas 1 y 13 contadas desde el primer ataque (11.9); respuestas a P-026 y P-027 (11.8). La v1.5 sincroniza con la Visión v1.2: la atacante que se va si cae el Maestro (9.2, 9.3, 11.5) y su registro en el epílogo (13), la prenda sin consecuencias (3.3) y los playtests sin encuesta (11.9); además, suma lo que mide el hito 0a.1b (11.9) y pone al día los pendientes (15). La v1.4 responde las lecturas declaradas S-21 a S-26 y la P-024 (S-20) del Arquitecto, y cierra las preguntas de `Mundo.md` 9.1 (confianza, golondrinas, aviso al comer y solo se come a una suelta). La v1.3 cierra los números de los rasgos reescritos tras el playtest 0a.1 (Visión 6.2) en una sola pasada de balance: el surco, Hacerse junco y Caza y cuenta (11.2.1 a 11.2.3), y la IA del Tasajero (11.8).
 > Este documento baja a números lo definido en `00_Vision.md`. Si algo acá contradice la Visión, manda la Visión: se propone el cambio y se registra en `Decisiones.md`.
 > Los nombres del juego (Arrimo, Encono, Secundar, péñola, prenda, Urdimbre, "lo que diste", Erizarse, Alabarda, Hacerse junco, Caza y cuenta, Martillazo, Lanzadera, Remiendo, Leña en las púas, Sueño liviano, Madriguera, Acecho, Poza Tibia, quebranto, Menestral, las rayas y las golondrinas) son finales y viven en `Mundo.md` (1.2, 2.8, 2.9, 4.5, 4.7, 4.9 y 4.10). Los marcados como *(provisorio)* esperan la confirmación del Worldbuilder: en la v1.3, **el surco** del Surcón y el estado **oculto** del Zancajunco.
 
@@ -145,10 +145,15 @@ Rama única del MVP. Aprobados en la Visión v0.7; nombres finales en `Mundo.md`
 | ¿Es un ataque? | No: no suma Encono, no cuenta como golpe a la rival, no le quita el bono de Hacerse junco a una destapada y no corta la cadena | — |
 | ¿Puede tumbar? | Sí. Una salvaje en 0 huye y se pierde la captura (11.5); una aliada queda caída | Empujar contra una pared a una salvaje con 10 de vida o menos es perderla |
 | Atraer a una unidad adyacente al Maestro | Objetivo no válido | — |
-| Unidad erizada | **Se puede mover**: Erizarse le impide moverse sola, no que la muevan. Conserva el −50% | Sacar a la Rodauva erizada del alcance del Tasajero sigue siendo posible |
-| Unidad oculta (Hacerse junco, 11.2.2) | **Objetivo no válido**, como para el Martillazo. Si la Lanzadera deja a una enemiga de pie adyacente a una oculta, la destapa | Destapar al Zancajunco salvaje acercándole una unidad |
+| Unidad erizada | **Se puede mover**: Erizarse le impide moverse sola, no que la muevan. Conserva el −50%. **El choque le hace 10 enteros**: el −50% rige para los ataques que siga recibiendo, no para el choque (15/10/2026, confirma S-46) | Sacar a la Rodauva erizada del alcance del Tasajero sigue siendo posible |
+| Unidad oculta (Hacerse junco, 11.2.2) | **Objetivo no válido**, como para el Martillazo, **también si es aliada**. Si la Lanzadera deja a una enemiga de pie adyacente a una oculta, la destapa | Destapar al Zancajunco salvaje acercándole una unidad |
 | Destino en un surco (11.2.1) | Cuenta como **casilla ocupada**: no se mueve y recibe 10. A un Surcón sí lo mueve | Empujar contra un surco es empujar contra una pared |
+| Sentido | Siempre en el **eje de la línea** Maestro–objetivo. Empujar a una adyacente vale; solo atraerla está prohibido (15/10/2026, confirma S-48) | — |
 - Sin descuento de la balanza (2.3). No se usan fuera del combate (2.5).
+
+**Objetivos y casos** — `DECIDIDO` (15/10/2026, confirma S-45 y S-47):
+- **Bando:** el Martillazo, como todo ataque, va solo a enemigas. La Lanzadera vale sobre los dos bandos (nunca sobre una oculta). El Remiendo, solo sobre el Maestro o una aliada de pie.
+- **Remiendo con la vida completa:** vale, gasta el maná y la acción, y cura 0. La pantalla muestra la cura antes de confirmar, así que el jugador no lo hace por error.
 
 **Identidad del Soplo:** con la balanza en 5 y Poder 3, el Maestro pega 30 cuerpo a cuerpo y 50 con el Martillazo: un mago de distancia con reserva grande.
 
@@ -215,13 +220,18 @@ Si una criatura ataca de noche (ver 9.2), el sueño se interrumpe: el Maestro re
 
 | Regla | Valor | Decisión que genera |
 |---|---|---|
-| Invocar en combate | Gasta el turno completo del Maestro. La criatura aparece en una **casilla libre adyacente** al Maestro (4 ortogonales, 11.3); si no hay ninguna, no se puede invocar | Conviene tener criaturas sueltas antes del combate, pero eso cuesta comida. Un Maestro rodeado no recibe refuerzos |
+| Invocar en combate | Gasta el turno completo del Maestro: solo con el turno **sin usar** (sin haberse movido ni usado la acción); después solo puede terminar (15/10/2026, confirma S-53). La criatura aparece en una **casilla libre adyacente** al Maestro (4 ortogonales, 11.3); si no hay ninguna, no se puede invocar | Conviene tener criaturas sueltas antes del combate, pero eso cuesta comida. Un Maestro rodeado no recibe refuerzos |
 | Guardar fuera de combate | Gratis | — |
-| Guardar en combate | Cuesta la acción de la criatura y exige que esté adyacente al Maestro (4 ortogonales) | ¿La salvo o la dejo pelear un turno más? |
+| Guardar en combate | Cuesta la acción de la criatura y exige que esté adyacente al Maestro (4 ortogonales). Puede moverse antes; guardarse termina su turno. No puede la enconada (10.5) ni la distraída por un incidente (10.4); la acobardada sí (15/10/2026, confirma S-54) | ¿La salvo o la dejo pelear un turno más? |
 | Guardar a una caída | Cuesta la acción del Maestro y maná (11.5) | ¿La salvo ahora o sigo peleando? |
 | Cobro de comida | Come toda criatura que estuvo suelta en algún momento del día | Sacarla "un ratito" también cuesta |
 | Criatura guardada | No come, no sufre clima, no gana ni pierde lealtad, no participa de relaciones, no abandona, **no se cura** | Seguridad contra vínculo |
 | Criatura suelta | Come, sufre el clima, gana y pierde lealtad, tiene relaciones, se cura al dormir (7.8) | Disponibilidad y vínculo contra costo |
+
+**Guardar e invocar en el mismo combate** — `DECIDIDO` (15/10/2026, confirma S-55 y S-56):
+- La guardada **conserva** vida, hambre, lealtad, enfermedades, contador de Encono y modo; **pierde** las marcas que solo existen en el tablero (erizada, oculta y bono de Hacerse junco). Al invocarla vuelve con esos valores.
+- Una criatura guardada durante el combate se puede invocar después, también en la misma ronda. Como toda invocada, actúa recién desde la ronda siguiente (11.3), y el Maestro paga el costo de invocar.
+- **Decisión que genera:** guardar e invocar no es una cura gratis: cuesta dos turnos (el de ella y el del Maestro), maná y una ronda sin actuar.
 
 ### 3.2 Cantidad y pérdida — `DECIDIDO`
 
@@ -315,10 +325,14 @@ Se puede tener **más de una criatura de la misma especie**: cada una es una ins
 | Regla | Decisión que genera |
 |---|---|
 | El porcentaje se muestra antes de gastar el maná | La apuesta es informada |
-| Si falla, el maná gastado se pierde | ¿Tiro ahora o le pego un turno más y arriesgo matarla? |
+| Si falla, el maná gastado se pierde. **El pergamino en blanco no se gasta**: solo se ocupa si sale (15/10/2026, confirma S-49) | ¿Tiro ahora o le pego un turno más y arriesgo matarla? |
+| **Con 0% no se puede intentar**: la acción se rechaza con su motivo y el 0% se sigue mostrando sobre la salvaje (15/10/2026, responde S-50) | Un tiro que siempre falla no es una apuesta: es una trampa. Primero hay que debilitarla |
+| Erizarse **no cambia** el % de sellado; solo cambia el texto del fallo (15/10/2026, confirma S-51) | — |
 | Solo se sellan criaturas de rango ≤ rango máximo de la balanza, por cualquier camino | La posición de la balanza abre o cierra el acceso a criaturas fuertes |
 | Toda captura exige un pergamino en blanco | Sin pergamino, no hay captura |
 | En combate, sellar gasta la **acción** del Maestro (conserva el movimiento), a distancia Manhattan **≤ 2**, sobre una salvaje de pie. Si sale bien, la salvaje deja el tablero guardada y cuenta como enemiga fuera | Para sellar hay que acercar al Maestro, y eso lo expone (Pilar 1) |
+
+**Por qué se prohíbe el 0 %** (S-50): con rangos 2 y 3 y más de 75 % de vida la tabla da 0 %. Permitir el intento solo gasta maná y la acción sin ninguna chance. **Alternativa descartada:** permitirlo, como el Remiendo que cura 0 (S-45). La diferencia: el Remiendo con la vida completa es raro; sellar al 0 % es el primer error de cualquier jugador que todavía no leyó la tabla.
 
 ### 4.2 Lealtad inicial según el camino — `DECIDIDO`
 
@@ -346,8 +360,10 @@ Aplica a la criatura que atacó al Maestro y fue derrotada (ver 9.3).
 | Costo | Igual que **invocar**: 2 / 3 / 4, con el descuento de la balanza y mínimo 1 |
 | Probabilidad | Fila de vida ≤ 25%: 80% / 65% / 50% |
 | Pergamino | Su pergamino ya ardió: exige **un pergamino en blanco** |
-| Resultado | Vuelve **guardada** con lealtad **1** (con el ajuste de la balanza; nunca menos de 0) |
+| Resultado | Vuelve **guardada** con lealtad **1** (con el ajuste de la balanza; nunca menos de 0) y **10 de vida** (`tablas/combate.json` `vida_al_resellar`; 13/10/2026, responde P-046). Como toda guardada, no se cura hasta salir |
 | Si falla | El maná se pierde y el Maestro vuelve a elegir entre perdonar y comer |
+
+**Por qué 10 de vida** (P-046): estaba caída en 0, y una guardada con 0 no tiene sentido al invocarla. 10 es el mismo valor que la vida al levantarse y al guardar una caída (11.5): una sola regla para "vuelve con lo justo".
 
 **Factibilidad con la balanza 2** (sin maná gastado en el combate):
 
@@ -357,7 +373,7 @@ Aplica a la criatura que atacó al Maestro y fue derrotada (ver 9.3).
 | Hambriento | 2 | Sí | No |
 | Famélico | 0 | No | No |
 
-**Decisión que genera:** ¿gasto en el combate el maná que necesito para resellarla? ¿Vale mi pergamino de reserva recuperar a una criatura que me traicionó?
+**Decisión que genera:** ¿gasto en el combate el maná que necesito para resellarla? ¿Vale mi pergamino de reserva recuperar a una criatura que me traicionó? Y si la recupero, vuelve débil: invocarla pronto es exponerla.
 
 ### 4.5 Camino de confianza — `DECIDIDO`
 
@@ -421,6 +437,7 @@ Todos los eventos de esta sección cambian la lealtad **solo de las sueltas**: l
 **Precisiones** — `DECIDIDO` (03/10/2026, responde P-001 y P-002 de `Arquitectura.md`):
 - **"Afines" en la muerte es la relación de especie** (10.8), mirada suelta por suelta: −4 a cada suelta cuya especie se lleve **bien** con la de la muerta; −2 al resto. No es la afinidad de combate: la muerte se resuelve con el combate terminado y la posición no cuenta. Ejemplo: muere una Rodauva → la otra Rodauva y el Surcón pierden 4; la Ocarra pierde 2.
 - **Suma y recorte únicos:** todos los cambios de lealtad de un mismo combate (o de una misma noche) se **suman** y el resultado se recorta a **0–10 una sola vez**. El orden de aplicación no cambia nada. Ejemplo: una rescatista con 9 que además pierde 2 por una caída que muere queda en 9 (9 + 2 − 2), no en 8.
+- **La noche del ataque es un solo recorte** (15/10/2026, confirma S-65): los cambios del cierre del combate nocturno (victoria, muertes) y los del destino de la atacante (perdón o comer) se suman y se recortan una vez. "Leal" para el +1 del perdón se mide con la lealtad **de antes** de esos cambios, como la rescatista (6).
 
 **Decisión que genera:** perder a una criatura de una manada duele el doble; llevar dos Rodauvas es más fuerte en el tablero y más frágil socialmente.
 
@@ -461,11 +478,14 @@ Todos los eventos de esta sección cambian la lealtad **solo de las sueltas**: l
 |---|---|
 | El Maestro cae | El combate termina en el acto (11.5). Se busca una criatura **suelta**, **de pie** (ni caída ni guardada) y con **lealtad real** ≥ umbral de rescate |
 | Elección de rescatista | Si hay varias: la de **mayor lealtad real**; si empatan, la **más cercana** al Maestro; si siguen empatadas, el orden de la tribu |
+| Con qué lealtad | La **del momento en que cae el Maestro**, antes de los cambios del cierre (muertes, +2). Una candidata justo en el umbral que pierde 2 por una caída igual rescata (15/10/2026, confirma S-62) |
 | Rescate | Lo arrastra al campamento y gana +2 de lealtad |
 | Recuperación | Por cada día: lealtad 0–1 abandona seguro, lealtad 2–3 tiene 50% de abandonar |
 | Quebranto | Al terminar la recuperación (6.1) |
 | Las caídas | **Mueren**: la rescatista solo puede cargar al Maestro. Sus pergaminos arden y se aplica "muerte en el grupo" (5.2). Las que el Maestro guardó antes de caer sobreviven en su pergamino (11.5) |
 | Sin rescatista | Permadeath |
+
+**Por qué la lealtad del momento** (S-62): el jugador ve "te rescataría" sobre una criatura antes de caer. Si las muertes del mismo cierre pudieran quitarle esa condición, la previsualización mentiría. Coincide con el ejemplo de 5.2 (rescató con 9).
 
 ### 6.1 Quebranto: la secuela — `DECIDIDO` (Visión 6.6)
 
@@ -668,12 +688,12 @@ Si se va, su pergamino arde (3.2). La interfaz muestra un **ícono de riesgo** s
 
 ### 9.2 Ataque nocturno — `DECIDIDO`
 
-1. La criatura golpea primero: **un ataque normal** contra el Maestro, con la fórmula de 11.4 (aplican sus rasgos de característica, como la Alabarda; la atacante no llega oculta, así que Hacerse junco no suma; como toda enemiga, no recibe Saciado ni enfermedades; no hay combo y no suma Encono). Con una Ocarra atacante son 40 de daño. No ocurre si hay una Ocarra suelta que no sea la atacante (Centinela, 12.6), **tenga la lealtad que tenga**. **Si el golpe deja al Maestro en 0**, el combate termina por caída antes de la ronda 1 y rige el paso 6 (responde S-10).
+1. La criatura golpea primero: **un ataque normal** contra el Maestro, con la fórmula de 11.4 (aplican sus rasgos de característica, como la Alabarda; la atacante no llega oculta, así que Hacerse junco no suma; como toda enemiga, no recibe Saciado ni enfermedades; no hay combo y no suma Encono). Con una Ocarra atacante son 40 de daño. No ocurre si hay una Ocarra suelta que no sea la atacante (Centinela, 12.6), **tenga la lealtad que tenga**. **Si el golpe deja al Maestro en 0**, el combate termina por caída antes de la ronda 1 y rige el paso 6 (responde S-10). **El golpe no tiene turno** (15/10/2026, confirma S-64): no lleva afinidad, cobardía ni ningún aporte de turno, aunque la atacante tenga una afín al lado. Va en la **ronda 0** y no cuenta como "primer ataque" de la métrica 1 (11.9): la pelea empieza en la ronda 1.
 2. Empieza un **combate donde se duerme**: el Molino o el campamento al raso (9.4). **Solo las leales defienden al Maestro** (ver "Quién defiende", abajo); las demás sueltas miran.
 3. Durante el combate, la atacante se trata como **salvaje**: obediencia ≤ 3 y sin Arrimo (10.7).
 4. El Maestro pelea con el maná del sueño interrumpido (2.4).
 5. A diferencia de una salvaje, la atacante **no huye** al llegar a 0 de vida: queda **caída** y el Maestro decide su destino (9.3).
-6. Si el Maestro cae en este combate, rige 11.5: si hay rescatista, el Maestro queda en recuperación (ya está en el Molino); las caídas de la tribu mueren y **la atacante se va** (su pergamino arde y vuelve a ser salvaje, como en un abandono), **también si ya estaba caída**: su destino no queda pendiente (05/10/2026, responde P-024 = S-20; confirmado por la Visión 6.4 v1.2). **Su ida no cambia la lealtad de nadie**: nadie decidió nada. El resto de la derrota se aplica igual: las caídas que mueren (−2 / −4, 5.2) y el +2 de la rescatista. En el epílogo se registra como **abandono** (13). Sin rescatista, permadeath. *En el MVP el caso de la atacante caída en una derrota no ocurre: es la única enemiga y, si cae, se gana. La regla se programa igual, para la 0b.*
+6. Si el Maestro cae en este combate, rige 11.5: si hay rescatista, el Maestro queda en recuperación (ya está en el Molino); las caídas de la tribu mueren y **la atacante se va** (su pergamino arde y vuelve a ser salvaje, como en un abandono), **también si ya estaba caída**: su destino no queda pendiente (05/10/2026, responde P-024 = S-20; confirmado por la Visión 6.4 v1.2). **Su ida no cambia la lealtad de nadie**: nadie decidió nada. El resto de la derrota se aplica igual: las caídas que mueren (−2 / −4, 5.2) y el +2 de la rescatista. En el epílogo se registra como **abandono** (13). Sin rescatista, permadeath. **Si el Maestro huye** (11.7), pasa lo mismo: la atacante se va, de pie o caída, y nadie cambia de lealtad por ella (15/10/2026, confirma S-66). *En el MVP el caso de la atacante caída en una derrota no ocurre: es la única enemiga y, si cae, se gana. La regla se programa igual, para la 0b.*
 
 **Quién defiende al Maestro** — `DECIDIDO` (03/10/2026, responde S-12; Visión 6.4: "las sueltas leales defienden al Maestro"):
 
@@ -697,8 +717,10 @@ Queda **caída** y el Maestro elige. En las tres salidas, **su pergamino arde**.
 | Opción | Efecto |
 |---|---|
 | Perdonar | Se va libre y vuelve a ser salvaje. Las leales ganan +1 |
-| Sellar | Resellado (4.4): costo de invocar y un pergamino en blanco. Vuelve guardada con lealtad 1 |
+| Sellar | Resellado (4.4): costo de invocar y un pergamino en blanco. Vuelve guardada con lealtad 1 y 10 de vida |
 | Comer | Rango × 2 raciones de carne. −2 a todas las sueltas, sin el −3 extra |
+
+Los cambios de lealtad de la noche (cierre y destino) se recortan una sola vez (5.2, S-65).
 
 ### 9.4 Campamento al raso — `DECIDIDO`
 
@@ -819,6 +841,8 @@ Cuando aliados atacan **de forma consecutiva** al **mismo objetivo**, cada golpe
 
 Con la escala ×10 (v1.7) cada eslabón suma lo que dice, también el 4 y el 5 (con daño 40: 68 / 54 / 46 / 43). Antes, con daños de 2 a 5, el tope real quedaba en 3 o 4 eslabones. La regla de la mitad no cambia (08/10/2026).
 
+**Pares mixtos** — `DECIDIDO` (15/10/2026, confirma S-27): si en una cadena cambia la relación del par que encadena, cada eslabón usa la base de **su** par, dividida por 2 tantas veces como eslabones pasaron desde el segundo: `bono_par(k) ÷ 2^(k−2)`, redondeado hacia abajo. Con un mismo par en toda la cadena da la tabla de arriba. Ejemplo con la balanza 2: Rodauva → Surcón (afines, eslabón 2: +70%) → Zancajunco (sin relación, eslabón 3: 50 ÷ 2 = +25%). **Decisión que genera:** el orden de quién sigue a quién importa, no solo quién está en la cadena. **Alternativa descartada:** la mitad del eslabón anterior (+35%), que ignora quién encadena.
+
 **Decisión que genera:** el orden en que actúan tus unidades importa tanto como dónde están.
 
 ### 10.3 Afinidad entre vecinas — `DECIDIDO`
@@ -903,6 +927,7 @@ Aplica a las criaturas **de trabajo**. Se chequea con el mismo disparador que el
 - No puede terminar su movimiento más cerca de la rival que donde empezó.
 - No puede Secundar.
 - Conserva el turno: puede moverse, atacar a otro objetivo, encadenar combos o ser guardada.
+- **No cambia la huida**: la huida de una salvaje se tira antes del chequeo de rival (11.3), así que estar acobardada no la hace huir más (v1.8, S-52; 11.7).
 
 **Decisión que genera:** ¿pongo al Maestro junto a la criatura asustada para sostenerla, sabiendo que eso lo expone?
 
@@ -963,7 +988,7 @@ Valores iniciales de test (sesión del 01/10/2026; escala ×10 desde el 08/10/20
 | Daño de las fichas y del Maestro (balanza: `10 × (5 − ⌊posición ÷ 2⌋)`) | Hambre, lealtad, obediencia, Encono (el contador de 0 a 3) |
 | Planos: afinidad +10, Encono +10 por punto, Hacerse junco +30, Cuenta −10, choque de la Lanzadera 10 | Maná, costos, Regeneración y Poder (sigue de 1 a 3) |
 | Martillazo `10 × (2 + Poder)` y Remiendo `10 × (3 + Poder)` | Movimiento, alcance, velocidad, distancias |
-| Daño mínimo **10**; vida al levantarse y al guardar una caída **10** | Los "mínimo 1 de vida" que significan "no mata" (ritual, río) y los mínimos de las curas por porcentaje (7.8, 6.2, 7.6) |
+| Daño mínimo **10**; vida al levantarse, al guardar una caída y al resellar **10** | Los "mínimo 1 de vida" que significan "no mata" (ritual, río) y los mínimos de las curas por porcentaje (7.8, 6.2, 7.6) |
 | Debilidad del ritual −40; quebranto −10 por día (mínimo 10) | El bono del combo por eslabón (la mitad del anterior, sin cambios) |
 
 **Decisión que genera:** ninguna nueva; hace que las existentes (Saciado, cadenas largas, enfermedades) pesen lo que dicen. ⚠️ Los combos y Saciado pegan un poco más: en la primera ronda de pelea de C, cerca de +9% de daño al Tasajero (14).
@@ -1073,7 +1098,7 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 | Regla | Valor | Decisión que genera |
 |---|---|---|
 | Tablero de referencia | **12 × 12**, con cámara móvil (Visión v1.3). Un escenario puede ser más chico si lo pide (combates de nodo, peleas cortas, G), nunca más grande en el MVP. Sin terreno en el MVP **salvo el surco** (11.2.1), que lo crea una criatura en combate | Espacio para maniobrar: flanquear, cavar, separar rivales |
-| Turno de una unidad | **1 movimiento y 1 acción**, en cualquier orden, sin partir el movimiento. Acciones: atacar, hechizo, sellar, guardar, Erizarse, Hacerse junco (sin haberse movido, 11.2.2), esperar. Invocar, huir y **cavar un surco** gastan el turno completo. **Secundar** aplaza el turno entero y solo se declara con el turno sin usar (10.1). **Excepción al movimiento sin partir:** el Tasajero en Cuenta (11.2.3). **Terminar el turno sin usar la acción es esperar** (con o sin movimiento; P-015). **Erizarse cierra el movimiento que quede** (P-014) | ¿Pego y me retiro, o me acomodo y pego? Con la Rodauva: ¿me ubico primero y después me erizo? |
+| Turno de una unidad | **1 movimiento y 1 acción**, en cualquier orden, sin partir el movimiento. Acciones: atacar, hechizo, sellar, guardar, Erizarse, Hacerse junco (sin haberse movido, 11.2.2), esperar. Invocar, huir y **cavar un surco** gastan el turno completo y solo se declaran con el turno sin usar (S-53, S-59). **Secundar** aplaza el turno entero y solo se declara con el turno sin usar (10.1). **Excepción al movimiento sin partir:** el Tasajero en Cuenta (11.2.3). **Terminar el turno sin usar la acción es esperar** (con o sin movimiento; P-015). **Erizarse cierra el movimiento que quede** (P-014) | ¿Pego y me retiro, o me acomodo y pego? Con la Rodauva: ¿me ubico primero y después me erizo? |
 | Movimiento | Solo ortogonal. Se atraviesan aliadas y caídas propias, nunca enemigas, **tampoco caídas** (P-018). No se termina en una casilla ocupada. **Los surcos** solo los pisa un Surcón (11.2.1) | Las enemigas funcionan como muro; un pasillo protege. La caída propia sigue cubriendo: guardarla libera la casilla y abre el paso |
 | Distancias | Todas **Manhattan** | — |
 | Casilla libre | Dentro del tablero, **sin unidad** (de pie o caída) **y sin surco**, para cualquier unidad, incluido un Surcón (S-25). La usan cavar, invocar y la métrica de encierro (11.9) | — |
@@ -1098,7 +1123,7 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 | Ocarra (Mov 3, Alc 2) | 5 | 6 a 8 | **8** |
 | Surcón (Mov 2) | 3 | No abre: llega tarde | — |
 
-- **Ronda del primer ataque:** la primera en que cualquier unidad de cualquier bando ataca (incluido el Martillazo). **Rondas de pelea:** desde esa ronda hasta el fin, inclusive. Las métricas 1 y 13 y el umbral de duración de C se leen así (11.9).
+- **Ronda del primer ataque:** la primera en que cualquier unidad de cualquier bando ataca (incluido el Martillazo; no el golpe inicial nocturno, que va en la ronda 0, 9.2). **Rondas de pelea:** desde esa ronda hasta el fin, inclusive. Las métricas 1 y 13 y el umbral de duración de C se leen así (11.9).
 - **Decisión que genera:** la ronda 1 es para acomodarse: sacar a la herida de la zona de Caza, cavar, esconderse o separar rivales con la Lanzadera.
 
 **Inicio del turno: orden de los chequeos** — `DECIDIDO` (03/10/2026):
@@ -1111,6 +1136,8 @@ Rasgo del Tasajero (Visión 6.2 v1.1). **Un solo turno por ronda**, con dos modo
 | 4 | Incidente con rival aliada vecina (10.4), **solo si no quedó enconada** | Criaturas |
 
 Si la huida del paso 2 sale, el turno termina ahí. **El inicio del turno corre una vez por ronda** (08/10/2026, responde P-033): la unidad que vuelve de Secundar sigue su turno sin repetirlo, igual que el borrado de Erizarse y el cambio de modo del Tasajero.
+
+**El orden se mantiene** — `DECIDIDO` (15/10/2026, responde S-52): la huida va antes del chequeo de rival. En el paso 2, "enconada" es la que tiene el Encono en 3 (quedaría enconada segura): esa no huye. La enconada por tirada del paso 3 ya pasó por la huida. **Alternativa descartada:** mover la huida detrás del paso 3 para que cuente estar acobardada. Con la cobardía de las salvajes (80%), una Rodauva salvaje débil con una rival a tiro huiría hasta un 75% de las veces (50 + 25): sellar cerca de rivales sería casi imposible. Eso es castigo, no decisión. Por eso sale el +25 de la acobardada (11.7).
 
 ### 11.4 Fórmula de daño — `DECIDIDO`
 
@@ -1134,14 +1161,15 @@ Si la huida del paso 2 sale, el turno termina ahí. **El inicio del turno corre 
 | **Criatura de la tribu** | Queda **caída**. Si se gana el combate, se levanta con **10 de vida**. Si el combate se pierde (o se huye, 11.7), **muere**: su pergamino arde y se aplica "muerte en el grupo" | La muerte depende de cómo termina la pelea, no de un solo golpe |
 | **Maestro** | El combate **termina en el acto**. La rescatista (suelta, de pie y leal) lo arrastra al Molino. **Las caídas quedan atrás y mueren** | No exponer al Maestro: si cae, arrastra a sus caídas con él |
 | **Salvaje** | **Huye** del tablero. No da comida ni puede sellarse | Pegarle de más significa perder la captura |
-| **Atacante nocturna** | Queda caída para que el Maestro decida su destino (9.3). Si después cae el Maestro, se va (9.2, paso 6) | Tumbarla no alcanza: hay que ganar el combate para decidir |
+| **Atacante nocturna** | Queda caída para que el Maestro decida su destino (9.3). Si después cae el Maestro o huye, se va (9.2, paso 6) | Tumbarla no alcanza: hay que ganar el combate para decidir |
 
 **Reglas de la caída:**
 - La caída queda en su casilla y la ocupa, pero **no puede ser objetivo**: nadie la remata.
 - No actúa, no cuenta para combos ni Arrimo, y no puede rescatar.
 - **No participa de ninguna relación:** no da ni recibe afinidad, no provoca ni sufre incidentes y no cuenta como rival a su alcance para el Encono ni para la cobardía.
 - Sigue sumando hambre de combate (7.2).
-- **El Maestro puede guardarla**: gasta su acción y el costo de invocar del rango (2 / 3 / 4, con descuento y mínimo 1), a distancia ≤ 2. Queda guardada con **10 de vida** y, como toda guardada, no se cura hasta salir. Si después el Maestro cae o huye, **sobrevive** en su pergamino.
+- **El Maestro puede guardarla**: gasta su acción y el costo de invocar del rango (2 / 3 / 4, con descuento y mínimo 1), a distancia Manhattan ≤ 2, **sin mirar la línea**: se puede guardar por encima de una enemiga o de un surco, como se sella (15/10/2026, confirma S-57). Queda guardada con **10 de vida** y, como toda guardada, no se cura hasta salir. Si después el Maestro cae o huye, **sobrevive** en su pergamino.
+- **Una caída guardada se puede invocar en el mismo combate** (15/10/2026, confirma S-58): es una guardada más. Paga el costo de invocar, vuelve con esos 10 de vida y actúa desde la ronda siguiente (3.1). Cuesta maná dos veces: no es una cura gratis.
 - El Remiendo no afecta a las caídas (1.6).
 - El combate se **gana** cuando no queda ningún enemigo en pie y se **pierde** cuando cae el Maestro.
 - Una criatura que sube de caída a 10 de vida tiene la misma curación nocturna que las demás (7.8).
@@ -1168,7 +1196,7 @@ Línea típica con las posiciones del escenario A en 8 × 8 (Maestro [3,7], Roda
 
 **Decisión que aparece:** ¿sello al 50% o arriesgo a mi compañera una ronda más para ir al 80%? "Una ronda más" ya no cuesta vida del Maestro: cuesta que la Rodauva caiga. Es la regla de oro en el día 1.
 
-**Prueba B — 2 Ocarras en los Huertos** (reescrita en la v1.7 con las coordenadas de 12 × 12, P-030): cada Ocarra va por la unidad que tiene más cerca, una por la Rodauva y otra por el Maestro. Desde la ronda 2 del combate el Maestro recibe 40 por ronda; la Rodauva cae en la ronda 3 y desde ahí el Maestro recibe 80 por ronda. Cae sin rescatista hacia la ronda 5. Es un muro, y se siente antes que en 8 × 8. La pregunta "¿guardo a la caída antes de huir?" aparece temprano. **Salida táctica:** con el Maestro un paso adelante, atraer a una Ocarra con la Lanzadera la deja en diagonal con la otra (rivales, 10.7).
+**Prueba B — 2 Ocarras en los Huertos** (reescrita en la v1.7 con las coordenadas de 12 × 12, P-030): cada Ocarra va por la unidad que tiene más cerca, una por la Rodauva y otra por el Maestro. Desde la ronda 2 del combate el Maestro recibe 40 por ronda; la Rodauva cae en la ronda 3 y desde ahí el Maestro recibe 80 por ronda. Cae sin rescatista hacia la ronda 5. Es un muro, y se siente antes que en 8 × 8. La pregunta "¿guardo a la caída antes de huir?" aparece temprano. **Huir no es gratis** (v1.8, 11.7): entre la declaración y la ida, cada Ocarra actúa una vez más, así que huir con menos de 80 de vida y las dos a tiro es arriesgar la caída. **Salida táctica:** con el Maestro un paso adelante, atraer a una Ocarra con la Lanzadera la deja en diagonal con la otra (rivales, 10.7).
 
 **Prueba C — Tasajero** (v1.3): en Caza pega 100 por ronda (dos ataques de 50) y recibe +25%; en Cuenta pica 40 y se retira. Un Maestro solo dura 2 rondas. Línea típica en rondas de pelea (en 8 × 8, con el Tasajero en [3,1]; en 12 × 12, la ronda 1 de esta tabla es la ronda 2 del combate):
 
@@ -1209,15 +1237,23 @@ Las emboscadas usan estas mismas tablas, sin las salvajes de trabajo (9.4).
 
 | Regla | Valor | Decisión que genera |
 |---|---|---|
-| Cuándo | En su turno, desde cualquier casilla | — |
-| Costo | Gasta su **turno completo**. El combate termina **al final de la ronda**: los enemigos que faltan todavía actúan | Para guardar a una caída y huir hacen falta dos turnos: hay que planear con una ronda de anticipación |
+| Cuándo | En su turno, desde cualquier casilla, con el turno **sin usar** (sin haberse movido ni usado la acción; 15/10/2026, confirma S-59) | — |
+| Costo | Gasta su **turno completo**. El combate termina **justo antes de su próximo turno**: **cada unidad del tablero actúa una vez más**, sin importar su Velocidad (las que faltan en esta ronda y, en la siguiente, las que van antes que él). Si en el medio se cierra una ronda, rigen sus efectos (hambre de combate, corte de la cadena) (15/10/2026, responde S-63; aprobado por el usuario) | Huir es una apuesta anticipada: hay que irse antes de estar al alcance, no en el último momento. Para guardar a una caída y huir hacen falta dos turnos |
+| Qué pasa en esa vuelta | La tribu sigue jugando con todas sus acciones (atacar, guardarse, erizarse) y las enemigas también. Si la **última enemiga** cae o huye antes de que el Maestro se vaya, es **victoria** (con el +1) y la huida no se aplica (15/10/2026, confirma S-60) | Una última vuelta puede ganar el combate |
 | Quiénes se van | El Maestro y las criaturas de pie | — |
 | Caídas en el tablero | **Mueren**: sus pergaminos arden y se aplica "muerte en el grupo". Las guardadas sobreviven | Huir sin guardarlas es abandonarlas |
-| Si el Maestro cae antes del cierre | Hasta el cierre de la ronda sigue en el tablero y puede ser objetivo. Si cae, el combate termina **por caída, no por huida**: se busca rescatista (6; las que se iban con él siguen de pie y pueden rescatarlo) y las caídas mueren. Visión 6.6 | La huida es una apuesta anticipada, no un seguro |
-| Previsualización al declarar | Qué enemigas actúan antes del cierre y el **daño máximo** que pueden hacerle al Maestro | ¿Huyo ahora con 60 de vida o pego una vez más? |
+| Si el Maestro cae antes de irse | Sigue en el tablero y puede ser objetivo. Si cae, el combate termina **por caída, no por huida**: se busca rescatista (6; las que se iban con él siguen de pie y pueden rescatarlo) y las caídas mueren. Visión 6.6 | La huida es una apuesta anticipada, no un seguro |
+| La atacante nocturna | Si el Maestro huye, se va, de pie o caída, como en la derrota (9.2, paso 6; S-66) | — |
+| Previsualización al declarar | Qué enemigas actúan antes de que se vaya y el **daño máximo** que pueden hacerle al Maestro | ¿Huyo ahora con 60 de vida o pego una vez más? |
 | Lealtad | No se gana el +1 de "pelearon juntos y ganaron" | — |
 | En el mapa | Se pierden los nodos que quedaban del día | Huir salva el pellejo, pero cuesta comida |
 | De noche | Se puede huir de una emboscada; el descanso queda a la mitad igual | — |
+
+**Daño máximo de la previsualización** — `DECIDIDO` (15/10/2026, confirma S-61): la suma, por cada enemiga que actúa antes de que el Maestro se vaya y que lo alcanza con el tablero de ahora, de su golpe previsto desde la casilla que más le pega, por los ataques de su modo actual. No cuenta lo que depende de tiradas (cobardía, incidente, huida de la salvaje) ni de cómo se muevan las demás. Es un techo informado, no una promesa.
+
+**Por qué "una vuelta" y no "el cierre de la ronda"** (S-63): con Velocidad 5, el Maestro suele actuar último. Con la regla de la v1.7, al declarar ya no quedaba ninguna enemiga por actuar y huir era gratis, lo contrario de "una apuesta anticipada". Con una vuelta, toda enemiga tiene exactamente un turno más, sea rápida o lenta. **Alternativas descartadas:** un golpe de oportunidad de las enemigas adyacentes (como huir exige el turno sin usar, el Maestro no puede despegarse antes: castiga sin dar salida) y dejar la regla como estaba y ajustar el umbral de B (B dejaría de medir si la huida se lee como decisión).
+
+**Ejemplo (B, 12 × 12):** el Maestro declara en la ronda 3 con 100 de vida. En la ronda 4, las dos Ocarras (Vel 7) actúan antes que él: si las dos lo alcanzan, recibe hasta 80 y se va con 20. Con 70 de vida, la previsualización avisa que puede caer.
 
 **Las salvajes** también pueden huir, **en su turno**:
 
@@ -1231,9 +1267,10 @@ Las emboscadas usan estas mismas tablas, sin las salvajes de trabajo (9.4).
 
 | Modificador | Efecto |
 |---|---|
-| Acobardada | +25 puntos |
-| Enconada | No huye |
+| Enconada (Encono en 3) | No huye |
 | Resultado | Gasta su turno y sale del tablero: no da comida ni se puede sellar |
+
+**Sale el +25 de la acobardada** (15/10/2026, responde S-52): la huida se tira antes del chequeo de rival (11.3), así que ese modificador nunca se aplicaba. Una regla que nunca actúa no genera decisiones.
 
 La probabilidad se muestra sobre la unidad. A 0 de vida, la salvaje huye siempre (11.5).
 
@@ -1290,17 +1327,17 @@ Cada salvaje, en su turno, decide en este orden:
 
 ### 11.9 Prueba 0a — `DECIDIDO`
 
-Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída y rescate. Lo que no entra se carga como **parámetro del escenario** (lealtad, hambre, Saciado, enfermedades, balanza, Poder, Regeneración, vida y maná de entrada). Se juega con **escenarios fijos + panel de parámetros + semilla de azar fija**. El brief completo para el Arquitecto vive en el doc "Brief para el Arquitecto — Prueba 0a" (01/10/2026), que es histórico: ante cualquier diferencia, manda este documento (`Arquitectura.md` A.5).
+Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída y rescate. Lo que no entra se carga como **parámetro del escenario** (lealtad, hambre, Saciado, enfermedades, balanza, Poder, Regeneración, vida y maná de entrada). Se juega con **escenarios fijos + panel de parámetros + semilla de azar fija**. Desde T31, **las variantes se arman en el panel** (balanza, lealtad, semilla, guardadas, toggles) sin archivos nuevos. El brief completo para el Arquitecto vive en el doc "Brief para el Arquitecto — Prueba 0a" (01/10/2026), que es histórico: ante cualquier diferencia, manda este documento (`Arquitectura.md` A.5).
 
 | Escenario | Archivo (`datos/escenarios/`) | Configuración | Qué mide | Señal de alarma |
 |---|---|---|---|---|
 | A. Día 1 | `a_dia_1.json` (Arquitecto) | Prueba A (11.6) | ¿Sello al 50% o arriesgo una ronda más? | Siempre se elige lo mismo |
-| B. Muro | `b_muro.json` | Maestro + Rodauva Neutral (5) contra 2 Ocarras separadas. Sin rescatista | ¿Reconoce que hay que huir? ¿Guarda a la caída antes? Segunda salida: juntar a las Ocarras (rivales) con la Lanzadera | Huir nunca se lee como opción |
+| B. Muro | `b_muro.json` | Maestro + Rodauva Neutral (5) contra 2 Ocarras separadas. Sin rescatista | ¿Reconoce que hay que huir, y a tiempo? ¿Guarda a la caída antes? Segunda salida: juntar a las Ocarras (rivales) con la Lanzadera | Huir nunca se lee como opción |
 | C. Tasajero | `c_tasajero.json` | Maestro + Rodauva, Ocarra y Zancajunco leales (8) contra el Tasajero. La Rodauva se puede pasar a guardada en el panel | Duración (meta: 2 o 3 rondas de pelea) · ¿Llevo a la Rodauva? | Más de 5 rondas de pelea, o la Rodauva muere sin decisión |
-| D. Rivales aliadas | `d_rivales_normal.json` · `d_rivales_hambriento.json` | Ocarra + Zancajunco Neutrales (5) contra Surcón + Rodauva salvajes, sin relación con la tribu. Hambre 3 y 6 | Incidentes por combate · ¿Separa con la Lanzadera? Con hambre, la obediencia baja a 3 y el incidente pasa a golpe | 0 incidentes, o castigo puro. **Leer también con la balanza 4** (ver 14) |
+| D. Rivales aliadas | `d_rivales_normal.json` · `d_rivales_hambriento.json` | Ocarra + Zancajunco Neutrales (5) contra Surcón + Rodauva salvajes, sin relación con la tribu. Hambre 3 y 6 | Incidentes por combate · ¿Separa con la Lanzadera? Con hambre, la obediencia baja a 3 y el incidente pasa a golpe | 0 incidentes, o castigo puro. **Leer también con la balanza 4**: variante de D normal armada en el panel, con la misma semilla (el archivo `d_rivales_balanza4.json` se borró en T31; ver 14) |
 | E. Cobardía | `e_cobardia.json` · `e_cobardia_afines.json` | Rodauva leal (8), Rodauva Neutral (5) y Surcón leal contra el Tasajero; sin y con el toggle de afines (10.6) | ¿Sostiene a la asustada? | Nunca aparece, o frustra siempre |
 | F. Rescate | `f_rescate.json` | Maestro con 60 de vida · Rodauva leal (rescatista frágil) · Ocarra Neutral, contra Zancajunco + Surcón | ¿Guarda caídas antes de caer? ¿Entiende quién lo salva? | El rescate se siente azaroso |
-| G. Ataque nocturno | Borrador del Arquitecto | Ocarra desleal atacante; maná de entrada a la mitad (2.4); golpe inicial de 40 (9.2) | Las 3 salidas (9.3) · ¿Alcanza para resellar? | Comer es siempre la respuesta |
+| G. Ataque nocturno | `g_ataque_nocturno.json` (Arquitecto) | Ocarra desleal atacante; maná de entrada a la mitad (2.4); golpe inicial de 40 (9.2) | Las 3 salidas (9.3) · ¿Alcanza para resellar? | Comer es siempre la respuesta |
 | H. Soplo | `h_soplo.json` | C con balanza 5 y Poder 3, mismas lealtades | ¿El Soplo es una build trampa? | Pierde siempre, o gana más fácil que el Barro |
 
 **Valores de los escenarios** — `DECIDIDO` (03/10/2026, responde P-004 a P-007):
@@ -1308,7 +1345,7 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 | Caso | Valor |
 |---|---|
 | "Leal" y "Neutral" sin número | **Leal 8, Neutral 5.** 8 sigue siendo leal con la balanza 5 (umbral 8); 5 es Neutral en todas las posiciones |
-| El Maestro | Está en **los 11 escenarios**, con los valores iniciales salvo F (vida 60), G (maná 4), H (balanza 5, Poder 3) y `d_rivales_balanza4` |
+| El Maestro | Está en **los 10 escenarios** y en la variante de D con la balanza 4, con los valores iniciales salvo F (vida 60), G (maná 4), H (balanza 5, Poder 3) y esa variante (balanza 4) |
 | D hambriento | Hambre 6 **solo en las criaturas**; el Maestro queda en 3. La única diferencia entre las dos D es la obediencia |
 | Posiciones | **Aprobadas en 12 × 12** (08/10/2026, responde P-030), tal como las propuso Claude Code y las verifica `pruebas/datos/test_contacto.gd` (tabla en `Arquitectura.md` A.9 y en P-030). G sigue en 8 × 8. **Ante una alarma, primero se descarta que la causa sea la posición; después se toca la regla** |
 | B en 12 × 12 | Cada Ocarra va por la unidad que tiene más cerca: el Maestro recibe golpes desde la ronda 2 (11.6, Prueba B reescrita). Lo que mide B no cambia |
@@ -1322,7 +1359,7 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 | A | 8 (Ocarra–Rodauva) | La Ocarra se acerca en la ronda 1, va por la Rodauva y la golpea en la ronda 2. La línea de 11.6 se mantiene | — |
 | B | 8 a las dos Ocarras | Las dos llegan a la tribu en la ronda 2 | Que las Ocarras salvajes **terminen vecinas** (8, también en diagonal) al final de las rondas 1 o 2: sería un incidente gratis. La Lanzadera tiene que poder juntarlas con 1 o 2 pasos del Maestro |
 | C y H | 8 (Tasajero a la tribu) | En la ronda 1 el Tasajero se acerca; el jugador tiene su ronda 1 para sacar a la Rodauva de la zona de Caza, erizarla o esconder al Zancajunco. Caza en la ronda 2 | Que el Tasajero pegue en la ronda 1 |
-| D (3 variantes) | 8 a la Rodauva salvaje | Las rivales aliadas (Ocarra y Zancajunco) **empiezan vecinas** (la diagonal ya cuenta) | Que separarlas no sea la primera decisión |
+| D (normal, hambriento y balanza 4) | 8 a la Rodauva salvaje | Las rivales aliadas (Ocarra y Zancajunco) **empiezan vecinas** (la diagonal ya cuenta) | Que separarlas no sea la primera decisión |
 | E (2 variantes) | **10** a las Rodauvas (excepción) | La primera tirada de cobardía cae en la **ronda 2**, con la formación que eligió el jugador. Con 8, el Tasajero (Vel 8) se acerca y las Rodauvas (Vel 6) tiran en la ronda 1, antes de que el Maestro (Vel 5) pueda acomodarse. E mide la cobardía, no la duración | Que la primera tirada caiga antes de que el Maestro actúe |
 | F | 8 (Zancajunco salvaje) | La línea de F de arriba | — |
 | G | Excepción: tablero de **8 × 8** | Es un ataque nocturno donde se duerme: contacto inmediato. La atacante queda cerca, como hoy | — |
@@ -1331,51 +1368,64 @@ Rebanada de combate aprobada el 01/10/2026: tablero, relaciones, sellado, caída
 
 **Bandos que se cruzan en la cola:** depende de las Velocidades, no de las posiciones. Se cruzan C, D, G y H; E se cruza solo después del cambio a Cuenta; A, B y F no se cruzan. **Se acepta** (07/10/2026): cruzarlos exigiría cambiar la composición de los escenarios, y con eso, lo que mide cada uno. Secundar (métrica 2) se lee solo en los escenarios que se cruzan.
 
-**Reglas de los escenarios:** todos usan posiciones fijas (el panel las cambia), hambre 3 y maná completo salvo indicación. Las variantes que se comparan **comparten semilla** (C y H; las dos D; las dos E), para que la diferencia salga de la regla y no del azar. Las notas de diseño de cada escenario viven en su campo `_nota`.
+**Reglas de los escenarios:** todos usan posiciones fijas (el panel las cambia), hambre 3 y maná completo salvo indicación. Las variantes que se comparan **comparten semilla** (C y H; las dos D y la de balanza 4; las dos E), para que la diferencia salga de la regla y no del azar. Las notas de diseño de cada escenario viven en su campo `_nota`.
 
 **Métricas por combate** — `DECIDIDO` (03/10/2026). Son **14** (la 14 se sumó el 05/10/2026) y reemplazan a cualquier otra lista (incluidas las "7 del Brief"). Se exportan junto con el resultado del combate (desenlace, destino de la atacante).
 
 | # | Métrica | Cómo se cuenta |
 |---|---|---|
-| 1 | Rondas | **Rondas totales**, **ronda del primer ataque** y **rondas de pelea** (desde el primer ataque hasta el fin, inclusive; 11.3). Los umbrales de duración usan las rondas de pelea (v1.6) |
+| 1 | Rondas | **Rondas totales**, **ronda del primer ataque** y **rondas de pelea** (desde el primer ataque hasta el fin, inclusive; 11.3). Los umbrales de duración usan las rondas de pelea (v1.6). El golpe inicial nocturno no cuenta (9.2) |
 | 2 | Secundar | Usos. Se lee en C, D, G y H (y en E después de la Cuenta) |
 | 3 | Eslabones | Promedio y máximo, contando solo las cadenas de 2 eslabones o más |
-| 4 | Incidentes | Total, dividido en distracciones y golpes |
+| 4 | Incidentes | Total, dividido en distracciones y golpes, por bando |
 | 5 | Encono | Veces que una criatura quedó enconada, por bando |
-| 6 | Cobardía | Tiradas, separadas en acobardadas y resistidas |
+| 6 | Cobardía | Tiradas, separadas en acobardadas y resistidas, por bando |
 | 7 | Sellados | Intentados y logrados, con la **probabilidad mostrada** en cada intento |
 | 8 | Capturas perdidas | Por huida en su turno y por llegar a 0 (detecta el "pegarle de más") |
-| 9 | Caídas | Por id de unidad |
+| 9 | Caídas | Por id de unidad, incluida la del Maestro (P-043) |
 | 10 | Caídas guardadas | Por id de unidad |
 | 11 | Muertes | Por id y causa: derrota, huida o caída del Maestro |
 | 12 | Rescate | Sí o no, y quién rescató |
 | 13 | Distancia del Maestro | Manhattan a la enemiga de pie más cercana, al final de cada turno suyo **desde la ronda del primer ataque**; promedio del combate (vigila el Martillazo). Motivo (v1.6): la ronda de acercamiento la inflaría y la alarma saltaría siempre |
-| 14 | Activas y terreno | Usos de Erizarse; surcos cavados; Hacerse junco (ocultos, destapes por contacto, bonos cobrados y perdidos); ronda del cambio a Cuenta; turnos que una unidad termina **sin ninguna casilla libre adyacente** (encierro) |
+| 14 | Activas y terreno | Usos de Erizarse; surcos cavados; Hacerse junco (ocultos, destapes por contacto, bonos cobrados y perdidos); ronda del cambio a Cuenta; turnos que una unidad termina **sin ninguna casilla libre adyacente** (encierro). Para la alarma de activas: **invocaciones por unidad** (`PARA ARQUITECTO`, P-052) |
 
 **Umbrales de alarma** — `DECIDIDO` (03/10/2026; aprobados por el Director Creativo). Superar uno obliga a revisar la regla antes de pasar a la 0b (Visión 10).
 
 **Cómo se mide:** **10 partidas por escenario**, y cada variante cuenta aparte, con al menos **3 jugadores distintos**. Se usan 10 semillas; las variantes que se comparan usan **las mismas 10** (C y H; las dos D; las dos E). **Sin encuesta** (`DECIDIDO` por el Director, Visión 11 v1.2): todo sale del registro. Se reabre si los comentarios de los jugadores contradicen los números. Con 10 partidas, "80%" = 8 de 10.
 
+**Los umbrales son datos** (desde T33, `Arquitectura.md` D-015): viven en `datos/playtest/alarmas.json`, con las 10 semillas de playtest y el mínimo de partidas y jugadores. Ajustar un umbral es editar ese archivo: no cambia código ni invalida grabaciones. **Este documento manda**: si los dos difieren, se corrige el archivo.
+
 **Desde cuándo se miden** (`Arquitectura.md` B.2.1): el hito **0a.1b** sirve para **sentir** los rasgos (¿se ven?, ¿generan decisiones?, ¿el combate sigue rígido?), no para medir estos umbrales: sin combos, afinidad ni relaciones, los números de C todavía no son los de 11.6. Los umbrales se miden **desde la 0a.2**, sobre el tablero de 12 × 12 y en la escala ×10, y los de criterio de éxito, en isométrica (Visión 10). La métrica 14 sí se puede mirar desde la 0a.1b, como señal temprana y sin umbral.
 
 | Escenario | Señal | Umbral | Métrica |
 |---|---|---|---|
-| A. Día 1 | Siempre se elige lo mismo | Más del **80%** de los primeros intentos de sellado en el mismo tramo de probabilidad (50% o 80%) | 7 |
+| A. Día 1 | Siempre se elige lo mismo | Más del **80%** de los primeros intentos de sellado con el **mismo % mostrado**, sea cual sea | 7 |
 | B. Muro | Huir nunca se lee como opción | Menos del **30%** de las partidas terminan en huida o en victoria | Desenlace |
 | C. Tasajero | Combate largo | Más de **5 rondas de pelea** en más del **20%** de las partidas, o promedio de rondas de pelea fuera de **2 a 3,5** | 1 |
 | C. Tasajero | La Rodauva muere sin decisión | La Rodauva muere en más del **50%** de las partidas en que empezó suelta | 11 |
-| D. Normal | Rivales invisibles | Menos del **20%** de los combates con al menos 1 incidente. Leer también con la balanza 4 | 4 |
-| D. Hambriento | Castigo puro | Derrota en más del **50%** de las partidas, o **3 o más** golpes por incidente por combate, en promedio | 4, desenlace |
-| E. Cobardía | Nunca aparece / frustra siempre | Acobardadas por debajo del **10%** o por encima del **60%** de las tiradas | 6 |
-| E. Toggle de afines | Decide el toggle (10.6) | Se aprueba si sin él se supera el 60% y con él la tasa queda entre 10% y 60% | 6 |
+| D. Normal | Rivales invisibles | Menos del **20%** de los combates con al menos 1 incidente **de la tribu**. Leer también con la balanza 4 | 4 |
+| D. Hambriento | Castigo puro | Derrota en más del **50%** de las partidas, o **3 o más** golpes por incidente **de la tribu** por combate, en promedio | 4, desenlace |
+| E. Cobardía | Nunca aparece / frustra siempre | Acobardadas por debajo del **10%** o por encima del **60%** de las tiradas **de la tribu** | 6 |
+| E. Toggle de afines | Decide el toggle (10.6) | Se aprueba si sin él se supera el 60% y con él la tasa queda entre 10% y 60% (tiradas de la tribu) | 6 |
 | F. Rescate | Se siente azaroso | En más del **60%** de las partidas en que el Maestro cae, no queda rescatista de pie | 9, 12 |
-| F. Rescate | Guardar caídas no se lee | Ninguna caída guardada en más del **80%** de las partidas con caídas | 10 |
-| G. Ataque nocturno | Comer es siempre la respuesta | Comer en más del **70%** de las partidas | Destino de la atacante |
+| F. Rescate | Guardar caídas no se lee | Ninguna caída guardada en más del **80%** de las partidas **con alguna caída de la tribu** | 10 |
+| G. Ataque nocturno | Comer es siempre la respuesta | Comer como **primera opción elegida** en más del **70%** de las partidas **con un destino elegido** | Destino de la atacante |
 | H. Soplo | Build trampa | Victorias en H por debajo del **20%** | Desenlace |
 | H. Soplo | Más fácil que el Barro | Victorias en H más de **20 puntos** por encima de las de C | Desenlace |
 | Todos | El Maestro se esconde (Martillazo) | Distancia media del Maestro (desde el primer ataque) **mayor a 3** en más del **50%** de los combates → se recorta el alcance del Martillazo (1.6) | 13 |
-| Todos | Una activa no genera decisiones | Una activa de la tribu (Erizarse, cavar, Hacerse junco) usada en menos del **20%** de los combates donde estaba disponible | 14 |
+| Todos | Una activa no genera decisiones | Una activa de la tribu (Erizarse, cavar, Hacerse junco) usada en menos del **20%** de los combates donde estaba **disponible** | 14 |
 | C y E | Encierro con surcos | El Tasajero termina un turno sin ninguna casilla libre adyacente en más del **20%** de las partidas | 14 |
+
+**Cómo se lee cada umbral** — `DECIDIDO` (15/10/2026, responde P-048 a P-051 y las lecturas de T33):
+
+| Umbral | Lectura | Motivo |
+|---|---|---|
+| A (P-048) | "Tramo" es el **% mostrado** en el primer intento de cada partida (lo que guarda la métrica 7). Se cuenta el valor más frecuente, sea cual sea (también 20% o 5%) | La señal es "siempre lo mismo". En A la Ocarra es de rango 1, así que cada tramo de vida da un % distinto |
+| D (P-049) | Solo los incidentes de la **tribu** | D mide las rivales aliadas del jugador; las de las enemigas no son una decisión suya |
+| E (lectura (b) de T33) | Solo las tiradas de cobardía de la **tribu** | Mismo motivo que D |
+| F (P-050) | "Partidas con caídas" = partidas en que cayó **al menos una criatura de la tribu**. La caída del Maestro o de una enemiga no cuenta | Sin una caída propia no había nada que guardar |
+| G (P-051) | Sobre las partidas con **un destino elegido** (una derrota o una huida no eligen: la atacante se va). Cuenta la **primera opción elegida**: resellar, fallar y después comer **no** cuenta como comer | Un resellado fallido no es elegir comer: el 20% de fallo eligió por el jugador |
+| Activas (lectura (a) de T33) | "Disponible" = una criatura de la tribu con esa activa estuvo en el tablero (suelta al empezar o invocada) | Una activa guardada todo el combate no tuvo oportunidad |
 
 ---
 
@@ -1541,7 +1591,7 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 
 **Registro para el epílogo**, por instancia: especie, si al final está **suelta, guardada o perdida**, estado de lealtad final, **día en que se guardó por última vez**, flag de **compañera inicial** y, si se perdió, **la causa** (comida, abandono, muerte en combate, hambre, perdonada) **y el día**. Opcional: flag "fue atacante".
 
-**La atacante que se va tras una derrota nocturna** (9.2, paso 6) — `DECIDIDO` (05/10/2026): causa **abandono**, con el día de la noche del ataque y el flag "fue atacante". Usa la línea de Abandono de `Mundo.md` 4.11, que ya dice lo que pasó ("se fue de noche, su pergamino ardió solo"). Una variante "tras atacarte", como la de Comida, es opcional (Worldbuilder).
+**La atacante que se va tras una derrota nocturna** (9.2, paso 6) — `DECIDIDO` (05/10/2026): causa **abandono**, con el día de la noche del ataque y el flag "fue atacante". Usa la línea de Abandono de `Mundo.md` 4.11, que ya dice lo que pasó ("se fue de noche, su pergamino ardió solo"). Una variante "tras atacarte", como la de Comida, es opcional (Worldbuilder). **Lo mismo si el Maestro huye** del combate nocturno (S-66).
 
 **Orden de lectura** (responde `Mundo.md` 4.11):
 
@@ -1572,13 +1622,15 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | Guardar en combate para salvar criaturas gratis | Resuelto | Cuesta la acción de la criatura y exige adyacencia |
 | Invocar gratis con descuento máximo | Resuelto | Costo mínimo de 1 maná |
 | Porcentajes que se pierden con números chicos | Resuelto | Escala ×10 de vida y daño (v1.7, 11.1); afinidad plana; recolección sobre el total del nodo |
-| Resellar a la traidora para "reiniciarla" | Resuelto | Vuelve con lealtad 1 y exige un pergamino en blanco |
+| Resellar a la traidora para "reiniciarla" | Resuelto | Vuelve con lealtad 1, 10 de vida y exige un pergamino en blanco |
 | Resellar un rango 2 era imposible con el maná nocturno | Resuelto | Resellar cuesta lo mismo que invocar |
 | Combos que dependen del azar de la iniciativa | Resuelto | Acción Secundar |
 | Cadenas infinitas | Resuelto | Cada eslabón vale la mitad |
 | Curarse gratis con hechizos antes de dormir | Resuelto | Sin hechizos fuera del combate |
 | Encadenar rituales con materiales acumulados | Resuelto | Máximo 1 por día; debilidades acumulables |
 | Porcentajes de vida que se achican en cadena | Resuelto | Todo se calcula sobre la vida máxima real |
+| **Huida gratis con el Maestro último** (Vel 5 cierra la ronda) | Resuelto | La huida termina antes de su próximo turno: cada unidad actúa una vez más (v1.8, 11.7, S-63) |
+| **Sellar al 0 % como trampa** | Resuelto | No se permite (v1.8, 4.1, S-50) |
 | **Balanza inicial en 2 da casi todo el Arrimo** | ⚠️ Vigilar | Decidido arrancar en 2. Si el Barro se siente "normal" y el Soplo un castigo, revisar |
 | **Combo de afines +80% en balanza 1** | ⚠️ Vigilar | Testear que no trivialice los combates de rango 1. Con la escala ×10 el bono se cobra completo |
 | **Polo Soplo como build trampa** | ⚠️ Vigilar | Sin Arrimo y con umbral 8. La interfaz debe mostrar el umbral de rescate y los riesgos de incidente |
@@ -1592,9 +1644,10 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | **Acampar en los Huertos** (la dieta variada no lo impide) | Resuelto | Agotamiento y comida perecedera (12.5) |
 | **Tribu de Ocarras** (rango 1, alcance 2, Velocidad 7, come poco) | ⚠️ Vigilar | Ocarra–Ocarra mal, Centinela no se acumula, una sola habilidad por especie. Con vecinas en 8 se tocan más seguido (10.4). Si domina, subir el incidente entre Ocarras |
 | **Esquivar todos los combates eligiendo columnas** | ⚠️ Vigilar | Sin combates no hay +1 de lealtad. Desde la v0.6 el Vado trae un solo encuentro: si se vuelve un destino sin peleas, sumar un segundo encuentro en lugar de la Orilla |
-| **Guardar a todas las caídas y huir siempre** | ⚠️ Vigilar | Lo limitan el maná, la acción, el alcance y los dos turnos. Si nunca muere nadie, subir el costo al de sellar |
+| **Guardar a todas las caídas y huir siempre** | ⚠️ Vigilar | Lo limitan el maná, la acción, el alcance, los dos turnos y, desde la v1.8, la vuelta de exposición antes de irse. Si nunca muere nadie, subir el costo al de sellar |
+| **Huida inviable con una vuelta de exposición** (v1.8) | ⚠️ Vigilar | Contra enemigas rápidas que ya alcanzan al Maestro, huir puede ser casi siempre caer. Escenario B: si la huida termina en caída en más de la mitad de los intentos, revisar (palanca: que solo las enemigas que alcanzan al Maestro al declarar tengan su vuelta) |
 | **IA predecible de más** (no se mueve si ya alcanza; 11.8) | ⚠️ Vigilar | Si trivializa B o D, sumar "la casilla con menos enemigas adyacentes" antes del orden de lectura |
-| **Salvajes que huyen antes del sellado** frustran | ⚠️ Vigilar | Se muestra el %. Si frustra, que solo huyan las acobardadas |
+| **Salvajes que huyen antes del sellado** frustran | ⚠️ Vigilar | Se muestra el %. Si frustra, bajar las probabilidades de huida por especie (11.7) |
 | **Microgestión nocturna** | ⚠️ Vigilar | La interfaz repite la asignación de guardias de la noche anterior |
 | **Lanzadera sobre el Tasajero en cada ronda** | Aceptado | Movimiento 4 contra 1 casilla de empuje; la reserva se agota |
 | **Rebuscar como piso sin fin** | Aceptado | Sostiene al Maestro, no a la tribu |
@@ -1617,10 +1670,10 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | **Quebranto y hambriento atrapado del otro lado del río** | Resuelto | El cruce no mata (12.11). Queda el costo de llegar con poca vida |
 | **Encono alto siempre deseable** (la Ocarra enconada pega 70) | ⚠️ Vigilar | Si perder el control no pesa, bajar el máximo a +20. Métricas de los escenarios C y D |
 | **El Maestro casi nunca es objetivo** (la IA va por la de menos vida; 11.8) | ⚠️ Vigilar | Mitigado en parte: sin remate, la IA va por la más cercana (P-020), así que un Maestro adelante recibe. En B (12 × 12) una Ocarra va por él desde la ronda 2. Métrica 9 en C y F. Si el Maestro no cae nunca, el Pilar 1 se debilita: aplicar el remate sobre el Maestro con su vida en porcentaje |
-| **Maestro solo en el ataque nocturno** (ninguna leal defiende; 9.2) | ⚠️ Vigilar | Peor caso ajustado. Si en 0b.3 termina en permadeath la mayoría de las veces, la atacante pierde el golpe inicial cuando no hay defensoras. Testear con la variante `g_sin_leales` |
+| **Maestro solo en el ataque nocturno** (ninguna leal defiende; 9.2) | ⚠️ Vigilar | Peor caso ajustado. Si en 0b.3 termina en permadeath la mayoría de las veces, la atacante pierde el golpe inicial cuando no hay defensoras. Testear con la variante `g_sin_leales` (armada en el panel) |
 | **Muertes en cadena** (cada muerte resta por separado; 5.2) | Intencional | Perder un combate con dos caídas golpea a toda la tribu. Es la regla de oro; vigilar que no empuje a una espiral de abandonos |
 | **La enconada remata a la salvaje que se quería sellar** | ⚠️ Vigilar | Tensión intencional (Pilar 2). Si frustra, que la enconada deje a una salvaje en 10 de vida |
-| **Incidentes casi invisibles con la balanza 2** (5% por chequeo; cerca de 30% de ver al menos uno en un combate de 3 o 4 rondas) | ⚠️ Vigilar | Mitigado en parte por las vecinas en 8 (v1.6): las rivales se tocan más seguido. Escenario D con la balanza 2 y con la 4 (15%). Si a balanza 2 los rivales nunca se notan, bajar el Arrimo a −3 puntos por paso o subir la base a 25% |
+| **Incidentes casi invisibles con la balanza 2** (5% por chequeo; cerca de 30% de ver al menos uno en un combate de 3 o 4 rondas) | ⚠️ Vigilar | Mitigado en parte por las vecinas en 8 (v1.6): las rivales se tocan más seguido. Escenario D con la balanza 2 y con la 4 (15%, variante del panel). Si a balanza 2 los rivales nunca se notan, bajar el Arrimo a −3 puntos por paso o subir la base a 25% |
 | **La Rodauva salvaje erizada alarga los combates** | ⚠️ Vigilar | Escenario D. Si se vuelve un muro, que solo se erice si la enemiga adyacente puede tumbarla este turno |
 | **Encierro con surcos** (dos surcos cierran una esquina) | ⚠️ Vigilar | Cavar junto a enemigas está permitido (05/10/2026). Umbral en 11.9. Palanca: prohibir cavar en casillas adyacentes a una enemiga de pie |
 | **Ocarra detrás del surco**, intocable para las de alcance 1 | ⚠️ Vigilar | Tope de 2 surcos y turno completo. Si domina, el surco corta la línea del Alcance 2 |
@@ -1642,92 +1695,73 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 
 ## 15. Pendientes
 
-> En la v1.5 se resumieron los pendientes ya cerrados de las versiones anteriores: el detalle de cada cierre está en el registro de cambios (16).
+> En la v1.5 se resumieron los pendientes ya cerrados de las versiones anteriores, y en la v1.8 los de la v1.6 y la v1.7: el detalle de cada cierre está en el registro de cambios (16).
 
 **PARA SISTEMAS:**
-- [x] ~~Todo lo pedido hasta la v1.5~~: S-1 a S-26, P-001 a P-024, escenarios B a F y H, rasgos reescritos e IA del Tasajero, preguntas de `Mundo.md` 9.1, sincronización con la Visión v1.2. Ver 16.
-- [x] ~~Visión v1.3: números con vecinas en 8 y despliegues en 12 × 12~~ → Hecho en la v1.6 (10.3, 10.4, 10.6, 11.3, 11.9). P-026 y P-027 respondidas (11.8).
-- [x] ~~Aprobar las coordenadas de 12 × 12~~ → Aprobadas en la v1.7 (P-030, 11.9).
-- [x] ~~P-031 a P-036, P-038 a P-040, S-41 a S-44 y A-3~~ → Respondidas en la v1.7 (ver 16).
-- [ ] Toggle de afines contra la cobardía (10.6): se decide con el escenario E (0a.2 en adelante).
-- [ ] Riesgos ⚠️ (14): se ajustan con las métricas de los playtests, **desde la 0a.2** (11.9). Nuevos en la v1.6: el bloque de 2 × 2, la afinidad que acorta C y la Cuenta con espacio. Nuevo en la v1.7: la enconada atada a su rival todo el turno (P-038).
-- [ ] Hito 0a.1b: leer la prueba manual de T40 (¿los rasgos se ven y generan decisiones?) y la métrica 14 como señal temprana. Si algún rasgo no genera decisiones, se revisa antes de la 0a.2.
+- [x] ~~Todo lo pedido hasta la v1.7~~: S-1 a S-44, P-001 a P-040, A-3, escenarios, rasgos reescritos, vecinas en 8, despliegues de 12 × 12 y la prueba manual de T40 (hito 0a.1b cerrado). Ver 16.
+- [x] ~~P-046, P-048 a P-051, lecturas (a) y (b) de T33, S-27 y S-45 a S-66~~ → Respondidas en la v1.8 (ver 16).
+- [ ] Toggle de afines contra la cobardía (10.6): se decide con el escenario E.
+- [ ] **Primer informe de playtest** (T33, `herramientas/informe_playtest.gd`): leer las alarmas por escenario y variante. Ajustar umbrales en `datos/playtest/alarmas.json` y copiar el cambio a 11.9.
+- [ ] Riesgos ⚠️ (14): se ajustan con las métricas de los playtests. Nuevo en la v1.8: huida inviable con una vuelta de exposición (escenario B).
 - [ ] Fuera del MVP (Capa 3): ¿5 posiciones de balanza alcanzan para el juego completo? · Posición inicial de la balanza por clase, entre 2 y 4.
 
 **PARA DIRECTOR CREATIVO:**
+- [ ] **v1.8, Visión 6.6 (huida):** cambiar "el combate termina al final de la ronda" por **"el combate termina justo antes del próximo turno del Maestro: cada unidad actúa una vez más"** (11.7, S-63). Lo aprobó el usuario el 15/10/2026; falta escribirlo en la Visión y en `Decisiones.md`. El espíritu no cambia: "una apuesta anticipada, no un seguro".
 - [ ] **v1.7, `Decisiones.md`:** registrar la escala ×10 de vida y daño (11.1). No cambia ninguna regla ni proporción; cambia cómo se leen los números en pantalla (la Ocarra pega 40, el Maestro tiene 200 de vida). Si la Visión cita números de vida o daño, actualizarlos.
 - [ ] **Visión v1.3, Escala 3:** registrar la lectura de "el primer contacto llega en la ronda 2" aprobada en la sesión del 07/10: **con la tribu quieta, la primera enemiga ataca en la ronda 2**; pegar antes, yendo a buscarla, es una decisión del jugador (11.3).
 - [ ] **Visión 6.2 (corregir):** "formar apretado suma afinidad, pero le da al Tasajero dos presas" no es exacto. Las dos presas salen de **formar con huecos** (cruz, L, diagonales: esquinas cóncavas). El bloque cierra las esquinas y da afinidad, pero pega con menos golpes (11.2.3). El dilema queda: **el bloque aguanta, rodear mata y expone**.
 - [ ] **Visión 11:** cerrar "Con vecinas en 8: ¿bajan el bono de afinidad y la probabilidad de incidente?" (no: 10.3 y 10.4) y "Despliegues de A a H en 12 × 12" (criterios en 11.9; coordenadas aprobadas en P-030). Cerrar también "Regla de IA del Tasajero" (resuelta desde la v1.3: 11.2.3 y 11.8). **Encabezado de la Visión:** la línea "los números de cada rasgo están pendientes en `Sistema.md` 11.2" ya no rige (11.2.1 a 11.2.3).
 - [ ] **Visión 10:** dice "13 métricas"; desde la v1.3 son **14** (11.9). El registro del 03/10 no se toca (fue cierto ese día).
-- [ ] Registrar en `Decisiones.md` las decisiones de Sistemas v0.8 a v1.7 que todavía no estén. En especial: "las leales defienden" quiere decir **solo** las leales (v1.1, 9.2); solo se come a una criatura **suelta** (v1.4, 7.7, opción B); la atacante que se va se registra como abandono (v1.5, 13); **el cuerpo mira 4 y el vínculo mira 8**, con la lista de 11.3 (v1.6); la escala ×10 (v1.7).
+- [ ] Registrar en `Decisiones.md` las decisiones de Sistemas v0.8 a v1.8 que todavía no estén. En especial: "las leales defienden" quiere decir **solo** las leales (v1.1, 9.2); solo se come a una criatura **suelta** (v1.4, 7.7, opción B); la atacante que se va se registra como abandono (v1.5, 13); **el cuerpo mira 4 y el vínculo mira 8**, con la lista de 11.3 (v1.6); la escala ×10 (v1.7); la huida con una vuelta (v1.8).
 - [ ] **Visión 6.2** (de la v1.3): Hacerse junco deja **oculto** (no se lo puede elegir como objetivo, sigue visible); Caza recibe +25%; Velocidad por modo; el surco se puede cavar junto a enemigas.
 - [ ] **Visión 6.5** (de la v1.4): solo se come a una criatura suelta (7.7).
 - [ ] Marcar el Brief del 01/10/2026 como histórico (lo propone el Arquitecto en 10.5; 11.9 ya lo dice).
 - [ ] La niebla de guerra queda fuera del MVP (11.2.2). ¿Entra en Ideas en espera?
+- [ ] Avisos visuales de T32 (`Arquitectura.md` v0.50): en isométrica, el texto de las marcas puede quedar tapado por la ficha de adelante, y el panel de la unidad pisa los sucesos. Va a Arte / UI.
 - [x] ~~D-1: ¿encuesta en E y F?~~ → No (Visión 11 v1.2). Aplicado en 11.9.
 - [x] ~~P-024~~ → La Visión 6.4 v1.2 confirma la respuesta de 9.2 (paso 6).
 
 **PARA WORLDBUILDER:**
+- [ ] **v1.8, revisar primero contra `es.json` v1.4** (620 claves): varios pendientes de abajo pueden estar ya cubiertos. La v1.8 no los audita.
+- [ ] **v1.8, huida del Maestro:** los textos de la previsualización (`huida.previa.*`) y del tooltip de Huir no pueden decir "antes del cierre de la ronda": ahora es "antes de que te vayas" (11.7).
+- [ ] **v1.8, sellar al 0 %:** una línea para el motivo del botón deshabilitado (por ejemplo, `aviso.sellar.sin_probabilidad`: "Así entera no hay hilo que la sujete"). La clave la confirma el Arquitecto.
+- [ ] **v1.8, resellado fallido:** el Arquitecto propone una línea propia (`nocturno.sellar.fallo`), porque `sellar.fallo.ocarra` no dice que el maná se gastó (`Arquitectura.md` v0.50).
 - [ ] **v1.7, escala ×10:** revisar `es.json` y `Mundo.md` por textos que citen vida o daño con números (tooltips de Hacerse junco "+3", de Caza y cuenta "ataques de 5", del Encono, de la afinidad "+1", la Lanzadera "recibe 1"). Pasarlos a la escala nueva o, mejor, dejarlos sin número y usar un hueco (`{n}`) que llene la pantalla desde los datos.
-- [ ] **v1.7, claves sin texto** que dejaron T13 a T21 (`RESUMENES.md`): `marca.enconada`, `marca.acobardada`, `panel.encono`, `panel.obediencia`, `obediencia.tramo.*`, `panel.cadena`, `panel.mana`, `aviso.terminar.debe_atacar_rival` y `aviso.terminar.debe_acercarse`. Con P-038 en la opción A, el aviso `debe_atacar_rival` también describe que la enconada no puede alejarse de su rival en ese turno.
-- [ ] **Antes de la prueba manual de T40** (lo pide el Arquitecto en 10.5): reemplazar en `es.json` los tooltips de Hacerse junco y de Caza y cuenta, que describen las reglas viejas ("actúa dos veces por ronda"), y retirar `rasgo.lomo_de_tierra.nombre` y `rasgo.lomo_de_tierra.tooltip`. Un texto equivocado engaña más que un `[FALTA]`.
-- [ ] **v1.3, textos nuevos** con las claves que el Arquitecto ya confirmó (`Arquitectura.md` 10.5): `rasgo.surco.*`, `accion.cavar`, `suceso.surco.cavar` y `.cerrar`, `marca.oculto`, `marca.bono`, `suceso.destape.mover`, `.atacar` y `.contacto`, `suceso.pierde_bono`, `aviso.cuenta.umbral` (`{n}`), `suceso.cuenta.cambio` y `aviso.destapar`.
+- [ ] **Claves sin texto** que dejaron T13 a T33 (`RESUMENES.md`), entre ellas `marca.enconada`, `marca.acobardada`, `panel.encono`, `aviso.terminar.debe_atacar_rival` y `aviso.terminar.debe_acercarse`. Con P-038 en la opción A, el aviso `debe_atacar_rival` también describe que la enconada no puede alejarse de su rival en ese turno.
 - [ ] **v1.3, nombres:** nombre final del **surco** (provisorio) y del estado **oculto** del Zancajunco (provisorio). Ojo con el choque entre "Caza" (modo de combate) y "Cazando" (hostilidad, 12.10).
 - [ ] **v1.3, fichas de `Mundo.md`:** el rasgo del Surcón pasa a ser el surco (sale Lomo de tierra); Hacerse junco cambia (se esconde y no se lo puede elegir como objetivo; ya no es "su primer golpe"); Caza y cuenta pasa a un turno en dos modos.
 - [ ] **v1.6, tooltips de relaciones:** si algún texto de afinidad, incidente o cobardía dice "adyacente" o "al lado", tiene que dejar claro que **cuentan las diagonales** (10.3, 10.4, 10.6). Y el del incidente, que la rival en diagonal no recibe el golpe: la criatura se distrae.
 - [ ] **v1.4, `Mundo.md` 9.1:** cerrar aviso de rescatistas al comer (sí, 7.7), olvido sin pergamino (sí, 4.5), cortes de etapas de confianza y de golondrinas (aprobados tal cual: 4.5 y 13) y "¿se puede comer a una guardada?" (no, opción B, 7.7). **Retirar la clave `comer.sacar_guardada`.** Cerrar también que las guardadas no pierden lealtad al comerse a una compañera (5.2).
 - [ ] **v1.5, la atacante que se va** (9.2, paso 6; Visión 6.4 v1.2): una línea para la mañana de la recuperación en `Mundo.md` 4.6, sin mostrar la ida ("nadie la ve irse; queda su rastro", Visión 7). En el epílogo usa la línea de Abandono (13); la variante "tras atacarte" es opcional.
 - [ ] Ataque nocturno (0b): una línea para las sueltas que miran sin defender al Maestro, con variante si **ninguna** lo defiende, y otra para la Centinela no leal ("avisa y se queda quieta") (9.2).
-- [ ] Claves de pantalla que dejó T13 sin texto (`RESUMENES.md`, T13): no son de Sistemas, pero conviene revisar las de lealtad (`lealtad.motivo.<evento>`), que nombran los eventos de 5.2.
 
 **PARA ARQUITECTO:**
-- [ ] **v1.7, T44 (escala ×10, solo datos, antes de T22):** multiplicar por 10, con su línea en la tabla de cotejo:
-  - `especies/*.json`: `vida` y `danio` de las 5 fichas (Rodauva 80/20, Surcón 240/30, Ocarra 120/40, Zancajunco 120/40, Tasajero 300/50); `rasgo.bono_plano` del Zancajunco +30; `danio_plano` del modo Cuenta −10.
-  - `tablas/balanza.json`: vida 220/200/180/160/140 y daño 50/40/40/30/30.
-  - `tablas/combate.json`: `danio_minimo` 10, `vida_tras_caida` 10, `afinidad_danio_plano` 10, bono del Encono por punto 10, vida al guardar una caída 10 y choque de la Lanzadera 10 (donde viva cada uno).
-  - Hechizos (T22): Martillazo `20 + 10 × Poder`, Remiendo `30 + 10 × Poder`. Poder sigue de 1 a 3.
-  - Escenarios: F, vida del Maestro 60. G: golpe inicial de 40 (sale de la ficha). Revisar las `_nota` que citen daños.
-  - Para la 0b: debilidad del ritual −40, quebranto −10 por día (mínimo 10).
-  - **No cambian:** porcentajes, umbrales en %, maná, hambre, lealtad, Encono (contador), movimiento, alcance, velocidad, y los "mínimo 1" de 6.2, 7.6, 7.8 y 12.11.
-  - Los tests que leen `datos/` real con números de daño (por ejemplo, el de F en `test_contacto.gd`: "pega 7") pasan a la escala nueva; los de fixtures no cambian salvo que se decida otra cosa.
-- [ ] **v1.7, P-040 (cambia código):** el piso del toggle pasa a `max(sin_afines − afines, min(sin_afines, 5))`. Cambia `ChequeoRival._pct_cobardia` y se suma el test del caso.
-- [ ] **v1.7, respuestas para pegar en `docs/PREGUNTAS.md`:**
-  - P-030: *"`Sistema.md` 11.9 v1.7: opción A. Coordenadas de 12 × 12 aprobadas tal como están, como provisorias (P-007). Se reescribe la línea de referencia de 11.6 B (cada Ocarra va por la unidad que tiene más cerca) y se asienta que en C y H la Ocarra empieza detrás de la Rodauva. No cambia código ni datos."*
-  - P-031: *"`Sistema.md` 10.1 v1.7: opción A. Secundar solo con el turno sin usar: aplaza el turno entero. Ya programado así: no cambia código ni tests."*
-  - P-032: *"`Sistema.md` 10.1 v1.7: opción A. Al volver, puede Secundar otra vez si queda otra aliada pendiente detrás. Ya programado así: no cambia código ni tests."*
-  - P-033: *"`Sistema.md` 10.1 y 11.3 v1.7: opción A. El inicio del turno, el borrado de Erizarse y el cambio de modo corren una vez por ronda; al volver de Secundar el turno sigue. Ya programado así: no cambia código ni tests."*
-  - P-034: *"`Sistema.md` 10.4 y 11.2.2 v1.7: opción A. La rival oculta provoca la tirada pero no recibe el golpe; si es la única a su alcance, la criatura se distrae. Ya programado así: no cambia código ni tests."*
-  - P-035: *"`Sistema.md` 10.2 v1.7: opción A. El golpe del incidente corta la cadena, no empieza otra y no recibe combo. Ya programado así: no cambia código ni tests."*
-  - P-036: *"`Sistema.md` 10.4 v1.7: opción A. 'La acción' son todos los ataques del turno: la distraída pierde los dos y el golpe gasta los dos. Ya programado así: no cambia código ni tests."*
-  - P-038: *"`Sistema.md` 10.5 v1.7: opción A. La restricción de casillas de la enconada dura todo el turno. Consecuencia aceptada: el Tasajero enconado en Cuenta casi nunca se retira (riesgo en 14, con la opción B como palanca). Ya programado así: no cambia código ni tests."*
-  - P-039: *"`Sistema.md` 10.4 y 10.6 v1.7: opción A. El −50 % de la acobardada rige en todos sus ataques del turno, también en el golpe del incidente. Ya programado así: no cambia código ni tests."*
-  - P-040: *"`Sistema.md` 10.6 v1.7: opción B, precisada. Las afines no bajan la cobardía por debajo de 5 %, pero el piso no la sube: `max(sin_afines − afines, min(sin_afines, 5))`. Sin afines, el toggle no cambia nada. Cambia `ChequeoRival._pct_cobardia` y se suma un test."*
-- [ ] **v1.7, 10.5:** pasar S-41 a S-44 y A-3 a "Resueltas": S-41 a S-44 confirmadas tal como están programadas (10.5, 10.6, 11.8, 2.2); A-3 aprobada como T44 con la lista de arriba. Sincronizar el encabezado con `Sistema.md` v1.7 y copiarlo a `docs/`.
-- [ ] **v1.6, métricas (T23, T33):** la métrica 1 registra **rondas totales, ronda del primer ataque y rondas de pelea**; la métrica 13 se cuenta **desde la ronda del primer ataque**. El umbral de duración de C usa las rondas de pelea (11.9).
-- [ ] **v1.4 / v1.5, P-024:** la atacante se va si el combate nocturno termina en derrota, de pie o caída, y su ida no cambia la lealtad (9.2, paso 6). Cambia una condición de `ResultadoCombate.armar` y se suma el caso de derrota al test 11 de T12 → T30.
-- [ ] **B.2.1, regla de sincronización:** copiar a `docs/` la Visión **v1.3** y `Sistema.md` **v1.7**.
-- [ ] 0b: el reparto de la noche solo ofrece comer a las sueltas (7.7). La atacante que se va tras una derrota entra al registro del epílogo como abandono, con el flag "fue atacante" (13).
-- [ ] Escenario G: golpe inicial como ataque normal, 40 de daño con la Ocarra (9.2) → T30.
-- [ ] Casos borde de la Lanzadera (1.6) → T22, con el choque de 10.
-- [ ] 0b.3: lista de defensoras al empezar el combate nocturno; +1 de victoria solo para las que pelearon; golpe inicial letal termina el combate antes de la ronda 1 (9.2). Variante de escenario `g_sin_leales` (Rodauva y Zancajunco con lealtad 5, misma semilla que G).
-- [ ] 0b: registro del epílogo con día del último guardado y flag de compañera inicial; orden de lectura y variante "Solo" (13). Cruce del río con vida mínima 1 (12.11). En los encuentros generados desde las tablas de 11.6, la lista de enemigas sigue el orden de la columna Composición (11.3).
+- [ ] **v1.8, respuestas para pegar en `docs/PREGUNTAS.md`:**
+  - P-048: *"`Sistema.md` 11.9 v1.8 (15/10/2026): opción A. 'Tramo' es el % mostrado en el primer intento; se cuenta el valor más frecuente, sea cual sea. Ya programado así: no cambia código ni tests."*
+  - P-049: *"`Sistema.md` 11.9 v1.8: opción A. Las dos alarmas de D cuentan solo los incidentes de la tribu. Ya programado así: no cambia código ni tests."*
+  - P-050: *"`Sistema.md` 11.9 v1.8: opción A. 'Partidas con caídas' son las partidas con al menos una caída de una criatura de la tribu. Ya programado así: no cambia código ni tests."*
+  - P-051: *"`Sistema.md` 11.9 v1.8: opción A, precisada. Se mide sobre las partidas con un destino elegido, y cuenta la **primera** opción elegida: resellar, fallar y después comer no cuenta como comer. Si `destino_atacante_proporcion` hoy cuenta el resultado final, cambia una condición y se suma ese caso al test."*
+- [ ] **v1.8, S-63 (cambia código, tarea propia antes de los playtests de B):** la huida del Maestro termina **justo antes de su próximo turno**, no al cerrar la ronda (11.7). Cada unidad actúa una vez más; si en el medio se cierra una ronda, rigen sus efectos (hambre de combate, corte de la cadena, `cadena_cortada` por `fin_ronda`). Cambian: el punto donde el Maestro "se va" (hoy en `Combate._cerrar_ronda`), `Combate.previsualizar_huida` (las enemigas que actúan antes de su próximo turno, también las de la ronda siguiente) y los tests de T28, incluido `test_huida_maestro_b.gd` (en B la previsualización deja de estar vacía). S-60 y S-61 no cambian salvo esa ventana.
+- [ ] **v1.8, S-50:** sellar con 0 % se rechaza con un motivo nuevo en `_motivo_sellar` (después de calcular el %); el % sigue en la pantalla. Un test por el motivo; el test de S-50 de T24 se reescribe citando 4.1 v1.8.
+- [ ] **v1.8, S-52:** sale el +25 de huida de la acobardada: quitar el parámetro de la tabla de combate y de su esquema (esquema → datos → fixtures → código), y su test con fixtures. La lectura "enconada = Encono en 3" queda igual.
+- [ ] **v1.8, 10.5:** pasar S-27 y S-45 a S-66 a "Resueltas": todas confirmadas tal como están programadas, salvo S-50 y S-52 (cambian, arriba) y S-63 (regla nueva, arriba). Las lecturas (a) y (b) de T33, confirmadas. Sincronizar el encabezado con `Sistema.md` v1.8 y copiarlo a `docs/`.
+- [ ] **v1.8, P-052 (tu decisión):** Sistemas prefiere la opción B (invocaciones por unidad en la métrica 14), porque el caso que se pierde es justo el que la alarma de activas busca. El evento `invocacion` ya está en el registro. No bloquea la 0a.
+- [x] ~~v1.7: T44 (escala ×10), P-040, respuestas P-030 a P-040, S-41 a S-44, métricas de la v1.6, P-024, golpe inicial de G y casos borde de la Lanzadera~~ → Hechos en T22, T23, T30 y T44.
+- [ ] 0b.3: lista de defensoras al empezar el combate nocturno; +1 de victoria solo para las que pelearon; golpe inicial letal termina el combate antes de la ronda 1 (9.2). Variante `g_sin_leales` (Rodauva y Zancajunco con lealtad 5, misma semilla que G), armada en el panel.
+- [ ] 0b: el reparto de la noche solo ofrece comer a las sueltas (7.7). La atacante que se va tras una derrota o una huida entra al registro del epílogo como abandono, con el flag "fue atacante" (13).
+- [ ] 0b: registro del epílogo con día del último guardado y flag de compañera inicial; orden de lectura y variante "Solo" (13). Cruce del río con vida mínima 1 (12.11). En los encuentros generados desde las tablas de 11.6, la lista de enemigas sigue el orden de la columna Composición (11.3). Debilidad del ritual −40 y quebranto −10 por día (mínimo 10).
 - [ ] Vigentes: todo número de las secciones 1 a 11 es dato editable (11.9); mapa del día, agotamiento, pudrición, confianza, campamento y cierre del día (7.9); contador de días, XP y nivel, hostilidad del Tasajero, tablas de encuentros y estado del río.
-- [x] ~~v1.6, geometría, dato de hambre cada 6 rondas, tablero de 12 × 12 y test de contacto~~ → Hechos en T41 a T43. Incidente con la rival en diagonal → T18. Orden del inicio del turno y una tirada por turno → T18, T19.
-- [x] ~~P-026 y P-027~~ → Cerradas en T41.
-- [x] ~~Corte de la cadena al cerrar la ronda (10.2) → T16~~ → Hecho en T16.
-- [x] ~~Rasgos reescritos de la v1.3~~ → Asumidos en el hito 0a.1b (B.2.1, T35 a T40), **antes de T14 y sin paralelo** (decisión del Arquitecto, que la Visión 10 le dejaba).
-- [x] ~~Escenarios B a F y H, paso de Erizarse en la IA y K-07, respuestas de la v1.1 y la v1.2 en 10.5, 14 métricas en T23 y T33~~ → Hechos en `Arquitectura.md` v0.8 a v0.22.
 
 **PARA ARTE / UI:**
+- [ ] **v1.8:** al declarar la huida, mostrar las unidades que actúan **antes de que el Maestro se vaya**, también las de la ronda siguiente, y el daño máximo sobre él (11.7). Sobre una salvaje con 0 % de sellado, el botón Sellar queda deshabilitado con su motivo (4.1).
 - [ ] **v1.7:** con la escala ×10, las barras de vida y los números de daño tienen tres cifras en el Tasajero (300). Prever el ancho en la ficha, la cola y el desglose.
 - [ ] Previsualizaciones obligatorias de la 0a: % de sellado y de huida, % de incidente por casilla, % de Encono y cobardía, desglose del daño (con el bono del Encono), cola de iniciativa (Caza y Cuenta), umbral de rescate, caídas en riesgo y empuje de la Lanzadera.
 - [ ] **v1.6:** al mover una unidad, marcar qué **vecinas** (las 8, con las diagonales) le darían afinidad o riesgo de incidente en la casilla de destino. Sin eso, la regla de las diagonales no se ve.
-- [ ] Al declarar la huida, enemigas que actúan antes del cierre y daño máximo sobre el Maestro (11.7).
 - [ ] Contador del Encono (0–3) visible sobre la criatura.
 - [ ] Antes de dormir, junto al ícono de riesgo (9.1): avisar si el golpe inicial puede tumbar al Maestro y mostrar quiénes lo defenderían (9.2).
 - [ ] Marca de quebranto en la barra de vida, con contador.
 - [ ] **v1.3** (T40 los resuelve con placeholders; falta el arte): surcos marcados en el tablero, con su dueño; marca **oculto** sobre el Zancajunco (siempre visible para el jugador) y del bono pendiente; modo del Tasajero y su umbral de cambio en la cola; **zona de Caza** visible; aviso al mover una unidad junto a una oculta.
+- [ ] Isométrica (T32): el texto de las marcas debajo de una ficha puede quedar tapado por la de adelante, y el panel de la unidad pisa los sucesos.
 - [ ] 0b: rendimiento previsto de cada nodo, días de cada ración perecedera, pantalla del campamento, contador del plazo (rayas), barra de XP, estado del Tasajero, estado del río con su previsión y aviso de daño antes de cruzar.
 
 ---
@@ -1753,3 +1787,4 @@ El Vado es el portero del Robledal. Cada día, el río tiene un estado: **70% no
 | v1.5 | 05/10/2026 | Sincronización con la Visión v1.2, sin cambios de números ni de reglas ya programadas. La atacante que se va si cae el Maestro: vuelve a ser salvaje y su ida no cambia la lealtad (9.2, 9.3, 11.5); se registra como abandono en el epílogo (13). La prenda no tiene consecuencias y no se registra (3.3). Playtests sin encuesta y medición desde la 0a.2, con el hito 0a.1b para sentir los rasgos; el Brief del 01/10 es histórico (11.9). Pendientes resumidos y puestos al día con `Arquitectura.md` v0.22, `docs/PREGUNTAS.md` y `docs/RESUMENES.md` (15) |
 | v1.6 | 07/10/2026 | Sincronización con la Visión v1.3 (geometría y tablero). **El cuerpo mira 4 y el vínculo mira 8:** tabla de adyacencia y vecinas (11.3); afinidad, incidente, toggle de afines y −10 del Maestro con vecinas en 8 (10.3, 10.4, 10.6, 10.7); Hacerse junco, Erizarse de la IA, invocar, cavar y Remiendo con las 4 ortogonales (1.6, 3.1, 11.2.2, 11.8). **Los números de afinidad (+1), incidente (20%) y del toggle no cambian.** Incidente con la rival en diagonal: golpea solo si la alcanza desde su casilla; si no, se distrae (10.4, 5.4). Geometría de las dos presas reescrita: el bloque cierra las esquinas, rodear las abre (11.2.3). Tablero de 12 × 12 con cámara móvil, zonas de despliegue y **contacto en la ronda 2** (definición, distancia estándar 8, rondas de pelea) (11.3). Hambre de combate cada **6** rondas (7.2). Líneas de 11.6 en rondas de pelea. Criterios de despliegue por escenario (E a distancia 10, G en 8 × 8), coordenadas a cargo de Claude Code con aprobación de Sistemas, bandos cruzados aceptados (11.9). Métrica 1 con ronda del primer ataque y rondas de pelea; métrica 13 desde el primer ataque; umbral de C en rondas de pelea (11.9). P-026 y P-027 respondidas, opción A; numeración de pasos corregida en los desempates (11.8). Riesgos nuevos: bloque de 2 × 2, afinidad que acorta C, Cuenta con espacio y golpe primero en la ronda 1 (14). Pendientes (15) |
 | v1.7 | 08/10/2026 | **Escala ×10 de vida y daño** (A-3; tabla de qué escala y qué no en 11.1): fichas (11.2), balanza y sus fórmulas (1.2, 7.8), hechizos `10 × (base + Poder)` y choque de la Lanzadera 10 (1.6), planos de afinidad, Encono, Hacerse junco y Cuenta (10.3, 10.5, 11.2.2, 11.2.3, 11.4), daño mínimo 10 y vida 10 al levantarse o al guardar una caída (11.4, 11.5), ritual y quebranto (3.3, 6.1); la regla de los eslabones no cambia (10.2); ejemplos de 9.2, 11.4 y 11.6 recalculados y aviso de Saciado en la Rodauva resuelto. Respuestas: P-030, coordenadas de 12 × 12 aprobadas, con Prueba B reescrita y la Ocarra de C y H detrás de la Rodauva (11.6, 11.9); P-031 a P-033, Secundar con el turno sin usar, otra vez si queda aliada detrás, inicio del turno una vez por ronda (10.1, 11.3); P-034 a P-036, rival oculta en el incidente, golpe del incidente sin cadena y "la acción" son todos los ataques (10.2, 10.4); P-038, opción A: la enconada queda atada a su rival todo el turno (10.5, 11.2.3, 11.8, riesgo nuevo en 14); P-039, −50% de la acobardada también en el incidente (10.6); P-040, piso del toggle que no sube la cobardía (10.6); S-41 a S-44 confirmadas (2.2, 10.5, 10.6, 10.7, 11.8). Pendientes (15) |
+| v1.8 | 15/10/2026 | Sincronización con `Arquitectura.md` v0.51, `Mundo.md` v1.4 y `docs/PREGUNTAS.md` al cierre de T33, sesión 2. **Huida del Maestro:** termina justo antes de su próximo turno; cada unidad actúa una vez más (11.7, S-63; aprobada por el usuario, pendiente en la Visión 6.6); ejemplo en B (11.6). **Sellar al 0 % no se permite** (4.1, S-50). **Sale el +25 de huida de la acobardada** y se mantiene el orden del inicio del turno (10.6, 11.3, 11.7, S-52). Resellada con 10 de vida (4.4, 9.3, P-046). Alarmas como datos en `datos/playtest/alarmas.json` y lectura de cada umbral: A, D, E, F, G y activas (11.9, P-048 a P-051, lecturas de T33); invocaciones en la métrica 14 como pedido al Arquitecto (P-052). Variante D con la balanza 4 desde el panel (11.9, 14). Confirmadas tal como están programadas: S-27 pares mixtos (10.2); S-45 a S-48 hechizos (1.6); S-49 y S-51 sellado (4.1); S-53 a S-56 guardar e invocar (3.1); S-57 y S-58 caídas guardadas (11.5); S-59 a S-61 huida (11.7); S-62 lealtad de la rescatista (6); S-64 a S-66 ataque nocturno (5.2, 9.2, 13). Riesgos nuevos y resueltos (14). Pendientes resumidos (15) |

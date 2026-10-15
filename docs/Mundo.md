@@ -1,8 +1,8 @@
-# MUNDO — Mundo, regiones y criaturas (v1.4)
+# MUNDO — Mundo, regiones y criaturas (v1.5)
 
-13/10/2026 · @Joaquín
+15/10/2026 · @Joaquín
 
-**Estado:** v1.4 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1). **v1.2:** etiquetas de T14 y T16, relaciones con vecinas en 8 (Visión v1.3) y cierre de las derivaciones ya resueltas. **v1.3:** etiquetas y avisos de T19 a T21 (Encono, cobardía y maná) y textos revisados contra la escala ×10 de vida y daño (`Sistema.md` 11.1 v1.7). **v1.4:** textos de T22 a T28 (hechizos, sellar, huida, invocar, guardar a una caída y huida del Maestro; `es.json`: 586 → 620 claves) y lore de fondo de **los Legados y sus Reveses** (2.10): los Nueve son nueve oficios de dos manos · Sincronizado con `00_Vision.md` v1.5, `Sistema.md` v1.7 y `Arquitectura.md` v0.48 · **Dueño:** Worldbuilder y Diseñador Narrativo
+**Estado:** v1.5 · **Textos del MVP aprobados y entregados en JSON** (`juego/datos/textos/es.json`; Visión v1.0). **v1.1:** textos de los rasgos reescritos (hito 0a.1b) y de la pantalla de T13 entregados en `es.json`, con los nombres nuevos en `PROPUESTA` (1.2.1). **v1.2:** etiquetas de T14 y T16, relaciones con vecinas en 8 (Visión v1.3) y cierre de las derivaciones ya resueltas. **v1.3:** etiquetas y avisos de T19 a T21 (Encono, cobardía y maná) y textos revisados contra la escala ×10 de vida y daño (`Sistema.md` 11.1 v1.7). **v1.4:** textos de T22 a T28 (hechizos, sellar, huida, invocar, guardar a una caída y huida del Maestro) y lore de fondo de **los Legados y sus Reveses** (2.10): los Nueve son nueve oficios de dos manos. **v1.5:** cierre de la 0a del lado del Worldbuilder: las 13 claves que T25, T28 y T29 dejaron sin texto (rescatista, pantalla de resultado, caídas en la previsualización de la huida, salvaje que no huye), aprobadas por el usuario el 15/10/2026; `es.json`: 620 → 633 claves · Sincronizado con `00_Vision.md` v1.5, `Sistema.md` v1.7, `Arquitectura.md` v0.48 y el estado del código hasta T33 (`CLAUDE.md`) · **Dueño:** Worldbuilder y Diseñador Narrativo
 
 Este documento define la identidad del mundo. Si algo acá contradice `00_Vision.md`, manda la Visión: se propone el cambio y se registra en `Decisiones.md`. Los números (rangos, apetito, efectos, costos) viven en `Sistema.md`.
 
@@ -41,6 +41,7 @@ Todo se nombra en **castellano evocador**: palabras reales o compuestas que suen
 | **Las rayas** | El contador del plazo de la partida | Rayas de carbón del fuego del Molino, una por día (ver 4.10) |
 | **Las golondrinas del Molino** | La señal del fin del plazo en el mundo | Se juntan en el techo a medida que pasan los días y se van el último (ver 4.10) |
 | **Huyendo** | El Maestro que declaró la huida y todavía no se fue (v1.4) | Gerundio a propósito: es el único estado que todavía no pasó; la ronda sigue y puede caer antes |
+| **Rescatista** | La criatura que hoy llevaría al Maestro a casa si cae (v1.5) | Ya es la palabra de las reglas (`Sistema.md` 6) y no cambia de género: sirve igual para la Rodauva y el Surcón, sin variantes |
 
 Los términos de capas futuras (Legados, Reveses, desborde, molida, torcedura, el Yugo…) están en 2.10 y en 8.
 
@@ -106,6 +107,7 @@ Valen para cualquier rol (`{a_rival}`, `{de_guardiana}`, `{testigo_o}`). Ejemplo
 - **Variantes por condición:** las claves terminadas en `.<especie>` o `.maestro` **reemplazan** a la clave base. Excepción: `caida.*`, `nocturno.base.*` y `nocturno.raso.*` son **complementos** que se muestran después de la línea base.
 - **Variantes al azar** (lista): solo `noche.molino`, con 3 variantes. Los textos de varios párrafos (ritual, apertura, epílogo) son un solo texto separado con `\n\n`, nunca una lista.
 - **Etiquetas de estado** (hambre, lealtad, estado de la unidad y marcas sobre la ficha): en femenino para las criaturas (*Famélica*: "la criatura") y en masculino para el Maestro, con la clave `.maestro`. **Desde la v1.1, las especies de nombre masculino concuerdan**, con variantes `.surcon`, `.zancajunco` y `.tasajero` (*Famélico*, *Caído*): la etiqueta se lee pegada al nombre, y "Surcón · Saciada" parece un error (hallazgo de T13). Los tooltips de un estado (*"Famélica: come lo que rechaza…"*) siguen en femenino: hablan de "la criatura". Programado en T40 (`Arquitectura.md` A.2.1, `DECIDIDO` 06/10/2026). **Las etiquetas de obediencia no concuerdan con la especie:** califican a la obediencia (*"Obediencia: 3 (Baja)"*), no a la criatura.
+- **Desde la v1.5, las etiquetas nuevas eligen palabras sin género** cuando pueden (*Rescatista*, *Quedó atrás*, *Se levantaron*): una etiqueta que no concuerda no necesita variantes.
 
 #### Textos nuevos de la entrega — `DECIDIDO`
 
@@ -162,7 +164,7 @@ Claves que dejaron T14 y T16 sin texto (`RESUMENES.md`). Mismo criterio que T13:
 
 #### Tooltips de relaciones (vecinas en 8) — `PROPUESTA` (v1.2)
 
-`Sistema.md` 15 (v1.6) pide que todo texto de afinidad, incidente o cobardía deje claro que **cuentan las diagonales**, y que el del incidente aclare que la rival en diagonal no recibe el golpe. Los necesitan las previsualizaciones obligatorias de T18 y T19. **Claves propuestas**: el Arquitecto las confirma o las renombra.
+`Sistema.md` 15 (v1.6) pide que todo texto de afinidad, incidente o cobardía deje claro que **cuentan las diagonales**, y que el del incidente aclare que la rival en diagonal no recibe el golpe. Los necesitan las previsualizaciones obligatorias de T18 y T19. Claves confirmadas por el Arquitecto (`Arquitectura.md` 10.5, 07/10/2026).
 
 | Qué | Clave | Texto |
 | --- | --- | --- |
@@ -238,19 +240,50 @@ Claves que dejaron T22 a T28 sin texto (`Arquitectura.md` A.10 v0.48). `es.json`
 | Desenlace de la huida (T28) | `resultado.desenlace.huida` | Huiste |
 | Marca del Maestro que declaró la huida | `marca.huida_declarada` | Huyendo |
 | Panel del turno del Maestro | `panel.huida_declarada` | *"Te vas al cerrar la ronda."* |
-| Huir después de moverse ⚠️ | `aviso.huir.ya_se_movio` | *"Huir lleva el turno entero, y ya te moviste."* |
-| Huir con la acción usada ⚠️ | `aviso.huir.accion_usada` | *"Huir lleva el turno entero, y ya usaste tu acción."* |
-| Previsualización: título ⚠️ | `huida.previa.titulo` | Si huís ahora |
-| Lista de las que actúan antes del cierre ⚠️ | `huida.previa.actuan` | *"Antes de que salgas del claro, todavía actúan:"* |
-| Nadie actúa antes del cierre ⚠️ | `huida.previa.ninguna` | *"Nadie más actúa antes de que salgas del claro."* |
-| Alguna alcanza al Maestro (`{n}` = daño máximo) ⚠️ | `huida.previa.alcanzan` | *"Te pueden alcanzar. En el peor caso, [n] de daño."* |
-| Actúan, pero ninguna llega ⚠️ | `huida.previa.no_alcanzan` | *"Ninguna te alcanza antes de que te vayas."* |
-| El daño máximo tumba al Maestro ⚠️ | `huida.previa.caes` | *"Con eso, caés antes de irte."* |
+| Huir después de moverse | `aviso.huir.ya_se_movio` | *"Huir lleva el turno entero, y ya te moviste."* |
+| Huir con la acción usada | `aviso.huir.accion_usada` | *"Huir lleva el turno entero, y ya usaste tu acción."* |
+| Previsualización: título | `huida.previa.titulo` | Si huís ahora |
+| Lista de las que actúan antes del cierre | `huida.previa.actuan` | *"Antes de que salgas del claro, todavía actúan:"* |
+| Nadie actúa antes del cierre | `huida.previa.ninguna` | *"Nadie más actúa antes de que salgas del claro."* |
+| Alguna alcanza al Maestro (`{n}` = daño máximo) | `huida.previa.alcanzan` | *"Te pueden alcanzar. En el peor caso, [n] de daño."* |
+| Actúan, pero ninguna llega | `huida.previa.no_alcanzan` | *"Ninguna te alcanza antes de que te vayas."* |
+| El daño máximo tumba al Maestro | `huida.previa.caes` | *"Con eso, caés antes de irte."* |
 
-> ⚠️ **Claves a confirmar** (PARA ARQUITECTO): `Arquitectura.md` v0.48 nombra `huida.previa.*` (6) y `aviso.huir.*` (2) sin listar las claves exactas. Los nombres son la lectura del Worldbuilder de la previsualización de `Sistema.md` 11.7. Se cotejan con la entrada de T28 en `docs/RESUMENES.md`; si difieren, cambia la clave y no el texto.
+> **Claves confirmadas (v1.5):** T30 adoptó los nombres de `huida.previa.*` y `aviso.huir.*` de esta tabla y retiró los provisorios de T28 (`CLAUDE.md`, estado de T30). Quedó una sola sin texto, `huida.previa.caidas`, que se agrega en la tabla siguiente.
 > **"Huyendo"** es el único participio que no es participio: dice que la huida todavía no se cumplió (11.7: el Maestro puede caer antes del cierre). Sin concordancia: solo el Maestro huye.
 > **`lanzadera.choque.obstaculo`** no nombra contra qué choca: con P-042, `contra` es `null` en el borde y en un surco.
 > **`huida.salvaje.tooltip`** (*"Se fue. Ya no se puede sellar."*) existe y T25 no lo usa. Se propone usarlo como tooltip del suceso de una huida ya ocurrida, junto a `huida.salvaje.<especie>` (PARA ARQUITECTO).
+
+#### Textos de la pantalla de T25, T28 y T29 — `DECIDIDO` (v1.5, aprobados por el usuario el 15/10/2026)
+
+Claves que dejaron T25, T28 y T29 sin texto (`CLAUDE.md`, estado de T25, T29 y T30). Con esto, ninguna pantalla de la 0a muestra `[FALTA]`. `es.json`: 620 → 633 claves.
+
+**Criterio:**
+- El rescate se nombra con lo que **hace**, no con un cargo: *"te lleva a casa"* es la frase de la regla de oro (Visión 6.6) y la del motivo de lealtad (`lealtad.motivo.rescate`). La marca sobre la ficha es la excepción, porque tiene que caber: *Rescatista*, que no cambia de género.
+- La pantalla de resultado lee lo que pasó con la tribu **sin culpa**: las muertas *"no volvieron"* y su causa dice dónde quedaron, no quién falló. Es el criterio de "quedar atrás es sobrio" (sección 5).
+- Ninguna etiqueta lleva género: sirven igual para la Rodauva y el Surcón sin variantes (1.5).
+
+| Qué | Clave | Texto | Se lee como |
+| --- | --- | --- | --- |
+| Rescatista en el panel del turno (T29) | `panel.rescatista` | Te lleva a casa | "Te lleva a casa: Rodauva" |
+| Sin rescatista en el panel | `panel.sin_rescatista` | *"Si caés ahora, nadie te lleva a casa."* | Línea completa |
+| Marca sobre la ficha de la rescatista | `marca.rescatista` | Rescatista | Sobre la ficha |
+| Rescatista en la pantalla de resultado | `resultado.rescatista` | Te llevó a casa | "Te llevó a casa: Surcón", seguido de `rescate.<especie>` |
+| Muertas en el resultado | `resultado.muertas` | No volvieron | Título de la lista |
+| Causa: el Maestro cayó | `resultado.causa.derrota_por_caida` | Quedó atrás cuando caíste | "Ocarra · Quedó atrás cuando caíste" |
+| Causa: el Maestro huyó | `resultado.causa.huida` | Quedó atrás en la huida | "Rodauva · Quedó atrás en la huida" |
+| Caídas levantadas | `resultado.levantadas` | Se levantaron | Título de la lista |
+| Caídas guardadas a tiempo | `resultado.caidas_guardadas` | Guardadas a tiempo | Título de la lista |
+| Salvajes selladas | `resultado.capturas` | Se sumaron a la tribu | Título de la lista |
+| Atacante nocturna esperando su destino | `resultado.atacante_pendiente` | Queda por decidir | "Queda por decidir: Ocarra", antes de los botones de 4.6 |
+| Previsualización de la huida: caídas que mueren (T28) | `huida.previa.caidas` | *"Si te vas, quedan atrás:"* | Título de la lista, como `huida.previa.actuan` |
+| Salvaje que tira para huir y se queda (T25, opcional) | `huida.salvaje.se_queda` | *"[Criatura] mira hacia el borde del claro, pero se queda."* | Línea de sucesos |
+
+> **"Te lleva a casa"** retoma la promesa del día 1 (*"Si la cuidás, te va a salvar"*, 4.8): el panel le recuerda al jugador, turno a turno, quién cumple hoy esa promesa. Elegida por el usuario. *Descartadas:* Rescatista (más técnica; queda solo como marca sobre la ficha) · Si caés, te lleva a casa (más larga).
+> **"No volvieron"** y no *Muertas*: el estado de la unidad ya dice *Muerta* al lado del nombre; el título no lo repite. *Descartada:* Quedaron atrás.
+> **"Se sumaron a la tribu"** y no *Capturas*: en Valdelumbre nadie captura; el hilo recoge (2.5). *Descartada:* Selladas.
+> **`huida.salvaje.se_queda`** es opcional: T25 la muestra solo si existe. Da sentido al porcentaje de la marca de huida: el jugador ve que la tirada pasó y que esa salvaje sigue a tiro del hilo.
+> **PARA ARQUITECTO:** confirmar que `panel.rescatista`, `resultado.rescatista`, `resultado.atacante_pendiente` y los títulos de lista se arman como "etiqueta: nombre" (como `panel.encono`) y no como frase con hueco. Si alguna lleva hueco, cambia el texto, no la clave.
 
 ## 2. La magia y los Nueve
 
@@ -927,6 +960,7 @@ Las tres salidas de la Visión 6.4. Sirven en el Molino y al raso. Las líneas d
 | Comer: con Zancajunco suelto (solo texto) | `nocturno.comer.zancajunco_suelto` | *"El Zancajunco se acerca a comer con vos. Es el único."* |
 
 > La clemencia, el nuevo sello y la comida se leen distinto por cómo reacciona la tribu, no por cómo se describe a la atacante. Comerla se elide (1.3).
+> **Desde T30**, la pantalla de resultado muestra *"Queda por decidir: [criatura]"* (`resultado.atacante_pendiente`, v1.5) antes de los tres botones. Si el resellado falla, la pantalla muestra `sellar.fallo` y la atacante sigue caída: quedan perdonar o comer.
 
 #### La atacante que se va — `PROPUESTA` (v1.1; Visión 6.4 v1.2, `Sistema.md` 9.2, paso 6)
 
@@ -991,6 +1025,8 @@ Nombres finales (reemplazan a los provisorios de `Sistema.md` 9.4) y texto de la
 **Las dos frutas iniciales** (inventario del día 1, `Sistema.md` 3.4): *"Antes de salir, la Rodauva se sacude en la puerta. Dos frutas caen de sus púas y ruedan hasta tus botas. No te las da: se le cayeron. Pero no vuelve a juntarlas."*
 
 **Línea de la interfaz** (la primera vez que se muestra el umbral de rescate): *"Si la cuidás, te va a salvar. Todavía no."*
+
+> En combate, el panel del turno retoma esta promesa con *"Te lleva a casa: [criatura]"* o *"Si caés ahora, nadie te lleva a casa."* (1.5, v1.5).
 
 **El pasado del Maestro no se explica en el MVP** — `DECIDIDO`. La apertura no dice de dónde viene ni por qué tiene tres pergaminos. Ese hueco es deliberado: depende de la clase (Capa 3) y de la historia principal (Capa 4).
 
@@ -1416,7 +1452,7 @@ Tooltip general: *"Se fue. Ya no se puede sellar."*
 | Tasajero | *"Retrocede sin dejar de mirarte. No huye: se va a pensar."* |
 
 > Derrotar al Tasajero baja su hostilidad en 1 y no vuelve en lo que queda de la visita (`Sistema.md` 12.10).
-> La salvaje que **huye en su turno** (T25) usa las mismas líneas; antes de que le toque, su riesgo se ve con `marca.huida` y `huida.salvaje.porcentaje` (1.5, v1.4).
+> La salvaje que **huye en su turno** (T25) usa las mismas líneas; antes de que le toque, su riesgo se ve con `marca.huida` y `huida.salvaje.porcentaje` (1.5, v1.4). **Si tira y se queda** (v1.5): *"[Criatura] mira hacia el borde del claro, pero se queda."* (`huida.salvaje.se_queda`).
 
 #### Criatura de la tribu caída
 
@@ -1445,7 +1481,7 @@ Tooltip: *"Guardada con lo justo para respirar. No se cura hasta que salga."* (v
 | Con caídas en el tablero | *"Al cruzar el claro, mirás atrás una vez. [Caída] sigue donde cayó."* |
 | Esa noche | *"Uno de los pergaminos se enciende solo, con una llama pálida que no calienta."* (sirve en el Molino y al raso, con o sin fuego) |
 
-La previsualización antes de declarar y la marca "Huyendo" están en 1.5 (v1.4).
+La previsualización antes de declarar y la marca "Huyendo" están en 1.5 (v1.4). Desde la v1.5, la previsualización también nombra a las caídas que quedarían atrás (`huida.previa.caidas`).
 
 #### El rescate
 
@@ -1455,6 +1491,8 @@ La previsualización antes de declarar y la marca "Huyendo" están en 1.5 (v1.4)
 | Surcón | *"Te carga en el lomo como a un costal. No se apura. No se detiene."* |
 | Ocarra | *"Te arrastra del cuello de la ropa con el pico y le grazna a todo lo que se acerca."* |
 | Zancajunco | *"Te arrastra de la capa entre las patas largas, mirando hacia atrás a cada paso."* |
+
+> En combate, antes de caer, el jugador ya sabe quién lo llevaría: la marca **Rescatista** sobre la ficha y la línea del panel (1.5, v1.5). En la pantalla de resultado, *"Te llevó a casa: [criatura]"* va seguida de su línea de esta tabla.
 
 #### Las caídas que quedan atrás
 
@@ -1487,7 +1525,7 @@ Momentos que muestran los hitos 0a.1 a 0a.3 (`Arquitectura.md` B.2 a B.4) y que 
 | Rango fuera de la balanza | `sellar.rango_alto` | *"El hilo no alcanza a sujetar algo así. Te falta Soplo."* |
 | Sin pergamino en blanco | `pergamino.sin_blanco` | Compartido con 4.6 |
 
-La salvaje que **huye en su turno** reutiliza las líneas de "Salvaje que huye a 0 de vida". Los avisos del botón Sellar están en 1.5 (v1.4).
+La salvaje que **huye en su turno** reutiliza las líneas de "Salvaje que huye a 0 de vida". Los avisos del botón Sellar están en 1.5 (v1.4). En la pantalla de resultado, las selladas se listan bajo *"Se sumaron a la tribu"* (`resultado.capturas`, v1.5).
 
 #### Encono y cobardía en el registro (T19)
 
@@ -1639,7 +1677,7 @@ Responden las preguntas de nombres de la Visión 11. **PARA DIRECTOR CREATIVO:**
 
 ## 9. Pendientes
 
-**v1.4:** los textos de T22 a T28 están en `es.json` (620 claves). El lore de los Legados y los nombres de las capas futuras quedan cerrados del lado del Worldbuilder. **El Worldbuilder no tiene pendientes que bloqueen la 0a.3 ni la 0b.**
+**v1.5:** con las 13 claves de 1.5 (T25, T28 y T29), `es.json` cubre todas las claves que el código de la 0a pide hasta T33 (633 claves). Los textos de v1.5 están aprobados por el usuario (15/10/2026). **El Worldbuilder no tiene pendientes que bloqueen el cierre de la 0a ni la 0b.**
 
 ### 9.1 Preguntas abiertas de reglas
 
@@ -1655,7 +1693,13 @@ Todas cerradas.
 - [x] ~~¿Cuándo se puede comer a una criatura?~~ → Solo en el reparto de la noche, junto al fuego (Visión v1.0, 6.5; 4.12).
 - [x] ~~¿Qué pasa si el Maestro muere de hambre?~~ → Permadeath directo (`Sistema.md` 7.6). Pantalla propia `DECIDIDO` (4.11).
 
+> Las preguntas abiertas de `PREGUNTAS.md` (P-048 a P-052, alarmas de playtest de T33) son de Sistemas y del Arquitecto y no tocan textos.
+
 ### 9.2 Derivaciones
+
+**PARA EL USUARIO (aprobación de textos):**
+
+- [x] ~~v1.5: aprobar las 13 claves de 1.5~~ → aprobadas el 15/10/2026, con `panel.rescatista` = *Te lleva a casa*.
 
 **PARA DIRECTOR CREATIVO:**
 
@@ -1675,10 +1719,12 @@ Todas cerradas.
 
 **PARA ARQUITECTO:**
 
-- [ ] **v1.4:** copiar `es.json` v1.4 a `juego/datos/textos/` (Claude Code no edita esa carpeta). Claves: 586 → 620. La huella de los datos no cambia (excluye `textos/`, A.7). Desaparecen los `[FALTA]` de T22 a T28.
-- [ ] **v1.4, claves a confirmar:** cotejar `aviso.huir.*` (2) y `huida.previa.*` (6) con la entrada de T28 en `docs/RESUMENES.md`. Si los nombres difieren, se cambian las claves en `es.json`; los textos no cambian (1.5).
-- [ ] **v1.4:** `huida.salvaje.tooltip` existe y T25 no lo usa. Propuesta: tooltip del suceso de una huida ya ocurrida. Si no tiene lugar, se retira en la v1.5.
-- [ ] **v1.4, T29:** si el rescate deja claves de pantalla sin texto, van al resumen como siempre; los textos del rescate (4.11 y sección 5) ya existen.
+- [ ] **v1.5:** copiar `es.json` v1.5 a `juego/datos/textos/` (Claude Code no edita esa carpeta). Claves: 620 → 633. La huella de los datos no cambia (excluye `textos/`, A.7). Desaparecen los `[FALTA]` de T25, T28 y T29.
+- [ ] **v1.5:** confirmar que `panel.rescatista`, `resultado.rescatista`, `resultado.atacante_pendiente` y los títulos de lista del resultado se arman como "etiqueta: nombre" y no como frase con hueco (1.5). Si alguna lleva hueco, cambia el texto, no la clave.
+- [ ] **v1.4:** `huida.salvaje.tooltip` existe y T25 no lo usa. Propuesta: tooltip del suceso de una huida ya ocurrida. Si no tiene lugar, se retira en la v1.6.
+- [x] ~~v1.4: copiar `es.json` v1.4~~ → copiado (T30 ya usa `huida.previa.*`).
+- [x] ~~v1.4, claves a confirmar `aviso.huir.*` y `huida.previa.*`~~ → confirmadas: T30 adoptó los nombres de 1.5 y retiró los provisorios de T28.
+- [x] ~~v1.4, T29: claves de pantalla del rescate~~ → entregadas en la v1.5 (1.5).
 - [x] ~~v1.3: copiar `es.json` v1.3~~ → copiado.
 - [x] ~~v1.3: quién sostuvo a la que resiste~~ → `sostenida_por` y `afin` en el `chequeo_rival` (T44, P-041).
 - [x] ~~Copiar `es.json` v1.2~~ → copiado en la sincronización previa a T41 (`Arquitectura.md` B.3.1).
@@ -1693,6 +1739,7 @@ Todas cerradas.
 
 **PARA ARTE / UI:**
 
+- [ ] **v1.5, rescatista:** la marca "Rescatista" sobre la ficha tiene que leerse como una promesa, no como un estado de la criatura (un ícono chico de fuego o de casa junto a la palabra, por ejemplo), y no confundirse con las marcas de Encono o huida.
 - [ ] **v1.4, huida:** la marca "Huida" sobre la salvaje con su porcentaje, y "Huyendo" sobre el Maestro que declaró. Que "Huyendo" no se confunda con un estado ya cumplido (un contorno que se apaga, por ejemplo).
 - [ ] **v1.4, Lanzadera:** el choque contra el borde o un surco se lee igual que contra una unidad (un golpe seco, sin desplazamiento).
 - [ ] **v1.3, escala ×10:** los números de vida y daño llegan a tres cifras (Tasajero, 300). Prever el ancho en la ficha, la cola y el desglose (`Sistema.md` 15 v1.7). Los textos no tienen números de balance: no cambian el ancho.
@@ -1746,6 +1793,7 @@ Todas cerradas.
 
 | Versión | Fecha | Cambio |
 | --- | --- | --- |
+| v1.5 | 15/10/2026 | **Cierre de la 0a del lado del Worldbuilder.** 1.5: textos de pantalla de T25, T28 y T29, aprobados por el usuario (rescatista; `panel.rescatista`: *Te lleva a casa* en el panel, en la ficha y en el resultado; títulos de muertas con su causa, levantadas, caídas guardadas, selladas y atacante pendiente; caídas en la previsualización de la huida; salvaje que tira para huir y se queda); claves de `huida.previa.*` y `aviso.huir.*` confirmadas por T30 (salen las ⚠️); regla nueva: las etiquetas nuevas eligen palabras sin género. 1.2: *Rescatista*. 4.6, 4.8 y sección 5: referencias a las líneas nuevas. 9: derivaciones al día (cerradas las del Arquitecto de la v1.4; nuevas para el usuario, el Arquitecto y Arte). `es.json`: 620 → 633 claves |
 | v1.4 | 13/10/2026 | **Textos de T22 a T28 y lore de los Legados.** 1.5: textos de pantalla de T22 a T28 (avisos de hechizos, sellar, invocar y guardar a una caída; sentidos y choque de la Lanzadera; marca y tooltip de huida de las salvajes; desenlace, marca, panel, avisos y previsualización de la huida del Maestro), aprobados por el usuario; 8 claves a confirmar por el Arquitecto. 1.2: *Huyendo*. 2.1: los Nueve son nueve. 2.4 reescrita: nueve oficios de dos manos; los linajes de hechura pasan a **los Legados y sus Reveses** (Revés reemplaza a Sombra). Nueva 2.10: los nueve oficios, nombres del sistema (Legados, Intemperie, colmo, desborde, darse vuelta, molida), respuestas a la Visión 11, justificación de los cuatro ciclos en los 18 legados, escena de Desapego e hipótesis de legados de las 5 criaturas. 2.7: lectura de los rastros por oficio, nunca escrita en el juego. 7: Nueve resueltos. 8: Legados en espera; nueva 8.1 con los nombres de las capas futuras (zozobra, templarse, quebrarse, el atado, torcedura, el Yugo, uncida, la Voz y el Grito). 9: derivaciones al día. `es.json`: 586 → 620 claves |
 | v1.3 | 08/10/2026 | **Sincronización con `Sistema.md` v1.7 y `Arquitectura.md` v0.37 (T17 a T21, escala ×10).** 1.5: textos de pantalla de T19 a T21 (`marca.enconada`, `marca.acobardada` con concordancia, `panel.encono`, `panel.mana`, `aviso.terminar.debe_atacar_rival` según P-038 opción A y `aviso.terminar.debe_acercarse`), aprobados por el usuario; revisión contra la escala ×10, con la regla "ningún texto escribe un número de vida, daño o curación". Sección 5: `guardar_caida.tooltip` sin número; nota sobre `cobardia.resiste.afin` y `.maestro`, que esperan un dato en el evento. 9.2: derivaciones al día (cerradas las de la v1.2 ya resueltas; nuevas para el Arquitecto, Sistemas, el Director y Arte). `es.json`: 577 → 586 claves |
 | v1.2 | 07/10/2026 | **Sincronización con la Visión v1.3 y `Sistema.md` v1.6 (vecinas en 8, tablero de 12 × 12).** 1.4: siluetas legibles con la cámara alejada. 1.5: etiquetas de T14 (obediencia y sus tramos, sin concordancia) y T16 (cadena); tooltips de afinidad, incidente, cobardía y Encono con las diagonales (claves propuestas al Arquitecto); concordancia de etiquetas cerrada (T40). Sección 5: hecho junco se destapa solo por los lados; las presas del Tasajero en los huecos de la formación; sostén de la cobardía en 8, con dos líneas que pasan de "al lado" a "cerca"; incidente con la rival en diagonal; combos sin posición; hambre de combate cada 6 rondas. Sección 6: el vínculo mira 8, el cuerpo mira 4. 9.2: derivaciones cerradas y nuevas. `es.json`: 568 → 577 claves |
