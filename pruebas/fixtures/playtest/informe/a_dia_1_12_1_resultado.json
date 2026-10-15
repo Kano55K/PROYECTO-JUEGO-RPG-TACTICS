@@ -1,0 +1,30 @@
+{
+	"_nota": "T33, sesion 3: resultado de prueba para la herramienta del informe (forma de MesaPlaytest.partida).",
+	"contexto_id": "a_dia_1", "semilla": 12, "desenlace": "derrota_por_caida", "rondas": 4,
+	"maestro_caido": true, "rescatista": "rodauva_1", "permadeath": false,
+	"maestro": {"vida": 10, "posicion": [0, 0], "mana": 0, "hambre": 3},
+	"unidades": [], "levantadas": [], "muertas": [], "capturas": [], "lealtad_cambios": [],
+	"pergaminos": {"en_blanco": 0, "ardidos": []},
+	"atacante_pendiente": null, "destino_atacante": null,
+	"metricas": {
+		"rondas": {"totales": 7, "primer_ataque": 1, "de_pelea": 7},
+		"secundar": {"usos": 2},
+		"eslabones": {"cadenas": 1, "suma": 3, "maximo": 3},
+		"incidentes": {"tribu": {"distraida": 1, "golpe": 2}, "enemigas": {"distraida": 0, "golpe": 1}},
+		"encono": {"tribu": 3, "enemigas": 1},
+		"cobardia": {"tribu": {"acobardada": 1, "resistida": 2}, "enemigas": {"acobardada": 0, "resistida": 1}},
+		"sellados": [{"objetivo": "ocarra_s1", "porcentaje": 60, "logrado": false},
+				{"objetivo": "ocarra_s1", "porcentaje": 80, "logrado": true}],
+		"capturas_perdidas": [{"unidad": "ocarra_s2", "motivo": "huida", "ronda": 3},
+				{"unidad": "ocarra_s3", "motivo": "cero", "ronda": 5}],
+		"caidas": [{"unidad": "rodauva_1", "ronda": 4}, {"unidad": "maestro", "ronda": 7}],
+		"caidas_guardadas": [{"unidad": "rodauva_1", "ronda": 5}],
+		"muertes": [{"unidad": "tasajero_1", "causa": "derrota_por_caida"}],
+		"rescate": {"rescatista": "rodauva_1"}, "distancia_maestro": {"turnos": 4, "suma": 13},
+		"activas": {"usos": [{"unidad": "rodauva_1", "erizarse": 2, "cavar": 0, "hacerse_junco": 0},
+				{"unidad": "tasajero_1", "erizarse": 0, "cavar": 1, "hacerse_junco": 1}],
+				"surcos": 1, "ocultos": 1, "destapes_contacto": 1, "bonos_cobrados": 1,
+				"bonos_perdidos": 0, "cambios_modo": [{"unidad": "tasajero_1", "de": "caza", "a": "cuenta", "ronda": 3}],
+				"encierros": [{"unidad": "tasajero_1", "turnos": 2}, {"unidad": "rodauva_1", "turnos": 1}]}
+	}
+}

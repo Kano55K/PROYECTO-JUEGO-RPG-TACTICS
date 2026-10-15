@@ -114,3 +114,32 @@ func test_t31_variante_editada_lleva_sufijo_y_se_reproduce() -> void:
 	var base_archivo: String = GuardadoCombate.guardar(_jugar_contrato(sin_cambios.escenario(), datos), carpeta,
 			sin_cambios.difiere())
 	assert_str(base_archivo.get_file()).is_equal("contrato_victoria_%d_1" % semilla)
+
+
+# T33, sesion 3 (10): con la ficha de playtest, un combate terminado la escribe
+# junto al resultado (<...>_playtest.json) y valida contra su esquema. Uno sin
+# terminar no escribe ni resultado ni ficha.
+func test_t33_guarda_la_ficha_junto_al_resultado() -> void:
+	var datos: Dictionary = DatosFixture.cargar()["datos"]
+	var escenario: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/contrato/contrato_victoria.json",
+			"escenario")["datos"]
+	var combate: Combate = _jugar_contrato(escenario, datos)
+	var carpeta: String = create_temp_dir("t33_ficha")
+	var ficha: Dictionary = FichaPlaytest.armar("contrato_victoria", {"semilla": 5, "pergaminos_en_blanco": 1},
+			combate.contexto().semilla, [combate.contexto().semilla], "Ana")
+	var base: String = GuardadoCombate.guardar(combate, carpeta, false, ficha)
+	assert_str(base).is_not_empty()
+	var ruta: String = base + GuardadoCombate.SUFIJO_PLAYTEST
+	assert_str(ruta.get_file()).is_equal("contrato_victoria_%d_1_playtest.json" % combate.contexto().semilla)
+	var esquema: Dictionary = Cargador.new().esquema_resuelto("res://datos", "playtest")["esquema"]
+	var validacion: Dictionary = Validador.new().validar(
+			JSON.parse_string(FileAccess.get_file_as_string(ruta)), esquema, "playtest")
+	assert_array(validacion["errores"] as Array).override_failure_message(str(validacion["errores"])).is_empty()
+	assert_dict(validacion["datos"]).is_equal(ficha)
+	assert_dict((validacion["datos"] as Dictionary)["variante"] as Dictionary).is_equal({"pergaminos_en_blanco": 1})
+	assert_int((validacion["datos"] as Dictionary)["indice_semilla"] as int).is_equal(1)
+
+	var a_medias: String = GuardadoCombate.guardar(_combate(), carpeta, false, ficha)
+	assert_bool(FileAccess.file_exists(a_medias + ".json")).is_true()
+	assert_bool(FileAccess.file_exists(a_medias + GuardadoCombate.SUFIJO_RESULTADO)).is_false()
+	assert_bool(FileAccess.file_exists(a_medias + GuardadoCombate.SUFIJO_PLAYTEST)).is_false()

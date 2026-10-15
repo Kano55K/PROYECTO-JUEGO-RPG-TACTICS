@@ -220,3 +220,43 @@ func _escribir(ruta: String, contenido: String) -> void:
 	var archivo: FileAccess = FileAccess.open(ruta, FileAccess.WRITE)
 	archivo.store_string(contenido)
 	archivo.close()
+
+
+# T33, sesion 3 (10) y (11), y manual 2: con "Ana" en Jugador, A con la semilla
+# de playtest 1 usa la primera semilla de playtest/alarmas.json (evento inicio);
+# al terminar, la ficha lleva el indice 1, el jugador y la variante vacia (la
+# semilla nunca es parte de la variante).
+func test_t33_jugador_y_semilla_de_playtest() -> void:
+	var alarmas: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_DATOS.path_join("playtest/alarmas.json")))
+	var primera: int = int((alarmas["semillas"] as Array)[0])
+	var runner: GdUnitSceneRunner = _principal(_DATOS)
+	await runner.simulate_frames(1)
+	var principal: Principal = runner.scene()
+	# Una carpeta propia: la de _principal la comparten los tests de este archivo.
+	principal.carpeta_registros = create_temp_dir("t33_registros")
+	assert_bool((runner.find_child("CampoJugador") as Control).visible).is_true()
+	assert_that(principal.jugador()).is_null()
+	principal.campo_jugador().text = "Ana"
+	assert_str(principal.jugador() as String).is_equal("Ana")
+
+	var panel: PanelParametros = await _abrir_panel(runner, "a_dia_1")
+	assert_bool((runner.find_child("CampoJugador") as Control).visible).is_false()
+	var lista: OptionButton = panel.control_semilla_playtest()
+	assert_object(lista).is_not_null()
+	lista.select(1)
+	lista.item_selected.emit(1)
+	assert_int(panel.edicion().valor("semilla") as int).is_equal(primera)
+	var vista: VistaCombate = await _jugar(runner)
+	assert_int(_semilla_del_registro(vista.combate())).is_equal(primera)
+	_hasta_el_final(vista)
+
+	var fichas: Array = Array(DirAccess.get_files_at(principal.carpeta_registros)).filter(
+			func(archivo: String) -> bool: return archivo.ends_with(GuardadoCombate.SUFIJO_PLAYTEST))
+	assert_array(fichas).has_size(1)
+	var ficha: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+			principal.carpeta_registros.path_join(fichas[0])))
+	assert_str(ficha["escenario"] as String).is_equal("a_dia_1")
+	assert_dict(ficha["variante"] as Dictionary).is_empty()
+	assert_int(int(ficha["semilla"])).is_equal(primera)
+	assert_int(int(ficha["indice_semilla"])).is_equal(1)
+	assert_str(ficha["jugador"] as String).is_equal("Ana")

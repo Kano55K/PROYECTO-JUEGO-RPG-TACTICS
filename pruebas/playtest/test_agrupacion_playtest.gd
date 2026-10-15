@@ -125,3 +125,34 @@ func test_sin_nada_que_medir_es_insuficiente() -> void:
 	assert_str(alarma["estado"] as String).is_equal(AlarmasPlaytest.ESTADO_INSUFICIENTE)
 	assert_that(alarma["valor"]).is_null()
 	assert_int(alarma["n"] as int).is_equal(0)
+
+
+# T33, sesion 3 (12): un resultado sin ficha llega con variante null
+# (FichaPlaytest.desconocida). Es su propio grupo, nunca el "sin cambios", y como
+# no se sabe que empezo suelta, no entra en el n de muere_si_empezo_suelta.
+func test_variante_desconocida_es_otro_grupo() -> void:
+	var partidas: Array[Dictionary] = MesaPlaytest.lote("c_tasajero", 10)
+	for partida in partidas:
+		MesaPlaytest.metricas(partida)["muertes"] = [{"unidad": "rodauva_1", "causa": "derrota_por_caida"}]
+	var desconocida: Dictionary = MesaPlaytest.partida("c_tasajero", null, MesaPlaytest.semillas()[0])
+	MesaPlaytest.metricas(desconocida)["muertes"] = [{"unidad": "rodauva_1", "causa": "derrota_por_caida"}]
+	desconocida["ficha"] = FichaPlaytest.desconocida(desconocida["resultado"], MesaPlaytest.semillas())
+	partidas.append(desconocida)
+	var informe: Dictionary = MesaPlaytest.calcular(partidas)
+
+	assert_int((informe["grupos"] as Array).size()).is_equal(2)
+	var sin_cambios: Dictionary = MesaPlaytest.grupo(informe, "c_tasajero")
+	assert_int(sin_cambios["partidas"] as int).is_equal(10)
+	var grupo: Dictionary = {}
+	for candidato in (informe["grupos"] as Array):
+		if candidato["variante"] == null:
+			grupo = candidato
+	assert_str(grupo["escenario"] as String).is_equal("c_tasajero")
+	assert_int(grupo["partidas"] as int).is_equal(1)
+	assert_int(grupo["jugadores"] as int).is_equal(0)
+	for alarma in (grupo["alarmas"] as Array):
+		if alarma["id"] == "c_rodauva_muere":
+			assert_int(alarma["n"] as int).is_equal(0)
+			assert_that(alarma["valor"]).is_null()
+			assert_str(alarma["estado"] as String).is_equal(AlarmasPlaytest.ESTADO_INSUFICIENTE)
+	assert_int(MesaPlaytest.alarma(informe, "c_tasajero", "c_rodauva_muere")["n"] as int).is_equal(10)

@@ -89,7 +89,8 @@ const _DECIMAS: int = 10
 
 
 # resultados: los diccionarios del esquema resultado. fichas: las fichas de
-# playtest (esquema playtest), una por resultado y en el mismo orden. datos: los
+# playtest (esquema playtest; o FichaPlaytest.desconocida, con variante null),
+# una por resultado y en el mismo orden. datos: los
 # datos cargados (playtest/alarmas.json, escenarios/ y especies/). Devuelve
 # {grupos, comparaciones, informativas, avisos}; cada grupo: {escenario,
 # variante, partidas, jugadores, semillas, semillas_fuera, alarmas}, y cada
@@ -102,7 +103,7 @@ static func calcular(resultados: Array[Dictionary], fichas: Array[Dictionary], d
 	var por_clave: Dictionary = {}
 	for i in range(resultados.size()):
 		var ficha: Dictionary = fichas[i]
-		var variante: Dictionary = _sin_semilla(ficha["variante"])
+		var variante: Variant = _sin_semilla(ficha["variante"])
 		var clave: String = _clave(ficha["escenario"], variante)
 		if not por_clave.has(clave):
 			por_clave[clave] = {"escenario": ficha["escenario"], "variante": variante, "partidas": []}
@@ -188,7 +189,7 @@ static func _jugadores(partidas: Array) -> int:
 	return jugadores.size()
 
 
-static func _clave(escenario: String, variante: Dictionary) -> String:
+static func _clave(escenario: String, variante: Variant) -> String:
 	return "%s|%s" % [escenario, JSON.stringify(variante, "", true)]
 
 
@@ -360,7 +361,7 @@ static func _muere_si_empezo_suelta(parametros: Dictionary, partidas: Array, esc
 	var n: int = 0
 	var murio: int = 0
 	for partida in partidas:
-		var variante: Dictionary = (partida["ficha"] as Dictionary)["variante"]
+		var variante: Variant = (partida["ficha"] as Dictionary)["variante"]
 		var sueltas: Array[String] = []
 		for criatura in (archivo["tribu"] as Array):
 			if criatura["especie"] == parametros["especie"] 					and _estado_inicial(criatura["id"], variante, archivo) == _ESTADO_SUELTA:
@@ -387,7 +388,7 @@ static func _activa_poco_usada(parametros: Dictionary, partidas: Array, escenari
 	var disponible: int = 0
 	var usada: int = 0
 	for partida in partidas:
-		var variante: Dictionary = (partida["ficha"] as Dictionary)["variante"]
+		var variante: Variant = (partida["ficha"] as Dictionary)["variante"]
 		var usos: Dictionary = {}
 		for fila in (_metricas(partida)["activas"]["usos"] as Array):
 			usos[fila["unidad"]] = fila[accion]
@@ -502,20 +503,27 @@ static func _decimas(suma: int, n: int) -> Variant:
 	return suma * _DECIMAS / n
 
 
-static func _sin_semilla(variante: Dictionary) -> Dictionary:
-	var copia: Dictionary = variante.duplicate(true)
+# La variante sin la semilla. null (desconocida: un resultado sin ficha, T33
+# sesion 3) sigue null: es su propio grupo y nunca el "sin cambios".
+static func _sin_semilla(variante: Variant) -> Variant:
+	if variante == null:
+		return null
+	var copia: Dictionary = (variante as Dictionary).duplicate(true)
 	copia.erase(_RUTA_SEMILLA)
 	return copia
 
 
 # El estado al empezar de una criatura de la tribu: el de la variante si lo
 # cambia, si no el del archivo del escenario (null si no esta en el archivo).
-static func _estado_inicial(id: String, variante: Dictionary, archivo: Dictionary) -> Variant:
+# Con la variante desconocida (null) tampoco se sabe: null.
+static func _estado_inicial(id: String, variante: Variant, archivo: Dictionary) -> Variant:
+	if variante == null:
+		return null
 	var del_archivo: Variant = null
 	for criatura in (archivo["tribu"] as Array):
 		if criatura["id"] == id:
 			del_archivo = criatura["estado"]
-	return variante.get(_RUTA_ESTADO_TRIBU % [id], del_archivo)
+	return (variante as Dictionary).get(_RUTA_ESTADO_TRIBU % [id], del_archivo)
 
 
 # El efecto del rasgo de la ficha en especies/, o "" si no tiene rasgo.

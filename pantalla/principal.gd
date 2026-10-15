@@ -8,6 +8,8 @@
 # T31: el selector abre el panel de parametros del escenario, y Jugar juega la
 # variante. Las variantes viven en memoria (una por escenario) y la recarga las
 # rearma sobre los datos nuevos.
+# T33 (D-015): el campo "Jugador" (junto al selector) y la variante del panel van
+# a la vista para la ficha de playtest; el panel recibe las semillas de playtest.
 class_name Principal
 extends Control
 
@@ -40,6 +42,10 @@ var _variantes: Dictionary = {}
 @onready var _pantalla_error: Control = $PantallaError
 @onready var _texto_errores: Label = $PantallaError/TextoErrores
 @onready var _selector: VBoxContainer = $SelectorEscenario
+# T33 (D-015): quien juega, para la ficha de playtest. Junto al selector y fuera
+# de SelectorEscenario (que solo tiene los botones). En memoria.
+@onready var _campo_jugador: HBoxContainer = $CampoJugador
+@onready var _jugador: LineEdit = $CampoJugador/Jugador
 @onready var _panel: PanelParametros = $PanelParametros
 @onready var _contenedor_vista: Node = $ContenedorVista
 
@@ -91,6 +97,16 @@ func panel() -> PanelParametros:
 	return _panel
 
 
+# T33: lo escrito en "Jugador", o null si esta vacio.
+func jugador() -> Variant:
+	var nombre: String = _jugador.text.strip_edges()
+	return null if nombre.is_empty() else nombre
+
+
+func campo_jugador() -> LineEdit:
+	return _jugador
+
+
 # T31: la variante del escenario (la ultima que se edito, o una copia del
 # archivo la primera vez).
 func variante(escenario_id: String) -> EdicionEscenario:
@@ -103,9 +119,9 @@ func variante(escenario_id: String) -> EdicionEscenario:
 # una recarga no pudo volver a aplicar.
 func abrir_panel(escenario_id: String, no_aplicados: Array[Dictionary] = []) -> PanelParametros:
 	_cerrar_vista()
-	_selector.visible = false
+	_ver_selector(false)
 	_escenario_actual = escenario_id
-	_panel.abrir(variante(escenario_id), no_aplicados)
+	_panel.abrir(variante(escenario_id), no_aplicados, _semillas_playtest())
 	_panel.visible = true
 	return _panel
 
@@ -113,20 +129,22 @@ func abrir_panel(escenario_id: String, no_aplicados: Array[Dictionary] = []) -> 
 # Juega la variante del escenario si se abrio su panel; si no, el archivo.
 func abrir_escenario(escenario_id: String) -> VistaCombate:
 	_cerrar_vista()
-	_selector.visible = false
+	_ver_selector(false)
 	_panel.visible = false
 	_escenario_actual = escenario_id
 	var escenario: Dictionary = _escenario(escenario_id)
 	var editado: bool = false
+	var cambios: Dictionary = {}
 	if _variantes.has(escenario_id):
 		var edicion: EdicionEscenario = _variantes[escenario_id]
 		escenario = edicion.escenario()
 		editado = edicion.difiere()
+		cambios = edicion.cambios()
 	_vista = _ESCENA_VISTA.instantiate()
 	_vista.vista_tablero = vista_tablero
 	_contenedor_vista.add_child(_vista)
 	_vista.volver.connect(_volver_al_selector)
-	_vista.empezar(escenario, _datos, _avisos, carpeta_registros, editado)
+	_vista.empezar(escenario, _datos, _avisos, carpeta_registros, editado, cambios, jugador())
 	return _vista
 
 
@@ -208,6 +226,16 @@ func _escenario(escenario_id: String) -> Dictionary:
 	return {}
 
 
+# T33: las semillas de playtest/alarmas.json (vacia si los datos no lo traen).
+func _semillas_playtest() -> Array:
+	return (_datos.get(AlarmasPlaytest.ARCHIVO, {}) as Dictionary).get("semillas", [])
+
+
+func _ver_selector(visible_ahora: bool) -> void:
+	_selector.visible = visible_ahora
+	_campo_jugador.visible = visible_ahora
+
+
 func _cerrar_vista() -> void:
 	if _vista == null:
 		return
@@ -232,7 +260,7 @@ func _vista_valida() -> bool:
 	printerr("[vista] ", error)
 	_texto_errores.text = error
 	_pantalla_error.visible = true
-	_selector.visible = false
+	_ver_selector(false)
 	_panel.visible = false
 	return false
 
@@ -246,7 +274,7 @@ func _mostrar_errores() -> void:
 		printerr("[datos] ", linea)
 	_texto_errores.text = "\n".join(lineas)
 	_pantalla_error.visible = true
-	_selector.visible = false
+	_ver_selector(false)
 	_panel.visible = false
 
 
@@ -274,4 +302,4 @@ func _mostrar_selector() -> void:
 		boton.text = escenario_id
 		boton.pressed.connect(abrir_panel.bind(escenario_id, [] as Array[Dictionary]))
 		_selector.add_child(boton)
-	_selector.visible = true
+	_ver_selector(true)

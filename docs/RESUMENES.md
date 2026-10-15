@@ -3234,3 +3234,57 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   - Campo "Jugador" en el selector y "Semilla de playtest 1 a 10" en el panel.
   - `herramientas/informe_playtest.gd` con su ayudante: JSON con `grupos`, `comparaciones`, `informativas` (`toggle_afines`) y `avisos`, CSV de una fila por combate y resumen en la consola.
   - El comando en `CLAUDE.md`. La entrada de la sesión 3 resume la tarea entera, con la prueba manual.
+
+## T33 · sesión 3 · 14/10/2026
+- **Rama:** tarea/T33-alarmas
+- **Estado:** TERMINADA (pendiente de PR). Esta entrada resume la tarea entera (sesiones 1 a 3) y es la descripción del PR.
+- **Hecho (tarea entera):**
+  - **Sesión 1:** A-5 (el núcleo **sí usa** `maestro.hambre: null`; no se tocó el esquema). Esquema `alarmas` y `datos/playtest/alarmas.json` (10 partidas por grupo, 3 jugadores, 10 semillas de playtest). Esquema `playtest` (la ficha). `HuellaDatos` excluye `playtest/`. Chequeo cruzado del `Cargador` (`_chequear_alarmas`). `AlarmasPlaytest` (`nucleo/playtest/`): agrupación por escenario + variante sin la semilla, jugadores distintos, semillas fuera de la lista y siete cálculos (A a D).
+  - **Sesión 2:** nueve cálculos más (E a H, "todos", "C y E"), las comparaciones entre escenarios (`victorias_diferencia`) y la informativa `toggle_afines`; 20 alarmas en `alarmas.json`.
+  - **Sesión 3:**
+    - `FichaPlaytest` (`nucleo/playtest/ficha_playtest.gd`, estática): `armar` (variante = cambios del panel **sin la semilla**; `indice_semilla` desde 1 o `null`; jugador vacío → `null`), `indice` y `desconocida(resultado, semillas)` para un resultado sin ficha (variante y jugador `null`).
+    - `AlarmasPlaytest` acepta la variante desconocida (`null`): es su propio grupo, nunca el "sin cambios", y su estado inicial es desconocido.
+    - `GuardadoCombate.guardar(..., ficha)` escribe `<nombre>_playtest.json` solo cuando escribe el resultado; `VistaCombate.empezar(..., variante, jugador)` arma la ficha al guardar. En G, después del destino, como la grabación. El resultado del núcleo no cambió.
+    - Selector: campo "Jugador" (`CampoJugador/Jugador`, pantalla de desarrollo, en memoria). Panel de T31: `SemillaPlaytest` ("playtest -", "1" a "10") junto al +1, que no cambió.
+    - `herramientas/informe_playtest.gd` y su ayudante `SalidaInformePlaytest` (`herramientas/salida_informe_playtest.gd`, se prueba sin lanzar Godot). Lee los `_resultado.json` y sus `_playtest.json` (validados contra sus esquemas) y escribe `informe_playtest.json` (`partidas`, `grupos`, `comparaciones`, `informativas` con `toggle_afines`, `avisos`) e `informe_playtest.csv`, más el resumen en la consola. Avisos propios: `sin_ficha`, `ficha_invalida` y `resultado_invalido` (este se saltea). Carpeta vacía o inexistente: no escribe y lo dice.
+    - Dentro del proyecto (`registros/`), la herramienta deja junto al CSV un `informe_playtest.csv.import` con `importer="keep"`: si no, el editor de Godot importa el CSV como archivo de traducciones y llena la carpeta de `.translation`. El CSV esperado del fixture lleva el mismo `.import`.
+    - Comando en `CLAUDE.md` (cmd y PowerShell).
+- **Archivos (tarea entera):**
+  - Creados:
+    - `datos/_esquemas/alarmas.schema.json`, `datos/_esquemas/playtest.schema.json` y `datos/playtest/alarmas.json`.
+    - `nucleo/playtest/alarmas_playtest.gd` y `nucleo/playtest/ficha_playtest.gd`.
+    - `herramientas/informe_playtest.gd` y `herramientas/salida_informe_playtest.gd`.
+    - `pruebas/playtest/` (`mesa_playtest.gd`, `test_agrupacion_playtest.gd`, `test_alarmas_a_d.gd`, `test_alarmas_e_h.gd`, `test_alarmas_todos.gd`, `test_ficha_playtest.gd`), `pruebas/datos/test_alarmas_datos.gd`, `pruebas/herramientas/test_informe_playtest.gd` y `pruebas/pantalla/test_vista_ficha_playtest.gd`.
+    - Fixtures: `pruebas/fixtures/playtest/alarmas.json`, `pruebas/fixtures/playtest/informe/` (cuatro resultados, tres fichas y un resultado roto), `pruebas/fixtures/playtest/informe_esperado.csv` (con su `.csv.import` "keep") y `pruebas/fixtures/cargador/alarmas_*/`.
+  - Modificados: `nucleo/datos/cargador.gd`, `nucleo/datos/huella_datos.gd`, `pantalla/combate/guardado_combate.gd`, `pantalla/combate/vista_combate.gd`, `pantalla/principal.gd`, `pantalla/principal.tscn`, `pantalla/parametros/panel_parametros.gd`; tests `pruebas/datos/test_cargador.gd`, `test_huella_datos.gd`, `test_esquemas.gd`, `pruebas/pantalla/test_guardado_combate.gd`, `test_principal_parametros.gd` y `pruebas/pantalla/parametros/test_panel_parametros.gd` (solo tests nuevos); `docs/PREGUNTAS.md` y `CLAUDE.md`.
+- **Tests:** sesión 3: 15 nuevos (tarea: 66 nuevos). Total 981, todos pasan (sí). Sin `SCRIPT ERROR` en la consola. Ningún test reescrito en toda la tarea.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. a 9. Sesiones 1 y 2 (ver sus entradas, con las tablas de cotejo de las 20 alarmas).
+  10. La ficha valida contra `playtest`, no lleva la semilla en la variante y se escribe junto al resultado, al terminar (`test_ficha_playtest`, `test_guardado_combate::test_t33_guarda_la_ficha_junto_al_resultado`). En G, recién después del destino (`test_vista_ficha_playtest`).
+  11. El selector pone la semilla de la lista (`test_panel_parametros::test_t33_semilla_de_playtest`) y el combate la usa: evento `inicio` y ficha con `indice_semilla` 1 y el jugador (`test_principal_parametros::test_t33_jugador_y_semilla_de_playtest`, `datos/` real).
+  12. Sobre la carpeta de fixtures, el CSV es igual a `informe_esperado.csv` y el JSON tiene los grupos de A (2 partidas, 2 jugadores, todo `insuficiente`, A con valor 100 y `n` 1), C desconocida y C con cambios; ningún `float` en el informe. El resultado sin ficha da `sin_ficha` y el roto `resultado_invalido`. Carpeta vacía o inexistente: no falla, no escribe y lo dice. Probado también por consola: sin `ERROR` del motor (el JSON roto se lee con `JSON.new().parse`).
+  13. Suite completa: 981 tests, 0 errores, 0 fallas. En la consola, solo lo que ya estaba (el depurador remoto del runner, los `push_error` esperados de `ReglasCombate` y el aviso de vista desconocida de T32).
+- **Columnas del CSV** (`SalidaInformePlaytest.COLUMNAS`, separador coma, comillas RFC 4180; `null` = celda vacía):
+  - `archivo` (nombre sin `_resultado.json`), `escenario`, `variante` (JSON compacto de los cambios sin la semilla; vacía sin cambios; `?` desconocida), `semilla`, `indice_semilla`, `jugador`, `desenlace`.
+  - Métrica 1: `rondas_totales`, `rondas_primer_ataque`, `rondas_de_pelea`. 2: `secundar_usos`. 3: `eslabones_cadenas`, `eslabones_suma`, `eslabones_maximo`.
+  - 4: `incidentes_{tribu,enemigas}_{distraida,golpe}`. 5: `encono_tribu`, `encono_enemigas`. 6: `cobardia_{tribu,enemigas}_{acobardada,resistida}`.
+  - 7: `sellados_intentos`, `sellados_logrados`. 8: `capturas_perdidas_huida`, `capturas_perdidas_cero`. 9: `caidas`. 10: `caidas_guardadas`. 11: `muertes`. 12: `rescatista` (id; vacía si el Maestro no cayó; `permadeath` si cayó sin rescatista). 13: `distancia_maestro_turnos`, `distancia_maestro_suma` (enteros, como la métrica).
+  - 14: `activas_erizarse`, `activas_cavar`, `activas_hacerse_junco` (usos sumados), `activas_surcos`, `activas_ocultos`, `activas_destapes_contacto`, `activas_bonos_cobrados`, `activas_bonos_perdidos`, `activas_cambios_modo` (cantidad), `activas_encierros` (turnos sumados).
+  - `destino_atacante` (la opción elegida; vacía si no hubo o fue `se_fue`).
+- **Supuestos técnicos (sesión 3):**
+  - Un resultado sin ficha (o con la ficha rota) forma el grupo "variante desconocida" de su escenario: nunca cuenta como "sin cambios" (comparaciones y toggle), su jugador no cuenta, y como no se sabe con qué estado empezó la tribu, no entra en el `n` de `muere_si_empezo_suelta` (en `activa_poco_usada` cuenta solo si la activa se usó o la criatura terminó fuera del pergamino).
+  - La herramienta toma una ruta relativa desde la raíz del proyecto (`registros` = `res://registros`).
+  - El CSV va con coma; si Excel en castellano no lo separa solo, se abre con "Datos > Desde texto/CSV".
+  - Las semillas de las fichas se resuelven contra `playtest/alarmas.json` al guardar; con datos sin ese archivo (fixtures de pantalla), `indice_semilla` queda `null`.
+- **Semillas de playtest:** 1101, 2203, 3307, 4409, 5501, 6607, 7703, 8809, 9901, 10007.
+- **Lecturas declaradas:** P-048, P-049, P-050, P-051 y P-052 (sesiones 1 y 2); ninguna nueva.
+- **Claves de texto nuevas sin texto:** ninguna (el campo "Jugador" y el selector de semilla son de pantallas de desarrollo).
+- **Preguntas:** nuevas en la tarea P-048 a P-051 (SISTEMAS, no bloquean) y P-052 (ARQUITECTO, no bloquea); en esta sesión ninguna. Cerradas: ninguna.
+- **Prueba manual (para el usuario):**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → escribir un nombre en "Jugador" (arriba, a la derecha de los escenarios) → `a_dia_1` → en el panel, en la fila de `semilla`, elegir "1" en el desplegable "playtest -" → Jugar hasta el final. Repetir con la semilla 2.
+  3. Volver, cambiar el nombre del jugador y jugar 2 partidas de `c_tasajero` con las semillas 1 y 2.
+  4. Correr la herramienta: PowerShell `& $env:GODOT_BIN --headless --path . --script res://herramientas/informe_playtest.gd -- registros` (o en `cmd`: `"%GODOT_BIN%" --headless --path . --script res://herramientas/informe_playtest.gd`). Abrir `registros/informe_playtest.json` y `.csv`: los grupos de A y C, con 2 partidas y 2 jugadores, todo `insuficiente`, con sus valores. Las partidas viejas de `registros/` (sin ficha) aparecen como "variante desconocida" y con el aviso `sin_ficha`.
+  5. Abrir el `.csv` en una planilla: una fila por combate.
+  6. Cambiar un umbral en `datos/playtest/alarmas.json` y volver a correr la herramienta: el umbral cambia en el informe, y las grabaciones se siguen reproduciendo sin aviso de huella.
+- **Para la próxima sesión:** nada: tarea terminada. Queda el PR a `develop` y, después, que Sistemas conteste P-048 a P-052.
