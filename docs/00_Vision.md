@@ -1,7 +1,7 @@
 # 00 — VISIÓN DEL JUEGO
 
-> **Estado:** v1.6 — **MVP definido, rasgos en revisión** · **Dueño:** Director Creativo · **Última actualización:** 13/10/2026
-> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2. La v1.3 cambia la geometría de las relaciones (vecinas en 8) y el tablero de referencia (12 × 12): ver Escala 3. La v1.4 agrega **los Legados y sus Sombras** a Ideas en espera (10). La v1.5 define **qué da cada uno de los 18 legados** (verbo y perfil de atributos), el boceto de estadísticas del juego completo y las reglas nuevas de generación e inversión (10). La v1.6 agrega **Más allá de Valdelumbre** a Ideas en espera (10), enmienda la sección 8 (coleccionar es el camino del Soplo) y reordena las Capas 4 y 5. Ni la v1.4, ni la v1.5, ni la v1.6 tocan el MVP ni la 0a.
+> **Estado:** v1.7 — **0a terminada, ajustes antes de la 0b** · **Dueño:** Director Creativo · **Última actualización:** 15/10/2026
+> **Para Sistemas:** la v1.1 reescribe los rasgos de combate (6.2). Los números de cada rasgo están pendientes en `Sistema.md` 11.2; mientras tanto, rige la dirección de diseño de 6.2. La v1.3 cambia la geometría de las relaciones (vecinas en 8) y el tablero de referencia (12 × 12): ver Escala 3. La v1.4 agrega **los Legados y sus Sombras** a Ideas en espera (10). La v1.5 define **qué da cada uno de los 18 legados** (verbo y perfil de atributos), el boceto de estadísticas del juego completo y las reglas nuevas de generación e inversión (10). La v1.6 agrega **Más allá de Valdelumbre** a Ideas en espera (10), enmienda la sección 8 (coleccionar es el camino del Soplo) y reordena las Capas 4 y 5. Ni la v1.4, ni la v1.5, ni la v1.6 tocan el MVP ni la 0a. **La v1.7 sí toca el MVP:** agrega un tramo de **ajustes de 0a** antes de la 0b (zona de amenaza de toda enemiga, acciones automáticas visibles y **Remiendo por distancia**, 6.7) y los **obstáculos fijos** de la 0b, como excepción registrada al alcance congelado (9). También suma a Ideas en espera los **estados de combate**, los **ataques a distancia** y los **hechizos de área** (10).
 > Este documento es la fuente de verdad. Ningún agente puede contradecirlo sin proponer un cambio y registrarlo en `Decisiones.md`.
 > **Documentos subordinados:** `Sistema.md` (reglas y números) · `Mundo.md` (mundo, regiones y criaturas) · `Arquitectura.md` (decisiones técnicas y plan de construcción). Este documento define **qué** y **por qué**; los números viven en `Sistema.md`, y el detalle del mundo, en `Mundo.md`.
 > **`Decisiones.md` es el historial, no la fuente de verdad:** registra cómo se llegó a cada regla. Queda fuera de `docs/` (Claude Code no lo lee) y es opcional en el conocimiento del proyecto.
@@ -76,6 +76,8 @@ El mundo es luminoso y aventurero, pero la supervivencia no perdona. El hambre p
 - **Tablero de referencia: 12 × 12** (`DECIDIDO` 07/10/2026). Un escenario puede ser más chico si lo pide (combates de nodo, peleas cortas), nunca más grande en el MVP.
   - **El primer contacto llega en la ronda 2.** El espacio es para maniobrar (flanquear, usar el surco, separar rivales con la Lanzadera), no para caminar: cada ronda suma hambre de combate. Los despliegues los define Sistemas.
   - El tablero grande necesita **cámara móvil** (desplazar y acercar).
+- **Obstáculos fijos** (`DECIDIDO` 15/10/2026, para la 0b): cada escenario puede traer casillas **intransitables para todos**, sin ningún otro efecto (sin altura, sin tipos de terreno, sin destruirse). Le dan a la cuadrícula ortogonal sus muros y pasillos, y a cada destino del valle su forma de pelear. Es una excepción registrada al alcance congelado (9). Si bloquean líneas de alcance lo define Sistemas.
+- **Zona de amenaza visible** (`DECIDIDO` 15/10/2026): al pasar el mouse sobre **cualquier enemiga**, se ve hasta dónde se mueve y a qué casillas puede golpear. Lo que puede pasar se muestra antes de mover (sección 8).
 - El orden de actuación lo define la **iniciativa** de cada unidad, y los bandos **se intercalan** en la cola. Una unidad puede **Secundar**: actuar justo después de un aliado elegido, a cambio de dejar que los enemigos intermedios actúen antes. Sin enemigas intermedias, Secundar no tendría decisión.
 - El Maestro y sus criaturas pelean juntos en el tablero.
 - Los turnos de combate **suman hambre**: los combates largos tienen costo.
@@ -138,7 +140,7 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
 - Es **omnívoro**: puede comer cualquier tipo de comida, incluida una criatura.
 - Necesita una **dieta variada**: si come el mismo tipo de comida varios días seguidos, cae **Enfermo** (ver 6.5). La interfaz avisa antes de que pase.
 
-**A futuro (Ideas en espera, 10):** el Maestro será **avatar de los Legados**: no está atado a ninguno y manifiesta su naturaleza por el equipo, con una afinidad que crece con su tribu por **la rueda del árbol**.
+**A futuro (Ideas en espera, 10):** el Maestro será **avatar de los Legados**: no está atado a ninguno y manifiesta su naturaleza por el equipo, con una afinidad que crece con su tribu por **la rueda del árbol**. Su **arma** puede ser de distancia (arco, armas arrojadizas o magia según el legado), siempre con un trueque (ver Ataques a distancia, 10).
 
 ### 6.2 Criaturas
 - Tienen habilidades **activas y pasivas**, que funcionan **dentro y fuera del combate**.
@@ -166,6 +168,7 @@ Las reglas y los números de cada sistema están en `Sistema.md`.
   - **El Tasajero desgasta, no ejecuta.** Pegarle a dos presas es lo propio de un cazador. Del lado del jugador, la pregunta es *dónde no me paro*: formar apretado suma afinidad, pero le da al Tasajero dos presas en un turno. Las aliadas en diagonal entre sí son vecinas (suman afinidad) y a la vez dejan esquinas donde el Tasajero alcanza a dos (Escala 3).
   - **Su IA** la propone Sistemas, con estos criterios de visión: prefiere repartir los golpes antes que gastarlos en una sola presa; es predecible y sin azar; no tumba a una presa entera de un solo turno sin una decisión previa del jugador. Cuándo cambia de modo también se ve antes.
 - **Todo rasgo se ve:** nombre y explicación al pasar el mouse sobre cualquier unidad, propia o enemiga, y un aviso cada vez que el rasgo actúa. Un rasgo que no se ve no existe para el jugador (hallazgo del playtest 0a.1).
+- **Toda acción automática se anuncia sobre la ficha** (`DECIDIDO` 15/10/2026): cuando una criatura actúa por su cuenta (Encono, cobardía, incidente, distracción), el aviso aparece **sobre su ficha, en el momento**, sea propia o enemiga. No alcanza con que figure en el registro de sucesos: lo que la tribu hace sola tiene que leerse en el tablero (Pilar 3; hallazgo del cierre de la 0a).
 - Cada criatura tiene una comida **favorita**, comidas que **acepta** y comidas que **rechaza** (ver 6.5).
 - Cada criatura está en uno de dos estados: **guardada** en su pergamino o **suelta** (ver 6.7).
 - **La compañera inicial:** el Maestro **no arranca solo**. Empieza con **una criatura fija**, **suelta**, que **ocupa uno de los pergaminos iniciales** y empieza **Neutral**: le faltan pocos días bien alimentada para poder rescatarlo.
@@ -208,7 +211,7 @@ Reglas comunes:
 - **Cobardía:** las criaturas **de trabajo**, ante una rival enemiga, no se enconan: se acobardan y quedan debilitadas. Su obediencia puede hacerlas resistir: **la regla de oro también se ve en el coraje**. Las **afines vecinas** también la sostienen (regla a testear en el MVP).
 - **Salvajes:** siguen las mismas reglas **de relación** (afinidad, incidentes, Encono y cobardía), sin obediencia que las contenga. Atraer a dos rivales salvajes es una táctica legítima.
   - **Las salvajes no encadenan combos:** se sostienen entre ellas, pero no se coordinan. La cadena es algo que solo da el vínculo con el Maestro (Pilar 3).
-- Toda probabilidad de incidente o Encono se **muestra antes** de mover.
+- Toda probabilidad de incidente o Encono se **muestra antes** de mover, y todo incidente, Encono o cobardía que ocurre se **anuncia sobre la ficha** de la criatura (6.2).
 
 Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni participan de relaciones**. El vínculo solo se construye con criaturas sueltas.
 
@@ -244,7 +247,7 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 - La probabilidad de enfermarse se **muestra antes** de elegir.
 - Afecta tanto a las criaturas como al Maestro.
 - No contradice "el hambre como único recurso": el estado es una **consecuencia** del hambre y de comer mal, no un recurso nuevo.
-- Los tres estados con efectos distintos entran en la Capa 1.
+- Los tres estados con efectos distintos entran en la Capa 1, **en la misma familia** que los estados de combate que siguen fuera de la pelea (Ideas en espera, 10).
 
 ### 6.6 Muerte y rescate
 
@@ -277,6 +280,11 @@ Las criaturas **guardadas** en pergamino **no ganan ni pierden lealtad, ni parti
 - En combate, el maná se reparte entre tres usos: **hechizos**, **sellar** criaturas salvajes e **invocar** las propias.
 - **Hechizos de la clase del MVP:** **Martillazo** (daño a distancia), **Lanzadera** (empuja o atrae una casilla: separa rivales aliadas y junta rivales salvajes) y **Remiendo** (cura; no levanta a las caídas). Solo se usan en combate.
   - ⚠️ **Vigilar:** que el Martillazo no esconda al Maestro en la retaguardia (sección 8). Si pasa, se le recorta el alcance.
+- **Remiendo por distancia** (`DECIDIDO` 15/10/2026; ajustes de 0a): el Remiendo tiene un **alcance base corto**, y **cada casilla extra se paga con maná**. Reemplaza al alcance fijo, que obligaba al Maestro a caminar demasiado en el tablero de 12 × 12.
+  - **Nunca alcanza todo el tablero gratis:** sigue siendo la curación de urgencia (12/10/2026), y un Maestro que cura desde la otra punta es un espectador (sección 8).
+  - **El freno es el tope de maná:** curar de lejos se puede, pero compite con sellar e invocar (Pilar 4). Los números los define Sistemas.
+  - **El Martillazo y la Lanzadera no cambian por ahora.** Si la regla funciona en el Remiendo, se evalúa para los otros dos.
+  - ⚠️ **Vigilar:** la distancia del Maestro a la primera línea se mide en los playtests (métrica nueva). Si el Maestro se planta atrás, se recorta el alcance extra.
 - **La tensión central:** una criatura guardada está a salvo pero sacarla cuesta maná; una criatura suelta está disponible gratis pero come, sufre el clima y no puede crear vínculo si no está afuera.
 
 **Pergaminos:**
@@ -346,12 +354,13 @@ Fuera del Molino, cada noche el Maestro arma un campamento. Entra completo en el
 Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 
 **Alcance congelado** (01/10/2026): algo nuevo entra al MVP solo si **tapa un hueco que impide jugar** o **reemplaza algo que sale**. Todo lo demás va a Ideas en espera.
+- **Excepciones registradas:** los **obstáculos fijos** de la 0b (15/10/2026, aprobada por el usuario; Escala 3).
 
 **Maestro**
 - **1** clase de Maestro, el **Menestral** (con 1 rama), con la balanza inclinada hacia el **Barro** al empezar.
 - Magia con maná y sus **3 atributos**: la balanza Barro ↔ Soplo, Poder mágico y Regeneración de maná.
 - Progresión por nivel: 1 punto a Poder o Regeneración, más 1 paso opcional de balanza.
-- 3 hechizos: Martillazo, Lanzadera y Remiendo.
+- 3 hechizos: Martillazo, Lanzadera y Remiendo (este último, con alcance extra pagado con maná; 6.7).
 - Experiencia mixta, con peso en los hitos de la tribu.
 - Dieta variada del Maestro.
 - Arranca con **1 compañera inicial fija**, suelta, Neutral y ocupando un pergamino.
@@ -365,6 +374,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - Lealtad simple (valor numérico con cuatro estados), obediencia y **1** tipo de relación (se llevan bien / se llevan mal).
 - Abandono durante la recuperación, abandono nocturno y ataque nocturno.
 - **Sin Legados ni Sombras** (Ideas en espera, 10), y sin las estadísticas del juego completo: el MVP usa sus cinco estadísticas (`Sistema.md` 11.1).
+- **Sin estados de combate** ni ataques a distancia nuevos (Ideas en espera, 10). La distancia del MVP es la Alabarda de la Ocarra y los hechizos.
 
 **Mundo**
 - **1** región: **Valdelumbre**, con el campamento (el Molino Callado) y **3** destinos de riesgo creciente: los Huertos de Almiar (bajo), el Vado de los Juncos (medio) y el Robledal Hondo (alto).
@@ -373,7 +383,8 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 
 **Supervivencia y combate**
 - Combate táctico básico en tablero de **hasta 12 × 12**, de **cuadrícula ortogonal** con **relaciones entre vecinas en 8**, con cámara móvil, iniciativa, Secundar, combos, afinidad, incidentes, Encono y cobardía.
-- **Sin terreno**, salvo una excepción: **el surco del Surcón**, el único terreno del MVP, que lo crea una criatura en combate. No abre un sistema de terreno.
+- **Zona de amenaza** de toda enemiga al pasar el mouse, y **acciones automáticas** anunciadas sobre la ficha (6.2).
+- **Sin terreno**, salvo dos excepciones: **el surco del Surcón**, el único terreno que crea una criatura en combate, y los **obstáculos fijos** de cada escenario de la 0b, intransitables y sin otro efecto (Escala 3). Ninguna de las dos abre un sistema de terreno.
 - Hambre como único recurso de supervivencia, con **7 tipos de comida** y preferencias por criatura.
 - **1** estado negativo: **Enfermo**, acumulable, con cura por descanso o viaje.
 - Huida, caídas y guardar a una caída.
@@ -389,7 +400,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 | Capa | Contenido |
 |---|---|
 | 0 — MVP | Todo lo de la sección 9 |
-| 1 | Crafteo y mejoras del campamento (reparar el Molino: destapar la acequia) · Estados negativos con efectos distintos (Empacho, Tripa negra, Fiebre del hongo) |
+| 1 | Crafteo y mejoras del campamento (reparar el Molino: destapar la acequia) · Estados negativos con efectos distintos (Empacho, Tripa negra, Fiebre del hongo), **en una sola familia con los estados de combate que siguen fuera de la pelea** (ver Estados de combate, Ideas en espera) |
 | 2 | Clima, estaciones, ciclo día/noche |
 | 3 | Más clases y ramas del Maestro |
 | 4 | **Economía, comercio, NPCs** · **Más allá de Valdelumbre** (salidas, ciudades, lo hondo, trabajos y misiones; ver Ideas en espera) *(antes Capa 5; reordenado el 13/10/2026)* |
@@ -421,9 +432,44 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
   2. **Vecinas en 8 para las relaciones**, antes de T18 (incidentes), para que T18 y T19 (Encono y cobardía) nazcan con la regla nueva.
   3. **Tablero de 12 × 12 con cámara móvil** y escenarios A a H reubicados, antes de los playtests de la 0a.2, porque las alarmas de duración (`Sistema.md` 11.9) se miden sobre el tablero real. Sistemas los recalibra en una sola pasada.
   - Son reemplazos de reglas existentes, no agregados: el alcance sigue congelado.
+- **La 0a está terminada** (mediados de octubre de 2026). **Hallazgos del cierre** (15/10/2026):
+  - **No se ve qué puede hacer una enemiga** al pasar el mouse sobre ella. Respuesta: zona de amenaza de toda enemiga (Escala 3).
+  - **No se leen las acciones automáticas** de las criaturas (Encono, cobardía, incidentes, distracción), propias ni enemigas. Respuesta: se anuncian sobre la ficha, en el momento (6.2).
+  - **El Remiendo obliga a caminar demasiado** en el tablero de 12 × 12. Respuesta: alcance base corto y casillas extra pagadas con maná (6.7). Se descartó que alcance todo el tablero (sección 8).
+- **Ajustes de 0a** `DECIDIDO` (15/10/2026): antes de empezar la 0b, un tramo corto con **la zona de amenaza, las acciones automáticas visibles y el Remiendo por distancia**. No suma sistemas: hace visible lo que ya existe y reemplaza el alcance fijo del Remiendo. El Arquitecto lo convierte en tareas.
+  - Suma una **métrica de playtest**: la distancia del Maestro a la primera línea (vigilancia de la sección 8). La define Sistemas.
+- **Obstáculos fijos en la 0b** `DECIDIDO` (15/10/2026): entran con los escenarios de cada destino (Escala 3). Excepción registrada al alcance congelado (9).
 
 **Ideas en espera** (aprobadas en espíritu, sin capa asignada):
 
+- **Estados de combate** *(aprobados en espíritu el 15/10/2026; juego completo)*. Son estados **propios del juego**: los nombres son palabras comunes del castellano, y los efectos son originales.
+  - **Acumulaciones por estado:** cada estado tiene un **nivel** (x1, x2, x3…), y cada acumulación nueva lo agrava. Son **independientes de la carga del legado**: un mismo ataque puede dejar carga y varios estados a la vez (por ejemplo, la picadura de una araña deja 3 de carga de Drenaje, x2 de envenenado y x1 de paralizado).
+  - **Cada especie (o habilidad) tiene su paquete de estados** al atacar: lo que deja es parte de su identidad (Pilar 2).
+  - **Se aplican seguro:** el ataque siempre deja sus acumulaciones. El azar vive en el efecto, no en si el estado entra.
+  - **Cada estado tiene su efecto propio, que crece con el nivel:**
+
+    | Tipo de efecto | Ejemplos *(provisorios)* |
+    |---|---|
+    | % de perder el turno | Aturdido, paralizado |
+    | Vida restada por turno | Envenenado, hemorragia |
+    | % de no poder moverse | Enraizado, agarrado, amarrado |
+    | Estadísticas restadas (sobre todo Agilidad) | Adormecido |
+    | Otros, a definir | Confundido, parasitado, derribado |
+
+  - **Cada estado baja a su manera:** algunos se van solos con los turnos; otros solo se curan con cura o descanso, y esos **siguen fuera del combate**. Los que siguen fuera forman **una sola familia** con los estados de la Capa 1 (Empacho, Tripa negra, Fiebre del hongo), con las mismas reglas de cura.
+  - **Criterios de visión:**
+    - **Un estado entra solo si genera una decisión que otro no genera** (misma regla que las estadísticas, `Sistema.md` 11.1). El realismo se cuida en los nombres y en qué criatura aplica cada estado, no en tener muchos.
+    - **Todo se ve:** cada estado es un ícono con su nivel sobre la ficha, y todo porcentaje y toda vida por turno se muestran **antes de pegar** (sección 8).
+    - **Ningún estado anula al Maestro:** su % de perder el turno y de no poder moverse **nunca llega al 100 %**, por más niveles que acumule (Pilar 1).
+    - **No multiplican el daño**, como los ciclos de la rueda.
+    - **Enfurecido no duplica el Encono:** o es la misma cosa, o hace algo claramente distinto.
+  - **Espera porque** es un sistema grande (efectos por nivel, curas, íconos, IA que los tenga en cuenta) y depende de las estadísticas del juego completo (Adormecido necesita Agilidad). Entra con los Legados o después.
+- **Ataques a distancia** *(aprobados en espíritu el 15/10/2026; juego completo)*.
+  - **El Maestro:** armas arrojadizas, arco o magia a distancia **según el legado** de su arma (el Maestro avatar de los Legados). Depende del equipo del Maestro y del crafteo (Capa 1).
+  - **Criaturas que disparan proyectiles:** especies nuevas, con el bestiario que crece después del MVP.
+  - **Criterio de visión:** pelear de lejos **siempre tiene un trueque**. Un Maestro con arco paga algo que uno de cuerpo a cuerpo no paga, para que no se esconda atrás (sección 8). La criatura que dispara es frágil o lenta (Pilar 2).
+  - Los obstáculos fijos pueden dar **cobertura** contra los proyectiles; si bloquean la línea de tiro se decide cuando existan.
+- **Hechizos de área** *(15/10/2026)*: hechizos sobre varios objetivos, que cuestan más maná cuantos más objetivos alcanzan. Las áreas son del verbo de **Sonido** (Legados) y de las **ramas del Maestro** (Capa 3). Toda área se ve antes de confirmar (sección 8).
 - **Más allá de Valdelumbre** *(aprobado en espíritu el 13/10/2026; Capa 4)*. Es el mundo del juego completo, fijo y diseñado a mano.
   - **Cinco salidas** desde el valle:
 
@@ -486,6 +532,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
     - **Regla que se desprende:** la Sombra de un legado anula a quien lo genera (+9 +8 = −1). La Sombra no ataca al legado: ataca su raíz.
   - **Criaturas:** cada una está **atada a dos legados**, un **principal** y un **secundario**, que definen cómo recibe la carga. Su ataque normal y sus habilidades ponen puntos de uno de ellos, según convenga y según la criatura (por ejemplo, el Zancajunco, Ilusión y Crecimiento: con Hacerse junco carga Ilusión; con el ataque normal, Crecimiento).
     - **Lo que distingue a una criatura** de las demás son tres cosas: sus **atributos base**, sus **activas** y su **combinación de legados**.
+    - **Además de la carga**, un ataque puede dejar **estados de combate** (ver arriba): son dos cosas distintas que conviven en el mismo golpe.
   - **Qué da cada legado** (12/10/2026):
     - **Un perfil de atributos:** **dos estadísticas altas y dos bajas**. El perfil inclina la ficha de la especie; cuánto pesa frente a la ficha, y cómo se reparte entre el legado principal y el secundario, lo define Sistemas.
       - **Cada par de la rueda es un eje en espejo:** las altas de uno son las bajas del otro. Lleno ↔ Vacío es la excepción: los dos son lentos, porque su espejo es de dónde sale el poder (el cuerpo o el espíritu).
@@ -553,7 +600,7 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
     - La rescatista, que **siempre es una leal**, se lleva al Maestro, y las demás criaturas de pie se van con ellos. **El combate sigue solo con las de Desapego** contra lo que quede del enemigo.
     - **Si ganan, las caídas de la tribu se salvan**, porque no queda nadie que las remate. Si caen ellas también, las caídas mueren como siempre.
     - **Desapego no rescata ni salva al Maestro:** la regla de oro no cambia. Desapego no pelea por el Maestro; pelea porque no lo necesita. La que no se ata a nadie salva a las que sí se ataban.
-  - **El Maestro, avatar de los legados:** no está atado a ninguno; manifiesta la naturaleza de cualquiera por su equipo y su magia. El **arma** define su legado de ataque y la **armadura**, sus dos legados defensivos. Elige el equipo **antes del combate**, y cambiar de arma en combate le gasta el turno: no puede ser el anulador universal. Si manifiesta un legado que no le gusta a una criatura de su tribu, ella lo siente.
+  - **El Maestro, avatar de los legados:** no está atado a ninguno; manifiesta la naturaleza de cualquiera por su equipo y su magia. El **arma** define su legado de ataque (y puede ser de distancia: ver Ataques a distancia) y la **armadura**, sus dos legados defensivos. Elige el equipo **antes del combate**, y cambiar de arma en combate le gasta el turno: no puede ser el anulador universal. Si manifiesta un legado que no le gusta a una criatura de su tribu, ella lo siente.
   - **La rueda del árbol:** la construcción del Maestro. Su afinidad con los legados nace de su clase y **crece con la tribu que elige y por la rueda**: se expande a los legados vecinos, y acercarse a las Sombras de sus legados cuesta más. **Especializarse limita; nunca es gratis.** No es un árbol aparte: sale de la rueda, la clase y la tribu (decisión del 01/10: clases distintas sin sistemas nuevos).
   - **Criterios de visión:**
     - La explosión es **un evento, no ruido**: una o dos por combate en las unidades clave. La generación no puede volverse la jugada de cada ronda: por eso cuesta fatiga.
@@ -601,6 +648,15 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 
 - [ ] Nombre del juego y del mundo.
 - [ ] ¿Cómo termina una partida del juego completo? Por ahora es exploración abierta, y las misiones principales llegan con la Capa 5. **Criterio:** cualquier final lee a la tribu (regla de oro).
+- [ ] Ajustes de 0a: ¿alcanza `Combate.zona_amenaza` para mostrar la zona de cualquier enemiga? ¿El problema de las acciones automáticas es de textos que faltan o de cómo se muestran? Tareas del tramo (Arquitecto)
+- [ ] Remiendo por distancia: alcance base y costo por casilla extra (Sistemas)
+- [ ] Métrica nueva: cómo se mide la distancia del Maestro a la primera línea y su umbral de alarma (Sistemas)
+- [ ] Textos de las acciones automáticas sobre la ficha, y los que faltan desde la T19 (marcas de enconada y acobardada, contador de Encono, avisos de terminar) (Worldbuilder)
+- [ ] Obstáculos fijos: ¿bloquean la línea de la Alabarda y de la Lanzadera? (Sistemas); qué obstáculos tiene cada destino del valle (Worldbuilder); cómo se agregan al esquema de escenario (Arquitecto)
+- [ ] Estados de combate: curva de cada estado por nivel, tope de niveles, ritmo con el que baja cada uno, techo del % del Maestro y cómo se unen con los estados de la Capa 1 (Sistemas, al darle capa)
+- [ ] Estados de combate: qué estados se curan solos y cuáles necesitan cura o descanso (y por qué); qué criaturas aplican cada uno; de dónde sale el envenenado; ¿enfurecido es otra cosa que el Encono? (Worldbuilder, al darle capa)
+- [ ] Ataques a distancia: qué paga un Maestro con arco o arrojadizas frente a uno de cuerpo a cuerpo; qué pagan las criaturas que disparan; ¿los obstáculos dan cobertura? (Sistemas, al darle capa)
+- [ ] ¿En qué capa entran los estados de combate y los ataques a distancia? (con los Legados o después)
 - [ ] Más allá de Valdelumbre: geografía, nombres y rastros de las 5 salidas y de la primera ciudad; señales de la boca y de lo hondo, por especie; quiénes son los Maestros renegados; qué criaturas viven del basural; cómo se lee en el lore que vender rompe el hilo, y su línea del epílogo (Worldbuilder)
 - [ ] Más allá de Valdelumbre: costo del corral por día frente a lo que rinden los trabajos; espacio de mochila de cada aparejo; lealtad que cuesta una venta frente a comerse una criatura; regla de los individuos marcados que valen "muertos"; días del Molino a la primera ciudad (Sistemas)
 - [ ] ¿Hacia dónde arrastra la rescatista al Maestro que cae en lo hondo o en la ciudad? (Sistemas)
@@ -630,6 +686,12 @@ Objetivo: comprobar que el núcleo es divertido antes de agregar capas.
 - [ ] Legados: cómo sigue el combate después de la caída del Maestro con las de Desapego (cómo se gana, qué pasa si caen) (Sistemas; Arquitecto al darle capa)
 - [ ] Legados: ¿cómo se invierte el Maestro, que no está atado a ningún legado? (al darle capa)
 - [ ] Legados: ¿qué pasa con una salvaje extenuada? ¿Huye o es más fácil de sellar? (compite con "debilitar y sellar", 6.3; Sistemas)
+- [x] ~~¿El Remiendo alcanza todo el tablero?~~ → No: alcance base corto y casillas extra pagadas con maná (6.7).
+- [x] ~~¿Los hechizos cuestan más cuanto más lejos llegan?~~ → Solo el Remiendo, por ahora (6.7). Los hechizos de varios objetivos quedan en Ideas en espera (10).
+- [x] ~~¿Entran intransitables al tablero?~~ → Sí, como obstáculos fijos por escenario en la 0b, sin otro efecto; excepción registrada al alcance congelado (Escala 3, 9).
+- [x] ~~¿Los estados de combate chocan con la sección 8?~~ → No: son propios; nombres comunes y efectos originales. Quedan para el juego completo (10).
+- [x] ~~¿Cómo funcionan los estados de combate?~~ → Acumulaciones por estado, independientes de la carga, aplicadas seguro, con efecto propio que crece por nivel; algunos siguen fuera del combate (10).
+- [x] ~~¿Qué son los ataques a distancia?~~ → El Maestro con arco, arrojadizas o magia según el legado, y criaturas que disparan proyectiles; juego completo, siempre con trueque (10).
 - [x] ~~Orden del roadmap para salir del valle~~ → Economía, comercio y NPCs pasan a la Capa 4; facciones, reinos e historia, a la Capa 5 (10).
 - [x] ~~¿Cómo se venden y compran criaturas?~~ → Vender rompe el vínculo: el pergamino arde, la tribu lo ve y el epílogo lo cuenta; el comprador sella con un pergamino propio (10).
 - [x] ~~¿El juego es de colección?~~ → No por defecto: coleccionar es el camino del Soplo y se paga con la regla de oro (8).
@@ -814,6 +876,20 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | 13/10/2026 | Primera porción post-MVP: aguas abajo, la primera ciudad, el corral, los encargos, una misión de captura por rumores y la boca | Probar la ciudad, la expedición y lo hondo antes de multiplicar el contenido |
 | 13/10/2026 | El juego completo es de exploración abierta, sin final definido; cualquier final futuro lee a la tribu | El epílogo es la regla de oro vista de frente |
 | 13/10/2026 | Capas reordenadas: economía, comercio y NPCs pasan a la Capa 4; facciones, reinos, historia y misiones principales, a la Capa 5 | Salir del valle necesita comercio antes que reinos |
+| 15/10/2026 | Toda enemiga muestra su zona de amenaza (movimiento + golpe) al pasar el mouse | Un rasgo que no se ve no existe (6.2); las apuestas se muestran antes (sección 8) |
+| 15/10/2026 | Toda acción automática de una criatura (Encono, cobardía, incidente, distracción) se anuncia sobre su ficha en el momento, no solo en el registro | Hallazgo del cierre de la 0a: las relaciones no se leían (Pilar 3) |
+| 15/10/2026 | El Remiendo no alcanza todo el tablero | Sección 8 (no hay entrenador espectador); curación de urgencia (12/10) |
+| 15/10/2026 | Remiendo: alcance base corto y cada casilla extra se paga con maná; Martillazo y Lanzadera sin cambios por ahora | Reemplaza el alcance fijo; el tope de maná es el freno; compite con sellar e invocar (Pilar 4) |
+| 15/10/2026 | Métrica nueva de playtest: distancia del Maestro a la primera línea | Vigilar que el Maestro no se esconda atrás (sección 8) |
+| 15/10/2026 | Hechizos sobre varios objetivos, a Ideas en espera | Las áreas son de Sonido y de las ramas del Maestro (Capa 3) |
+| 15/10/2026 | Obstáculos fijos por escenario, intransitables y sin otro efecto, en la 0b. Excepción al alcance congelado aprobada por el usuario | Los muros, los pasillos y la formación sostienen la cuadrícula ortogonal (Escala 3); identidad de cada destino; costo bajo (ya existe la casilla bloqueada del surco) |
+| 15/10/2026 | Estados de combate propios, aprobados en espíritu para el juego completo: acumulaciones por estado (x1, x2…), independientes de la carga del legado | Cada golpe deja algo y lo agrava (Pilares 2 y 4) |
+| 15/10/2026 | Los estados se aplican seguro; cada uno tiene un efecto propio que crece con el nivel (% de perder el turno, vida por turno, % de no moverse, estadísticas restadas) | Legibilidad; el azar vive en el efecto |
+| 15/10/2026 | Cada estado baja a su manera; algunos solo con cura o descanso, y siguen fuera del combate; forman una sola familia con los estados de la Capa 1 | La pelea llega al día (Pilar 4); un solo sistema |
+| 15/10/2026 | Un estado entra solo si genera una decisión propia; todo nivel y todo porcentaje se ven antes de pegar | Legibilidad táctica; sección 8 |
+| 15/10/2026 | El Maestro nunca llega al 100 % de perder el turno ni de no moverse | Pilar 1 |
+| 15/10/2026 | Ataques a distancia del Maestro (arco, arrojadizas o magia según el legado) y criaturas que disparan proyectiles, aprobados para el juego completo; pelear de lejos siempre tiene un trueque | Encaja con el Maestro avatar de los Legados; sección 8 y Pilar 2 |
+| 15/10/2026 | Antes de la 0b, un tramo de ajustes de 0a: zona de amenaza, acciones automáticas visibles y Remiendo por distancia | Cerrar los hallazgos del combate antes de construir encima |
 
 ## 13. Registro de versiones
 
@@ -835,3 +911,4 @@ Resumen de las decisiones que afectan a este documento. El detalle completo est�
 | v1.4 | 11/10/2026 | **Los Legados y sus Sombras** en Ideas en espera: rueda de 18, cuatro ciclos sobre la carga, almacén con explosión, inversión y extenuación, lo que no le gusta a cada criatura, el Maestro avatar y la rueda del árbol (10). Reemplazan a los linajes de hechura (6.2) y se nombran en el Maestro (6.1), en "no es" (8) y en el MVP como fuera de alcance (9). Preguntas abiertas: nuevas para Worldbuilder y Sistemas; cerrada la de cómo funcionan los linajes (11). Registro del 10/10 (12). Sin cambios en la 0a ni en la 0b |
 | v1.5 | 12/10/2026 | **Los 18 legados definidos.** Legado principal y secundario; perfil de atributos y verbo de cada legado; boceto de siete estadísticas del juego completo con Suerte y sin Inteligencia; tabla de los 18; casillero 5 = Intemperie (provisorio); inversión hacia la Sombra de un legado propio; inversión por enemigo (solo la forma de pegar) y propia (el cuerpo entero); generación con fatiga; Desapego sigue peleando si cae el Maestro; criterios de visión nuevos (10). Nota de la excepción de Desapego en 6.6 y estadísticas fuera del MVP (9). Preguntas abiertas: nuevas para Worldbuilder y Sistemas; cerradas qué da cada legado, Inteligencia y hacia dónde se invierte (11). Registro del 12/10 (12). Sin cambios en la 0a ni en la 0b |
 | v1.6 | 13/10/2026 | **Más allá de Valdelumbre** en Ideas en espera (Capa 4): 5 salidas con la ciudad cerca de lo seguro; lo hondo, que siempre avisa con señales; la boca; la ciudad (hambre con plata, basural, corral que protege pero no une); compra y venta de criaturas que rompe el vínculo; trabajos; misiones como expediciones, carteles y Maestros renegados; mochila y objetos; aparejos de trabajo para las criaturas; primera porción propuesta (10). Sección 8 enmendada: coleccionar es el camino del Soplo. Venta en los vínculos rotos (6.7). Final del juego completo: exploración abierta, cualquier final lee a la tribu (5). Capas 4 y 5 reordenadas, con dependencias; referencias a la historia (5, 6.2) y a los escribas (10) actualizadas. Preguntas abiertas nuevas y cerradas (11). Registro del 13/10 (12). Sin cambios en la 0a ni en la 0b |
+| v1.7 | 15/10/2026 | **Cierre de la 0a y ajustes antes de la 0b.** Zona de amenaza de toda enemiga y obstáculos fijos en la 0b (Escala 3). Acciones automáticas anunciadas sobre la ficha (6.2, 6.4). Remiendo por distancia: alcance base corto y casillas extra pagadas con maná; nunca todo el tablero (6.7). Familia única de estados entre la Capa 1 y los estados de combate (6.5, 10). El arma de distancia del Maestro (6.1). Excepción registrada al alcance congelado y MVP actualizado (9). Hallazgos del cierre de la 0a, tramo de ajustes de 0a, métrica de distancia del Maestro y obstáculos de la 0b (10). Ideas en espera nuevas: estados de combate, ataques a distancia y hechizos de área; la carga y los estados conviven en los Legados (10). Preguntas abiertas nuevas y cerradas (11). Registro del 15/10 (12) |
