@@ -109,7 +109,8 @@ static func guardar_caida(id_objetivo: String) -> Accion:
 	return accion
 
 
-# Sistema.md 11.7 (T28): el Maestro declara la huida; se va al cerrar la ronda.
+# Sistema.md 11.7 (T28): el Maestro declara la huida; se va justo antes de su
+# proximo turno (11.7 v1.8, T46).
 static func huir() -> Accion:
 	return Accion.new(Tipo.HUIR)
 

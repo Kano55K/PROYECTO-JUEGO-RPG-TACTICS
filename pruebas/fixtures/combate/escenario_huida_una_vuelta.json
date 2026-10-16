@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida_una_vuelta",
+  "_nota": "Arquitectura.md B.4 (T46, D-017): la huida del Maestro termina justo antes de su proximo turno (Sistema.md 11.7 v1.8, S-63). Con la Velocidad 5 del fixture maestro.json, el orden de 11.3 es Ocarra (7), rodauva_1 (6), Maestro (5), Surcon (2). La Ocarra en [2,1] (a 5 del Maestro: movimiento 3 + alcance 2) le pega desde [2,4] en las dos rondas; el Surcon en [2,9] (a 3: 2 + 1) le pega desde [2,7]. Nunca quedan vecinas en 8 (Surcon-Ocarra bien, 10.8). rodauva_1 lejos, con lealtad 7 (umbral de rescate de la balanza 2): rescata si el Maestro cae. Nadie tira: ninguna salvaje queda a 25 % o menos, y no hay rivales ni afines a su alcance",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 7, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [10, 10] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [2, 1] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [2, 9] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

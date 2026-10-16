@@ -235,3 +235,23 @@ func test_misma_cola_y_sin_azar() -> void:
 		assert_str(fuente).is_not_empty()
 		for prohibido in _AZAR_PROHIBIDO:
 			assert_bool(fuente.contains(prohibido)).override_failure_message(ruta + " usa " + prohibido).is_false()
+
+
+# T46 (D-017, D-005): ronda_siguiente arma la ronda que empezaria con el Plantel
+# de ahora, con la misma funcion que empezar_ronda (Sistema.md 11.3), sin tocar
+# la cola: ni la ronda, ni el cursor, ni las entradas de la ronda en curso.
+func test_ronda_siguiente_calcula_sin_aplicar() -> void:
+	var plantel: Plantel = _plantel(_escenario(_CARPETA_UNIDADES + "escenario_a.json"))
+	var cola: ColaIniciativa = _cola(plantel)
+	cola.siguiente(plantel)
+	var entradas: Array[EntradaCola] = cola.entradas()
+	var siguiente: Array[String] = []
+	for entrada in cola.ronda_siguiente(plantel):
+		siguiente.append(entrada.unidad_id)
+	assert_array(siguiente).is_equal(["ocarra_s1", "rodauva_1", Maestro.ID])
+	assert_int(cola.ronda).is_equal(1)
+	assert_int(cola.lugar()).is_equal(1)
+	assert_array(cola.entradas()).is_equal(entradas)
+	assert_bool(cola.entradas()[0].actuo).is_true()
+	var otra: ColaIniciativa = _cola(plantel)
+	assert_array(siguiente).is_equal(_orden(otra))

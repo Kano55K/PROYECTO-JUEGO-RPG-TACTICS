@@ -29,9 +29,10 @@ var mana: int = 0
 # viene del escenario.
 var caido: bool = false
 # Sistema.md 11.7 (T28): declaro la huida en su turno; sigue en el tablero hasta
-# el cierre de la ronda. Estado del combate, como caido.
+# justo antes de su proximo turno (11.7 v1.8, T46). Estado del combate, como caido.
 var huida_declarada: bool = false
-# Sistema.md 11.7 (T28): se fue al cerrar la ronda con la huida declarada.
+# Sistema.md 11.7 v1.8 (T46): se fue en su proxima entrada de la cola con la
+# huida declarada.
 # FinCombate.evaluar lo lee: el fin no se guarda en otro lado.
 var se_fue: bool = false
 

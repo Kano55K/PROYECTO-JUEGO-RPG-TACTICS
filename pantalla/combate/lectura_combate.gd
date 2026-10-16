@@ -58,7 +58,7 @@ func fichas() -> Array[Dictionary]:
 		var marcas_maestro: Array[String] = []
 		if foto_maestro["caido"]:
 			marcas_maestro.append(_armador.armar(ClavesTextos.MARCA_CAIDA, {}, Maestro.ID))
-		# T28 (Sistema.md 11.7): declaro la huida y se va al cerrar la ronda.
+		# T28 (Sistema.md 11.7): declaro la huida; se va antes de su proximo turno (T46).
 		if foto_maestro["huida_declarada"]:
 			marcas_maestro.append(_armador.armar(ClavesTextos.MARCA_HUIDA_DECLARADA))
 		var ficha_maestro: Dictionary = _ficha(Maestro.ID, foto_maestro["posicion"], true, true, foto_maestro["caido"],
@@ -211,7 +211,8 @@ func panel_turno() -> Array[String]:
 	var cadena: Variant = _combate.instantanea()["cadena"]
 	if cadena != null:
 		lineas.append(_linea_cadena(cadena))
-	# T28 (Sistema.md 11.7): con la huida declarada, que se va al cerrar la ronda.
+	# T28 (Sistema.md 11.7): con la huida declarada, que se va antes de su proximo
+	# turno (11.7 v1.8, T46).
 	if _combate.instantanea()["maestro"]["huida_declarada"]:
 		lineas.append(_armador.armar(ClavesTextos.PANEL_HUIDA_DECLARADA))
 	var rescate: String = linea_rescatista()
@@ -849,7 +850,8 @@ func boton_huir() -> Dictionary:
 
 # T28 (Sistema.md 11.7, "previsualizacion al declarar"): las lineas de
 # Combate.previsualizar_huida, con los numeros que da el nucleo. T30 (Mundo.md
-# 1.5 v1.4): el titulo; las que actuan antes del cierre (con su danio si lo
+# 1.5 v1.4): el titulo; las que actuan antes de que se vaya, de esta ronda y de
+# la siguiente, en el orden del nucleo (T46; con su danio si lo
 # alcanzan) o la linea de ninguna; si alguna alcanza, el danio maximo total ({n});
 # si no, la de ninguna llega; la vida del Maestro, el aviso si cae y las caidas
 # que moririan.

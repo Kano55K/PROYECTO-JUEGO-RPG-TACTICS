@@ -62,8 +62,8 @@ func test_derrota_con_la_atacante_caida_y_de_pie() -> void:
 				"despues": 10, "anotaciones": [{"cambio": 2, "motivo": "rescate"}]}])
 
 
-# (5) S-66: el Maestro declara la huida con la atacante en el tablero; al cerrar
-# la ronda se va y la atacante se va igual.
+# (5) S-66: el Maestro declara la huida con la atacante en el tablero; se va
+# antes de su proximo turno (11.7 v1.8, T46) y la atacante se va igual.
 func test_huida_con_la_atacante_en_el_tablero() -> void:
 	var escenario: Dictionary = MesaNocturno.escenario()
 	escenario["golpe_inicial"] = null

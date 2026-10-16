@@ -274,8 +274,11 @@ func rescatista_ahora() -> Variant:
 # Sistema.md 11.7, "previsualizacion al declarar" (T28, D-005, S-61): lo que
 # arriesga el Maestro si declara la huida ahora. Calcula sin aplicar: no cambia
 # el Plantel, la cola ni el generador. Devuelve:
-#   enemigas: [{unidad, alcanza, danio}], las enemigas con entrada pendiente en
-#     la ronda que pueden actuar, en el orden de la cola. alcanza: si lo golpea
+#   enemigas: [{unidad, alcanza, danio}], las que actuan antes de que se vaya
+#     (11.7 v1.8, T46): las de entrada pendiente en la ronda que pueden actuar,
+#     en el orden de la cola, y despues las que irian antes que el en la ronda
+#     siguiente (ColaIniciativa.ronda_siguiente, con el Plantel de ahora). Cada
+#     una cuenta una vez. alcanza: si lo golpea
 #     en su turno moviendose y atacando, como la IA (pasos_para_mover y
 #     previsualizar_ataque); danio: el de la casilla que mas le pega, por los
 #     ataques de su modo actual (0 si no alcanza).
@@ -284,13 +287,25 @@ func rescatista_ahora() -> Variant:
 # Lectura S-61: con el tablero de ahora, sin lo que depende de tiradas (huida,
 # Encono, cobardia, incidente) ni de como se muevan las demas.
 func previsualizar_huida() -> Dictionary:
-	var enemigas: Array[Dictionary] = []
-	var total: int = 0
+	var actuan: Array[EntradaCola] = []
+	var vistas: Dictionary = {}
 	var entradas: Array[EntradaCola] = _cola.entradas()
 	for indice in range(_cola.lugar(), entradas.size()):
 		var entrada: EntradaCola = entradas[indice]
 		if _es_del_jugador(entrada.unidad_id) or not _cola.pendiente(entrada.unidad_id, _plantel):
 			continue
+		actuan.append(entrada)
+		vistas[entrada.unidad_id] = true
+	for entrada in _cola.ronda_siguiente(_plantel):
+		if entrada.unidad_id == Maestro.ID:
+			break
+		if _es_del_jugador(entrada.unidad_id) or vistas.has(entrada.unidad_id):
+			continue
+		actuan.append(entrada)
+		vistas[entrada.unidad_id] = true
+	var enemigas: Array[Dictionary] = []
+	var total: int = 0
+	for entrada in actuan:
 		var danio: int = _danio_maximo_al_maestro(entrada)
 		var alcanza: bool = danio >= 0
 		danio = maxi(danio, 0)
@@ -402,11 +417,17 @@ func _avanzar() -> void:
 		if entrada == null:
 			if _cola.ronda > 0:
 				_cerrar_ronda()
-				# Sistema.md 11.7 (T28): la huida termina el combate al cerrar la ronda.
-				if _fin != FinCombate.Fin.EN_CURSO:
-					continue
 			_cola.empezar_ronda(_plantel)
 			_registrar({"tipo": "ronda"})
+			continue
+		# Sistema.md 11.7 v1.8 (T46, D-017, S-63): la huida declarada se cumple en
+		# la proxima entrada del Maestro, en lugar de su `turno` y de su inicio del
+		# turno (sin regenerar mana). Si antes cayo o no quedo ninguna enemiga de
+		# pie, el combate ya habia terminado (caida -> victoria -> se_fue).
+		if entrada.unidad_id == Maestro.ID and _plantel.maestro.huida_declarada:
+			_plantel.maestro.se_fue = true
+			_fin = FinCombate.evaluar(_plantel)
+			_terminar()
 			continue
 		# Sistema.md 10.1 (T17): la entrada de la unidad que Secundo vuelve. El
 		# turno sigue sin un inicio nuevo (S-31), asi que no lleva otro `turno`
@@ -524,10 +545,8 @@ func _registrar_incidente(estados_antes: Dictionary) -> void:
 # En una ronda que la dispara, el evento va aunque nadie cambie (todas en el
 # tope): lectura tecnica de T14. Un combate que termina a mitad de ronda no
 # llega aca, asi que no suma. Despues, la cadena se corta: nunca pasa a la ronda
-# siguiente (10.2). Al final, la huida del Maestro (11.7, T28, S-60): si la
-# declaro y el combate sigue en curso, se va y el combate termina en huida (fin
-# y cierre, sin evento nuevo, A.7). Si antes cayo o no quedo ninguna enemiga en
-# pie, el combate ya habia terminado y no llega aca.
+# siguiente (10.2). Con la huida del Maestro declarada, todo esto rige igual: se
+# va en su proxima entrada (_avanzar, 11.7 v1.8, T46).
 func _cerrar_ronda() -> void:
 	_cola.terminar_ronda()
 	_registrar({"tipo": "fin_ronda"})
@@ -536,10 +555,6 @@ func _cerrar_ronda() -> void:
 		_registrar({"tipo": "hambre_combate", "cambios": cambios})
 	_cadena.cortar(Cadena.MOTIVO_FIN_RONDA)
 	_registrar_cadena()
-	if _plantel.maestro.huida_declarada and _fin == FinCombate.Fin.EN_CURSO:
-		_plantel.maestro.se_fue = true
-		_fin = FinCombate.evaluar(_plantel)
-		_terminar()
 
 
 # Sistema.md 11.8: las acciones de la IA, una por una. Corta si el combate

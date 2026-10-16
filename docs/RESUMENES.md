@@ -3374,3 +3374,43 @@ Lo escribe Claude Code al final de cada sesión, según CLAUDE.md (sección "Res
   5. Correr el informe: `& $env:GODOT_BIN --headless --path . --script res://herramientas/informe_playtest.gd -- registros`. En `registros/informe_playtest.csv` está la columna `activas_invocaciones`, y la partida de G figura con `destino_atacante` = `sellar`.
   6. `git status`: nada de `registros/` aparece como cambio.
 - **Para la próxima sesión:** nada: tarea terminada. Sigue T46.
+
+## T46 · sesión 1 · 15/10/2026
+- **Rama:** tarea/T46-huida-una-vuelta (desde `origin/develop` con T45 mergeada, PR #50)
+- **Estado:** TERMINADA (pendiente de PR)
+- **Hecho:**
+  - Núcleo (`Sistema.md` 11.7 v1.8, S-63, D-017): el Maestro con la huida declarada ya no se va en `Combate._cerrar_ronda`. Se va en `_avanzar` cuando la cola llega a su próxima entrada (reconocida por el `unidad_id` de la `EntradaCola`, nunca por posición): marca `se_fue`, `FinCombate.evaluar` da `HUIDA` y corre `_terminar`, en lugar de su `turno` y de su inicio (sin `mana` de regeneración). Sin eventos nuevos (A.7): el `fin` `huida` y el `cierre` van donde iría ese `turno`. `fin_ronda`, `hambre_combate` y `cadena_cortada` (`fin_ronda`) siguen como antes. El orden caída → victoria → `se_fue` no cambió.
+  - `ColaIniciativa.ronda_siguiente(plantel)`: la ronda que empezaría ahora, con el mismo `_armar` de `empezar_ronda`, sin tocar `ronda`, el cursor ni las entradas (D-005).
+  - `Combate.previsualizar_huida` (S-61): las enemigas pendientes de la ronda y después las que van antes que el Maestro en `ronda_siguiente`, cada una una vez, con el mismo cálculo de daño de T28.
+  - Pantalla: sin código nuevo. `LecturaCombate.vista_previa_huida` ya recorre `enemigas` en orden, así que lista las dos rondas. Solo comentarios.
+  - Comentarios al día en `maestro.gd`, `fin_combate.gd`, `turno.gd`, `accion.gd` y `lectura_combate.gd`.
+- **Archivos:** creados `pruebas/combate/test_huida_una_vuelta.gd` y `pruebas/fixtures/combate/escenario_huida_una_vuelta.json`; modificados `nucleo/combate/combate.gd`, `cola_iniciativa.gd`, `accion.gd`, `fin_combate.gd`, `turno.gd`, `nucleo/unidades/maestro.gd`, `pantalla/combate/lectura_combate.gd`, `pruebas/combate/test_huida_maestro_combate.gd`, `test_cola_iniciativa.gd`, `test_atacante_se_va.gd` (comentario), `pruebas/datos/test_huida_maestro_b.gd`, `pruebas/pantalla/test_lectura_huida_maestro.gd` y `test_vista_huida_maestro.gd` (comentarios), `CLAUDE.md` (Estado actual). Se suman los `.uid` de `test_s52.gd` y `test_textos_v15.gd`, que habían quedado sin commitear en T45.
+- **Tests:** 9 nuevos, total 1000, todos pasan (sí). Sin errores ni advertencias en la consola.
+- **Tests reescritos** (todos por `Sistema.md` 11.7 v1.8, S-63):
+  - `test_huida_maestro_combate.gd::test_al_cerrar_la_ronda_termina_en_huida` → `test_se_va_antes_de_su_turno_de_la_ronda_siguiente`: el final pasa de `fin_ronda, fin, cierre` (ronda 1) a `fin_ronda, ronda, fin, cierre` (ronda 2).
+  - `test_huida_maestro_combate.gd::test_hambre_de_combate_antes_de_irse`: de `fin_ronda, hambre_combate, fin, cierre` a `fin_ronda, hambre_combate, ronda, fin, cierre`.
+  - `test_huida_maestro_b.gd::test_b_huye_en_la_ronda_2`: la previsualización deja de estar vacía (`danio_maximo` 0) y lista `ocarra_s1` y `ocarra_s2`.
+  - `test_huida_maestro_b.gd::test_d_el_surcon_figura`: la lista es exactamente `surcon_s1` y `rodauva_s1`.
+  - `test_huida_maestro_b.gd::_huir`: el combate termina en la ronda 3, no en la 2, y las enemigas listadas son las que tuvieron `turno` después de declarar.
+  - Siguen pasando sin cambios (solo cambió el comentario): `test_cae_antes_del_cierre`, `test_rescate_combate.gd::test_huida_declarada`, `test_atacante_se_va.gd::test_huida_con_la_atacante_en_el_tablero` y `test_vista_huida_maestro.gd::test_clic_declara_y_resultado`.
+- **Criterio de terminado:** cumplido punto por punto:
+  1. `test_huida_una_vuelta::test_ultimo_de_la_ronda`: sin el Surcón y con `cada_rondas` 1, el Maestro (último) regenera en la ronda 1 y declara. Siguen `fin_ronda`, `hambre_combate`, `ronda`, los `turno` de la Ocarra y de rodauva_1, y `fin` `huida` (ronda 2) + `cierre`, sin `mana` del Maestro y con el mismo maná.
+  2. `test_con_enemigas_pendientes`: después de declarar, los `turno` son [surcon_s1, ocarra_s1, rodauva_1], con un solo `fin_ronda` entre el primero y el segundo.
+  3. `test_huida_maestro_combate::test_se_va_antes_de_su_turno_de_la_ronda_siguiente` (Maestro con Velocidad 9): se va justo después de `ronda`.
+  4. `test_cae_antes_de_irse`: con la vida justa, la Ocarra lo tumba en la ronda 2. Da `derrota_por_caida`, con el rescate de rodauva_1 y `se_fue` falso; la previsualización decía `puede_caer`. Victoria con el +1: `test_la_ultima_enemiga_cae_antes_del_cierre` y `..._huye_...` (sin cambios).
+  5. `test_la_cadena_se_corta_con_fin_ronda`: rodauva_1 empieza la cadena después de la declaración, y el final es `fin_ronda, cadena_cortada (fin_ronda), ronda, fin, cierre`.
+  6. `test_previsualizacion_es_el_peor_caso_aplicado`: lista [Surcón, Ocarra], que son exactamente las enemigas con `turno` después de declarar, y el daño recibido es ≤ al máximo. `test_previsualizar_no_cambia_nada`: la `instantanea`, el registro, `cola()` y el generador quedan igual. `test_cola_iniciativa::test_ronda_siguiente_calcula_sin_aplicar`.
+  7. `test_huida_maestro_b.gd` (`datos/` real, B y D) reescrito. Pasan el permanente, `test_contacto`, `test_robustez_ia`, `test_metricas_escenarios` y los de datos reales de T22 a T45.
+  8. `test_grabacion_y_resultado`: la partida de dos rondas se reproduce con el mismo registro y la misma `instantanea`, y el resultado valida.
+  9. Suite completa en verde (1000).
+  - Pantalla: `test_lectura_huida_maestro::test_vista_previa_de_dos_rondas` (Surcón y después Ocarra, cada una con su daño).
+- **Lecturas declaradas:** métrica 1 (11.9): con el Maestro primero de la ronda, el `fin` va en la ronda N+1, sin que nadie actúe en ella, y "rondas totales" y "de pelea hasta el fin, inclusive" la cuentan. Es la lectura literal: el `fin` es de esa ronda. Sin código. La previsualización está pensada para el turno del Maestro; si se pide en otro turno, cuenta lo mismo.
+- **Supuestos técnicos:** el chequeo de la entrada del Maestro va antes de la rama `vuelve` (un Maestro con la huida declarada no puede tener un turno que vuelva, porque huir cierra el turno). `_avanzar` pierde el chequeo de `_fin` después de `_cerrar_ronda`, que solo existía para la salida de T28.
+- **Claves de texto nuevas sin texto:** ninguna. `panel.huida_declarada` y `huida.previa.*` siguen igual; el texto lo actualiza el Worldbuilder (Arquitectura.md 10.5).
+- **Preguntas:** nuevas ninguna; cerradas ninguna.
+- **Prueba manual (para el usuario, cierra la 0a):**
+  1. Suite completa: `cmd`: `addons\gdUnit4\runtest.cmd -a res://pruebas` · PowerShell: `& .\addons\gdUnit4\runtest.cmd -a res://pruebas`.
+  2. F5 → `b_muro` → Jugar. En la ronda 2, en el turno del Maestro (el último), pasar el mouse por Huir. La previsualización lista las dos Ocarras y el daño máximo. Declarar. La ronda cierra, en la 3 actúan las Ocarras y la Rodauva, y el combate termina antes del turno del Maestro.
+  3. F5 → `d_rivales_normal` → Jugar. Declarar en el turno del Maestro: primero actúa el Surcón salvaje, cierra la ronda y en la siguiente actúa la Rodauva salvaje antes de que se vaya.
+  4. En B, declarar con poca vida. Si la previsualización dice que podés caer y caés, el resultado es "Caíste", con su rescate o permadeath, no "Huiste".
+- **Para la próxima sesión:** nada: tarea terminada.

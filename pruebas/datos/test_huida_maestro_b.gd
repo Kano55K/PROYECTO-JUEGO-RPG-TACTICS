@@ -6,9 +6,11 @@ extends GdUnitTestSuite
 # despues de declarar no supera el danio maximo de Combate.previsualizar_huida,
 # y el combate termina en huida, o en derrota por caida si la previsualizacion
 # decia que podia caer (Sistema.md 11.7, S-61).
+# Desde T46 (Sistema.md 11.7 v1.8, S-63) se va justo antes de su proximo turno:
 # B: las dos Ocarras (Velocidad 7) y la Rodauva (6) juegan antes que el Maestro
-# (5), asi que al declarar no queda ninguna enemiga pendiente (P-045). D: el
-# Surcon salvaje (Velocidad 2) juega despues: figura en la previsualizacion.
+# (5), asi que al declarar no queda ninguna enemiga pendiente en la ronda, pero
+# las Ocarras vuelven a jugar en la 3 antes que el. D: el Surcon salvaje
+# (Velocidad 2) juega despues en la ronda 2 y la Rodauva salvaje antes en la 3.
 # Si un dia una regla impide declarar, no se tocan coordenadas: se anota en
 # docs/PREGUNTAS.md.
 const _CARPETA_DATOS: String = "res://datos"
@@ -68,7 +70,19 @@ func _danio_al_maestro(combate: Combate, desde: int) -> int:
 	return total
 
 
+# Las enemigas con evento `turno` desde la linea `desde`, en orden.
+func _enemigas_que_actuaron(combate: Combate, desde: int) -> Array:
+	var enemigas: Array = (combate.contexto().escenario["enemigas"] as Array).map(func(enemiga: Dictionary) -> String:
+			return enemiga["id"])
+	return combate.registro().lineas().slice(desde).filter(func(linea: Dictionary) -> bool:
+			return linea["tipo"] == "turno" and enemigas.has(linea["unidad"])) \
+			.map(func(linea: Dictionary) -> String: return linea["unidad"])
+
+
 # Declara en la ronda 2 y juega hasta el fin. Devuelve la previsualizacion.
+# Reescrito en T46 (Sistema.md 11.7 v1.8, S-63): el Maestro se va justo antes de
+# su turno de la ronda 3, asi que el combate termina en la ronda 3 (o antes, si
+# cae), y las enemigas listadas son exactamente las que actuaron en el medio.
 func _huir(combate: Combate) -> Dictionary:
 	assert_bool(_esperar_hasta_el_maestro(combate, _RONDA_HUIDA)).is_true()
 	assert_int(combate.turno_actual().motivo_huir()).is_equal(ResultadoAccion.Motivo.NINGUNO)
@@ -77,28 +91,35 @@ func _huir(combate: Combate) -> Dictionary:
 	assert_bool(combate.aplicar(Accion.huir()).valida).is_true()
 	_hasta_el_fin(combate)
 	assert_int(_danio_al_maestro(combate, desde)).is_less_equal(previa["danio_maximo"])
-	# Termina en la misma ronda: en huida o, si podia caer, por caida.
-	if combate.fin() != FinCombate.Fin.HUIDA:
+	if combate.fin() == FinCombate.Fin.HUIDA:
+		assert_int(combate.instantanea()["ronda"]).is_equal(_RONDA_HUIDA + 1)
+		var unidades: Array = (previa["enemigas"] as Array).map(func(enemiga: Dictionary) -> String:
+				return enemiga["unidad"])
+		assert_array(_enemigas_que_actuaron(combate, desde)).is_equal(unidades)
+		assert_str(combate.resultado().a_diccionario()["desenlace"]).is_equal("huida")
+	else:
+		# Si podia caer, por caida.
 		assert_bool(previa["puede_caer"]).is_true()
 		assert_int(combate.fin()).is_equal(FinCombate.Fin.DERROTA_POR_CAIDA)
-	assert_int(combate.instantanea()["ronda"]).is_equal(_RONDA_HUIDA)
 	return previa
 
 
-# (11) B: sin enemigas pendientes al declarar (P-045): danio maximo 0, y huye.
+# (11) Reescrito en T46 (Sistema.md 11.7 v1.8, S-63): en B las dos Ocarras
+# (Velocidad 7) actuan en la ronda 3 antes que el Maestro (5): la
+# previsualizacion las lista, en el orden de la cola, y deja de estar vacia.
 func test_b_huye_en_la_ronda_2() -> void:
 	var combate: Combate = _combate("b_muro")
 	var previa: Dictionary = _huir(combate)
-	assert_array(previa["enemigas"]).is_empty()
-	assert_int(previa["danio_maximo"]).is_equal(0)
-	assert_int(combate.fin()).is_equal(FinCombate.Fin.HUIDA)
-	assert_str(combate.resultado().a_diccionario()["desenlace"]).is_equal("huida")
+	var unidades: Array = (previa["enemigas"] as Array).map(func(enemiga: Dictionary) -> String: return enemiga["unidad"])
+	assert_array(unidades).is_equal(["ocarra_s1", "ocarra_s2"])
+	assert_int(previa["danio_maximo"]).is_greater(0)
 
 
-# (11) D: el Surcon salvaje juega despues del Maestro y figura en la
-# previsualizacion; el danio recibido no la supera.
+# (11) Reescrito en T46 (Sistema.md 11.7 v1.8, S-63): en D el Surcon salvaje
+# (Velocidad 2) juega despues del Maestro en la ronda 2, y la Rodauva salvaje
+# (6), antes que el en la 3: la previsualizacion lista a las dos, en ese orden.
 func test_d_el_surcon_figura() -> void:
 	var combate: Combate = _combate("d_rivales_normal")
 	var previa: Dictionary = _huir(combate)
 	var unidades: Array = (previa["enemigas"] as Array).map(func(enemiga: Dictionary) -> String: return enemiga["unidad"])
-	assert_array(unidades).contains(["surcon_s1"])
+	assert_array(unidades).is_equal(["surcon_s1", "rodauva_s1"])
