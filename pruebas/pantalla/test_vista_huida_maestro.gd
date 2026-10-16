@@ -3,7 +3,8 @@ extends GdUnitTestSuite
 # Arquitectura.md B.4 (T28), criterio 10: el boton Huir en la vista, con el
 # runner de escenas de GdUnit4. Con el mouse sobre el boton, el panel muestra
 # Combate.previsualizar_huida y se marcan las enemigas que alcanzan al Maestro;
-# el clic declara; despues, la marca en el Maestro; al cerrar la ronda, el
+# el clic declara; despues, la marca en el Maestro; cuando se va (desde T46,
+# justo antes de su proximo turno, Sistema.md 11.7 v1.8), el
 # resultado dice huida. Fixtures (A.6): escenario_huida_maestro_combate.json
 # (Velocidad del Maestro subida en memoria a 9: juega primero; el Tasajero en
 # [2,1] y el Surcon en [2,9] lo alcanzan, la Ocarra en [9,1] no), es_rasgos.json
@@ -119,7 +120,7 @@ func test_boton_deshabilitado_despues_de_mover() -> void:
 
 
 # (10) El clic en el boton declara: la marca sale en el Maestro, el boton se va y
-# el suceso lo dice. Al cerrar la ronda, la pantalla de resultado muestra el
+# el suceso lo dice. Cuando se va, la pantalla de resultado muestra el
 # desenlace huida (clave propuesta: falta en es.json).
 func test_clic_declara_y_resultado() -> void:
 	var runner: GdUnitSceneRunner = _vista()

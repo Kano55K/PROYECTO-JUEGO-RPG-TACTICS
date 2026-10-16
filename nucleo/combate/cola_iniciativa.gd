@@ -61,6 +61,13 @@ func pendiente(unidad_id: String, plantel: Plantel) -> bool:
 	return false
 
 
+# T46 (D-017, D-005): la ronda que empezaria ahora con este Plantel, con la
+# misma cuenta que empezar_ronda, sin tocar la cola (calcular sin aplicar). La
+# usa la previsualizacion de la huida del Maestro (Sistema.md 11.7 v1.8).
+func ronda_siguiente(plantel: Plantel) -> Array[EntradaCola]:
+	return _armar(plantel)
+
+
 # Indice de la entrada de la unidad en la ronda, o -1.
 func lugar_de(unidad_id: String) -> int:
 	for indice in range(_entradas.size()):

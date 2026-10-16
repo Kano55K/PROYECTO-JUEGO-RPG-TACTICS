@@ -1493,7 +1493,8 @@ func _motivo_puede_guardar_caida() -> ResultadoAccion.Motivo:
 
 # Sistema.md 11.7 y 11.3 (T28): el Maestro declara la huida. Gasta el turno
 # completo, como invocar (S-59): despues solo vale terminar, que no es esperar.
-# Sigue en el tablero y puede ser objetivo; se va al cerrar la ronda (Combate).
+# Sigue en el tablero y puede ser objetivo; se va justo antes de su proximo
+# turno (Combate, 11.7 v1.8, T46).
 # No es un ataque: no toca la cadena, el Encono ni el bono.
 func _declarar_huida(aplica: bool) -> ResultadoAccion:
 	var motivo: ResultadoAccion.Motivo = _motivo_huir()

@@ -6,6 +6,9 @@ extends GdUnitTestSuite
 # y 7.2. Lecturas declaradas S-59 (turno sin usar), S-60 (la ronda sigue entera;
 # victoria si antes cae o huye la ultima enemiga; hambre antes de irse) y S-61
 # (dano maximo con el tablero de ahora, sin tiradas, por los ataques del modo).
+# Desde T46 (11.7 v1.8, S-63) el Maestro se va justo antes de su proximo turno,
+# no al cerrar la ronda: aca, con Velocidad 9, al empezar la ronda 2. Los casos
+# de dos rondas estan en test_huida_una_vuelta.gd.
 # escenario_huida_maestro_combate.json, con la Velocidad del Maestro subida en
 # memoria a 9 (juega primero): el Tasajero en Caza le pega 5 + 5 desde [2,5], la
 # Ocarra no lo alcanza y va por rodauva_1, y el Surcon le pega 3 desde [2,7].
@@ -139,18 +142,20 @@ func test_la_ronda_sigue() -> void:
 	assert_array(ataques).contains_exactly([_TASAJERO, _TASAJERO, _OCARRA, _SUELTA, _SURCON])
 
 
-# (3) Al cerrar la ronda: huida, un solo cierre y despues todo COMBATE_TERMINADO.
+# (3) Reescrito en T46 (Sistema.md 11.7 v1.8, S-63): el Maestro es el primero de
+# la ronda siguiente, asi que se va al empezarla, justo despues de `ronda` y en
+# lugar de su `turno`: huida, un solo cierre y despues todo COMBATE_TERMINADO.
 # (6 en el Combate) la caida muere, la guardada sobrevive y la suelta pierde 4
 # (Rodauva-Rodauva, 5.2), sin +1.
-func test_al_cerrar_la_ronda_termina_en_huida() -> void:
+func test_se_va_antes_de_su_turno_de_la_ronda_siguiente() -> void:
 	var combate: Combate = _combate()
 	var desde: int = combate.registro().lineas().size()
 	_declarar(combate)
 	_hasta_el_fin(combate)
 	assert_int(combate.fin()).is_equal(FinCombate.Fin.HUIDA)
-	assert_int(combate.instantanea()["ronda"]).is_equal(1)
+	assert_int(combate.instantanea()["ronda"]).is_equal(2)
 	assert_bool(combate.instantanea()["maestro"]["se_fue"]).is_true()
-	assert_array(_tipos(combate, desde).slice(-3)).is_equal(["fin_ronda", "fin", "cierre"])
+	assert_array(_tipos(combate, desde).slice(-4)).is_equal(["fin_ronda", "ronda", "fin", "cierre"])
 	assert_array(_lineas(combate, "fin")).has_size(1)
 	assert_str(_lineas(combate, "fin")[0]["desenlace"]).is_equal("huida")
 	var cierres: Array[Dictionary] = _lineas(combate, "cierre")
@@ -171,8 +176,9 @@ func test_al_cerrar_la_ronda_termina_en_huida() -> void:
 	assert_int(combate.registro().lineas().size()).is_equal(lineas)
 
 
-# (3) Si la ronda que cierra suma hambre de combate (7.2), se suma antes de irse:
-# hambre_combate va entre fin_ronda y fin (S-60).
+# (3) Si la ronda que cierra suma hambre de combate (7.2), se suma antes de irse
+# (S-60). Reescrito en T46 (Sistema.md 11.7 v1.8, S-63): hambre_combate va entre
+# fin_ronda y la `ronda` siguiente, al empezar la cual se va.
 func test_hambre_de_combate_antes_de_irse() -> void:
 	var combate: Combate = _combate("escenario_huida_maestro_combate.json", [], 0, _datos(1))
 	var hambre_antes: int = combate.instantanea()["maestro"]["hambre"]
@@ -180,7 +186,7 @@ func test_hambre_de_combate_antes_de_irse() -> void:
 	_declarar(combate)
 	_hasta_el_fin(combate)
 	assert_int(combate.fin()).is_equal(FinCombate.Fin.HUIDA)
-	assert_array(_tipos(combate, desde).slice(-4)).is_equal(["fin_ronda", "hambre_combate", "fin", "cierre"])
+	assert_array(_tipos(combate, desde).slice(-5)).is_equal(["fin_ronda", "hambre_combate", "ronda", "fin", "cierre"])
 	assert_int(combate.instantanea()["maestro"]["hambre"]).is_equal(hambre_antes + 1)
 
 

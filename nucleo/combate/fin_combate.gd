@@ -1,6 +1,7 @@
 # Sistema.md 11.5: el combate se gana cuando no queda ninguna enemiga en pie y se
 # pierde cuando cae el Maestro. 11.7 (T28): termina en huida cuando el Maestro se
-# fue al cerrar la ronda. No se guarda: sale del Plantel, asi todos los turnos lo
+# fue con la huida declarada (justo antes de su proximo turno, 11.7 v1.8, T46).
+# No se guarda: sale del Plantel, asi todos los turnos lo
 # ven igual. El cierre (Cierre) recibe el mismo Fin.
 class_name FinCombate
 extends RefCounted

@@ -171,3 +171,40 @@ func test_resultado() -> void:
 	_huir_hasta_el_fin()
 	assert_array(lectura.resultado(_combate.resultado().a_diccionario())) \
 			.contains(["[FALTA: resultado.desenlace.huida]"])
+
+
+# T46 (Sistema.md 11.7 v1.8, S-63): en escenario_huida_una_vuelta.json (Maestro
+# con la Velocidad 5 del fixture), la vista previa lista primero al Surcon, que
+# falta en esta ronda, y despues a la Ocarra, que va antes que el en la
+# siguiente: el orden del nucleo, cada una con su danio.
+func test_vista_previa_de_dos_rondas() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	var textos: Dictionary = LectorFixture.leer(_TEXTOS, "textos")["datos"]
+	textos.merge(_TEXTOS_ES, true)
+	textos.merge(_TEXTOS_PRUEBA, true)
+	var escenario: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/escenario_huida_una_vuelta.json",
+			"escenario")["datos"]
+	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
+	assert_bool(contexto.valido).is_true()
+	_combate = Combate.empezar(contexto)
+	for _i in range(5):
+		if _combate.turno_actual().unidad_id == Maestro.ID:
+			break
+		_aplicar_valida(Accion.terminar())
+	assert_str(_combate.turno_actual().unidad_id).is_equal(Maestro.ID)
+	var vista: LecturaCombate = LecturaCombate.new(_combate, ArmadorTextos.desde_datos(textos, contexto.azar_textos),
+			EstadosUnidad.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"]))
+	var previa: Dictionary = _combate.previsualizar_huida()
+	var enemigas: Array = previa["enemigas"]
+	assert_array(enemigas.map(func(enemiga: Dictionary) -> String: return enemiga["unidad"])) \
+			.is_equal(["surcon_s1", "ocarra_s1"])
+	var lineas: Array[String] = vista.vista_previa_huida(previa)
+	assert_array(lineas.slice(0, 4)).is_equal([
+		"Si huís ahora",
+		"Antes de que salgas del claro, todavía actúan:",
+		"%s −%d" % [vista.nombre("surcon_s1"), enemigas[0]["danio"]],
+		"%s −%d" % [vista.nombre("ocarra_s1"), enemigas[1]["danio"]],
+	])
+	assert_str(lineas[4]).is_equal("Te pueden alcanzar. En el peor caso, %d de daño." % previa["danio_maximo"])
