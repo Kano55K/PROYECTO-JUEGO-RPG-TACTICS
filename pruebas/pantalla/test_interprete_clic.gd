@@ -21,14 +21,14 @@ var _turno: Turno
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	var tablero: Tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	var danio: Danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 	var especies: Dictionary = {}
 	for id_especie in _ESPECIES:
 		especies[id_especie] = Especie.new(_leer(_CARPETA_UNIDADES + id_especie + ".json", "especie"))
 	var tabla: TablaBalanza = TablaBalanza.new(_leer(_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"))
 	_plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_turno.json", "escenario"), especies, tabla,
 			_leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
-	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, danio, Surcos.new())
+	_turno = Turno.empezar(EntradaCola.new(Maestro.ID, "", 0), _plantel, tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -81,14 +81,14 @@ func test_con_el_movimiento_gastado_una_casilla_vacia_da_nada() -> void:
 func test_modo_cavar() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	var tablero: Tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	var danio: Danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 	var especies: Dictionary = {}
 	for id_especie in _ESPECIES:
 		especies[id_especie] = Especie.new(_leer(_CARPETA_UNIDADES + id_especie + ".json", "especie"))
 	var tabla: TablaBalanza = TablaBalanza.new(_leer(_CARPETA_UNIDADES + "balanza_1_2.json", "balanza"))
 	var plantel: Plantel = Plantel.desde_escenario(_leer(_CARPETA + "escenario_surco_tribu.json", "escenario"),
 			especies, tabla, _leer(_CARPETA_UNIDADES + "maestro.json", "maestro"))
-	var turno: Turno = Turno.empezar(EntradaCola.new("surcon_1", "", 0), plantel, tablero, danio, Surcos.new())
+	var turno: Turno = Turno.empezar(EntradaCola.new("surcon_1", "", 0), plantel, tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 	var foto: Dictionary = plantel.instantanea()
 
 	var accion: Accion = InterpreteClic.accion(turno, foto, Vector2i(3, 5), true)
@@ -101,3 +101,41 @@ func test_modo_cavar() -> void:
 	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 8), true)).is_null()
 	# Sin el modo, la misma casilla es un movimiento.
 	assert_int(InterpreteClic.accion(turno, foto, Vector2i(3, 5)).tipo).is_equal(Accion.Tipo.MOVER)
+
+
+# T22 (sesion 2, criterio 3): en el modo Lanzadera, el clic izquierdo empuja y el
+# derecho atrae, con los sentidos de Turno.sentidos_para_hechizo (MesaHechizos:
+# fixtures de los tests de hechizos). Atraer a una adyacente no hace nada.
+func test_modo_lanzadera_izquierdo_empuja_y_derecho_atrae() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 3),
+			"rodauva_1": Vector2i(2, 5)})
+	var turno: Turno = mesa.turno()
+	var foto: Dictionary = mesa.plantel.instantanea()
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 3), false, false, "lanzadera").a_diccionario()) \
+			.is_equal(Accion.hechizo("lanzadera", "ocarra_s1", "empujar").a_diccionario())
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 3), false, false, "lanzadera", true).a_diccionario()) \
+			.is_equal(Accion.hechizo("lanzadera", "ocarra_s1", "atraer").a_diccionario())
+	# La Rodauva aliada esta adyacente: empujarla si, atraerla no.
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(2, 5), false, false, "lanzadera").a_diccionario()) \
+			.is_equal(Accion.hechizo("lanzadera", "rodauva_1", "empujar").a_diccionario())
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(2, 5), false, false, "lanzadera", true)).is_null()
+	# Una casilla sin objetivo del hechizo, nada (aunque se pueda mover ahi).
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "lanzadera")).is_null()
+
+
+# T22: un hechizo sin modos va con el clic izquierdo; el derecho no hace nada.
+# Fuera del modo hechizo, el clic derecho no hace nada (ni atacar ni mover).
+func test_hechizo_sin_modos_y_clic_derecho_fuera_del_modo() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 5), "ocarra_s1": Vector2i(3, 4)})
+	var turno: Turno = mesa.turno()
+	var foto: Dictionary = mesa.plantel.instantanea()
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "martillazo").a_diccionario()) \
+			.is_equal(Accion.hechizo("martillazo", "ocarra_s1").a_diccionario())
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "martillazo", true)).is_null()
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 5), false, false, "remiendo").a_diccionario()) \
+			.is_equal(Accion.hechizo("remiendo", Maestro.ID).a_diccionario())
+	# Fuera del modo: el izquierdo ataca a la adyacente, el derecho nada.
+	assert_dict(InterpreteClic.accion(turno, foto, Vector2i(3, 4)).a_diccionario()) \
+			.is_equal(Accion.atacar("ocarra_s1").a_diccionario())
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(3, 4), false, false, "", true)).is_null()
+	assert_object(InterpreteClic.accion(turno, foto, Vector2i(2, 5), false, false, "", true)).is_null()

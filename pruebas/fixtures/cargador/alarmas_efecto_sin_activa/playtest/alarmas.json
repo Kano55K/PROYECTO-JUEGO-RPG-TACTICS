@@ -1,0 +1,10 @@
+{
+  "_nota": "T33, sesión 2: activa_poco_usada con un efecto que no tiene activa",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "activa", "escenarios": ["c_tasajero"], "calculo": "activa_poco_usada",
+      "parametros": { "efecto": "alabarda", "umbral_pct": 20 } }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "rival_salvajes_combate",
+  "_nota": "Sistema.md 10.4, 10.5, 10.7 y 11.3 pasos 3 y 4 v1.6 (registro de T20, con Combate). Balanza 5 (Arrimo 0). Orden de la ronda: ocarra_1 (Vel 7, la tribu primero en el empate), ocarra_s1, ocarra_s2 y el Maestro (Vel 5). Con combate.json de prueba: ocarra_1 neutral tira Encono 25 % contra ocarra_s1 [3,3], a su alcance (4); con la semilla 1 sale 54 y no se encona. ocarra_s1 tira 35 % (baja, 10.7) contra ocarra_1 y sale 4: enconada, la alcanza desde [3,5] y la ataca (paso 3 de 11.8). ocarra_s2 [7,0] queda lejos de todas. Cada test puede mover a las unidades en una copia",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 5, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 3] },
+    { "id": "ocarra_s2", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [7, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

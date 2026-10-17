@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../datos/_esquemas/hechizos.schema.json",
+  "_nota": "Arquitectura.md B.3 (T22, sesion 2, criterio 1): los botones y el modo de los hechizos salen de los datos, nunca del id. Un hechizo inventado de otro id (pedrada) con un efecto existente (danio), otro costo y otro alcance, mas la Lanzadera y el Remiendo del fixture de combate (escala vieja, D-009). Sistema.md 1.6",
+  "hechizos": [
+    {
+      "_nota": "Inventado para el test: costo 3, Manhattan <= 4 sin bloqueo, danio 1 + 2 x Poder",
+      "id": "pedrada",
+      "costo": 3,
+      "alcance": 4,
+      "geometria": "distancia_libre",
+      "efecto": "danio",
+      "base": 1,
+      "por_poder": 2,
+      "es_ataque": true
+    },
+    {
+      "_nota": "Copia de pruebas/fixtures/combate/hechizos.json: choque 1",
+      "id": "lanzadera",
+      "costo": 2,
+      "alcance": 2,
+      "geometria": "linea_bloqueo_enemigas",
+      "efecto": "empuje",
+      "modos": [
+        "empujar",
+        "atraer"
+      ],
+      "casillas": 1,
+      "danio_choque": 1,
+      "afecta_caidas": false,
+      "es_ataque": false
+    },
+    {
+      "_nota": "Copia de pruebas/fixtures/combate/hechizos.json: cura 3 + 1 x Poder",
+      "id": "remiendo",
+      "costo": 4,
+      "alcance": 1,
+      "incluye_si_mismo": true,
+      "geometria": "adyacente",
+      "efecto": "cura",
+      "base": 3,
+      "por_poder": 1,
+      "afecta_caidas": false,
+      "es_ataque": false
+    }
+  ]
+}

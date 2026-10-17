@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "hambre_combate",
+  "_nota": "Arquitectura.md B.3 (T14, tests 4 a 8 y 11). Sistema.md 7.2: +1 al cerrar las rondas 5, 10... al Maestro y a la tribu en el tablero, de pie o caida; no a la guardada, la salvaje ni la atacante. Tablero de 3 x 40: las Ocarras enemigas (Movimiento 3) empiezan en la fila 39 y no alcanzan a nadie antes de cerrar la ronda 10. Balanza 2: umbral 7. La casilla [1,1], junto al Maestro, queda libre",
+  "tipo": "test",
+  "semilla": 14,
+  "tablero": { "ancho": 3, "alto": 40 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [1, 0] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 7, "hambre": 5, "enfermedades": 0, "vida": null, "posicion": [0, 0],
+      "_nota": "Sistema.md 5.4: obediencia 7 (leal) con hambre 5; con 6 pasa a Hambrienta y a 5 (neutral)" },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 2, "enfermedades": 0, "vida": null, "posicion": [2, 0],
+      "_nota": "Sistema.md 7.1: Saciada (+25%) pega 5; con hambre 3 pierde Saciado y pega 4" },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 0, "posicion": [0, 1],
+      "_nota": "En 0 al armar: queda caida en su casilla (11.5) y suma hambre igual (7.2)" },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 10, "enfermedades": 0, "vida": null, "posicion": [2, 1],
+      "_nota": "En el tope de la escala (7.1): no cambia ni aparece en el evento" },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "guardada", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null,
+      "_nota": "Guardada: fuera del reloj (7.2)" }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [1, 39] },
+    { "id": "ocarra_a1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 9, "vida": null, "posicion": [2, 39],
+      "_nota": "La atacante no suma hambre de combate (7.2)" }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

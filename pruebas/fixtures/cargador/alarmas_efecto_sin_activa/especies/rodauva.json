@@ -1,0 +1,2 @@
+{ "id": "rodauva", "velocidad": 6,
+  "rasgo": { "id": "erizarse", "efecto": "erizarse", "danio_recibido_pct": -50, "inmovil": true, "umbral_vida_pct": 50 } }

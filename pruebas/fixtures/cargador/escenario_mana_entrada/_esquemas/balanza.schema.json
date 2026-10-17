@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": ["posiciones"],
+  "additionalProperties": false,
+  "properties": {
+    "_nota": { "type": "string" },
+    "posiciones": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["posicion", "reserva_mana"],
+        "additionalProperties": false,
+        "properties": {
+          "posicion": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "reserva_mana": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

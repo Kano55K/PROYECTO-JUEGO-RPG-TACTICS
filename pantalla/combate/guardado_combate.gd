@@ -2,14 +2,26 @@
 # guarda sola la grabacion (.json) y el registro (.jsonl, una linea por evento)
 # como <escenario>_<semilla>_<n>. n es el primer numero libre de la carpeta, asi
 # no se pisa una partida anterior. Lo reproduce herramientas/reproducir.gd.
+# T23 (D-011): ademas, el resultado con sus metricas, como <...>_<n>_resultado.json.
+# T33 (D-015): y la ficha de playtest (FichaPlaytest), como <...>_<n>_playtest.json,
+# solo cuando se escribe el resultado.
 class_name GuardadoCombate
 extends RefCounted
 
+const SUFIJO_RESULTADO: String = "_resultado.json"
+const SUFIJO_PLAYTEST: String = "_playtest.json"
+# T31: una variante editada en el panel se guarda como
+# <escenario>_editado_<semilla>_<n>, para no mezclarla con las del archivo.
+const SUFIJO_EDITADO: String = "_editado"
 
-# Devuelve la ruta sin extension, o "" si no se pudo escribir.
-static func guardar(combate: Combate, carpeta: String) -> String:
+
+# Devuelve la ruta sin extension, o "" si no se pudo escribir. editado: si el
+# escenario jugado difiere del archivo (EdicionEscenario.difiere). ficha: la de
+# playtest ({} = no se escribe).
+static func guardar(combate: Combate, carpeta: String, editado: bool = false, ficha: Dictionary = {}) -> String:
 	DirAccess.make_dir_recursive_absolute(carpeta)
-	var prefijo: String = "%s_%d_" % [combate.contexto().escenario_id, combate.contexto().semilla]
+	var prefijo: String = "%s%s_%d_" % [combate.contexto().escenario_id, SUFIJO_EDITADO if editado else "",
+			combate.contexto().semilla]
 	var n: int = 1
 	while FileAccess.file_exists(carpeta.path_join(prefijo + str(n)) + ".json"):
 		n += 1
@@ -20,7 +32,21 @@ static func guardar(combate: Combate, carpeta: String) -> String:
 	var lineas: Array[String] = combate.registro().lineas_json()
 	if not _escribir(base + ".jsonl", "\n".join(lineas) + "\n"):
 		return ""
+	if combate.resultado() != null:
+		if not guardar_resultado(combate, base):
+			return ""
+		if not ficha.is_empty() and not _escribir(base + SUFIJO_PLAYTEST, JSON.stringify(ficha, "\t", true)):
+			return ""
 	return base
+
+
+# T23: el resultado del combate (A.7), con las metricas, en base + SUFIJO_RESULTADO.
+# Lo usa tambien herramientas/reproducir.gd. false si el combate no tiene
+# resultado (no termino) o no se pudo escribir.
+static func guardar_resultado(combate: Combate, base: String) -> bool:
+	if combate.resultado() == null:
+		return false
+	return _escribir(base + SUFIJO_RESULTADO, JSON.stringify(combate.resultado().a_diccionario(), "\t", true))
 
 
 static func _escribir(ruta: String, contenido: String) -> bool:

@@ -5,12 +5,12 @@
 class_name DecisionIA
 extends RefCounted
 
-# Huida y Encono (pasos 1 y 3) entran en T25 y T19/T20. CAZA es el 6b
+# La huida (paso 1) no es una decision: la tira el inicio del turno (T25). ENCONO es el 3 (T20); CAZA es el 6b
 # (reemplaza a 5 y 6); PREPARARSE, el 7 (ocultarse o cavar).
-enum Paso { ERIZARSE, REMATE, CERCANA, CAZA, PREPARARSE, ACERCARSE }
+enum Paso { ENCONO, ERIZARSE, REMATE, CERCANA, CAZA, PREPARARSE, ACERCARSE }
 # El numero de cada paso en la lista de Sistema.md 11.8 v1.3.
 const _NUMERO: Dictionary = {
-	Paso.ERIZARSE: "4", Paso.REMATE: "5", Paso.CERCANA: "6", Paso.CAZA: "6b",
+	Paso.ENCONO: "3", Paso.ERIZARSE: "4", Paso.REMATE: "5", Paso.CERCANA: "6", Paso.CAZA: "6b",
 	Paso.PREPARARSE: "7", Paso.ACERCARSE: "8",
 }
 

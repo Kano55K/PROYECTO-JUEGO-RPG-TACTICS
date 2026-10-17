@@ -1,0 +1,58 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://pantalla/parametros/panel_parametros.gd" id="1_script"]
+
+[node name="PanelParametros" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Contenido" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Titulo" type="Label" parent="Contenido"]
+layout_mode = 2
+
+[node name="Botones" type="HBoxContainer" parent="Contenido"]
+layout_mode = 2
+
+[node name="Volver" type="Button" parent="Contenido/Botones"]
+layout_mode = 2
+text = "Volver al selector"
+
+[node name="Restaurar" type="Button" parent="Contenido/Botones"]
+layout_mode = 2
+text = "Restaurar del archivo"
+
+[node name="Jugar" type="Button" parent="Contenido/Botones"]
+layout_mode = 2
+text = "Jugar"
+
+[node name="ErroresGenerales" type="Label" parent="Contenido"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+autowrap_mode = 3
+
+[node name="Desplazable" type="ScrollContainer" parent="Contenido"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Campos" type="GridContainer" parent="Contenido/Desplazable"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 16
+columns = 3

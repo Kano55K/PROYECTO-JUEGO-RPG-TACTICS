@@ -72,6 +72,12 @@ func armar_lineas(clave: String, datos: Dictionary = {}, sujeto: String = "") ->
 	return lineas
 
 
+# T19: si la clave tiene texto (sin avisar), para elegir entre una linea propia
+# y la general cuando la variante no sigue la forma <clave>.<sujeto>.
+func tiene(clave: String) -> bool:
+	return _es_texto(clave)
+
+
 # Avisos de los pedidos hechos hasta ahora: {clave, hueco, motivo}.
 func avisos() -> Array[Dictionary]:
 	return _avisos.duplicate(true)

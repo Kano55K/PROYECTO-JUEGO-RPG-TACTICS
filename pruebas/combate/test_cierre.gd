@@ -80,6 +80,9 @@ func _assert_rechazado(cierre: ResultadoCierre, motivo: ResultadoCierre.Motivo) 
 
 # (6) Victoria con una caida: se levanta con 1 de vida y recibe el +1, como las
 # de pie; la guardada no lo recibe. La atacante caida no cambia.
+# Reescrito en T30 (Sistema.md 5.2 y 9.3, S-65): con la atacante caida, el cierre
+# deja su destino pendiente y la lealtad de la noche sin aplicar (un solo recorte
+# con el destino). Los mismos +1 salen al aplicar el acumulador que deja abierto.
 func test_victoria_levanta_y_suma_uno() -> void:
 	var plantel: Plantel = _plantel()
 	_victoria(plantel)
@@ -96,6 +99,11 @@ func test_victoria_levanta_y_suma_uno() -> void:
 	assert_int(levantada.estado).is_equal(Criatura.Estado.SUELTA)
 	assert_int(levantada.vida).is_equal(1)
 	assert_that(levantada.posicion).is_equal(Vector2i(1, 6))
+	assert_str(cierre.destino_pendiente).is_equal("ocarra_n1")
+	assert_array(cierre.lealtad).is_empty()
+	assert_int(levantada.lealtad).is_equal(8)
+	assert_object(cierre.acumulador).is_not_null()
+	cierre.lealtad = cierre.acumulador.aplicar(plantel.criaturas())
 	assert_int(levantada.lealtad).is_equal(9)
 	assert_int(plantel.criatura("rodauva_2").lealtad).is_equal(7)
 	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(10)
@@ -133,8 +141,10 @@ func test_derrota_con_dos_caidas() -> void:
 	for id_pergamino in pergaminos:
 		assert_int(plantel.pergamino(id_pergamino).estado).is_equal(Pergamino.Estado.ARDIDO)
 
-	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(1)
-	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["muerte_en_el_grupo_afines", "muerte_en_el_grupo_afines"])
+	# Reescrito en T29 (Sistema.md 6): surcon_1 (9, la mas leal) rescata y suma +2:
+	# 9 + 2 - 4 - 4 = 3.
+	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(3)
+	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["rescate", "muerte_en_el_grupo_afines", "muerte_en_el_grupo_afines"])
 	assert_int(plantel.criatura("ocarra_1").lealtad).is_equal(3)
 	assert_array(_motivos(_cambio(cierre, "ocarra_1"))).contains_exactly(["muerte_en_el_grupo", "muerte_en_el_grupo"])
 
@@ -149,9 +159,10 @@ func test_ejemplo_muerte_de_una_rodauva() -> void:
 	_assert_valido(cierre)
 	assert_int(_cambio(cierre, "rodauva_2").cambio).is_equal(-4)
 	assert_int(plantel.criatura("rodauva_2").lealtad).is_equal(2)
-	assert_int(_cambio(cierre, "surcon_1").cambio).is_equal(-4)
-	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(5)
-	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["muerte_en_el_grupo_afines"])
+	# Reescrito en T29 (Sistema.md 6): surcon_1 tambien rescata (+2): 9 + 2 - 4 = 7.
+	assert_int(_cambio(cierre, "surcon_1").cambio).is_equal(-2)
+	assert_int(plantel.criatura("surcon_1").lealtad).is_equal(7)
+	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["rescate", "muerte_en_el_grupo_afines"])
 	assert_int(_cambio(cierre, "ocarra_1").cambio).is_equal(-2)
 	assert_int(plantel.criatura("ocarra_1").lealtad).is_equal(5)
 	assert_array(_motivos(_cambio(cierre, "ocarra_1"))).contains_exactly(["muerte_en_el_grupo"])
@@ -196,12 +207,93 @@ func test_se_cierra_una_sola_vez() -> void:
 	assert_str(_foto(plantel)).is_equal(antes)
 
 
-# La huida existe en el enum, pero es de T26.
-func test_huida_no_implementada() -> void:
+# T28 (reescribe el test de T10 que rechazaba HUIDA con NO_IMPLEMENTADO, porque
+# Sistema.md 11.7 ya la define): con el Maestro ido, las caidas del tablero mueren
+# y su pergamino arde; muerte en el grupo a las sueltas (5.2: -4 a las afines de la
+# muerta, -2 al resto); la guardada sobrevive, tambien la caida guardada (11.5,
+# T27); nadie recibe el +1 de victoria.
+func test_huida_las_caidas_mueren() -> void:
 	var plantel: Plantel = _plantel()
-	_tumbar(plantel, ["rodauva_1"])
+	var pergamino_caida: String = plantel.criatura("rodauva_1").pergamino_id
+	_tumbar(plantel, ["rodauva_1", "rodauva_2"])
+	# rodauva_2 cayo y el Maestro la guardo (T27): guardada, fuera del tablero.
+	var guardada_caida: Criatura = plantel.criatura("rodauva_2")
+	guardada_caida.estado = Criatura.Estado.GUARDADA
+	guardada_caida.posicion = Criatura.SIN_POSICION
+	guardada_caida.vida = 1
+	plantel.maestro.huida_declarada = true
+	plantel.maestro.se_fue = true
+	assert_int(FinCombate.evaluar(plantel)).is_equal(FinCombate.Fin.HUIDA)
+
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.HUIDA)
+	_assert_valido(cierre)
+	assert_int(cierre.fin).is_equal(FinCombate.Fin.HUIDA)
+	assert_bool(cierre.maestro_caido).is_false()
+	assert_array(cierre.levantadas).is_empty()
+	assert_array(cierre.muertas).contains_exactly(["rodauva_1"])
+	var muerta: Criatura = plantel.criatura("rodauva_1")
+	assert_int(muerta.estado).is_equal(Criatura.Estado.MUERTA)
+	assert_str(muerta.pergamino_id).is_empty()
+	assert_int(plantel.pergamino(pergamino_caida).estado).is_equal(Pergamino.Estado.ARDIDO)
+
+	assert_int(_cambio(cierre, "surcon_1").cambio).is_equal(-4)
+	assert_array(_motivos(_cambio(cierre, "surcon_1"))).contains_exactly(["muerte_en_el_grupo_afines"])
+	assert_int(_cambio(cierre, "ocarra_1").cambio).is_equal(-2)
+	assert_array(_motivos(_cambio(cierre, "ocarra_1"))).contains_exactly(["muerte_en_el_grupo"])
+	for cambio in cierre.lealtad:
+		assert_array(_motivos(cambio)).not_contains(["victoria"])
+
+	assert_int(guardada_caida.estado).is_equal(Criatura.Estado.GUARDADA)
+	assert_int(guardada_caida.vida).is_equal(1)
+	assert_int(guardada_caida.lealtad).is_equal(6)
+	assert_int(plantel.pergamino(guardada_caida.pergamino_id).estado).is_equal(Pergamino.Estado.OCUPADO)
+	var guardada: Criatura = plantel.criatura("zancajunco_1")
+	assert_int(guardada.estado).is_equal(Criatura.Estado.GUARDADA)
+	assert_int(guardada.lealtad).is_equal(5)
+	assert_int(cierre.lealtad.size()).is_equal(2)
+
+
+# T28 (11.7): sin caidas, la huida no mata a nadie ni cambia la lealtad.
+func test_huida_sin_caidas() -> void:
+	var plantel: Plantel = _plantel()
+	plantel.maestro.se_fue = true
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.HUIDA)
+	_assert_valido(cierre)
+	assert_array(cierre.muertas).is_empty()
+	assert_array(cierre.lealtad).is_empty()
+
+
+# T28: Cierre.caidas_que_mueren es el criterio del cierre: las caidas de la tribu
+# en el tablero, en su orden (la atacante caida no, la guardada no).
+func test_caidas_que_mueren() -> void:
+	var plantel: Plantel = _plantel()
+	_tumbar(plantel, ["rodauva_2", "rodauva_1", "ocarra_n1"])
+	var ids: Array[String] = []
+	for criatura in Cierre.caidas_que_mueren(plantel):
+		ids.append(criatura.id)
+	assert_array(ids).contains_exactly(["rodauva_1", "rodauva_2"])
+
+
+# T28 (11.7, S-60): el orden de evaluar es caida -> victoria -> huida, y la huida
+# solo declarada no termina nada.
+func test_evaluar_con_la_huida() -> void:
+	var plantel: Plantel = _plantel()
+	plantel.maestro.huida_declarada = true
+	assert_int(FinCombate.evaluar(plantel)).is_equal(FinCombate.Fin.EN_CURSO)
+	plantel.maestro.se_fue = true
+	assert_int(FinCombate.evaluar(plantel)).is_equal(FinCombate.Fin.HUIDA)
+	_tumbar(plantel, ["ocarra_s1", "ocarra_n1"])
+	assert_int(FinCombate.evaluar(plantel)).is_equal(FinCombate.Fin.VICTORIA)
+	_tumbar(plantel, [Maestro.ID])
+	assert_int(FinCombate.evaluar(plantel)).is_equal(FinCombate.Fin.DERROTA_POR_CAIDA)
+
+
+# T28: con el Maestro solo declarado (no se fue), HUIDA no coincide con el Plantel.
+func test_huida_solo_declarada_no_coincide() -> void:
+	var plantel: Plantel = _plantel()
+	plantel.maestro.huida_declarada = true
 	var antes: String = _foto(plantel)
-	_assert_rechazado(_cierre.cerrar(plantel, FinCombate.Fin.HUIDA), ResultadoCierre.Motivo.NO_IMPLEMENTADO)
+	_assert_rechazado(_cierre.cerrar(plantel, FinCombate.Fin.HUIDA), ResultadoCierre.Motivo.FIN_NO_COINCIDE)
 	assert_str(_foto(plantel)).is_equal(antes)
 
 
@@ -212,3 +304,68 @@ func test_fin_que_no_coincide() -> void:
 	var antes: String = _foto(plantel)
 	_assert_rechazado(_cierre.cerrar(plantel, FinCombate.Fin.VICTORIA), ResultadoCierre.Motivo.FIN_NO_COINCIDE)
 	assert_str(_foto(plantel)).is_equal(antes)
+
+
+# T30 (P-024, Sistema.md 9.2 paso 6): con la derrota, la atacante nocturna se va,
+# de pie o caida: su pergamino arde, sale del tablero (fuera, sin posicion) y
+# nadie anota lealtad por ella. Queda en se_fueron.
+func test_derrota_la_atacante_se_va() -> void:
+	for caida in [false, true]:
+		var plantel: Plantel = _plantel()
+		var atacantes: Array[String] = [Maestro.ID]
+		if caida:
+			atacantes.append("ocarra_n1")
+		_tumbar(plantel, atacantes)
+		var atacante: Criatura = plantel.criatura("ocarra_n1")
+		var pergamino_id: String = atacante.pergamino_id
+		var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.DERROTA_POR_CAIDA)
+		_assert_valido(cierre)
+		assert_array(cierre.se_fueron).contains_exactly(["ocarra_n1"])
+		assert_int(atacante.estado).is_equal(Criatura.Estado.FUERA)
+		assert_that(atacante.posicion).is_equal(Criatura.SIN_POSICION)
+		assert_str(atacante.pergamino_id).is_empty()
+		assert_int(plantel.pergamino(pergamino_id).estado).is_equal(Pergamino.Estado.ARDIDO)
+		assert_object(_cambio(cierre, "ocarra_n1")).is_null()
+		assert_array(cierre.muertas).is_empty()
+		# Lo unico de lealtad es el rescate (Sistema.md 6): nada por la que se va.
+		for cambio in cierre.lealtad:
+			assert_array(_motivos(cambio)).contains_exactly(["rescate"])
+
+
+# T30 (S-66): con la huida del Maestro, la atacante se va igual.
+func test_huida_la_atacante_se_va() -> void:
+	var plantel: Plantel = _plantel()
+	plantel.maestro.huida_declarada = true
+	plantel.maestro.se_fue = true
+	var atacante: Criatura = plantel.criatura("ocarra_n1")
+	var pergamino_id: String = atacante.pergamino_id
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.HUIDA)
+	_assert_valido(cierre)
+	assert_array(cierre.se_fueron).contains_exactly(["ocarra_n1"])
+	assert_int(atacante.estado).is_equal(Criatura.Estado.FUERA)
+	assert_int(plantel.pergamino(pergamino_id).estado).is_equal(Pergamino.Estado.ARDIDO)
+	assert_array(cierre.lealtad).is_empty()
+
+
+# T30: con la victoria, la atacante caida se queda esperando su destino (sesion 2).
+func test_victoria_la_atacante_no_se_va() -> void:
+	var plantel: Plantel = _plantel()
+	_victoria(plantel)
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.VICTORIA)
+	_assert_valido(cierre)
+	assert_array(cierre.se_fueron).is_empty()
+	assert_int(plantel.criatura("ocarra_n1").estado).is_equal(Criatura.Estado.CAIDA)
+
+
+# T30 (S-65): sin una atacante caida (aca, ya fuera del tablero), la victoria no
+# deja destino pendiente y la lealtad se aplica en el cierre, como siempre.
+func test_victoria_sin_atacante_caida_aplica_la_lealtad() -> void:
+	var plantel: Plantel = _plantel()
+	_tumbar(plantel, ["ocarra_s1"])
+	VidaCero.sacar_del_tablero(plantel.criatura("ocarra_n1"), Surcos.new())
+	var cierre: ResultadoCierre = _cierre.cerrar(plantel, FinCombate.Fin.VICTORIA)
+	_assert_valido(cierre)
+	assert_str(cierre.destino_pendiente).is_empty()
+	assert_object(cierre.acumulador).is_null()
+	assert_int(cierre.lealtad.size()).is_equal(4)
+	assert_int(plantel.criatura("rodauva_1").lealtad).is_equal(9)

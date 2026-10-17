@@ -26,7 +26,8 @@ enum Motivo {
 	MOVER_ENTRE_ATAQUES,
 	# Sistema.md 11.2.1, Costo: se cava sin haberse movido en el turno.
 	YA_SE_MOVIO,
-	# Sistema.md 11.2.1, Donde: ortogonalmente adyacente.
+	# Sistema.md 11.2.1, Donde: ortogonalmente adyacente. T26 (3.1): guardar exige
+	# la criatura junto al Maestro e invocar, la casilla junto al Maestro.
 	CASILLA_NO_ADYACENTE,
 	# Sistema.md 11.3, Casilla libre: fuera del tablero, con unidad o con surco (S-25).
 	CASILLA_NO_LIBRE,
@@ -41,6 +42,78 @@ enum Motivo {
 	# Combate.aplicar: no es el turno de una unidad del jugador (o el combate se
 	# detuvo por un error).
 	FUERA_DE_TURNO,
+	# Sistema.md 10.1, Restricciones: las salvajes no Secundan.
+	SALVAJE_NO_SECUNDA,
+	# Sistema.md 10.1: se Secunda a otra unidad, nunca a si misma.
+	SECUNDAR_A_SI_MISMA,
+	# Sistema.md 10.1: la elegida es una aliada (del mismo bando).
+	ALIADA_DE_OTRO_BANDO,
+	# Sistema.md 10.1: la aliada todavia no actuo en la ronda (ni cayo, ni fue
+	# guardada); asi tampoco se Secunda mas alla del final de la ronda.
+	ALIADA_SIN_ENTRADA_PENDIENTE,
+	# Sistema.md 10.5 y 10.1 (T19): la enconada no usa otra accion que atacar a su
+	# rival, y no Secunda.
+	ENCONADA,
+	# Sistema.md 10.1: la acobardada no Secunda.
+	ACOBARDADA,
+	# S-35: la enconada que alcanza a su rival solo se mueve a casillas desde
+	# donde golpea a alguna rival del chequeo.
+	CASILLA_SIN_RIVAL,
+	# S-35: la enconada solo ataca a las rivales del chequeo (en Caza, el primer ataque).
+	OBJETIVO_NO_RIVAL,
+	# S-35: la enconada que alcanza no termina sin atacar a su rival.
+	DEBE_ATACAR_RIVAL,
+	# S-35: la enconada que no alcanza solo se mueve a las casillas de menor
+	# distancia a la rival mas cercana.
+	CASILLA_NO_ACERCA,
+	# S-35: la enconada que no alcanza no termina mientras pueda acercarse.
+	DEBE_ACERCARSE,
+	# Sistema.md 10.6 y S-36: la acobardada no termina un movimiento mas cerca de
+	# ninguna rival del chequeo que donde empezo el turno.
+	MAS_CERCA_DE_RIVAL,
+	# Sistema.md 1.6 (T22): solo el Maestro lanza hechizos.
+	SOLO_MAESTRO,
+	# El Maestro no tiene ese hechizo (maestro.json, hechizos.json).
+	HECHIZO_INEXISTENTE,
+	# Sistema.md 1.6 y 2.3: el maná actual no alcanza el costo.
+	MANA_INSUFICIENTE,
+	# Sistema.md 1.6: el hechizo no vale sobre el Maestro mismo (la Lanzadera).
+	OBJETIVO_PROPIO,
+	# Sistema.md 1.6: el Remiendo es para el Maestro o una aliada. T26: se invoca a
+	# una criatura de la tribu.
+	OBJETIVO_ENEMIGO,
+	# Sistema.md 1.6, casos borde de la Lanzadera: atraer a una unidad adyacente.
+	ATRAER_ADYACENTE,
+	# Sistema.md 1.6: la Lanzadera lleva un sentido de sus modos; los demas, ninguno.
+	SENTIDO_INVALIDO,
+	# Turno.motivo_hechizo (T22, sesion 2): el hechizo no vale sobre ninguna unidad ahora.
+	SIN_OBJETIVOS,
+	# Sistema.md 4.1 (T24): toda captura exige un pergamino en blanco en el Plantel.
+	SIN_PERGAMINO,
+	# Sistema.md 4.1: se sella a una salvaje; la atacante nocturna se resella despues
+	# del combate (9.3, T30).
+	OBJETIVO_NO_SALVAJE,
+	# Sistema.md 4.3: la ficha no es sellable (el Tasajero).
+	NO_SELLABLE,
+	# Sistema.md 4.1: el rango de la especie pasa el maximo sellable de la balanza.
+	RANGO_ALTO,
+	# Sistema.md 3.1 (T26): se guarda una criatura de la tribu (ni el Maestro ni una enemiga).
+	SOLO_CRIATURA_DE_LA_TRIBU,
+	# Sistema.md 3.1 (T26): solo se invoca a una guardada (no a una suelta, caida o fuera).
+	NO_GUARDADA,
+	# Sistema.md 3.1 (T26): sin ninguna casilla libre junto al Maestro no se invoca.
+	SIN_CASILLA_LIBRE,
+	# Sistema.md 11.5 (T27, P-025): guardar a una caida pide una unidad caida (no una de pie).
+	OBJETIVO_NO_CAIDO,
+	# Sistema.md 9.3 (T30): no hay una atacante nocturna caida esperando su destino (el
+	# combate sigue, termino de otra forma o ya se decidio). Tambien en el Turno.
+	SIN_DESTINO_PENDIENTE,
+	# Sistema.md 9.3: la opcion no es perdonar, sellar ni comer.
+	OPCION_INVALIDA,
+	# Sistema.md 4.4: si sellar de nuevo fallo, solo quedan perdonar y comer.
+	SELLAR_YA_FALLO,
+	# Sistema.md 4.1 v1.8 (T45, S-50): con 0 % no se puede intentar sellar.
+	SIN_PROBABILIDAD,
 }
 
 var valida: bool
@@ -49,6 +122,36 @@ var motivo: Motivo
 var danio: int = 0
 # Solo al atacar: el desglose de 11.4 (danio == desglose.total). Lo lee el registro.
 var desglose: DesgloseDanio = null
+# Solo al atacar (Sistema.md 10.2, T16): el eslabon de la cadena que es (o seria)
+# el golpe, desde 1; null en las enemigas, que no encadenan. Lo lee el registro.
+var eslabon: Variant = null
+# Solo en un hechizo, un sellado, una invocacion o al guardar a una caida (Sistema.md 1.6, 4.1, 3.1 y 11.5;
+# T22, T24, T26 y T27) y en el resellado del destino (T30): {de, a} del mana que
+# paga, o {} si no cambia (D-007).
+var mana: Dictionary = {}
+# Solo en un hechizo que no es ataque: el evento de A.7 que produce (`lanzadera`
+# o `remiendo`), con su tipo. Lo mismo al validar y al aplicar. En un sellado
+# (T24), el evento `sellado`, solo al aplicar: la tirada existe solo al aplicar.
+# En una invocacion (T26), el evento `invocacion`. Al guardar a una caida (T27), el
+# evento `guardado_caida`, igual al validar y al aplicar. En el destino de la
+# atacante (T30), el evento `destino_atacante`, solo al aplicar (puede haber tirada).
+var evento: Dictionary = {}
+# Solo en un sellado valido (Sistema.md 4.1 y 2.3, T24) y en el resellado del
+# destino (4.4, T30): el % que se muestra antes de gastar el mana y el costo. En una invocacion valida (T26) y al guardar a una
+# caida (T27), el costo. Lo mismo al validar y al aplicar. Tambien en el sellado
+# rechazado por SIN_PROBABILIDAD (T45): el 0 % se sigue mostrando (4.1 v1.8).
+var porcentaje: Variant = null
+var costo: int = 0
+# Solo al guardar a una caida (Sistema.md 11.5, T27): {de, a} de la vida de la caida
+# (la de ahora y la que le queda guardada). Lo mismo al validar y al aplicar.
+var vida: Dictionary = {}
+# Solo en el destino de la atacante (Sistema.md 5.2, T30, S-65): los cambios de
+# lealtad de toda la noche (cierre y destino) con un solo recorte; [] en un
+# sellado que falla, que no cierra la noche. Lo mismo al validar y al aplicar.
+var lealtad: Array[CambioLealtad] = []
+# Solo en la Lanzadera y en una invocacion (T26): las ocultas que la movida o la
+# invocada destaparia por contacto al llegar (Junco.destaparia), en el orden del Plantel; [] si choca.
+var destaparia: Array[String] = []
 # Solo al terminar: true si el turno se cierra sin haber usado la accion (P-015).
 var espero: bool = false
 # Como esta el combate: despues de aplicar, o el motivo de un rechazo por

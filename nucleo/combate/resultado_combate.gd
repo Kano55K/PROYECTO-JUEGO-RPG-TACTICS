@@ -12,6 +12,9 @@ var semilla: int
 var desenlace: FinCombate.Fin
 var rondas: int
 var maestro_caido: bool
+# Sistema.md 6 (T29): el id de la rescatista ("" si no hubo) y si fue permadeath.
+var rescatista: String = ""
+var permadeath: bool = false
 # ids en el orden de la tribu.
 var levantadas: Array[String] = []
 var muertas: Array[String] = []
@@ -19,8 +22,25 @@ var lealtad: Array[CambioLealtad] = []
 # ids de los pergaminos que ardieron en este combate.
 var pergaminos_ardidos: Array[String] = []
 var pergaminos_en_blanco: int = 0
-# id de la atacante nocturna caida al terminar, o "" (su destino es de T30).
+const DESTINO_SE_FUE: String = "se_fue"
+
+# id de la atacante nocturna caida tras una victoria, que espera su destino
+# (Sistema.md 9.3), o "".
 var atacante_pendiente: String = ""
+# Sistema.md 9.2 y 9.3 (T30): {opcion, resultado, primera_opcion} o {} (null en el
+# diccionario). Con la derrota o la huida (P-024, S-66), {opcion: null, resultado:
+# se_fue, primera_opcion: null}. Con la victoria, lo pone el Combate cuando el
+# destino se decide (perdonada, sellada o comida); mientras espera, {} y
+# atacante_pendiente. primera_opcion (T45, P-051, 11.9 v1.8): la primera opcion
+# elegida (sellar, si se resello, fallo y despues se eligio otra).
+var destino_atacante: Dictionary = {}
+# Sistema.md 11.9 (T23, D-011): MetricasCombate.calcular sobre el registro
+# completo. La llena el Combate despues del evento `cierre`.
+var metricas: Dictionary = {}
+# Sistema.md 4.1 y 4.2 (T24): las salvajes selladas en este combate, en el orden de
+# sus pergaminos: {unidad, especie, pergamino, lealtad} (lealtad inicial del
+# camino de combate). Salen guardadas: el Cierre no les da el +1 (5.2).
+var capturas: Array = []
 # Estado final, en el orden del Plantel (diccionarios del esquema).
 var _maestro: Dictionary = {}
 var _unidades: Array = []
@@ -36,6 +56,8 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	resultado.desenlace = cierre.fin
 	resultado.rondas = rondas_jugadas
 	resultado.maestro_caido = plantel.maestro.caido
+	resultado.rescatista = cierre.rescatista
+	resultado.permadeath = cierre.permadeath
 	resultado.levantadas = cierre.levantadas.duplicate()
 	resultado.muertas = cierre.muertas.duplicate()
 	resultado.lealtad = cierre.lealtad.duplicate()
@@ -43,17 +65,26 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 	for pergamino in plantel.pergaminos():
 		if pergamino.estado == Pergamino.Estado.EN_BLANCO:
 			resultado.pergaminos_en_blanco += 1
-	# Lectura literal de B.2 (T12): la atacante caida, sea cual sea el desenlace (P-024, S-20).
-	for criatura in plantel.criaturas():
-		if criatura.comportamiento == Criatura.Comportamiento.ATACANTE_NOCTURNA \
-				and criatura.estado == Criatura.Estado.CAIDA:
-			resultado.atacante_pendiente = criatura.id
-			break
+		# Un pergamino ocupado por una salvaje es una captura de este combate (T24).
+		elif pergamino.estado == Pergamino.Estado.OCUPADO:
+			var ocupante: Criatura = plantel.criatura(pergamino.ocupante_id)
+			if ocupante != null and ocupante.comportamiento == Criatura.Comportamiento.SALVAJE:
+				resultado.capturas.append({"unidad": ocupante.id, "especie": ocupante.especie.id(),
+						"pergamino": pergamino.id, "lealtad": contexto.sellado.lealtad_inicial(plantel.maestro)})
+	# Sistema.md 9.3 y P-024 (T30): solo con la victoria la atacante caida espera su
+	# destino; con la derrota o la huida se fue (el Cierre ya la saco). Despues del
+	# destino ya no esta caida (o lo sigue, si fallo el sellado: sigue esperando).
+	if cierre.fin == FinCombate.Fin.VICTORIA:
+		var atacante: Criatura = Cierre.atacante_caida(plantel)
+		if atacante != null:
+			resultado.atacante_pendiente = atacante.id
+	if not cierre.se_fueron.is_empty():
+		resultado.destino_atacante = {"opcion": null, "resultado": DESTINO_SE_FUE, "primera_opcion": null}
 	resultado._maestro = {
 		"vida": plantel.maestro.vida,
 		"posicion": Plantel.casilla_a_lista(plantel.maestro.posicion),
-		# Lo llena T21.
-		"mana": null,
+		# Sistema.md 2.1 (T21): el mana actual al terminar.
+		"mana": plantel.maestro.mana,
 		"hambre": plantel.maestro.hambre,
 	}
 	for criatura in plantel.criaturas():
@@ -65,13 +96,15 @@ static func armar(contexto: ContextoCombate, cierre: ResultadoCierre, rondas_jug
 			"estado": Plantel.nombre_estado(criatura.estado),
 			"vida": criatura.vida,
 			"lealtad": criatura.lealtad if es_tribu else null,
+			# Arquitectura.md A.7 (T14): con el hambre de combate (Sistema.md 7.2).
+			"hambre": criatura.hambre if es_tribu else null,
 			"posicion": Plantel.casilla_a_lista(criatura.posicion),
 		})
 	return resultado
 
 
-# Arquitectura.md A.7. Los campos de tareas futuras van en null o lista vacia:
-# rescatista y permadeath (T29), capturas (T24, T30), metricas (T23, T33).
+# Arquitectura.md A.7. rescatista y permadeath, desde T29 (Sistema.md 6).
+# capturas: las de T24 (el resellado de T30 no es una captura: vuelve de la tribu, 4.4).
 func a_diccionario() -> Dictionary:
 	return {
 		"contexto_id": contexto_id,
@@ -79,17 +112,18 @@ func a_diccionario() -> Dictionary:
 		"desenlace": (FinCombate.Fin.keys()[desenlace] as String).to_lower(),
 		"rondas": rondas,
 		"maestro_caido": maestro_caido,
-		"rescatista": null,
-		"permadeath": null,
+		"rescatista": null if rescatista.is_empty() else rescatista,
+		"permadeath": permadeath,
 		"maestro": _maestro.duplicate(true),
 		"unidades": _unidades.duplicate(true),
 		"levantadas": levantadas.duplicate(),
 		"muertas": muertas.duplicate(),
-		"capturas": [],
+		"capturas": capturas.duplicate(true),
 		"lealtad_cambios": cambios_a_lista(lealtad),
 		"pergaminos": {"en_blanco": pergaminos_en_blanco, "ardidos": pergaminos_ardidos.duplicate()},
 		"atacante_pendiente": null if atacante_pendiente.is_empty() else atacante_pendiente,
-		"metricas": null,
+		"destino_atacante": null if destino_atacante.is_empty() else destino_atacante.duplicate(),
+		"metricas": metricas.duplicate(true),
 	}
 
 

@@ -1,0 +1,10 @@
+{
+  "_nota": "T33 (2): a desenlace_proporcion le falta comparacion",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "sin_comparacion", "escenarios": ["c_tasajero"], "calculo": "desenlace_proporcion",
+      "parametros": { "desenlaces": ["victoria"], "umbral_pct": 20 } }
+  ]
+}

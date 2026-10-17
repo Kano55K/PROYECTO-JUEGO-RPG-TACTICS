@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Arquitectura.md B.4 (T24): una especie inventada que no se sella (sellable false, como el Tasajero en Sistema.md 4.3), de rango 1, con otros ids. Numeros de la Ocarra de la fixture (Sistema.md 11.2)",
+  "id": "especie_no_sellable",
+  "rol": "trabajo",
+  "rango": 1,
+  "sellable": false,
+  "vida": 12,
+  "danio": 4,
+  "movimiento": 3,
+  "alcance": 1,
+  "velocidad": 7,
+  "rasgo": {
+    "id": "rasgo_no_sellable",
+    "efecto": "alabarda"
+  },
+  "huida_pct": 0
+}

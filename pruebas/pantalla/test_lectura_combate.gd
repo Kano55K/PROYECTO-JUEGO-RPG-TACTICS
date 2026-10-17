@@ -208,11 +208,13 @@ func test_t40_sucesos_de_los_rasgos() -> void:
 # (5) El tooltip de una enemiga muestra su rasgo y su estado: el Tasajero de C
 # en Caza con el umbral de vida_de_cambio (30 x 50% = 15); el Zancajunco
 # salvaje oculto con el bono; los Surcones con sus surcos contra el tope (2).
+# T19 (Sistema.md 10.5 v1.6): el Tasajero es de Encono y suma su contador (0 de
+# 3); el fixture de textos no tiene panel.encono.
 func test_t40_tooltip_de_una_enemiga() -> void:
 	var lectura: LecturaCombate = _lectura_rasgos("escenario_c")
 	assert_array(lectura.tooltip_unidad("tasajero_s1")).is_equal(["Tasajero", "Vida: 30/30", "Caza y cuenta",
 			"Empieza cazando: dos zarpazos por turno, a una presa o a dos, y recibe más daño. Herido, pasa a contar: pica una vez, más flojo, y se aparta. No vuelve a cazar.",
-			"Caza", "Con 15 de vida o menos, pasa a Cuenta."])
+			"Caza", "[FALTA: panel.encono]: 0/3", "Con 15 de vida o menos, pasa a Cuenta."])
 	assert_str(lectura.tooltip_unidad(Maestro.ID)[0]).is_equal("Maestro")
 
 	lectura = _lectura_rasgos("escenario_junco_salvaje")
@@ -222,7 +224,9 @@ func test_t40_tooltip_de_una_enemiga() -> void:
 	var tooltip: Array[String] = lectura.tooltip_unidad("zancajunco_s1")
 	assert_array(tooltip).contains(["Zancajunco", "Hacerse junco", "Hecho junco", "Embestida"])
 	assert_bool(_ficha_de(lectura, "zancajunco_s1")["oculta"]).is_true()
-	assert_array(_ficha_de(lectura, "zancajunco_s1")["marcas"]).is_equal(["Hecho junco", "Embestida"])
+	# T24 (Sistema.md 4.1): la ficha de una salvaje sellable suma su % de sellado (rango 2
+	# con la vida completa: 0 %).
+	assert_array(_ficha_de(lectura, "zancajunco_s1")["marcas"]).is_equal(["Hecho junco", "Embestida", "0%"])
 
 	# escenario_surco_tribu: el Maestro juega primero; despues el Surcon de la tribu cava.
 	lectura = _lectura_rasgos("escenario_surco_tribu")
@@ -267,3 +271,130 @@ func test_t40_desglose_nombra_el_modo() -> void:
 	assert_array(lineas).contains(["Caza: +25%"])
 	for linea in lineas:
 		assert_str(linea).not_contains("desglose.fuente.modo")
+
+
+# T14 (11): el panel de la unidad del turno y el tooltip de una criatura de la
+# tribu muestran la obediencia (numero y tramo) que da el nucleo; el Maestro y
+# las enemigas no tienen. Las claves nuevas no estan en es.json: [FALTA].
+func test_t14_panel_y_tooltip_con_obediencia() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_hambre_combate")
+	while _combate.turno_actual().unidad_id != "rodauva_1":
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	# Lealtad 7 con hambre 5 (Normal), balanza 2 (umbral 7): 7, leal.
+	var linea: String = "[FALTA: panel.obediencia]: 7 ([FALTA: obediencia.tramo.leal])"
+	assert_array(lectura.panel_turno()).contains([linea])
+	assert_str(lectura.tooltip_unidad("rodauva_1")[2]).is_equal(linea)
+	for id_unidad in [Maestro.ID, "ocarra_s1"]:
+		for texto in lectura.tooltip_unidad(id_unidad):
+			assert_str(texto).not_contains("obediencia")
+	while _combate.turno_actual().unidad_id != Maestro.ID:
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	for texto in lectura.panel_turno():
+		assert_str(texto).not_contains("obediencia")
+
+	# Despues de cerrar la ronda 5 (Sistema.md 7.2): hambre 6, Hambrienta, 5 y neutral.
+	while _combate.instantanea()["ronda"] < 6:
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	assert_str(lectura.tooltip_unidad("rodauva_1")[2]) \
+			.is_equal("[FALTA: panel.obediencia]: 5 ([FALTA: obediencia.tramo.neutral])")
+
+
+# T14 (11): el hambre de combate da la linea de combate.hambre y una linea por
+# cada unidad cuyo estado de hambre cambio (con su sujeto, A.2.1). El Maestro y
+# el Surcon caido suben 3 -> 4 sin cambiar de estado: no tienen linea.
+func test_t14_suceso_de_hambre_de_combate() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_hambre_combate")
+	while _combate.instantanea()["ronda"] < 6:
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	var evento: Dictionary = {}
+	for linea in _combate.registro().lineas():
+		if linea["tipo"] == "hambre_combate":
+			evento = linea
+	assert_array(lectura.suceso(evento)).is_equal([
+		"La pelea se alarga. A los tuyos les empieza a pesar el estómago vacío.",
+		"Rodauva · Hambrienta",
+		"Ocarra · Normal",
+	])
+
+
+# T15 (11), Sistema.md 10.3: un ataque con afinidad jugado por el Combate. El
+# desglose del evento `ataque` es el de la previsualizacion (el del mouse), con
+# la fuente afinidad, y la pantalla lo muestra como "Afinidad: +1". La Ocarra
+# [5,4] le pega a la Ocarra salvaje [7,4] con el Surcon [5,5] a su lado.
+func test_t15_desglose_del_registro_y_del_mouse_con_afinidad() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_afinidad",
+			{"ocarra_1": {"posicion": [5, 4]}, "surcon_1": {"posicion": [5, 5]}})
+	while _combate.turno_actual().unidad_id != "ocarra_1":
+		assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+	var vista_previa: ResultadoAccion = _combate.turno_actual().previsualizar_ataque(Vector2i(5, 4), "ocarra_s1")
+	assert_bool(vista_previa.valida).is_true()
+	assert_int(vista_previa.danio).is_equal(4 + 1)
+	assert_bool(_combate.aplicar(Accion.atacar("ocarra_s1")).valida).is_true()
+	var evento: Dictionary = {}
+	for linea in _combate.registro().lineas():
+		if linea["tipo"] == "ataque":
+			evento = linea
+	assert_str(evento["atacante"]).is_equal("ocarra_1")
+	assert_dict(evento["desglose"]).is_equal(vista_previa.desglose.a_diccionario())
+	var lineas: Array[String] = lectura.desglose(evento["desglose"], "ocarra_1")
+	assert_array(lineas).is_equal(lectura.desglose(vista_previa.desglose.a_diccionario(), "ocarra_1"))
+	assert_array(lineas).contains(["Afinidad: +1", "Total: 5"])
+
+
+# T16 (12), Sistema.md 10.2: con el mouse sobre la objetivo de la cadena, el
+# desglose muestra el bono del eslabon siguiente, y es el del evento `ataque`.
+# El panel de la unidad del turno muestra la cadena en curso (objetivo y eslabon).
+# escenario_cadena_combate: el Zancajunco pega a surcon_s1 y despues la Ocarra,
+# su rival (sin relacion, +50).
+func test_t16_desglose_y_panel_de_la_cadena() -> void:
+	var lectura: LecturaCombate = _lectura_rasgos("escenario_cadena_combate")
+	assert_str(_combate.turno_actual().unidad_id).is_equal("zancajunco_1")
+	for linea in lectura.panel_turno():
+		assert_str(linea).not_contains("panel.cadena")
+	assert_bool(_combate.aplicar(Accion.atacar("surcon_s1")).valida).is_true()
+	assert_bool(_combate.aplicar(Accion.terminar()).valida).is_true()
+
+	assert_str(_combate.turno_actual().unidad_id).is_equal("ocarra_1")
+	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.cadena]: Surcón (1)"])
+	var vista_previa: ResultadoAccion = _combate.turno_actual().previsualizar_ataque(Vector2i(4, 6), "surcon_s1")
+	assert_bool(vista_previa.valida).is_true()
+	assert_array(lectura.desglose(vista_previa.desglose.a_diccionario(), "ocarra_1")) \
+			.contains(["Cadena: +50%", "Total: 6"])
+	assert_bool(_combate.aplicar(Accion.atacar("surcon_s1")).valida).is_true()
+	var evento: Dictionary = {}
+	for linea in _combate.registro().lineas():
+		if linea["tipo"] == "ataque":
+			evento = linea
+	assert_dict(evento["desglose"]).is_equal(vista_previa.desglose.a_diccionario())
+	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.cadena]: Surcón (2)"])
+
+
+# T21 (12), Sistema.md 2.1: el panel del turno del Maestro y su tooltip muestran
+# el mana actual/tope, y cambian despues de la regeneracion; los de una criatura
+# no lo muestran. panel.mana no esta en el texto: se ve [FALTA]. El fixture baja
+# el mana a mano (en T21 nada lo gasta).
+func test_t21_mana_en_panel_y_tooltip() -> void:
+	var datos_fixture: Dictionary = DatosFixture.cargar()
+	assert_array(datos_fixture["errores"]).is_empty()
+	var datos: Dictionary = datos_fixture["datos"]
+	var escenario: Dictionary = LectorFixture.leer("res://pruebas/fixtures/combate/escenario_mana_combate.json",
+			"escenario")["datos"]
+	var textos: Dictionary = LectorFixture.leer(_TEXTOS, "textos")
+	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
+	contexto.plantel.maestro.mana = 2
+	_combate = Combate.empezar(contexto)
+	assert_str(_combate.error()).is_empty()
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, ArmadorTextos.desde_datos(textos["datos"],
+			contexto.azar_textos), EstadosUnidad.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"]))
+	var tope: int = contexto.plantel.maestro.mana_entrada
+
+	# Turno de la Rodauva: el Maestro todavia no regenero.
+	assert_str(_combate.turno_actual().unidad_id).is_equal("rodauva_1")
+	for linea in lectura.panel_turno() + lectura.tooltip_unidad("rodauva_1"):
+		assert_str(linea).not_contains("panel.mana")
+	assert_array(lectura.tooltip_unidad(Maestro.ID)).contains(["[FALTA: panel.mana]: 2/%d" % tope])
+
+	_combate.aplicar(Accion.terminar())
+	assert_str(_combate.turno_actual().unidad_id).is_equal(Maestro.ID)
+	assert_array(lectura.panel_turno()).contains(["[FALTA: panel.mana]: 3/%d" % tope])
+	assert_array(lectura.tooltip_unidad(Maestro.ID)).contains(["[FALTA: panel.mana]: 3/%d" % tope])

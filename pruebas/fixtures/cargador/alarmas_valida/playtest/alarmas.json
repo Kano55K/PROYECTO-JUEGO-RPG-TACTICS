@@ -1,0 +1,18 @@
+{
+  "_nota": "T33: una alarma por forma de parámetros, sin errores",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "muere", "escenarios": ["c_tasajero"], "calculo": "muere_si_empezo_suelta",
+      "parametros": { "especie": "rodauva", "umbral_pct": 50 } },
+    { "id": "promedio", "escenarios": ["c_tasajero"], "calculo": "rondas_pelea_promedio_fuera",
+      "parametros": { "_nota": "la nota no es un parámetro ajeno", "desde_decimas": 20, "hasta_decimas": 35 } },
+    { "id": "diferencia", "escenarios": ["c_tasajero"], "calculo": "victorias_diferencia",
+      "parametros": { "comparado_con": "c_tasajero", "umbral_puntos": 20 } },
+    { "id": "activa", "escenarios": ["c_tasajero"], "calculo": "activa_poco_usada",
+      "parametros": { "efecto": "erizarse", "umbral_pct": 20 } },
+    { "id": "encierro", "escenarios": ["c_tasajero"], "calculo": "encierro_de_efecto",
+      "parametros": { "efecto": "erizarse", "umbral_pct": 20 } }
+  ]
+}

@@ -48,6 +48,14 @@ func adyacentes(a: Vector2i, b: Vector2i) -> bool:
 	return distancia(a, b) == 1
 
 
+# Sistema.md 11.3 v1.6, Vecinas (8) y D-001: el vinculo mira las 8 casillas
+# alrededor, diagonales incluidas (distancia de Chebyshev 1). Es la unica
+# consulta de "vecina en 8": la usan la afinidad y, despues, el incidente y la
+# cobardia. El cuerpo (mover, atacar, junco, Caza) sigue con `vecinas` y `adyacentes`.
+static func es_vecina_en_8(a: Vector2i, b: Vector2i) -> bool:
+	return a != b and maxi(absi(a.x - b.x), absi(a.y - b.y)) == 1
+
+
 # Sistema.md 11.3, Movimiento: camino ortogonal de hasta `movimiento` pasos (BFS).
 # Se pasa por aliadas y caidas propias, nunca por enemigas; no se termina en una
 # casilla ocupada. Incluye `desde` (quedarse quieto). Orden de lectura.
@@ -164,16 +172,64 @@ func despliegue(bando: Criatura.Bando) -> Array[Vector2i]:
 	return resultado
 
 
-# Casilla -> bando de la unidad que la ocupa: el Maestro (de la tribu) y las
-# criaturas en el tablero, de pie o caidas. Las guardadas no ocupan casilla.
+# P-042 (T22; consulta publica desde T23): el id de la unidad que ocupa la
+# casilla (el Maestro o una criatura en el tablero, de pie o caida), o null.
+func ocupante_en(casilla: Vector2i, plantel: Plantel) -> Variant:
+	return _ids_por_casilla(plantel).get(casilla, null)
+
+
+# Sistema.md 11.9, metrica 13 (T23, D-011): la distancia Manhattan desde `desde`
+# a la unidad de pie (Objetivos.de_pie: una oculta cuenta) mas cercana del otro
+# bando, o null si no queda ninguna. El Maestro es de la tribu.
+func distancia_a_enemiga_de_pie(desde: Vector2i, bando: Criatura.Bando, plantel: Plantel) -> Variant:
+	var minima: Variant = null
+	var ids: Dictionary = _ids_por_casilla(plantel)
+	for casilla in ids.keys():
+		var id_unidad: String = ids[casilla]
+		if _bando_de(id_unidad, plantel) == bando or not Objetivos.de_pie(id_unidad, plantel):
+			continue
+		var valor: int = distancia(desde, casilla)
+		if minima == null or valor < (minima as int):
+			minima = valor
+	return minima
+
+
+# Sistema.md 11.9, metrica 14 (encierro, T23): ninguna de las 4 ortogonales es
+# casilla libre (es_casilla_libre; S-25: un surco no es libre). Fuera del
+# tablero no cuenta como libre: `vecinas` ya la deja afuera.
+func encerrada(casilla: Vector2i, plantel: Plantel, surcos: Surcos) -> bool:
+	for vecina in vecinas(casilla):
+		if es_casilla_libre(vecina, plantel, surcos):
+			return false
+	return true
+
+
+# Casilla -> bando de la unidad que la ocupa (ver _ids_por_casilla).
 func _ocupantes(plantel: Plantel) -> Dictionary:
 	var ocupantes: Dictionary = {}
+	var ids: Dictionary = _ids_por_casilla(plantel)
+	for casilla in ids.keys():
+		ocupantes[casilla] = _bando_de(ids[casilla], plantel)
+	return ocupantes
+
+
+# Casilla -> id de la unidad que la ocupa: el Maestro (de la tribu) y las
+# criaturas en el tablero, de pie o caidas. Las guardadas no ocupan casilla.
+# Es el unico lugar de ese criterio.
+func _ids_por_casilla(plantel: Plantel) -> Dictionary:
+	var ids: Dictionary = {}
 	if plantel.maestro.posicion != Criatura.SIN_POSICION:
-		ocupantes[plantel.maestro.posicion] = Criatura.Bando.TRIBU
+		ids[plantel.maestro.posicion] = Maestro.ID
 	for criatura in plantel.criaturas():
 		if criatura.estado != Criatura.Estado.GUARDADA and criatura.posicion != Criatura.SIN_POSICION:
-			ocupantes[criatura.posicion] = criatura.bando
-	return ocupantes
+			ids[criatura.posicion] = criatura.id
+	return ids
+
+
+static func _bando_de(unidad_id: String, plantel: Plantel) -> Criatura.Bando:
+	if unidad_id == Maestro.ID:
+		return Criatura.Bando.TRIBU
+	return plantel.criatura(unidad_id).bando
 
 
 static func _en_orden_de_lectura(casillas: Array[Vector2i]) -> Array[Vector2i]:

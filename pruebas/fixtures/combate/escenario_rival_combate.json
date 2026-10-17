@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "rival_combate",
+  "_nota": "Sistema.md 10.4, 10.5 y 11.3 paso 3 y 4 v1.6 (registro de T19, con Combate). Balanza 5 (Arrimo 0), Ocarras de la tribu neutrales (lealtad 5, hambre 3): Encono 25 % con combate.json de prueba, 100 % con combate_rival_100.json. ocarra_1 [3,5] tiene a la Ocarra salvaje [3,1] a su alcance (4 <= 3 + 2) y desde [3,3] la golpea en linea; ocarra_2 [4,6] es su rival aliada en diagonal y no tiene a la salvaje a su alcance (6). Con la semilla 1 las dos primeras tiradas de combate dan 54 y 4. El Maestro [0,7] queda lejos",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 5, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 5] },
+    { "id": "ocarra_2", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 6] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 1] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

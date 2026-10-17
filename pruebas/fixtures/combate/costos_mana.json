@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../datos/_esquemas/costos_mana.schema.json",
+  "_nota": "Copia de datos/tablas/costos_mana.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 2.3 (resellar: 4.4; guardar caidas: 11.5). El descuento esta en la balanza",
+  "sellar": [3, 5, 7],
+  "invocar": [2, 3, 4],
+  "resellar": [2, 3, 4],
+  "guardar_caida": [2, 3, 4],
+  "costo_minimo": 1
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida_maestro_victoria",
+  "_nota": "Arquitectura.md B.4 (T28), criterio 5 (S-60): la ultima enemiga cae o huye antes del cierre de la ronda en que el Maestro declaro la huida, y es victoria. Los tests suben en memoria la Velocidad del Maestro a 9 y dejan una sola enemiga: ocarra_s1 (1 de vida: va por rodauva_1, que despues la tumba) o huye_s1 (especie_huida_100 de T25, 7 de 30: 100 %, huye al empezar su turno; Velocidad 9, juega despues del Maestro por el empate de 11.3)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [2, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [5, 6] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": 1, "posicion": [5, 3] },
+    { "id": "huye_s1", "especie": "especie_huida_100", "comportamiento": "salvaje", "vida": 7, "posicion": [0, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -1,0 +1,182 @@
+{
+  "title": "Alarmas de la prueba 0a",
+  "description": "Sistema.md 11.9, Umbrales de alarma, y Arquitectura.md D-015 (T33). Cómo se mide la 0a: partidas por grupo (escenario + variante), jugadores mínimos, las semillas de playtest y cada alarma como un cálculo de un catálogo cerrado con sus parámetros. Solo enteros: las proporciones en % entero y los promedios en décimas. Qué parámetros pide cada cálculo lo revisa el cargador. Fuera de la huella de los datos (A.7).",
+  "type": "object",
+  "required": [
+    "partidas_por_grupo",
+    "jugadores_minimos",
+    "semillas",
+    "alarmas"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "_nota": {
+      "$ref": "comunes.schema.json#/$defs/nota"
+    },
+    "partidas_por_grupo": {
+      "description": "Partidas que hacen falta en un grupo para medir; con menos, el estado es insuficiente",
+      "type": "integer",
+      "minimum": 1
+    },
+    "jugadores_minimos": {
+      "description": "Jugadores distintos que hacen falta en un grupo para medir",
+      "type": "integer",
+      "minimum": 1
+    },
+    "semillas": {
+      "description": "Las semillas de playtest, en orden (la 1 es la primera). Sin repetir: lo revisa el cargador",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "alarmas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "escenarios",
+          "calculo",
+          "parametros"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "_nota": {
+            "$ref": "comunes.schema.json#/$defs/nota"
+          },
+          "id": {
+            "$ref": "comunes.schema.json#/$defs/id"
+          },
+          "escenarios": {
+            "description": "ids de escenarios/: la alarma vale para todas sus variantes",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "comunes.schema.json#/$defs/id"
+            }
+          },
+          "calculo": {
+            "description": "El comportamiento, programado una vez con su test (D-015). Sus números van en parametros",
+            "enum": [
+              "primer_sellado_mismo_tramo",
+              "desenlace_proporcion",
+              "rondas_pelea_mayor_que",
+              "rondas_pelea_promedio_fuera",
+              "muere_si_empezo_suelta",
+              "combates_con_incidente",
+              "golpes_incidente_promedio",
+              "tasa_acobardadas_fuera",
+              "toggle_afines",
+              "maestro_cae_sin_rescatista",
+              "sin_caidas_guardadas",
+              "destino_atacante_proporcion",
+              "victorias_diferencia",
+              "distancia_maestro_mayor_que",
+              "activa_poco_usada",
+              "encierro_de_efecto"
+            ]
+          },
+          "parametros": {
+            "description": "Los parámetros de todos los cálculos; cada cálculo usa los suyos y ninguno ajeno (lo revisa el cargador)",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "_nota": {
+                "$ref": "comunes.schema.json#/$defs/nota"
+              },
+              "umbral_pct": {
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "comparacion": {
+                "description": "mayor_que: salta por encima del umbral; menor_que: por debajo",
+                "enum": [
+                  "mayor_que",
+                  "menor_que"
+                ]
+              },
+              "desenlaces": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "enum": [
+                    "victoria",
+                    "derrota_por_caida",
+                    "huida"
+                  ]
+                }
+              },
+              "rondas": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "desde_decimas": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "hasta_decimas": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "umbral_decimas": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "especie": {
+                "$ref": "comunes.schema.json#/$defs/id"
+              },
+              "bando": {
+                "description": "El bando de la métrica que se cuenta (resultado, metricas)",
+                "enum": [
+                  "tribu",
+                  "enemigas"
+                ]
+              },
+              "desde_pct": {
+                "description": "Borde de abajo de un rango en %: por debajo, fuera",
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "hasta_pct": {
+                "description": "Borde de arriba de un rango en %: por encima, fuera",
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "supera_pct": {
+                "description": "El % que el escenario comparado tiene que superar",
+                "$ref": "comunes.schema.json#/$defs/pct"
+              },
+              "umbral_puntos": {
+                "description": "Diferencia en puntos de % entre dos escenarios",
+                "type": "integer",
+                "minimum": 0
+              },
+              "comparado_con": {
+                "description": "id de escenarios/ contra el que se compara (su grupo sin cambios)",
+                "$ref": "comunes.schema.json#/$defs/id"
+              },
+              "opciones": {
+                "description": "Opciones del destino de la atacante (resultado, destino_atacante.opcion)",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "enum": [
+                    "perdonar",
+                    "sellar",
+                    "comer"
+                  ]
+                }
+              },
+              "efecto": {
+                "description": "Efecto de un rasgo (especie, rasgo.efecto): lo revisa el cargador",
+                "$ref": "comunes.schema.json#/$defs/id"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

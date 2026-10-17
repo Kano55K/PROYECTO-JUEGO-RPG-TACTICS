@@ -9,14 +9,21 @@ enum Motivo {
 	NINGUNO,
 	# Una unidad del tablero sin posicion: el despliegue manual no es de 0a (A-1).
 	DESPLIEGUE_NO_IMPLEMENTADO,
+	# D-008 (T22): una regla de ReglasCombate no se pudo armar (falta su archivo o un
+	# dato); su nombre queda en regla_faltante.
+	REGLA_FALTANTE,
 }
 
 # Arquitectura.md A.8: nombres de sistema para derivar los generadores.
 const SISTEMA_COMBATE: String = "combate"
 const SISTEMA_TEXTOS: String = "textos"
+# T30: el nombre de regla_faltante si falta un dato del destino de la atacante.
+const REGLA_DESTINO_ATACANTE: String = "destino_atacante"
 
 var valido: bool = false
 var motivo: Motivo = Motivo.NINGUNO
+# Con REGLA_FALTANTE, el nombre de la regla (ReglasCombate.falta); si no, "".
+var regla_faltante: String = ""
 
 var escenario_id: String
 # Copia del escenario tal como se juega: lo guarda la Grabacion (A.7).
@@ -32,9 +39,54 @@ var toggles: Dictionary = {}
 # Generadores separados: una frase nueva no cambia las tiradas del combate (A.2.1).
 var azar_combate: GeneradorAzar
 var azar_textos: GeneradorAzar
-var danio: Danio
 var cierre: Cierre
+# Sistema.md 6 (T29): la eleccion de la rescatista, la misma instancia que usa el
+# Cierre. No va en ReglasCombate: el Turno no la usa (D-008).
+var rescate: Rescate:
+	get: return null if cierre == null else cierre.rescate
 var relaciones: Relaciones
+# Sistema.md 5.4 (T14): se pregunta, nunca se guarda. La leen la pantalla y T15 a T20.
+var obediencia: Obediencia
+# Sistema.md 7.2 (T14): la usa el Combate al cerrar cada ronda.
+var hambre_combate: HambreCombate
+# D-008 (T21-ajustes): las reglas sin estado, armadas una vez. Las recibe el Turno.
+var reglas: ReglasCombate
+# Acceso de lectura a cada regla de `reglas`, para el Combate y los tests. Con
+# el contexto sin armar (no valido), null, como antes de D-008.
+var danio: Danio:
+	get: return null if reglas == null else reglas.danio
+# Sistema.md 2.1 y 2.2 (T21): la regeneracion de mana del Maestro. La aplica el Turno.
+var regeneracion_mana: RegeneracionMana:
+	get: return null if reglas == null else reglas.regeneracion_mana
+# Sistema.md 10.3 (T15): la usa el Turno para el aporte de afinidad.
+var afinidad: Afinidad:
+	get: return null if reglas == null else reglas.afinidad
+# Sistema.md 10.2 y 1.3 (T16): la regla del bono de combo. La cadena es del Combate.
+var combo: Combo:
+	get: return null if reglas == null else reglas.combo
+# Sistema.md 10.4 y 1.3 (T18): la regla del incidente. La aplica el Turno con azar_combate.
+var incidente: Incidente:
+	get: return null if reglas == null else reglas.incidente
+# Sistema.md 10.5, 10.6 y 1.3 (T19): el chequeo de rival enemiga. Lo aplica el Turno con azar_combate.
+var chequeo_rival: ChequeoRival:
+	get: return null if reglas == null else reglas.chequeo_rival
+# Sistema.md 1.6 (T22): los hechizos del Maestro. Los lanza el Turno.
+var hechizos: Hechizos:
+	get: return null if reglas == null else reglas.hechizos
+# Sistema.md 4.1 a 4.3 (T24): sellar en combate. La aplica el Turno con azar_combate.
+var sellado: Sellado:
+	get: return null if reglas == null else reglas.sellado
+# Sistema.md 11.7 (T25): la huida de las salvajes. La tira el Turno con azar_combate.
+var huida: Huida:
+	get: return null if reglas == null else reglas.huida
+# Sistema.md 2.3 (T26): los costos de mana con descuento (sellar, invocar y guardar a una caida).
+var costos_mana: CostosMana:
+	get: return null if reglas == null else reglas.costos_mana
+# Sistema.md 11.5 (T27): guardar a una caida propia. La aplica el Turno.
+var guardado_caida: GuardadoCaida:
+	get: return null if reglas == null else reglas.guardado_caida
+# Sistema.md 9.3 (T30): el destino de la atacante nocturna caida tras la victoria.
+var destino_atacante: DestinoAtacante
 # Huella de los datos (A.7, HuellaDatos): va en el evento `inicio` y en la Grabacion.
 var huella: String = ""
 
@@ -59,9 +111,39 @@ static func armar(escenario: Dictionary, datos: Dictionary) -> ContextoCombate:
 	contexto.toggles = escenario.get("toggles", {}).duplicate(true)
 	contexto.azar_combate = GeneradorAzar.derivado(contexto.semilla, SISTEMA_COMBATE)
 	contexto.azar_textos = GeneradorAzar.derivado(contexto.semilla, SISTEMA_TEXTOS)
-	contexto.danio = Danio.desde_datos(tabla_combate, datos["tablas/hambre.json"])
+	var regla_danio: Danio = Danio.desde_datos(tabla_combate, datos["tablas/hambre.json"])
 	contexto.relaciones = Relaciones.new(datos["relaciones.json"])
 	contexto.cierre = Cierre.desde_datos(tabla_combate, datos["tablas/lealtad.json"], contexto.relaciones)
+	contexto.obediencia = Obediencia.desde_datos(datos["tablas/hambre.json"], datos["tablas/lealtad.json"], tabla_combate)
+	contexto.hambre_combate = HambreCombate.desde_datos(datos["tablas/hambre.json"])
+	var regla_mana: RegeneracionMana = RegeneracionMana.desde_datos(datos["tablas/hambre.json"])
+	var regla_afinidad: Afinidad = Afinidad.desde_datos(tabla_combate, contexto.relaciones, contexto.obediencia)
+	var arrimo: Arrimo = Arrimo.desde_datos(datos["tablas/arrimo.json"])
+	var regla_combo: Combo = Combo.desde_datos(tabla_combate, arrimo, regla_afinidad)
+	var regla_incidente: Incidente = Incidente.desde_datos(tabla_combate, arrimo, contexto.relaciones,
+			contexto.obediencia)
+	var regla_chequeo: ChequeoRival = ChequeoRival.desde_datos(tabla_combate, arrimo, contexto.relaciones,
+			contexto.obediencia, regla_afinidad, contexto.toggles.get("afines_contra_cobardia", false))
+	var regla_hechizos: Hechizos = Hechizos.desde_datos(datos.get("hechizos.json", {}), datos["maestro.json"])
+	var regla_costos: CostosMana = CostosMana.desde_datos(datos.get("tablas/costos_mana.json", {}))
+	var regla_sellado: Sellado = Sellado.desde_datos(datos.get("tablas/sellado.json", {}), regla_costos,
+			datos["tablas/lealtad.json"], tabla_combate)
+	contexto.reglas = ReglasCombate.new(regla_danio, regla_afinidad, regla_combo, regla_incidente, regla_chequeo,
+			regla_mana, regla_hechizos, regla_sellado, Huida.desde_datos(tabla_combate), regla_costos,
+			GuardadoCaida.desde_datos(tabla_combate, regla_costos))
+	# D-008: sin todas las reglas el combate no se arma (hallazgo de la revision de T21-ajustes).
+	if not contexto.reglas.falta.is_empty():
+		contexto.motivo = Motivo.REGLA_FALTANTE
+		contexto.regla_faltante = contexto.reglas.falta
+		return contexto
+	# Sistema.md 9.3 (T30): el destino de la atacante, despues del combate (no es del
+	# Turno, como el Rescate). Con todas las reglas, solo falta si falta un dato suyo.
+	contexto.destino_atacante = DestinoAtacante.desde_datos(tabla_combate, datos["tablas/lealtad.json"],
+			regla_costos, regla_sellado)
+	if contexto.destino_atacante == null:
+		contexto.motivo = Motivo.REGLA_FALTANTE
+		contexto.regla_faltante = REGLA_DESTINO_ATACANTE
+		return contexto
 	contexto.valido = true
 	return contexto
 

@@ -17,7 +17,9 @@
     "huida_salvaje",
     "alcance_sellar",
     "alcance_guardar_caida",
-    "vida_tras_caida"
+    "vida_tras_caida",
+    "vida_al_guardar_caida",
+    "vida_al_resellar"
   ],
   "additionalProperties": false,
   "properties": {
@@ -155,7 +157,7 @@
       }
     },
     "obediencia": {
-      "description": "Sistema.md 5.4. 'leal' rige desde el umbral de rescate; 'baja', hasta el valor indicado",
+      "description": "Sistema.md 5.4. 'leal' rige desde el umbral de rescate (tablas/balanza.json); 'baja', debajo del piso de Neutral (tablas/lealtad.json neutral_desde): los mismos cortes que los estados de lealtad (P-003)",
       "type": "object",
       "required": [
         "leal",
@@ -185,15 +187,11 @@
         "baja": {
           "type": "object",
           "required": [
-            "hasta",
             "encono_pts",
             "cobardia_pts"
           ],
           "additionalProperties": false,
           "properties": {
-            "hasta": {
-              "type": "integer"
-            },
             "encono_pts": {
               "type": "integer"
             },
@@ -236,16 +234,12 @@
     "huida_salvaje": {
       "type": "object",
       "required": [
-        "umbral_vida_pct",
-        "acobardada_pts"
+        "umbral_vida_pct"
       ],
       "additionalProperties": false,
       "properties": {
         "umbral_vida_pct": {
           "$ref": "comunes.schema.json#/$defs/pct"
-        },
-        "acobardada_pts": {
-          "$ref": "comunes.schema.json#/$defs/puntos"
         },
         "_nota": {
           "$ref": "comunes.schema.json#/$defs/nota"
@@ -263,7 +257,17 @@
     "vida_tras_caida": {
       "type": "integer",
       "minimum": 1,
-      "description": "Al levantarse tras ganar y al ser guardada caída"
+      "description": "Al levantarse tras ganar (Sistema.md 11.5)"
+    },
+    "vida_al_guardar_caida": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "La vida con la que queda una caída que el Maestro guarda (Sistema.md 11.5, T27)"
+    },
+    "vida_al_resellar": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "La vida con la que queda guardada la atacante nocturna resellada (Sistema.md 4.4 y 9.3, T30; P-046)"
     }
   }
 }

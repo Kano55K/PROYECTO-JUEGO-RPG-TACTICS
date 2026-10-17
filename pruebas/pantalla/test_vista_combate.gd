@@ -35,14 +35,15 @@ func _rutas_escenarios(datos: Dictionary) -> Array[String]:
 	return rutas
 
 
-# (3) La vista de cada uno de los 11 escenarios se crea sin errores y queda
+# (3) La vista de cada uno de los 10 escenarios se crea sin errores y queda
 # esperando al jugador (la IA ya jugo hasta su primer turno).
 # (4) Cada unidad esta en map_to_local de su casilla, y local_to_map de su
 # posicion da la casilla.
 func test_once_escenarios_se_dibujan_en_su_casilla() -> void:
 	var datos: Dictionary = _datos()
 	var rutas: Array[String] = _rutas_escenarios(datos)
-	assert_int(rutas.size()).is_equal(11)
+	# A.9, T31: 10 desde que se borro d_rivales_balanza4.json.
+	assert_int(rutas.size()).is_equal(10)
 	for ruta in rutas:
 		var runner: GdUnitSceneRunner = _vista(datos[ruta], datos)
 		await runner.simulate_frames(1)
@@ -172,6 +173,9 @@ func test_jugar_a_guarda_y_se_reproduce_igual() -> void:
 # IA (pausa larga y `saltar` en cada secuencia), guarda una grabacion que se
 # reproduce igual: animar no cambia nada del combate. Politica: atacar si hay
 # objetivo; si no, la primera activa habilitada; si no, acercarse.
+# Cambia de danio en T16 por Sistema.md 10.2: en las rondas 1 y 2 la Ocarra
+# leal y despues el Maestro encadenan sobre el Tasajero (afines, +70: el Maestro
+# pega 8). Ninguna asercion depende del danio, asi que solo cambia este comentario.
 func test_jugar_c_con_activas_se_reproduce_igual() -> void:
 	var datos: Dictionary = _datos()
 	var escenario: Dictionary = datos["escenarios/c_tasajero.json"]

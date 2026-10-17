@@ -1,30 +1,31 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "d_rivales_hambriento",
-  "_nota": "Escenario D, variante Hambriento (Sistema.md 11.9). Mismas unidades y posiciones que la Normal, con hambre 6 solo en las dos criaturas (el Maestro sigue en 3): obediencia 5 − 2 = 3, un incidente es un golpe a la rival (5.4, 10.4). Incidente 5% con balanza 2. En la ronda 5 pasan a hambre 7 (siguen Hambrientas, 7.2). Misma semilla que las variantes Normal y balanza 4.",
+  "_nota": "Escenario D, variante Hambriento (Sistema.md 11.9). Tablero de 12 × 12 (11.9 v1.6, T43). Mismas unidades y posiciones que la Normal, con hambre 6 solo en las dos criaturas (el Maestro sigue en 3): obediencia 5 − 2 = 3, un incidente es un golpe a la rival (5.4, 10.4). Incidente 5% con balanza 2. En la ronda 5 pasan a hambre 7 (siguen Hambrientas, 7.2). Misma semilla que las variantes Normal y balanza 4.",
   "tipo": "test",
   "semilla": 44001,
-  "tablero": { "ancho": 8, "alto": 8 },
+  "tablero": { "ancho": 12, "alto": 12 },
   "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
                "vida": null, "mana_entrada": null, "hambre": 3,
-               "enfermedades": 0, "posicion": [3, 6] },
+               "enfermedades": 0, "posicion": [5, 10],
+               "_nota": "A 8 de la Rodauva salvaje, su objetivo: llega en la ronda 1 a [5,6] y le pega en la 2 desde [5,9] (Sistema.md 11.9 v1.6)" },
   "tribu": [
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 5, "hambre": 6, "enfermedades": 0,
-      "vida": null, "posicion": [3, 7],
+      "vida": null, "posicion": [5, 11],
       "_nota": "Detrás del Maestro, alcance 2 por encima de él" },
     { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
       "lealtad": 5, "hambre": 6, "enfermedades": 0,
-      "vida": null, "posicion": [4, 7],
-      "_nota": "Adyacente a la Ocarra: el riesgo de incidente se ve desde el primer turno (actúa primero, Vel 8). ¿Las separa o mantiene la formación?" }
+      "vida": null, "posicion": [6, 11],
+      "_nota": "Al lado de la Ocarra (vecinas, Sistema.md 11.9 v1.6): el riesgo de incidente se ve desde el primer turno (actúa primero, Vel 8). ¿Las separa o mantiene la formación?" }
   ],
   "enemigas": [
     { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje",
-      "vida": null, "posicion": [3, 1],
-      "_nota": "Muro lento: alarga el combate y da tiempo a que aparezcan incidentes" },
+      "vida": null, "posicion": [4, 2],
+      "_nota": "Muro lento: alarga el combate y da tiempo a que aparezcan incidentes. Cava en las rondas 1 y 2, sin cerrarle el paso a la Rodauva salvaje" },
     { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje",
-      "vida": null, "posicion": [4, 1],
-      "_nota": "Afín del Surcón salvaje (+1 adyacentes). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente" }
+      "vida": null, "posicion": [5, 2],
+      "_nota": "Afín del Surcón salvaje (+10 vecinas en 8, 10.3 v1.6; escala ×10 de 11.1 v1.7). Prueba la IA de Erizarse: vida ≤ 50% y enemiga adyacente. A 8 del Maestro: abre el combate en la ronda 2 (Sistema.md 11.9 v1.6)" }
   ],
   "pergaminos_en_blanco": 1,
   "golpe_inicial": null,

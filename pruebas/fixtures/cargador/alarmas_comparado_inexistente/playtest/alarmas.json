@@ -1,0 +1,10 @@
+{
+  "_nota": "T33, sesión 2: una comparación contra un escenario que no está en escenarios/",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "diferencia", "escenarios": ["c_tasajero"], "calculo": "victorias_diferencia",
+      "parametros": { "comparado_con": "z_no_existe", "umbral_puntos": 20 } }
+  ]
+}

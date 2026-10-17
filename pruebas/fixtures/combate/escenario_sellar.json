@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "sellar",
+  "_nota": "Sistema.md 4.1 a 4.3, 2.3, 11.2.1 y 11.2.2 (tests de T24, turnos sueltos). Todas estacionadas en la fila 0 y la columna 11, lejos del Maestro: cada test acomoda a las que usa. Balanza 2 (reserva 8, descuento 0, rango maximo 2). Pergaminos: rodauva_1 y la atacante ocupan dos; queda uno en blanco. especie_sellar_r2 (rango 2) y especie_no_sellable son inventadas (MesaSellar las suma)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 11] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [2, 0] },
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [4, 0] },
+    { "id": "zancajunco_s1", "especie": "zancajunco", "comportamiento": "salvaje", "vida": null, "posicion": [6, 0] },
+    { "id": "r2_s1", "especie": "especie_sellar_r2", "comportamiento": "salvaje", "vida": null, "posicion": [8, 0] },
+    { "id": "no_sellable_s1", "especie": "especie_no_sellable", "comportamiento": "salvaje", "vida": null, "posicion": [10, 0] },
+    { "id": "atacante_1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "vida": null, "hambre": 3, "enfermedades": 0, "posicion": [11, 2] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

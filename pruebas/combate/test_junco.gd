@@ -12,13 +12,11 @@ const _JUNCO: String = "zancajunco_1"
 const _JUNCO_SALVAJE: String = "zancajunco_s1"
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -42,7 +40,8 @@ func _plantel(nombre: String = "escenario_junco") -> Plantel:
 
 # Turno suelto, sin cola y sin surcos.
 func _turno(plantel: Plantel, unidad_id: String) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, Surcos.new())
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, Surcos.new(),
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 # Un turno entero que se oculta y termina.
@@ -234,6 +233,8 @@ func test_mover_destapa_y_conserva() -> void:
 
 # (6) Ataca (11.2.2): lo destapa y el bono se cobra en ese golpe. Validar y
 # previsualizar no lo gastan.
+# Reescrito en T19 por Sistema.md 10.5 v1.6: el Zancajunco (mixto) golpea a su
+# rival enemiga, la Ocarra: el contador del Encono sube y su evento va antes del destape.
 func test_atacar_destapa_y_cobra() -> void:
 	var plantel: Plantel = _plantel()
 	_ocultar(plantel, _JUNCO)
@@ -250,7 +251,8 @@ func test_atacar_destapa_y_cobra() -> void:
 	var golpe: ResultadoAccion = turno.aplicar(Accion.atacar("ocarra_s1"))
 	assert_int(golpe.danio).is_equal(7)
 	_assert_estado_junco(plantel, _JUNCO, false, false)
-	assert_array(turno.eventos()).is_equal([{"tipo": "destape", "unidad": _JUNCO, "motivo": "atacar", "por": null}])
+	assert_array(turno.eventos()).is_equal([{"tipo": "encono", "unidad": _JUNCO, "de": 0, "a": 1, "rival": "ocarra_s1"},
+			{"tipo": "destape", "unidad": _JUNCO, "motivo": "atacar", "por": null}])
 
 
 # (7) Destape por contacto (11.2.2, S-24): una enemiga de pie que termina su
@@ -326,6 +328,8 @@ func test_rival_oculta() -> void:
 # (11) Registro, instantanea y reproduccion (A.7): oculto, destape por contacto
 # de la IA y bono_perdido, con Combate.aplicar. Al terminar el combate se borran
 # el estado oculto y el bono (11.2.2, Fin del combate).
+# Reescrito en T19 por Sistema.md 10.5 v1.6: la Ocarra salvaje (combate) golpea a
+# su rival, el Zancajunco: entre el `ataque` y el `bono_perdido` va su `encono`.
 func test_registro_instantanea_y_grabacion() -> void:
 	var lectura: Dictionary = DatosFixture.cargar()
 	assert_array(lectura["errores"]).is_empty()
@@ -371,7 +375,9 @@ func test_registro_instantanea_y_grabacion() -> void:
 			assert_str(linea["motivo"]).is_equal("contacto")
 			assert_str(linea["por"]).is_equal("ocarra_s1")
 		if linea["tipo"] == "bono_perdido":
-			assert_str(lineas[indice - 1]["tipo"]).is_equal("ataque")
+			assert_str(lineas[indice - 1]["tipo"]).is_equal("encono")
+			assert_str(lineas[indice - 1]["unidad"]).is_equal("ocarra_s1")
+			assert_str(lineas[indice - 2]["tipo"]).is_equal("ataque")
 			assert_str(linea["unidad"]).is_equal(_JUNCO)
 			assert_str(linea["atacante"]).is_equal("ocarra_s1")
 	assert_array(tipos).is_equal(["oculto", "destape", "bono_perdido"])

@@ -22,7 +22,7 @@ var bando: Bando
 var comportamiento: Comportamiento = Comportamiento.NINGUNO
 var estado: Estado = Estado.SUELTA
 var vida: int
-# Solo tiene sentido en la tribu: la obediencia de las enemigas es de T14 (10.7).
+# Solo tiene sentido en la tribu: las enemigas no tienen obediencia propia (Obediencia, 10.7).
 var lealtad: int = 0
 var hambre: int = 0
 var enfermedades: int = 0
@@ -46,6 +46,9 @@ var bono_junco: bool = false
 # Si se oculto en su turno anterior (no puede dos turnos seguidos). Lo escribe
 # el fin de cada turno suyo.
 var junco_turno_anterior: bool = false
+# Sistema.md 10.5: el contador del Encono, de 0 al maximo de tablas/combate.json.
+# Estado del combate (T19): no viene del escenario y el Cierre lo vuelve a 0.
+var encono: int = 0
 
 
 func _init(id_criatura: String, especie_criatura: Especie, bando_criatura: Bando) -> void:

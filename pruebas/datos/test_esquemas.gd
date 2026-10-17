@@ -6,10 +6,13 @@ extends GdUnitTestSuite
 const _CARPETA_DATOS: String = "res://datos"
 const _CARPETA_FIXTURES: String = "res://pruebas/fixtures/esquemas/"
 
-# Los 13 archivos de entrada de la tabla de A.2 (resultado y grabacion son de T12).
+# Los 14 archivos de entrada de la tabla de A.2 (resultado y grabacion son de T12;
+# alarmas, de T33) y la ficha de playtest (T33, D-015), que los tests escriben a
+# mano y sigue las mismas reglas.
 const _ESQUEMAS_DE_ENTRADA: Array[String] = [
 	"especie", "maestro", "hechizos", "relaciones", "balanza", "arrimo",
 	"sellado", "costos_mana", "hambre", "lealtad", "combate", "escenario", "textos",
+	"alarmas", "playtest",
 ]
 
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "guardar_invocar_combate",
+  "_nota": "Arquitectura.md B.4 (T26): guardar e invocar dentro del Combate (registro, cola, grabacion). Sistema.md 3.1, 2.3, 11.3 y 11.8. Balanza 2: invocar a una Rodauva (rango 1) cuesta 2. Orden de la ronda: Rodauva de la tribu (Velocidad 6), Maestro (5), Surcon salvaje (2). La Rodauva empieza al oeste del Maestro; la casilla de invocar del test es [5,2], al sur. El Surcon salvaje (Movimiento 2, Alcance 1) llega a pegarle a [5,2] y no al Maestro ni a [4,1]. Rodauva-Surcon se llevan bien (10.8): nadie tira Encono, cobardia ni incidente",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 1] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 1] },
+    { "id": "rodauva_g", "especie": "rodauva", "estado": "guardada", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [5, 5] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

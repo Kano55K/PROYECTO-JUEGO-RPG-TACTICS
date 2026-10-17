@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "guardar_caida",
+  "_nota": "Sistema.md 11.5, 3.1, 2.3, 5.2, 7.2 y 11.2.1 (tests de T27, turnos sueltos). Balanza 2 (reserva 8, descuento 0): guardar a una caida cuesta 2 / 3 / 4 por rango (Rodauva 2, Surcon 3). El Maestro en [5,6]; la tribu suelta estacionada en la fila 11 y las enemigas en la fila 0, sin vecinas entre si: cada test acomoda y tumba a las que usa. ocarra_a1 es la atacante nocturna (9.2), que caida queda en el tablero y no es de la tribu",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 11] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 11] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 11] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] },
+    { "id": "ocarra_a1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 9, "vida": null, "posicion": [4, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

@@ -89,6 +89,15 @@ func pergaminos() -> Array[Pergamino]:
 	return _pergaminos.duplicate()
 
 
+# Sistema.md 4.1 (T24): el primer pergamino en blanco, en el orden del Plantel, o
+# null si no queda ninguno. Es el que ocupa una captura.
+func pergamino_en_blanco() -> Pergamino:
+	for p in _pergaminos:
+		if p.estado == Pergamino.Estado.EN_BLANCO:
+			return p
+	return null
+
+
 # Foto del estado para comparar (tests, reproductor de T12): solo enteros,
 # textos, booleanos, null, listas y diccionarios. Criaturas en el orden del Plantel.
 func instantanea() -> Dictionary:
@@ -99,6 +108,9 @@ func instantanea() -> Dictionary:
 			"estado": nombre_estado(c.estado),
 			"vida": c.vida,
 			"lealtad": c.lealtad,
+			# Arquitectura.md A.7 (T14): cambia en combate (Sistema.md 7.2). null
+			# en las enemigas, como en el resultado.
+			"hambre": c.hambre if c.bando == Criatura.Bando.TRIBU else null,
 			"posicion": casilla_a_lista(c.posicion),
 			"erizada": c.erizada,
 			# Arquitectura.md A.7 (B.2.1): el modo actual, o null sin modos.
@@ -106,6 +118,8 @@ func instantanea() -> Dictionary:
 			# Arquitectura.md A.7 (B.2.1): Hacerse junco (Sistema.md 11.2.2).
 			"oculta": c.oculta,
 			"bono_junco": c.bono_junco,
+			# Arquitectura.md A.7 (T19): el contador del Encono (Sistema.md 10.5).
+			"encono": c.encono,
 			"pergamino": c.pergamino_id,
 		})
 	var lista_pergaminos: Array = []
@@ -118,8 +132,14 @@ func instantanea() -> Dictionary:
 	return {
 		"maestro": {
 			"vida": maestro.vida,
+			"hambre": maestro.hambre,
+			# Arquitectura.md A.7 (T21, D-007): el mana actual.
+			"mana": maestro.mana,
 			"posicion": casilla_a_lista(maestro.posicion),
 			"caido": maestro.caido,
+			# Arquitectura.md A.7 (T28): la huida declarada y si ya se fue.
+			"huida_declarada": maestro.huida_declarada,
+			"se_fue": maestro.se_fue,
 		},
 		"criaturas": lista_criaturas,
 		"pergaminos": lista_pergaminos,
@@ -162,8 +182,13 @@ static func _crear_maestro(datos_maestro: Dictionary, tabla_balanza: TablaBalanz
 	nuevo.alcance = ficha_maestro["alcance"]
 	nuevo.velocidad = ficha_maestro["velocidad"]
 	nuevo.posicion = _posicion(datos_maestro.get("posicion"))
-	# Tal cual llega: se resuelve en T21.
-	nuevo.mana_entrada = datos_maestro.get("mana_entrada")
+	# Sistema.md 1.2 y 2.1 (T21, M-04): null = la reserva de la fila de su
+	# balanza. Es el tope del combate; el mana actual arranca ahi.
+	if datos_maestro.get("mana_entrada") != null:
+		nuevo.mana_entrada = datos_maestro["mana_entrada"]
+	else:
+		nuevo.mana_entrada = nuevo.fila_balanza()["reserva_mana"]
+	nuevo.mana = nuevo.mana_entrada
 	return nuevo
 
 

@@ -1,12 +1,13 @@
 # Arquitectura.md A.7, Huella de los datos: SHA-256 de la serializacion canonica
-# (claves ordenadas) de los datos cargados, sin textos/ ni escenarios/, sin _nota
-# ni $schema. Una correccion de texto o de nota no invalida grabaciones; un numero
-# si. escenarios/ queda afuera porque la grabacion lleva su escenario entero. La
-# usan la grabacion (T12) y el guardado de 0b.
+# (claves ordenadas) de los datos cargados, sin textos/, escenarios/ ni playtest/,
+# sin _nota ni $schema. Una correccion de texto o de nota no invalida grabaciones;
+# un numero si. escenarios/ queda afuera porque la grabacion lleva su escenario
+# entero, y playtest/ porque ajustar un umbral de alarma no es una regla del
+# combate (D-015, T33). La usan la grabacion (T12) y el guardado de 0b.
 class_name HuellaDatos
 extends RefCounted
 
-const _PREFIJOS_IGNORADOS: Array[String] = ["textos/", "escenarios/"]
+const _PREFIJOS_IGNORADOS: Array[String] = ["textos/", "escenarios/", "playtest/"]
 const _CLAVES_IGNORADAS: Array[String] = ["_nota", "$schema"]
 
 

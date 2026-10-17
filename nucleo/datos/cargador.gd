@@ -71,6 +71,31 @@ func esquema_resuelto(ruta_carpeta: String, nombre_esquema: String) -> Dictionar
 	return {"errores": errores, "esquema": esquema}
 
 
+# T31 (Arquitectura.md B.4): valida un escenario suelto (una variante del panel)
+# contra los datos ya cargados, con el mismo Validador y los mismos chequeos
+# cruzados que cargar_carpeta. esquema: el de escenario, de esquema_resuelto.
+# Devuelve {"errores": Array[Dictionary], "datos": Variant}, con datos null si
+# hay al menos un error. El archivo de cada error es escenarios/<id>.json.
+func validar_escenario(escenario: Dictionary, esquema: Dictionary, datos: Dictionary) -> Dictionary:
+	var ruta: String = "escenarios/%s.json" % [str(escenario.get("id", ""))]
+	var resultado: Dictionary = Validador.new().validar(escenario, esquema, ruta)
+	var errores: Array[Dictionary] = resultado["errores"]
+	if not errores.is_empty():
+		return {"errores": errores, "datos": null}
+
+	# Solo lo que los chequeos de un escenario consultan: sus especies y la
+	# balanza. El resto de los datos ya paso los suyos al cargarse.
+	var datos_por_archivo: Dictionary = {ruta: resultado["datos"]}
+	for clave in datos.keys():
+		var clave_str: String = clave as String
+		if clave_str.begins_with("especies/") or clave_str == "tablas/balanza.json":
+			datos_por_archivo[clave_str] = datos[clave]
+	_chequear_cruzados(datos_por_archivo, errores)
+	if not errores.is_empty():
+		return {"errores": errores, "datos": null}
+	return {"errores": errores, "datos": resultado["datos"]}
+
+
 # --- Lectura de archivos ---------------------------------------------------
 
 func _listar_archivos_json(carpeta: String, relativo: String = "") -> Array[String]:
@@ -124,6 +149,9 @@ func _esquema_para_ruta(ruta_relativa: String) -> String:
 			return partes[partes.size() - 1].get_basename()
 		"textos":
 			return "textos"
+		"playtest":
+			# D-015 (T33): playtest/alarmas.json -> alarmas.
+			return partes[partes.size() - 1].get_basename()
 		_:
 			return ""
 
@@ -211,6 +239,71 @@ func _chequear_cruzados(datos_por_archivo: Dictionary, errores: Array[Dictionary
 	_chequear_ids_escenario(datos_por_archivo, errores)
 	_chequear_posiciones_en_tablero(datos_por_archivo, errores)
 	_chequear_rasgos(datos_por_archivo, errores)
+	_chequear_mana_entrada(datos_por_archivo, errores)
+	_chequear_alarmas(datos_por_archivo, especies_validas, errores)
+
+
+# D-015 (T33), como los rasgos (A.2.2): cada calculo trae sus parametros y
+# ninguno ajeno (AlarmasPlaytest.PARAMETROS); los escenarios (tambien
+# comparado_con) y la especie nombrados existen; un efecto es el de alguna ficha
+# y, en activa_poco_usada, tiene activa; las semillas y los ids de alarma no se
+# repiten. Sin el
+# archivo no se revisa nada (fixtures parciales).
+func _chequear_alarmas(datos_por_archivo: Dictionary, especies_validas: Dictionary, errores: Array[Dictionary]) -> void:
+	var ruta: String = AlarmasPlaytest.ARCHIVO
+	if not datos_por_archivo.has(ruta):
+		return
+	var config: Dictionary = datos_por_archivo[ruta]
+
+	var semillas: Array = config["semillas"]
+	for i in range(semillas.size()):
+		if semillas.find(semillas[i]) < i:
+			errores.append(_error(ruta, "semillas[%d]" % [i], "una semilla sin repetir", semillas[i]))
+
+	# Los efectos de las fichas (rasgo.efecto), para el parametro efecto.
+	var efectos: Dictionary = {}
+	for archivo in datos_por_archivo.keys():
+		var ficha: Dictionary = datos_por_archivo[archivo]
+		if (archivo as String).begins_with("especies/") and ficha.has("rasgo"):
+			efectos[(ficha["rasgo"] as Dictionary)["efecto"]] = true
+
+	var ids: Dictionary = {}
+	var alarmas: Array = config["alarmas"]
+	for i in range(alarmas.size()):
+		var alarma: Dictionary = alarmas[i]
+		if ids.has(alarma["id"]):
+			errores.append(_error(ruta, "alarmas[%d].id" % [i], "un id de alarma sin repetir", alarma["id"]))
+		ids[alarma["id"]] = true
+
+		var escenarios: Array = alarma["escenarios"]
+		for j in range(escenarios.size()):
+			if not datos_por_archivo.has("escenarios/%s.json" % [escenarios[j]]):
+				errores.append(_error(ruta, "alarmas[%d].escenarios[%d]" % [i, j], "un escenario existente en escenarios/",
+						escenarios[j]))
+
+		var calculo: String = alarma["calculo"]
+		var propios: Array = AlarmasPlaytest.PARAMETROS[calculo]
+		var parametros: Dictionary = alarma["parametros"]
+		for parametro in propios:
+			if not parametros.has(parametro):
+				errores.append(_error(ruta, "alarmas[%d].parametros.%s" % [i, parametro], "presente (parametro de %s)" % calculo, null))
+		for clave in parametros.keys():
+			if clave != "_nota" and not propios.has(clave):
+				errores.append(_error(ruta, "alarmas[%d].parametros.%s" % [i, clave], "solo parametros de %s" % calculo, clave))
+		if parametros.has("especie") and not especies_validas.has(parametros["especie"]):
+			errores.append(_error(ruta, "alarmas[%d].parametros.especie" % [i], "una especie existente en especies/",
+					parametros["especie"]))
+		if parametros.has("comparado_con") \
+				and not datos_por_archivo.has("escenarios/%s.json" % [parametros["comparado_con"]]):
+			errores.append(_error(ruta, "alarmas[%d].parametros.comparado_con" % [i],
+					"un escenario existente en escenarios/", parametros["comparado_con"]))
+		if parametros.has("efecto"):
+			var efecto: String = parametros["efecto"]
+			if calculo == AlarmasPlaytest.CALCULO_ACTIVA_POCO_USADA and not AlarmasPlaytest.ACCION_DE_EFECTO.has(efecto):
+				errores.append(_error(ruta, "alarmas[%d].parametros.efecto" % [i], "un efecto con activa", efecto))
+			elif not efectos.has(efecto):
+				errores.append(_error(ruta, "alarmas[%d].parametros.efecto" % [i],
+						"el efecto de alguna especie de especies/", efecto))
 
 
 # Arquitectura.md A.2.2 (Rasgos y modos). Cada efecto trae sus parametros y ninguno ajeno; la ficha lleva velocidad si
@@ -378,6 +471,31 @@ func _chequear_posiciones_en_tablero(datos_por_archivo: Dictionary, errores: Arr
 			for criatura in (datos.get(lista_nombre, []) as Array):
 				var criatura_dic: Dictionary = criatura as Dictionary
 				_chequear_posicion(ruta_str, "%s.%s.posicion" % [lista_nombre, criatura_dic["id"]], criatura_dic.get("posicion"), ancho, alto, errores)
+
+
+# Sistema.md 2.1 y M-04 (T21): el mana de entrada de un escenario no supera la
+# reserva de la balanza de su Maestro (tablas/balanza.json). null es la reserva.
+# Sin la tabla o sin la fila, no se revisa (fixtures parciales).
+func _chequear_mana_entrada(datos_por_archivo: Dictionary, errores: Array[Dictionary]) -> void:
+	if not datos_por_archivo.has("tablas/balanza.json"):
+		return
+	var reservas: Dictionary = {}
+	for fila in ((datos_por_archivo["tablas/balanza.json"] as Dictionary).get("posiciones", []) as Array):
+		var fila_dic: Dictionary = fila as Dictionary
+		if fila_dic.has("reserva_mana"):
+			reservas[fila_dic["posicion"] as int] = fila_dic["reserva_mana"] as int
+	for ruta in datos_por_archivo.keys():
+		var ruta_str: String = ruta as String
+		if not ruta_str.begins_with("escenarios/"):
+			continue
+		var maestro: Dictionary = (datos_por_archivo[ruta] as Dictionary).get("maestro", {}) as Dictionary
+		var mana_entrada: Variant = maestro.get("mana_entrada")
+		if mana_entrada == null or not reservas.has(maestro.get("balanza")):
+			continue
+		var reserva: int = reservas[maestro["balanza"]]
+		if (mana_entrada as int) > reserva:
+			errores.append(_error(ruta_str, "maestro.mana_entrada", "como mucho %d (reserva de la balanza %d, tablas/balanza.json)"
+					% [reserva, maestro["balanza"] as int], mana_entrada))
 
 
 func _chequear_posicion(ruta: String, campo: String, posicion: Variant, ancho: int, alto: int, errores: Array[Dictionary]) -> void:

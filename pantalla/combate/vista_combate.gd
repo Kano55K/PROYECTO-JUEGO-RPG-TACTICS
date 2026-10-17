@@ -1,8 +1,11 @@
-# Arquitectura.md B.2 (T13): la vista del combate, cenital y con placeholders.
+# Arquitectura.md B.2 (T13): la vista del combate, con placeholders.
 # Arma el combate (la IA juega hasta el primer turno del jugador) y se redibuja
 # entera desde el nucleo: no guarda copias del estado de reglas. Casilla <->
-# pantalla solo con map_to_local / local_to_map (A.3): T32 cambia solo el
-# tileset. Sesion 2: el jugador juega con el mouse (InterpreteClic y botones),
+# pantalla solo con map_to_local / local_to_map (A.3). T32 (D-013): isometrica
+# por defecto y cenital de desarrollo; el TileSet sale de VistasTablero y lo
+# toman todas las capas. El mouse sale de sus eventos, nunca del cursor del
+# sistema (D-006).
+# Sesion 2: el jugador juega con el mouse (InterpreteClic y botones),
 # ve las marcas, el desglose de previsualizar_ataque y los sucesos del registro;
 # al terminar, se guardan solos la grabacion y el registro y se ve el resultado.
 class_name VistaCombate
@@ -25,14 +28,59 @@ const _MARCA_ZONA: Vector2i = Vector2i(4, 0)
 const _MARCA_CAVAR: Vector2i = Vector2i(5, 0)
 # T40, sesion 2: el destino de cada paso de la IA.
 const _MARCA_DESTINO: Vector2i = Vector2i(6, 0)
+# T41: las unidades que darian afinidad desde la casilla bajo el mouse.
+const _MARCA_AFIN: Vector2i = Vector2i(7, 0)
+# T18: las rivales que darian riesgo de incidente desde la casilla bajo el mouse.
+const _MARCA_RIVAL: Vector2i = Vector2i(8, 0)
+# T19: las rivales enemigas que la harian tirar Encono o cobardia desde ahi.
+const _MARCA_RIVAL_ENEMIGA: Vector2i = Vector2i(9, 0)
+# T32 (A.3, riesgo): las 4 vecinas ortogonales (el cuerpo) de la casilla bajo el
+# mouse; una forma distinta de la de afines y rivales (las 8 del vinculo).
+const _MARCA_ORTOGONAL: Vector2i = Vector2i(10, 0)
+# T17: las aliadas que se pueden Secundar (la misma marca de "elegir" que cavar).
+const _MARCA_ALIADA: Vector2i = _MARCA_CAVAR
+# T22: las objetivos del hechizo elegido (la misma marca de "elegir") y, con el
+# mouse sobre una, los destinos de la Lanzadera (la marca de destino).
+const _MARCA_OBJETIVO_HECHIZO: Vector2i = _MARCA_CAVAR
+const _MARCA_DESTINO_HECHIZO: Vector2i = _MARCA_DESTINO
+# T24: las objetivos del sellado (la misma marca de "elegir").
+const _MARCA_OBJETIVO_SELLAR: Vector2i = _MARCA_CAVAR
+# T26: las casillas donde se puede invocar (la misma marca de "elegir" que cavar).
+const _MARCA_INVOCAR: Vector2i = _MARCA_CAVAR
+# T27: las caidas que se pueden guardar (la misma marca de "elegir" que Sellar).
+const _MARCA_CAIDA: Vector2i = _MARCA_CAVAR
+# T28: las enemigas que alcanzan al Maestro antes del cierre, con la marca de objetivo.
+const _MARCA_ALCANZA_HUIDA: Vector2i = _MARCA_OBJETIVO
 const _TEXTOS: String = "textos/es.json"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
 const _ACCION_DEPURACION: String = "depuracion"
 const _ACCION_SELECCIONAR: String = "seleccionar"
+# T22: el clic derecho (atraer con la Lanzadera).
+const _ACCION_SELECCIONAR_ALTERNO: String = "seleccionar_alterno"
 const _ACCION_ZONA: String = "zona"
 const _ACCION_SALTAR: String = "saltar"
+# T42: la camara (D-003).
+const _ACCION_CAMARA_ARRIBA: String = "camara_arriba"
+const _ACCION_CAMARA_ABAJO: String = "camara_abajo"
+const _ACCION_CAMARA_IZQUIERDA: String = "camara_izquierda"
+const _ACCION_CAMARA_DERECHA: String = "camara_derecha"
+const _ACCION_CAMARA_ACERCAR: String = "camara_acercar"
+const _ACCION_CAMARA_ALEJAR: String = "camara_alejar"
+const _ACCION_CAMARA_ARRASTRAR: String = "camara_arrastrar"
 const _PREFIJO_BOTON_ACTIVA: String = "Activa_"
+const _NOMBRE_BOTON_SECUNDAR: String = "Secundar"
+const _PREFIJO_BOTON_HECHIZO: String = "Hechizo_"
+# T26: el boton Guardar y los de invocar (uno por guardada, con su id).
+const _NOMBRE_BOTON_GUARDAR: String = "Guardar"
+const _PREFIJO_BOTON_INVOCAR: String = "Invocar_"
+const _NOMBRE_BOTON_SELLAR: String = "Sellar"
+# T27: el boton de guardar a una caida.
+const _NOMBRE_BOTON_GUARDAR_CAIDA: String = "GuardarCaida"
+# T28 (Sistema.md 11.7): el boton Huir.
+const _NOMBRE_BOTON_HUIR: String = "Huir"
+# T30 (Sistema.md 9.3): los botones del destino de la atacante, uno por opcion.
+const _PREFIJO_BOTON_DESTINO: String = "Destino_"
 # Presentacion: la oculta sigue visible para el jugador, a media transparencia.
 const _ALFA_OCULTA: float = 0.45
 const _CARPETA_REGISTROS: String = "res://registros"
@@ -42,16 +90,43 @@ const _COLOR_ACTUAL: Color = Color(1.0, 0.85, 0.3)
 const _COLOR_ACTUO: Color = Color(0.6, 0.6, 0.6)
 const _COLOR_PENDIENTE: Color = Color(1, 1, 1)
 const _MARCA_ACTUAL: String = "> "
+# T24-ajustes (D-012): valor de dispositivo_mouse que acepta el mouse de
+# cualquier device. Fuera de los ids que usa Godot (0 en adelante, y -1 para la
+# emulacion desde toque).
+const DISPOSITIVO_CUALQUIERA: int = -1000
 
 # T40, sesion 2: segundos entre los pasos de la IA. Es presentacion, no un dato
 # de balance; con 0 no se anima (los tests la ponen en 0).
 @export var pausa_ia: float = 0.4
+# T42 (D-003): la camara. Es presentacion, no datos de balance. El zoom de
+# Camera2D: mas grande = mas cerca. paso_zoom se suma al acercar y se resta al
+# alejar; velocidad_camara en pixeles de pantalla por segundo; margen en
+# pixeles del lienzo alrededor del tablero.
+@export var zoom_minimo: float = 0.5
+@export var zoom_maximo: float = 2.0
+@export var paso_zoom: float = 0.25
+@export var velocidad_camara: float = 600.0
+@export var margen: float = 64.0
+# T24-ajustes (D-012): de que device se acepta el mouse. El juego acepta
+# cualquiera; los tests ponen el suyo (MousePrueba) para que el cursor real de
+# la maquina no pise sus eventos.
+@export var dispositivo_mouse: int = DISPOSITIVO_CUALQUIERA
+# T32 (D-013): la vista del tablero (VistasTablero). Se aplica al entrar al
+# arbol y al empezar.
+@export var vista_tablero: String = VistasTablero.POR_DEFECTO
 
 var _combate: Combate = null
 var _armador: ArmadorTextos = null
 var _estados: EstadosUnidad = null
 var _avisos_carga: Array[Dictionary] = []
 var _carpeta_registros: String = _CARPETA_REGISTROS
+# T31: el escenario es una variante del panel que difiere del archivo.
+var _editado: bool = false
+# T33 (D-015): lo que va a la ficha de playtest: los cambios del panel, quien
+# juega (null = nadie lo escribio) y las semillas de playtest/alarmas.json.
+var _variante: Dictionary = {}
+var _jugador: Variant = null
+var _semillas_playtest: Array = []
 # Lineas de sucesos ya armadas y cuantas lineas del registro ya se leyeron.
 var _sucesos: Array[String] = []
 var _lineas_leidas: int = 0
@@ -60,9 +135,34 @@ var _guardado: String = ""
 var _desglose_mostrado: Dictionary = {}
 # La casilla bajo el mouse la ultima vez, para no rearmar el desglose en cada pixel.
 var _casilla_mouse: Vector2i = Criatura.SIN_POSICION
+# D-006: la posicion (en el viewport) del ultimo InputEventMouse recibido, y si
+# llego alguno.
+var _posicion_mouse: Vector2 = Vector2.ZERO
+var _hay_mouse: bool = false
 # T40, estado de la interfaz (no de reglas): el modo "elegir casilla" de Cavar,
 # si la zona de Caza se ve, y el tooltip y el aviso que se muestran.
 var _eligiendo_cavar: bool = false
+# T17: el modo "elegir aliada" de Secundar y la aliada bajo el mouse ("" si
+# ninguna), cuya cola resultante se muestra.
+var _eligiendo_aliada: bool = false
+var _aliada_previa: String = ""
+# T22: el hechizo cuyo modo "elegir objetivo" esta puesto ("" si ninguno) y lo
+# que se muestra con el mouse sobre una objetivo: {sentido: {evento, destaparia}}.
+var _hechizo_elegido: String = ""
+var _hechizo_mostrado: Dictionary = {}
+# T24: el modo "elegir objetivo" de Sellar y lo que se muestra con el mouse sobre
+# una objetivo: {objetivo, porcentaje, costo, previa}, o {}.
+var _sellando: bool = false
+var _sellado_mostrado: Dictionary = {}
+# T26: la guardada cuyo modo "elegir casilla" de invocar esta puesto ("" si ninguna).
+var _invocando: String = ""
+# T27: el modo "elegir caida" de guardar a una caida y lo que se muestra con el
+# mouse sobre una caida valida: {objetivo, costo, vida, previa}, o {}.
+var _guardando_caida: bool = false
+var _caida_mostrada: Dictionary = {}
+# T28: la previsualizacion de la huida con el mouse sobre el boton Huir
+# (Combate.previsualizar_huida), o {}.
+var _huida_mostrada: Dictionary = {}
 var _zona_visible: bool = true
 var _tooltip_mostrado: Array[String] = []
 var _aviso_mostrado: String = ""
@@ -70,11 +170,19 @@ var _aviso_mostrado: String = ""
 # una secuencia en curso.
 var _secuencia: Array[Dictionary] = []
 var _en_secuencia: bool = false
+# T42: el rectangulo (en el lienzo) del que no sale lo que se ve.
+var _limites: Rect2 = Rect2()
 
 @onready var _tablero: TileMapLayer = $Tablero
 @onready var _capa_surcos: TileMapLayer = $Tablero/Surcos
 @onready var _capa_zona: TileMapLayer = $Tablero/Zona
 @onready var _marcas: TileMapLayer = $Tablero/Marcas
+@onready var _capa_afines: TileMapLayer = $Tablero/Afines
+@onready var _capa_rivales: TileMapLayer = $Tablero/Rivales
+@onready var _capa_rivales_enemigas: TileMapLayer = $Tablero/RivalesEnemigas
+@onready var _capa_destinos: TileMapLayer = $Tablero/DestinosHechizo
+@onready var _capa_alcanzan_huida: TileMapLayer = $Tablero/AlcanzanHuida
+@onready var _capa_ortogonales: TileMapLayer = $Tablero/Ortogonales
 @onready var _unidades: Node2D = $Tablero/Unidades
 @onready var _camara: Camera2D = $Camara
 @onready var _mensaje: Label = $Interfaz/Mensaje
@@ -83,13 +191,16 @@ var _en_secuencia: bool = false
 @onready var _panel_turno: Label = $Interfaz/PanelTurno
 @onready var _panel_desglose: Label = $Interfaz/PanelDesglose
 @onready var _texto_sucesos: Label = $Interfaz/Sucesos
-@onready var _botones: HBoxContainer = $Interfaz/Botones
+# T29: corta en varias lineas (HFlowContainer) para no salirse de la ventana.
+@onready var _botones: HFlowContainer = $Interfaz/Botones
 @onready var _boton_terminar: Button = $Interfaz/Botones/BotonTerminar
 @onready var _panel_unidad: Label = $Interfaz/PanelUnidad
 @onready var _aviso: Label = $Interfaz/Aviso
 @onready var _pantalla_resultado: Control = $Interfaz/PantallaResultado
-@onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/TextoResultado
+@onready var _texto_resultado: Label = $Interfaz/PantallaResultado/Contenido/Desplazable/TextoResultado
 @onready var _boton_volver: Button = $Interfaz/PantallaResultado/Contenido/BotonVolver
+# T30: los botones del destino de la atacante (Destino_<opcion>).
+@onready var _botones_destino: HFlowContainer = $Interfaz/PantallaResultado/Contenido/BotonesDestino
 @onready var _depuracion: TextEdit = $Interfaz/PanelDepuracion
 @onready var _pausa: Timer = $PausaIA
 
@@ -98,16 +209,30 @@ func _ready() -> void:
 	_boton_terminar.pressed.connect(pulsar_terminar)
 	_boton_volver.pressed.connect(volver.emit)
 	_pausa.timeout.connect(_siguiente_paso)
+	_aplicar_vista()
 
 
 # escenario y datos: los del Cargador. avisos_carga: sus avisos, para el panel
 # de depuracion. carpeta_registros: donde se guardan la grabacion y el registro
-# al terminar ("" = res://registros).
+# al terminar ("" = res://registros). editado: si el escenario es una variante
+# del panel que difiere del archivo (T31: lo guardado lleva _editado).
+# variante y jugador (T33): los cambios del panel (EdicionEscenario.cambios) y
+# el nombre del selector, para la ficha de playtest que se guarda al terminar.
 func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dictionary] = [],
-		carpeta_registros: String = "") -> void:
+		carpeta_registros: String = "", editado: bool = false, variante: Dictionary = {},
+		jugador: Variant = null) -> void:
 	_avisos_carga = avisos_carga
+	_editado = editado
+	_variante = variante.duplicate(true)
+	_jugador = jugador
+	_semillas_playtest = (datos.get(AlarmasPlaytest.ARCHIVO, {}) as Dictionary).get("semillas", [])
 	if not carpeta_registros.is_empty():
 		_carpeta_registros = carpeta_registros
+	var error_vista: String = VistasTablero.error(vista_tablero)
+	if not error_vista.is_empty():
+		_mostrar_mensaje(error_vista)
+		return
+	_aplicar_vista()
 	var contexto: ContextoCombate = ContextoCombate.armar(escenario, datos)
 	if not contexto.valido:
 		# Pantalla de desarrollo: muestra el motivo tecnico.
@@ -118,6 +243,7 @@ func empezar(escenario: Dictionary, datos: Dictionary, avisos_carga: Array[Dicti
 	_armador = ArmadorTextos.desde_datos(datos[_TEXTOS], contexto.azar_textos)
 	_estados = EstadosUnidad.desde_datos(datos[_TABLA_HAMBRE], datos[_TABLA_LEALTAD])
 	_despues_de_un_cambio()
+	_encuadrar()
 	for aviso in _avisos_armador():
 		print("[textos] ", aviso)
 
@@ -129,6 +255,38 @@ func combate() -> Combate:
 
 func tablero() -> TileMapLayer:
 	return _tablero
+
+
+func camara() -> Camera2D:
+	return _camara
+
+
+# T42: los limites de la camara (las esquinas del tablero mas el margen).
+func limites_camara() -> Rect2:
+	return _limites
+
+
+# T42: la casilla bajo el mouse la ultima vez que se miro (hover). D-006: sale
+# de _casilla_del_mouse; sin ningun evento del mouse, Criatura.SIN_POSICION.
+func casilla_bajo_mouse() -> Vector2i:
+	return _casilla_mouse
+
+
+# T42: mueve la camara (en pixeles del lienzo), acotada a los limites. Anda
+# tambien durante la secuencia de la IA: solo mira.
+func mover_camara(desplazamiento: Vector2) -> void:
+	if _combate == null:
+		return
+	_camara.global_position += desplazamiento
+	_acotar_camara()
+
+
+func acercar() -> void:
+	_cambiar_zoom(paso_zoom)
+
+
+func alejar() -> void:
+	_cambiar_zoom(-paso_zoom)
 
 
 func fichas() -> Array[FichaUnidad]:
@@ -148,11 +306,12 @@ func filas_cola() -> Array[Label]:
 
 
 # Un clic en una casilla: la Accion que da el InterpreteClic, si hay alguna.
-# Devuelve true si se aplico.
-func clic_casilla(casilla: Vector2i) -> bool:
+# Devuelve true si se aplico. T22: alterno es el clic derecho (`seleccionar_alterno`).
+func clic_casilla(casilla: Vector2i, alterno: bool = false) -> bool:
 	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
 		return false
-	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar)
+	var accion: Accion = InterpreteClic.accion(_combate.turno_actual(), _combate.instantanea(), casilla, _eligiendo_cavar,
+			_eligiendo_aliada, _hechizo_elegido, alterno, _sellando, _invocando, _guardando_caida)
 	if accion == null:
 		return false
 	return _aplicar(accion)
@@ -161,11 +320,25 @@ func clic_casilla(casilla: Vector2i) -> bool:
 # El mouse sobre una casilla: con una objetivo atacable, el desglose de
 # previsualizar_ataque desde donde esta la unidad. T40: con una unidad, su
 # tooltip; en una casilla para moverse que la dejaria junto a una oculta
-# enemiga, el aviso (Combate.destaparia).
+# enemiga, el aviso (Combate.destaparia). T41: en una casilla para moverse o en
+# la propia, se marcan las unidades que le darian afinidad desde ahi
+# (Combate.afines_desde) y, si hay alguna, el aviso suma afinidad.tooltip. T18:
+# ahi mismo, las rivales del incidente (Combate.incidente_en) e incidente.tooltip.
+# T19: y las rivales enemigas del Encono o la cobardia (Combate.rival_en).
 func sobre_casilla(casilla: Vector2i) -> void:
 	_desglose_mostrado = {}
+	_hechizo_mostrado = {}
+	_sellado_mostrado = {}
+	_caida_mostrada = {}
+	_huida_mostrada = {}
+	_capa_alcanzan_huida.clear()
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
+	_capa_afines.clear()
+	_capa_rivales.clear()
+	_capa_rivales_enemigas.clear()
+	_capa_destinos.clear()
+	_capa_ortogonales.clear()
 	# Durante la secuencia de la IA, nada: el nucleo ya esta en el estado final y
 	# las fichas todavia no.
 	if _combate == null or _en_secuencia:
@@ -177,16 +350,100 @@ func sobre_casilla(casilla: Vector2i) -> void:
 		_tooltip_mostrado = lectura.tooltip_unidad(unidad)
 	if _combate.esperando_jugador():
 		var turno: Turno = _combate.turno_actual()
+		_dibujar_ortogonales(turno, unidad, casilla)
 		var objetivo: String = InterpreteClic.objetivo_en(turno, foto, casilla)
-		if not objetivo.is_empty():
+		if not _hechizo_elegido.is_empty():
+			_mostrar_hechizo(turno, foto, casilla)
+		elif _guardando_caida:
+			_mostrar_caida(turno, foto, casilla)
+		elif _sellando:
+			_mostrar_sellado(turno, foto, casilla)
+		elif not _invocando.is_empty():
+			# T26 (S-24): sobre una casilla donde se puede invocar, el aviso si la
+			# invocada destaparia a una oculta (Turno.previsualizar_invocar).
+			var previa: ResultadoAccion = turno.previsualizar_invocar(_invocando, casilla)
+			if previa.valida and not previa.destaparia.is_empty():
+				_aviso_mostrado = _armador.armar(ClavesTextos.AVISO_DESTAPAR)
+		elif _eligiendo_aliada:
+			# T17: sobre una aliada valida, la cola muestra el orden que quedaria.
+			var aliada: String = InterpreteClic.aliada_en(turno, foto, casilla)
+			if aliada != _aliada_previa:
+				_aliada_previa = aliada
+				_dibujar_cola(lectura)
+		elif not objetivo.is_empty():
 			var vista_previa: ResultadoAccion = turno.previsualizar_ataque(_casilla_de(foto, turno.unidad_id), objetivo)
 			if vista_previa.valida:
 				_desglose_mostrado = vista_previa.desglose.a_diccionario()
-		elif not _eligiendo_cavar and turno.casillas_para_mover().has(casilla) \
-				and not _combate.destaparia(turno.unidad_id, casilla).is_empty():
-			_aviso_mostrado = _armador.armar(ClavesTextos.AVISO_DESTAPAR)
+		elif not _eligiendo_cavar:
+			var para_mover: bool = turno.casillas_para_mover().has(casilla)
+			var avisos: Array[String] = []
+			if para_mover and not _combate.destaparia(turno.unidad_id, casilla).is_empty():
+				avisos.append(_armador.armar(ClavesTextos.AVISO_DESTAPAR))
+			if para_mover or casilla == _casilla_de(foto, turno.unidad_id):
+				var afines: Array[String] = _combate.afines_desde(turno.unidad_id, casilla)
+				for afin in afines:
+					_capa_afines.set_cell(_casilla_de(foto, afin), _FUENTE_MARCAS, _MARCA_AFIN)
+				if not afines.is_empty():
+					avisos.append(_armador.armar(ClavesTextos.AFINIDAD_TOOLTIP))
+				# T18 (Sistema.md 10.4: "la probabilidad se muestra en la casilla
+				# antes de mover"): el % de incidente parada ahi y sus rivales. Con
+				# 0 % no hay riesgo: no se marca nada.
+				var incidente: Dictionary = _combate.incidente_en(turno.unidad_id, casilla)
+				if incidente["porcentaje"] > 0:
+					for rival in incidente["rivales"]:
+						_capa_rivales.set_cell(_casilla_de(foto, rival), _FUENTE_MARCAS, _MARCA_RIVAL)
+					avisos.append(_armador.armar(ClavesTextos.INCIDENTE_TOOLTIP,
+							{"porcentaje": incidente["porcentaje"]}))
+				# T19 (Sistema.md 10.5 y 10.6): el chequeo de rival enemiga que tiraria
+				# al empezar su turno ahi (Combate.rival_en). Con 0 %, nada.
+				var rival: Dictionary = _combate.rival_en(turno.unidad_id, casilla)
+				if rival["porcentaje"] > 0:
+					for rival_id in rival["rivales"]:
+						_capa_rivales_enemigas.set_cell(_casilla_de(foto, rival_id), _FUENTE_MARCAS,
+								_MARCA_RIVAL_ENEMIGA)
+					var clave_rival: String = ClavesTextos.ENCONO_TOOLTIP \
+							if rival["tipo"] == ChequeoRival.TIPO_ENCONO else ClavesTextos.COBARDIA_TOOLTIP
+					avisos.append(_armador.armar(clave_rival, {"porcentaje": rival["porcentaje"]}))
+			_aviso_mostrado = "\n".join(avisos)
 	_dibujar_desglose()
 	_dibujar_tooltip()
+
+
+# T22: con el mouse sobre una objetivo del hechizo elegido, lo que haria en cada
+# sentido (Turno.previsualizar_hechizo): el desglose si es un ataque; si no, su
+# evento y las ocultas que destaparia, y el destino sin choque marcado.
+func _mostrar_hechizo(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
+	var objetivo: String = InterpreteClic.objetivo_hechizo_en(turno, foto, casilla, _hechizo_elegido)
+	if objetivo.is_empty():
+		return
+	for sentido in turno.sentidos_para_hechizo(_hechizo_elegido, objetivo):
+		var previa: ResultadoAccion = turno.previsualizar_hechizo(_hechizo_elegido, objetivo, sentido)
+		if not previa.valida:
+			continue
+		if previa.desglose != null:
+			_desglose_mostrado = previa.desglose.a_diccionario()
+			continue
+		_hechizo_mostrado[sentido] = {"evento": previa.evento.duplicate(true), "destaparia": previa.destaparia.duplicate(),
+				"previa": previa}
+		var hasta: Variant = previa.evento.get("hasta")
+		if hasta != null:
+			_capa_destinos.set_cell(Vector2i(hasta[0], hasta[1]), _FUENTE_MARCAS, _MARCA_DESTINO_HECHIZO)
+
+
+# T22: lo que se muestra del hechizo con el mouse sobre una objetivo, por
+# sentido ("" si no tiene): {evento, destaparia}, o {}. El desglose de un ataque
+# va en desglose_mostrado().
+func hechizo_mostrado() -> Dictionary:
+	var mostrado: Dictionary = {}
+	for sentido in _hechizo_mostrado.keys():
+		mostrado[sentido] = {"evento": _hechizo_mostrado[sentido]["evento"].duplicate(true),
+				"destaparia": _hechizo_mostrado[sentido]["destaparia"].duplicate()}
+	return mostrado
+
+
+# T22: las casillas marcadas como destino de la Lanzadera ahora.
+func casillas_destino_hechizo() -> Array[Vector2i]:
+	return _capa_destinos.get_used_cells()
 
 
 # Las lineas del tooltip que se ve ahora, o [].
@@ -194,9 +451,45 @@ func tooltip_mostrado() -> Array[String]:
 	return _tooltip_mostrado.duplicate()
 
 
-# El aviso de destapar que se ve ahora, o "".
+# El aviso que se ve ahora (destapar y afinidad, una linea cada uno), o "".
 func aviso_mostrado() -> String:
 	return _aviso_mostrado
+
+
+# T41: las casillas de las unidades marcadas como afines ahora.
+# T32: las casillas que marca la capa Ortogonales.
+func casillas_ortogonales() -> Array[Vector2i]:
+	return _capa_ortogonales.get_used_cells()
+
+
+# T32 (A.3, riesgo; Sistema.md 11.3, "el cuerpo mira 4"): con el mouse sobre una
+# unidad de la tribu o sobre una casilla para mover, sus 4 vecinas ortogonales.
+# Salen de Tablero.vecinas (T06), nunca de una cuenta de la pantalla.
+func _dibujar_ortogonales(turno: Turno, unidad: String, casilla: Vector2i) -> void:
+	if not _es_de_la_tribu(unidad) and not turno.casillas_para_mover().has(casilla):
+		return
+	for vecina in _combate.contexto().tablero.vecinas(casilla):
+		_capa_ortogonales.set_cell(vecina, _FUENTE_MARCAS, _MARCA_ORTOGONAL)
+
+
+func _es_de_la_tribu(unidad: String) -> bool:
+	if unidad.is_empty():
+		return false
+	return unidad == Maestro.ID or _combate.contexto().plantel.criatura(unidad).bando == Criatura.Bando.TRIBU
+
+
+func casillas_afines() -> Array[Vector2i]:
+	return _capa_afines.get_used_cells()
+
+
+# T18: las casillas de las rivales marcadas por riesgo de incidente ahora.
+func casillas_rivales() -> Array[Vector2i]:
+	return _capa_rivales.get_used_cells()
+
+
+# T19: las casillas de las rivales enemigas marcadas por Encono o cobardia ahora.
+func casillas_rivales_enemigas() -> Array[Vector2i]:
+	return _capa_rivales_enemigas.get_used_cells()
 
 
 # T40: el boton de una activa (LecturaCombate.ACTIVA_*). Cavar no aplica nada:
@@ -211,13 +504,239 @@ func pulsar_activa(tipo: String) -> bool:
 			return _aplicar(Accion.hacerse_junco())
 		LecturaCombate.ACTIVA_CAVAR:
 			_eligiendo_cavar = not _eligiendo_cavar
+			_eligiendo_aliada = false
+			_aliada_previa = ""
+			_hechizo_elegido = ""
+			_sellando = false
+			_invocando = ""
+			_guardando_caida = false
 			redibujar()
 			return true
 	return false
 
 
+# T22: el boton de un hechizo no aplica nada: entra (o sale) del modo "elegir
+# objetivo" de ese hechizo. Solo si Turno.motivo_hechizo lo deja (salir, siempre).
+# Devuelve true si hizo algo.
+func pulsar_hechizo(hechizo_id: String) -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if _hechizo_elegido == hechizo_id:
+		_hechizo_elegido = ""
+	elif _combate.turno_actual().motivo_hechizo(hechizo_id) == ResultadoAccion.Motivo.NINGUNO:
+		_hechizo_elegido = hechizo_id
+	else:
+		return false
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_sellando = false
+	_invocando = ""
+	_guardando_caida = false
+	redibujar()
+	return true
+
+
+# T24: el boton Sellar no aplica nada: entra (o sale) del modo "elegir objetivo".
+# Solo si Turno.motivo_sellar lo deja (salir, siempre). Devuelve true si hizo algo.
+func pulsar_sellar() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if not _sellando and _combate.turno_actual().motivo_sellar() != ResultadoAccion.Motivo.NINGUNO:
+		return false
+	_sellando = not _sellando
+	_invocando = ""
+	_guardando_caida = false
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	redibujar()
+	return true
+
+
+func eligiendo_sellar() -> bool:
+	return _sellando
+
+
+# T27: el boton de guardar a una caida no aplica nada: entra (o sale) del modo
+# "elegir caida". Solo si Turno.motivo_guardar_caida lo deja (salir, siempre).
+# Devuelve true si hizo algo.
+func pulsar_guardar_caida() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if not _guardando_caida and _combate.turno_actual().motivo_guardar_caida() != ResultadoAccion.Motivo.NINGUNO:
+		return false
+	_guardando_caida = not _guardando_caida
+	_sellando = false
+	_invocando = ""
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	redibujar()
+	return true
+
+
+func eligiendo_caida() -> bool:
+	return _guardando_caida
+
+
+# T27: lo que se muestra con el mouse sobre una caida que se puede guardar
+# (Turno.previsualizar_guardar_caida): {objetivo, costo, vida}, o {}.
+func guardado_caida_mostrado() -> Dictionary:
+	if _caida_mostrada.is_empty():
+		return {}
+	return {"objetivo": _caida_mostrada["objetivo"], "costo": _caida_mostrada["costo"],
+			"vida": _caida_mostrada["vida"]}
+
+
+# T27: con el mouse sobre una caida que se puede guardar, el costo y la vida con
+# la que queda, que da el nucleo.
+func _mostrar_caida(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
+	var caida: String = InterpreteClic.caida_en(turno, foto, casilla)
+	if caida.is_empty():
+		return
+	var previa: ResultadoAccion = turno.previsualizar_guardar_caida(caida)
+	if previa.valida:
+		_caida_mostrada = {"objetivo": caida, "costo": previa.costo, "vida": previa.vida, "previa": previa}
+
+
+# T28 (Sistema.md 11.7): el boton Huir declara la huida del Maestro.
+func pulsar_huir() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	return _aplicar(Accion.huir())
+
+
+# T28 ("previsualizacion al declarar"): con el mouse sobre el boton Huir, el
+# panel muestra Combate.previsualizar_huida y se marcan las enemigas que lo
+# alcanzan; al salir, se borra. sobre: si el mouse entro o salio.
+func mostrar_huida(sobre: bool) -> void:
+	_huida_mostrada = {}
+	if sobre and _combate != null and not _en_secuencia and _combate.esperando_jugador():
+		_huida_mostrada = _combate.previsualizar_huida()
+	_dibujar_alcanzan_huida()
+	_dibujar_desglose()
+
+
+# T28: la previsualizacion que se ve ahora (Combate.previsualizar_huida), o {}.
+func huida_mostrada() -> Dictionary:
+	return _huida_mostrada.duplicate(true)
+
+
+# T28: las casillas de las enemigas marcadas porque alcanzan al Maestro.
+func casillas_alcanzan_huida() -> Array[Vector2i]:
+	return _capa_alcanzan_huida.get_used_cells()
+
+
+func _dibujar_alcanzan_huida() -> void:
+	_capa_alcanzan_huida.clear()
+	if _huida_mostrada.is_empty():
+		return
+	var foto: Dictionary = _combate.instantanea()
+	for enemiga: Dictionary in _huida_mostrada["enemigas"]:
+		if enemiga["alcanza"]:
+			_capa_alcanzan_huida.set_cell(_casilla_de(foto, enemiga["unidad"]), _FUENTE_MARCAS, _MARCA_ALCANZA_HUIDA)
+
+
+# T30 (Sistema.md 9.3): un boton del destino de la atacante aplica esa opcion,
+# solo si el combate espera el destino y Combate.motivo_destino la deja.
+func pulsar_destino(opcion: String) -> bool:
+	if _combate == null or not _combate.esperando_destino() \
+			or _combate.motivo_destino(opcion) != ResultadoAccion.Motivo.NINGUNO:
+		return false
+	return _aplicar(Accion.destino_atacante(opcion))
+
+
+# T26: el boton Guardar aplica la accion de la criatura del turno.
+func pulsar_guardar() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	return _aplicar(Accion.guardar())
+
+
+# T26: el boton de invocar de una guardada no aplica nada: entra (o sale) del
+# modo "elegir casilla" para ella. Solo si Turno.motivo_invocar lo deja (salir,
+# siempre). Devuelve true si hizo algo.
+func pulsar_invocar(criatura_id: String) -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if _invocando == criatura_id:
+		_invocando = ""
+	elif _combate.turno_actual().motivo_invocar(criatura_id) == ResultadoAccion.Motivo.NINGUNO:
+		_invocando = criatura_id
+	else:
+		return false
+	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	_sellando = false
+	_guardando_caida = false
+	redibujar()
+	return true
+
+
+# T26: la guardada cuyo modo de invocar esta puesto, o "".
+func invocando() -> String:
+	return _invocando
+
+
+# T26: las casillas marcadas para invocar (las de Turno.casillas_para_invocar).
+func casillas_marcadas() -> Array[Vector2i]:
+	return _marcas.get_used_cells()
+
+
+# T24: lo que se muestra con el mouse sobre una objetivo del sellado
+# (Turno.previsualizar_sellar): {objetivo, porcentaje, costo}, o {}.
+func sellado_mostrado() -> Dictionary:
+	if _sellado_mostrado.is_empty():
+		return {}
+	return {"objetivo": _sellado_mostrado["objetivo"], "porcentaje": _sellado_mostrado["porcentaje"],
+			"costo": _sellado_mostrado["costo"]}
+
+
+# T24: con el mouse sobre una objetivo del sellado, el % y el costo que da el nucleo.
+func _mostrar_sellado(turno: Turno, foto: Dictionary, casilla: Vector2i) -> void:
+	var objetivo: String = InterpreteClic.objetivo_sellar_en(turno, foto, casilla)
+	if objetivo.is_empty():
+		return
+	var previa: ResultadoAccion = turno.previsualizar_sellar(objetivo)
+	if previa.valida:
+		_sellado_mostrado = {"objetivo": objetivo, "porcentaje": previa.porcentaje, "costo": previa.costo,
+				"previa": previa}
+
+
+# T22: el hechizo cuyo modo esta puesto, o "".
+func hechizo_elegido() -> String:
+	return _hechizo_elegido
+
+
 func eligiendo_cavar() -> bool:
 	return _eligiendo_cavar
+
+
+# T17: el boton Secundar no aplica nada: entra (o sale) del modo "elegir
+# aliada". Devuelve true si hizo algo.
+func pulsar_secundar() -> bool:
+	if _combate == null or _en_secuencia or not _combate.esperando_jugador():
+		return false
+	if not _eligiendo_aliada and _combate.turno_actual().aliadas_para_secundar().is_empty():
+		return false
+	_eligiendo_aliada = not _eligiendo_aliada
+	_eligiendo_cavar = false
+	_hechizo_elegido = ""
+	_sellando = false
+	_invocando = ""
+	_guardando_caida = false
+	_aliada_previa = ""
+	redibujar()
+	return true
+
+
+func eligiendo_aliada() -> bool:
+	return _eligiendo_aliada
 
 
 func zona_visible() -> bool:
@@ -255,8 +774,28 @@ func redibujar() -> void:
 		_mostrar_mensaje("Error del combate: " + _combate.error())
 
 
+# T42: las direcciones de la camara se miran en cada frame (tecla sostenida).
+func _process(delta: float) -> void:
+	if _combate == null:
+		return
+	var direccion: Vector2 = Input.get_vector(_ACCION_CAMARA_IZQUIERDA, _ACCION_CAMARA_DERECHA,
+			_ACCION_CAMARA_ARRIBA, _ACCION_CAMARA_ABAJO)
+	if direccion != Vector2.ZERO:
+		mover_camara(direccion * velocidad_camara * delta / _camara.zoom.x)
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(_ACCION_DEPURACION):
+	if event.is_action_pressed(_ACCION_CAMARA_ACERCAR):
+		acercar()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_CAMARA_ALEJAR):
+		alejar()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and Input.is_action_pressed(_ACCION_CAMARA_ARRASTRAR):
+		# Arrastrar: el tablero sigue al mouse.
+		mover_camara(-(event as InputEventMouseMotion).relative / _camara.zoom.x)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_DEPURACION):
 		_depuracion.visible = not _depuracion.visible
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(_ACCION_SALTAR) and _en_secuencia:
@@ -268,6 +807,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed(_ACCION_SELECCIONAR):
 		clic_casilla(_casilla_del_mouse())
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(_ACCION_SELECCIONAR_ALTERNO):
+		clic_casilla(_casilla_del_mouse(), true)
+		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion:
 		var casilla: Vector2i = _casilla_del_mouse()
 		if casilla != _casilla_mouse:
@@ -275,8 +817,81 @@ func _unhandled_input(event: InputEvent) -> void:
 			sobre_casilla(casilla)
 
 
+# D-006: la posicion del mouse sale del ultimo evento, nunca del cursor del
+# sistema. Se guarda en _input (antes que _unhandled_input y tambien si un
+# Control se queda con el evento); no se marca como manejado.
+# T24-ajustes (D-012): el unico filtro de device. Un mouse de otro device se
+# marca como manejado: no guarda posicion ni llega a los botones ni a
+# _unhandled_input (clic, hover, arrastre).
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouse and dispositivo_mouse != DISPOSITIVO_CUALQUIERA \
+			and event.device != dispositivo_mouse:
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventMouse:
+		_posicion_mouse = (event as InputEventMouse).position
+		_hay_mouse = true
+
+
+# D-006: la unica conversion de la posicion guardada a casilla (clic, hover y
+# rehover al mover la camara). Sin ningun evento todavia, no hay casilla.
 func _casilla_del_mouse() -> Vector2i:
-	return _tablero.local_to_map(_tablero.get_local_mouse_position())
+	if not _hay_mouse:
+		return Criatura.SIN_POSICION
+	return _tablero.local_to_map(_tablero.get_global_transform_with_canvas().affine_inverse() * _posicion_mouse)
+
+
+# T32 (D-013 (2)): el TileSet de la vista lo elige VistasTablero, y todas las
+# capas del tablero toman el del tablero (ninguna guarda el suyo). Con una
+# vista desconocida queda vacio: empezar muestra el error.
+func _aplicar_vista() -> void:
+	_tablero.tile_set = VistasTablero.tile_set(vista_tablero)
+	for hijo in _tablero.get_children():
+		if hijo is TileMapLayer:
+			(hijo as TileMapLayer).tile_set = _tablero.tile_set
+
+
+# T42 (D-003), al abrir: los limites salen de map_to_local de las esquinas del
+# tablero del escenario. Si entra entero con el zoom minimo se encuadra entero;
+# si no, se centra en el Maestro (EncuadreCamara.inicial). Despues, la camara
+# solo la mueve el jugador.
+func _encuadrar() -> void:
+	var tablero_combate: Tablero = _combate.contexto().tablero
+	var ultima_x: int = tablero_combate.ancho - 1
+	var ultima_y: int = tablero_combate.alto - 1
+	# T32 (D-013 (4)): las cuatro esquinas; en rombo, dos no alcanzan.
+	var esquinas: PackedVector2Array = PackedVector2Array()
+	for casilla in [Vector2i(0, 0), Vector2i(ultima_x, 0), Vector2i(0, ultima_y), Vector2i(ultima_x, ultima_y)]:
+		esquinas.append(_tablero.to_global(_tablero.map_to_local(casilla)))
+	_limites = EncuadreCamara.limites(esquinas, margen)
+	var centro_maestro: Variant = null
+	var casilla_maestro: Vector2i = _casilla_de(_combate.instantanea(), Maestro.ID)
+	if casilla_maestro != Criatura.SIN_POSICION:
+		centro_maestro = _tablero.to_global(_tablero.map_to_local(casilla_maestro))
+	var inicial: Dictionary = EncuadreCamara.inicial(_limites, get_viewport_rect().size, zoom_minimo, zoom_maximo,
+			centro_maestro)
+	_camara.zoom = Vector2.ONE * (inicial["zoom"] as float)
+	_camara.global_position = inicial["centro"]
+	_camara.force_update_scroll()
+
+
+func _cambiar_zoom(cambio: float) -> void:
+	if _combate == null:
+		return
+	_camara.zoom = Vector2.ONE * EncuadreCamara.acotar_zoom(_camara.zoom.x + cambio, zoom_minimo, zoom_maximo)
+	_acotar_camara()
+
+
+# Lo que se ve no sale de los limites. Con la camara movida y el mouse quieto,
+# la casilla bajo el mouse puede cambiar: se rearma el hover.
+func _acotar_camara() -> void:
+	_camara.global_position = EncuadreCamara.acotar_centro(_camara.global_position,
+			get_viewport_rect().size / _camara.zoom.x, _limites)
+	_camara.force_update_scroll()
+	var casilla: Vector2i = _casilla_del_mouse()
+	if casilla != _casilla_mouse:
+		_casilla_mouse = casilla
+		sobre_casilla(casilla)
 
 
 # Una accion del jugador: si el nucleo la acepta, se redibuja todo. T40, sesion
@@ -285,9 +900,19 @@ func _aplicar(accion: Accion) -> bool:
 	if not _combate.aplicar(accion).valida:
 		return false
 	_desglose_mostrado = {}
+	_hechizo_mostrado = {}
 	_tooltip_mostrado = []
 	_aviso_mostrado = ""
 	_eligiendo_cavar = false
+	_eligiendo_aliada = false
+	_aliada_previa = ""
+	_hechizo_elegido = ""
+	_sellando = false
+	_invocando = ""
+	_guardando_caida = false
+	_sellado_mostrado = {}
+	_caida_mostrada = {}
+	_huida_mostrada = {}
 	_casilla_mouse = Criatura.SIN_POSICION
 	var pasos: Array[Dictionary] = SecuenciaIA.pasos(_combate.registro().lineas(), _lineas_leidas)
 	if pausa_ia > 0.0 and not pasos.is_empty():
@@ -320,6 +945,10 @@ func _empezar_secuencia(pasos: Array[Dictionary]) -> void:
 	_en_secuencia = true
 	_botones.visible = false
 	_marcas.clear()
+	_capa_afines.clear()
+	_capa_rivales.clear()
+	_capa_rivales_enemigas.clear()
+	_capa_destinos.clear()
 	_capa_zona.clear()
 	_dibujar_desglose()
 	_dibujar_tooltip()
@@ -338,9 +967,15 @@ func _siguiente_paso() -> void:
 	_marcas.clear()
 	for ficha in fichas():
 		ficha.modulate = Color(1, 1, 1, ficha.modulate.a)
+		ficha.mostrar_marca("")
 	var actua: FichaUnidad = _ficha(paso["unidad"])
 	if actua != null:
 		actua.modulate = Color(_COLOR_ACTUAL, actua.modulate.a)
+		# T20: la que actua, enconada o acobardada en su turno (el chequeo_rival
+		# del registro), lleva la marca mientras se muestran sus pasos.
+		if not (paso["estado"] as String).is_empty():
+			actua.mostrar_marca(LecturaCombate.new(_combate, _armador, _estados).marca_estado(paso["unidad"],
+					paso["estado"]))
 	if paso["tipo"] == SecuenciaIA.MOVIMIENTO:
 		var hasta: Vector2i = paso["hasta"]
 		_marcas.set_cell(hasta, _FUENTE_MARCAS, _MARCA_DESTINO)
@@ -368,13 +1003,16 @@ func _ficha(unidad_id: String) -> FichaUnidad:
 
 
 # Lo nuevo del registro pasa a los sucesos; con el combate terminado se guarda
-# una sola vez. Despues, se redibuja todo desde el nucleo.
+# una sola vez. T30: si la atacante espera su destino, despues de elegirlo (la
+# grabacion lleva esa accion). Despues, se redibuja todo desde el nucleo.
 func _despues_de_un_cambio() -> void:
 	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
 	_sucesos.append_array(lectura.sucesos(_lineas_leidas))
 	_lineas_leidas = _combate.registro().lineas().size()
-	if _combate.terminado() and _guardado.is_empty():
-		_guardado = GuardadoCombate.guardar(_combate, _carpeta_registros)
+	if _combate.terminado() and not _combate.esperando_destino() and _guardado.is_empty():
+		var ficha: Dictionary = FichaPlaytest.armar(_combate.contexto().escenario_id, _variante,
+				_combate.contexto().semilla, _semillas_playtest, _jugador)
+		_guardado = GuardadoCombate.guardar(_combate, _carpeta_registros, _editado, ficha)
 		if _guardado.is_empty():
 			_mostrar_mensaje("No se pudo guardar la partida en " + _carpeta_registros)
 		else:
@@ -390,25 +1028,57 @@ func _dibujar_tablero() -> void:
 		for x in range(tablero_combate.ancho):
 			var clara: bool = (x + y) % 2 == 0
 			_tablero.set_cell(Vector2i(x, y), _FUENTE_CASILLAS, _CASILLA_CLARA if clara else _CASILLA_OSCURA)
-	var esquina_a: Vector2 = _tablero.map_to_local(Vector2i(0, 0))
-	var esquina_b: Vector2 = _tablero.map_to_local(Vector2i(tablero_combate.ancho - 1, tablero_combate.alto - 1))
-	_camara.global_position = _tablero.to_global((esquina_a + esquina_b) / 2.0)
 
 
 # Solo en el turno del jugador: a donde puede moverse y a quien puede atacar.
 # T40: eligiendo donde cavar, solo las casillas de casillas_para_cavar.
 func _dibujar_marcas() -> void:
 	_marcas.clear()
+	# T41: las de afinidad son del hover; el proximo movimiento del mouse las rearma.
+	_capa_afines.clear()
+	_capa_rivales.clear()
+	_capa_rivales_enemigas.clear()
+	_capa_destinos.clear()
+	_capa_ortogonales.clear()
+	_dibujar_alcanzan_huida()
 	if not _combate.esperando_jugador():
 		return
 	var turno: Turno = _combate.turno_actual()
+	# T22: eligiendo la objetivo de un hechizo, solo las de objetivos_para_hechizo.
+	if not _hechizo_elegido.is_empty():
+		var foto_hechizo: Dictionary = _combate.instantanea()
+		for objetivo in turno.objetivos_para_hechizo(_hechizo_elegido):
+			_marcas.set_cell(_casilla_de(foto_hechizo, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_HECHIZO)
+		return
+	# T24: eligiendo la objetivo del sellado, solo las de objetivos_para_sellar.
+	if _sellando:
+		var foto_sellar: Dictionary = _combate.instantanea()
+		for objetivo in turno.objetivos_para_sellar():
+			_marcas.set_cell(_casilla_de(foto_sellar, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO_SELLAR)
+		return
+	# T27: eligiendo la caida que se guarda, solo las de objetivos_para_guardar_caida.
+	if _guardando_caida:
+		var foto_caida: Dictionary = _combate.instantanea()
+		for caida in turno.objetivos_para_guardar_caida():
+			_marcas.set_cell(_casilla_de(foto_caida, caida), _FUENTE_MARCAS, _MARCA_CAIDA)
+		return
+	# T26: eligiendo donde invocar, solo las de casillas_para_invocar.
+	if not _invocando.is_empty():
+		for casilla in turno.casillas_para_invocar():
+			_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_INVOCAR)
+		return
 	if _eligiendo_cavar:
 		for casilla in turno.casillas_para_cavar():
 			_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_CAVAR)
 		return
+	var foto: Dictionary = _combate.instantanea()
+	# T17: eligiendo a quien Secundar, solo las aliadas de aliadas_para_secundar.
+	if _eligiendo_aliada:
+		for aliada in turno.aliadas_para_secundar():
+			_marcas.set_cell(_casilla_de(foto, aliada), _FUENTE_MARCAS, _MARCA_ALIADA)
+		return
 	for casilla in turno.casillas_para_mover():
 		_marcas.set_cell(casilla, _FUENTE_MARCAS, _MARCA_MOVER)
-	var foto: Dictionary = _combate.instantanea()
 	for objetivo in turno.objetivos_para_atacar():
 		_marcas.set_cell(_casilla_de(foto, objetivo), _FUENTE_MARCAS, _MARCA_OBJETIVO)
 
@@ -469,13 +1139,23 @@ func _dibujar_fichas(lectura: LecturaCombate) -> void:
 
 func _dibujar_interfaz(lectura: LecturaCombate) -> void:
 	_ronda.text = lectura.texto_ronda()
+	_dibujar_cola(lectura)
+	_panel_turno.text = "\n".join(lectura.panel_turno())
+
+
+# La cola de la ronda; T17: con una aliada bajo el mouse en el modo Secundar, la
+# cola que quedaria (LecturaCombate.filas_cola_si_secunda).
+func _dibujar_cola(lectura: LecturaCombate) -> void:
 	for hijo in _cola.get_children():
 		_cola.remove_child(hijo)
 		hijo.queue_free()
 	var titulo: Label = Label.new()
 	titulo.text = lectura.titulo_cola()
 	_cola.add_child(titulo)
-	for fila in lectura.filas_cola():
+	var filas: Array[Dictionary] = lectura.filas_cola()
+	if _eligiendo_aliada and not _aliada_previa.is_empty():
+		filas = lectura.filas_cola_si_secunda(_aliada_previa)
+	for fila in filas:
 		var etiqueta: Label = Label.new()
 		var actual: bool = fila["actual"]
 		etiqueta.text = (_MARCA_ACTUAL if actual else "") + (fila["texto"] as String)
@@ -484,7 +1164,6 @@ func _dibujar_interfaz(lectura: LecturaCombate) -> void:
 		etiqueta.set_meta("marca", fila["marca"])
 		etiqueta.set_meta("actual", actual)
 		_cola.add_child(etiqueta)
-	_panel_turno.text = "\n".join(lectura.panel_turno())
 
 
 func _dibujar_botones(lectura: LecturaCombate) -> void:
@@ -492,7 +1171,11 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 	_botones.visible = esperando
 	if not esperando:
 		return
-	_boton_terminar.text = lectura.texto_terminar()
+	# T19: segun Turno.puede_terminar, con el motivo de la obligacion (S-35).
+	var datos_terminar: Dictionary = lectura.boton_terminar()
+	_boton_terminar.text = datos_terminar["texto"]
+	_boton_terminar.disabled = not datos_terminar["habilitado"]
+	_boton_terminar.tooltip_text = datos_terminar["motivo"]
 	# T40: un boton por activa, armados desde el efecto (LecturaCombate).
 	for hijo in _botones.get_children():
 		if hijo != _boton_terminar:
@@ -510,13 +1193,123 @@ func _dibujar_botones(lectura: LecturaCombate) -> void:
 		boton.pressed.connect(pulsar_activa.bind(tipo))
 		_botones.add_child(boton)
 		_botones.move_child(boton, _boton_terminar.get_index())
+	# T22: un boton por hechizo, armados desde los datos (LecturaCombate).
+	for datos_hechizo in lectura.botones_hechizos():
+		var id_hechizo: String = datos_hechizo["id"]
+		var boton_hechizo: Button = Button.new()
+		boton_hechizo.name = _PREFIJO_BOTON_HECHIZO + id_hechizo
+		boton_hechizo.text = datos_hechizo["texto"]
+		boton_hechizo.tooltip_text = datos_hechizo["tooltip"]
+		boton_hechizo.disabled = not datos_hechizo["habilitado"]
+		boton_hechizo.toggle_mode = true
+		boton_hechizo.button_pressed = _hechizo_elegido == id_hechizo
+		boton_hechizo.pressed.connect(pulsar_hechizo.bind(id_hechizo))
+		_botones.add_child(boton_hechizo)
+		_botones.move_child(boton_hechizo, _boton_terminar.get_index())
+	# T17: Secundar, solo si hay alguna aliada a la que se pueda Secundar.
+	# T24: el boton Sellar, solo en el turno del Maestro (LecturaCombate.boton_sellar).
+	var datos_sellar: Dictionary = lectura.boton_sellar()
+	if not datos_sellar.is_empty():
+		var boton_sellar: Button = Button.new()
+		boton_sellar.name = _NOMBRE_BOTON_SELLAR
+		boton_sellar.text = datos_sellar["texto"]
+		boton_sellar.tooltip_text = datos_sellar["tooltip"]
+		boton_sellar.disabled = not datos_sellar["habilitado"] and not _sellando
+		boton_sellar.toggle_mode = true
+		boton_sellar.button_pressed = _sellando
+		boton_sellar.pressed.connect(pulsar_sellar)
+		_botones.add_child(boton_sellar)
+		_botones.move_child(boton_sellar, _boton_terminar.get_index())
+	# T27: el boton de guardar a una caida, solo en el turno del Maestro
+	# (LecturaCombate.boton_guardar_caida).
+	var datos_caida: Dictionary = lectura.boton_guardar_caida()
+	if not datos_caida.is_empty():
+		var boton_caida: Button = Button.new()
+		boton_caida.name = _NOMBRE_BOTON_GUARDAR_CAIDA
+		boton_caida.text = datos_caida["texto"]
+		boton_caida.tooltip_text = datos_caida["tooltip"]
+		boton_caida.disabled = not datos_caida["habilitado"] and not _guardando_caida
+		boton_caida.toggle_mode = true
+		boton_caida.button_pressed = _guardando_caida
+		boton_caida.pressed.connect(pulsar_guardar_caida)
+		_botones.add_child(boton_caida)
+		_botones.move_child(boton_caida, _boton_terminar.get_index())
+	# T28: Huir, en el turno del Maestro y sin la huida declarada
+	# (LecturaCombate.boton_huir). Con el mouse encima, la previsualizacion.
+	var datos_huir: Dictionary = lectura.boton_huir()
+	if not datos_huir.is_empty():
+		var boton_huir: Button = Button.new()
+		boton_huir.name = _NOMBRE_BOTON_HUIR
+		boton_huir.text = datos_huir["texto"]
+		boton_huir.tooltip_text = datos_huir["tooltip"]
+		boton_huir.disabled = not datos_huir["habilitado"]
+		boton_huir.pressed.connect(pulsar_huir)
+		boton_huir.mouse_entered.connect(mostrar_huida.bind(true))
+		boton_huir.mouse_exited.connect(mostrar_huida.bind(false))
+		_botones.add_child(boton_huir)
+		_botones.move_child(boton_huir, _boton_terminar.get_index())
+	# T26: Guardar, solo si la criatura del turno puede guardarse ahora.
+	var datos_guardar: Dictionary = lectura.boton_guardar()
+	if not datos_guardar.is_empty():
+		var boton_guardar: Button = Button.new()
+		boton_guardar.name = _NOMBRE_BOTON_GUARDAR
+		boton_guardar.text = datos_guardar["texto"]
+		boton_guardar.tooltip_text = datos_guardar["tooltip"]
+		boton_guardar.pressed.connect(pulsar_guardar)
+		_botones.add_child(boton_guardar)
+		_botones.move_child(boton_guardar, _boton_terminar.get_index())
+	# T26: uno por guardada, en el turno del Maestro (LecturaCombate.botones_invocar).
+	for datos_invocar in lectura.botones_invocar():
+		var id_criatura: String = datos_invocar["criatura"]
+		var boton_invocar: Button = Button.new()
+		boton_invocar.name = _PREFIJO_BOTON_INVOCAR + id_criatura
+		boton_invocar.text = datos_invocar["texto"]
+		boton_invocar.tooltip_text = datos_invocar["tooltip"]
+		boton_invocar.disabled = not datos_invocar["habilitado"] and _invocando != id_criatura
+		boton_invocar.toggle_mode = true
+		boton_invocar.button_pressed = _invocando == id_criatura
+		boton_invocar.pressed.connect(pulsar_invocar.bind(id_criatura))
+		_botones.add_child(boton_invocar)
+		_botones.move_child(boton_invocar, _boton_terminar.get_index())
+	var datos_secundar: Dictionary = lectura.boton_secundar()
+	if not datos_secundar.is_empty():
+		var boton_secundar: Button = Button.new()
+		boton_secundar.name = _NOMBRE_BOTON_SECUNDAR
+		boton_secundar.text = datos_secundar["texto"]
+		boton_secundar.toggle_mode = true
+		boton_secundar.button_pressed = _eligiendo_aliada
+		boton_secundar.pressed.connect(pulsar_secundar)
+		_botones.add_child(boton_secundar)
+		_botones.move_child(boton_secundar, _boton_terminar.get_index())
 
 
+# El desglose de un ataque o, T22, lo que haria el hechizo (LecturaCombate.vista_previa_hechizo).
 func _dibujar_desglose() -> void:
-	_panel_desglose.visible = not _desglose_mostrado.is_empty()
-	if _panel_desglose.visible:
-		var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	_panel_desglose.visible = not _desglose_mostrado.is_empty() or not _hechizo_mostrado.is_empty() \
+			or not _sellado_mostrado.is_empty() or not _caida_mostrada.is_empty() or not _huida_mostrada.is_empty()
+	if not _panel_desglose.visible:
+		return
+	var lectura: LecturaCombate = LecturaCombate.new(_combate, _armador, _estados)
+	# T28: lo que arriesga el Maestro si huye (LecturaCombate.vista_previa_huida).
+	if not _huida_mostrada.is_empty():
+		_panel_desglose.text = "\n".join(lectura.vista_previa_huida(_huida_mostrada))
+		return
+	# T27: el mana y la vida de guardar a la caida (LecturaCombate.vista_previa_guardar_caida).
+	if not _caida_mostrada.is_empty():
+		_panel_desglose.text = "\n".join(lectura.vista_previa_guardar_caida(_caida_mostrada["previa"]))
+		return
+	# T24: el % y el mana del sellado (LecturaCombate.vista_previa_sellar).
+	if not _sellado_mostrado.is_empty():
+		_panel_desglose.text = "\n".join(lectura.vista_previa_sellar(_sellado_mostrado["previa"],
+				_sellado_mostrado["objetivo"]))
+		return
+	if not _desglose_mostrado.is_empty():
 		_panel_desglose.text = "\n".join(lectura.desglose(_desglose_mostrado, _combate.turno_actual().unidad_id))
+		return
+	var previas: Dictionary = {}
+	for sentido in _hechizo_mostrado.keys():
+		previas[sentido] = _hechizo_mostrado[sentido]["previa"]
+	_panel_desglose.text = "\n".join(lectura.vista_previa_hechizo(previas))
 
 
 # A.7: la pantalla de resultado desde ResultadoCombate.a_diccionario().
@@ -527,6 +1320,21 @@ func _dibujar_resultado(lectura: LecturaCombate) -> void:
 		return
 	_texto_resultado.text = "\n".join(lectura.resultado(resultado.a_diccionario()))
 	_boton_volver.text = _armador.armar(ClavesTextos.RESULTADO_VOLVER)
+	# T30 (Sistema.md 9.3): mientras la atacante espera su destino, sus botones
+	# (LecturaCombate.botones_destino) y no se puede volver sin elegir.
+	_boton_volver.visible = not _combate.esperando_destino()
+	for hijo in _botones_destino.get_children():
+		_botones_destino.remove_child(hijo)
+		hijo.queue_free()
+	for datos_boton in lectura.botones_destino():
+		var opcion: String = datos_boton["opcion"]
+		var boton: Button = Button.new()
+		boton.name = _PREFIJO_BOTON_DESTINO + opcion
+		boton.text = datos_boton["texto"]
+		boton.tooltip_text = datos_boton["tooltip"]
+		boton.disabled = not datos_boton["habilitado"]
+		boton.pressed.connect(pulsar_destino.bind(opcion))
+		_botones_destino.add_child(boton)
 
 
 # Pantalla de desarrollo: registro crudo y avisos, con ids y datos tecnicos.

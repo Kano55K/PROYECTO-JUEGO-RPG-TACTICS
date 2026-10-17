@@ -64,3 +64,97 @@ func test_claves_de_rasgos_y_variantes() -> void:
 	for clave in claves:
 		assert_bool(vistas.has(clave)).override_failure_message("repetida: " + clave).is_false()
 		vistas[clave] = true
+
+
+# T19, sesion 2 (Mundo.md 9.2 v1.2 y 5): las claves del Encono y la cobardia. Las
+# reacciones por par (encono.<especie>.<rival>), por especie (cobardia.<especie>)
+# y cobardia.resiste.<especie> se piden solo si estan en el archivo.
+# Reescrito en T44 por Mundo.md 9.2 v1.3 y Arquitectura.md A.7 (sostenida_por):
+# cobardia.resiste.maestro y cobardia.resiste.afin pasan a ser claves fijas (antes
+# se afirmaba que no se pedian); siguen sin ser variantes de cobardia.resiste.
+func test_claves_del_encono_y_la_cobardia() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"encono.ocarra.zancajunco": "x", "encono.tasajero.rodauva": "x",
+			"cobardia.rodauva": "x", "cobardia.resiste.rodauva": "x", "cobardia.resiste.maestro": "x",
+			"marca.enconada.tasajero": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["encono.tooltip", "cobardia.tooltip", "encono.inicio", "encono.sube",
+			"cobardia.inicio", "cobardia.resiste", "marca.enconada", "marca.acobardada", "panel.encono",
+			"aviso.terminar.debe_atacar_rival", "aviso.terminar.debe_acercarse", "cobardia.resiste.maestro",
+			"cobardia.resiste.afin"])
+	assert_array(claves).contains(["encono.ocarra.zancajunco", "encono.tasajero.rodauva", "cobardia.rodauva",
+			"cobardia.resiste.rodauva", "marca.enconada.tasajero"])
+	assert_array(claves).not_contains(["encono.ocarra.ocarra", "cobardia.ocarra"])
+
+
+# T44 (Mundo.md 9.2 v1.3, A.7): las variantes por especie de quien la sostuvo se
+# piden solo si estan en el archivo.
+func test_claves_de_quien_sostuvo() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"cobardia.resiste.maestro.surcon": "x", "cobardia.resiste.afin.rodauva": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["cobardia.resiste.maestro", "cobardia.resiste.afin",
+			"cobardia.resiste.maestro.surcon", "cobardia.resiste.afin.rodauva"])
+	assert_array(claves).not_contains(["cobardia.resiste.maestro.rodauva", "cobardia.resiste.afin.surcon"])
+
+
+# T22 (sesion 2): por cada hechizo del Maestro (maestro.json), su nombre y su
+# tooltip, y el rotulo de cada modo de hechizos.json; con el fixture de otro id,
+# las de ese id. Los choques de la Lanzadera y los motivos de los botones son fijos.
+func test_claves_de_hechizos_desde_los_datos() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	for hechizo in ["martillazo", "lanzadera", "remiendo"]:
+		assert_array(claves).contains(["hechizo.%s.nombre" % hechizo, "hechizo.%s.tooltip" % hechizo])
+	assert_array(claves).contains(["hechizo.sentido.empujar", "hechizo.sentido.atraer", "lanzadera.choque",
+			"lanzadera.choque.contra_maestro", "lanzadera.choque.obstaculo", "aviso.hechizo.mana_insuficiente",
+			"aviso.hechizo.accion_usada", "aviso.hechizo.sin_objetivos"])
+	# Ninguna variante por especie del choque esta en los textos: no se pide.
+	assert_array(claves).not_contains(["lanzadera.choque.ocarra"])
+
+	datos["hechizos.json"] = LectorFixture.leer("res://pruebas/fixtures/pantalla/hechizos.json", "hechizos")["datos"]
+	datos["maestro.json"] = LectorFixture.leer("res://pruebas/fixtures/pantalla/maestro_hechizos.json",
+			"maestro")["datos"]
+	claves = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["hechizo.pedrada.nombre", "hechizo.pedrada.tooltip"])
+	assert_array(claves).not_contains(["hechizo.martillazo.nombre"])
+	# Con una variante en el archivo de textos, se pide.
+	datos["textos/es.json"] = {"lanzadera.choque.ocarra": "La Ocarra sale volando."}
+	assert_array(ClavesTextos.usadas(datos)).contains(["lanzadera.choque.ocarra"])
+
+
+# T24 (Sistema.md 4.1, Mundo.md 5): las claves de sellar son fijas; el fallo por
+# especie se pide solo si la variante esta en los textos (la erizada es otra clave).
+func test_claves_de_sellar() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"sellar.fallo.surcon": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["accion.sellar", "sellar.tooltip", "sellar.exito", "sellar.fallo",
+			"sellar.fallo.erizada", "sellar.rango_alto", "pergamino.sin_blanco", "aviso.sellar.accion_usada",
+			"aviso.sellar.mana_insuficiente", "aviso.sellar.fuera_de_alcance", "aviso.sellar.no_sellable",
+			"aviso.sellar.oculta", "aviso.sellar.no_salvaje", "aviso.sellar.sin_objetivos", "sellar.fallo.surcon"])
+	assert_array(claves).not_contains(["sellar.fallo.ocarra"])
+
+
+# T30 (Mundo.md 4.6): las claves del ataque nocturno. El boton y el tooltip, por
+# cada opcion de DestinoAtacante; la linea de comer con una especie suelta, solo
+# si esta en los textos.
+func test_claves_del_ataque_nocturno() -> void:
+	var lectura: Dictionary = DatosFixture.cargar()
+	assert_array(lectura["errores"]).is_empty()
+	var datos: Dictionary = lectura["datos"]
+	datos["textos/es.json"] = {"nocturno.comer.zancajunco_suelto": "x"}
+	var claves: Array[String] = ClavesTextos.usadas(datos)
+	assert_array(claves).contains(["nocturno.base", "nocturno.atacante.caida", "nocturno.perdonar",
+			"nocturno.perdonar.tribu", "nocturno.sellar", "nocturno.comer", "nocturno.comer.zancajunco_suelto"])
+	for opcion in DestinoAtacante.OPCIONES:
+		assert_array(claves).contains(["nocturno.boton.%s" % opcion, "nocturno.%s.tooltip" % opcion])
+	assert_array(claves).not_contains(["nocturno.comer.ocarra_suelto"])

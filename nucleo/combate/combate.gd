@@ -31,11 +31,26 @@ var _surcos: Surcos = Surcos.new()
 var _surcos_volcados: int = 0
 # Eventos de Junco del turno en curso ya volcados al registro (vuelve a 0 con cada turno).
 var _junco_volcados: int = 0
+# Sistema.md 10.2: la cadena de combos es del combate (T16), como los surcos.
+var _cadena: Cadena
+# Eventos cadena_cortada ya volcados al registro.
+var _cadena_volcados: int = 0
+# Sistema.md 9.3 (T30): la atacante caida que espera su destino tras la victoria
+# ("" si ninguna), si ya fallo un sellado (4.4: quedan perdonar y comer), el
+# cierre (con el acumulador de la noche abierto, S-65) y los pergaminos ardidos
+# antes de cerrar (para los de este combate, tambien los del destino).
+var _destino_pendiente: String = ""
+var _sellar_fallido: bool = false
+# T45 (P-051, Sistema.md 11.9 v1.8): la primera opcion de destino aplicada ("" si ninguna).
+var _primera_opcion_destino: String = ""
+var _cierre: ResultadoCierre = null
+var _ardidos_antes: Array[String] = []
 
 
 func _init(contexto_combate: ContextoCombate) -> void:
 	_contexto = contexto_combate
 	_plantel = contexto_combate.plantel
+	_cadena = Cadena.new(contexto_combate.combo)
 
 
 # Arma el combate y lo juega hasta el primer turno del jugador (o el fin).
@@ -61,6 +76,10 @@ func turno_actual() -> Turno:
 # ni se graba. `terminar` cierra el turno y el bucle sigue hasta el proximo
 # turno del jugador o el fin.
 func aplicar(accion: Accion) -> ResultadoAccion:
+	# Sistema.md 9.3 (T30): el destino de la atacante va por su propio camino, con
+	# el combate terminado; mientras espera, todo lo demas es COMBATE_TERMINADO.
+	if accion.tipo == Accion.Tipo.DESTINO_ATACANTE:
+		return _aplicar_destino(accion)
 	if _fin != FinCombate.Fin.EN_CURSO:
 		var rechazo: ResultadoAccion = ResultadoAccion.rechazada(ResultadoAccion.Motivo.COMBATE_TERMINADO)
 		rechazo.fin = _fin
@@ -79,6 +98,25 @@ func aplicar(accion: Accion) -> ResultadoAccion:
 
 func terminado() -> bool:
 	return _fin != FinCombate.Fin.EN_CURSO
+
+
+# Sistema.md 9.3 (T30): el combate termino con la victoria y la atacante nocturna
+# caida espera que el Maestro decida su destino (Accion.destino_atacante).
+func esperando_destino() -> bool:
+	return _error.is_empty() and not _destino_pendiente.is_empty()
+
+
+# T30 (D-005): por que no vale esa opcion ahora, con el mismo chequeo que la
+# accion (DestinoAtacante.motivo); NINGUNO si vale.
+func motivo_destino(opcion: String) -> ResultadoAccion.Motivo:
+	return _contexto.destino_atacante.motivo(opcion, _atacante_que_espera(), _plantel, _sellar_fallido)
+
+
+# T30 (D-005, calcular sin aplicar): lo que haria esa opcion: costo, porcentaje y
+# mana al sellar, y los cambios de lealtad de la noche que quedarian (en sellar,
+# si sale). No cambia nada ni toca el generador.
+func previsualizar_destino(opcion: String) -> ResultadoAccion:
+	return _resolver_destino(opcion, false)
 
 
 func fin() -> FinCombate.Fin:
@@ -159,6 +197,151 @@ func destaparia(unidad_id: String, casilla: Vector2i) -> Array[String]:
 	return Junco.destaparia(unidad_id, casilla, _plantel)
 
 
+# T41 (Sistema.md 10.3 y 15, v1.6): las unidades que le darian afinidad a la
+# unidad si golpeara desde `casilla` (Afinidad.afines_vecinas, en el orden del
+# Plantel). Calcula sin aplicar.
+func afines_desde(unidad_id: String, casilla: Vector2i) -> Array[String]:
+	return _contexto.afinidad.afines_vecinas(unidad_id, casilla, _plantel)
+
+
+# T18 (Sistema.md 10.4: "la probabilidad se muestra en la casilla antes de
+# mover"): {rivales, porcentaje} que tendria la unidad al empezar su proximo
+# turno parada en `casilla`, con el tablero de ahora (Incidente.consulta, la
+# misma cuenta que la tirada). Calcula sin aplicar.
+func incidente_en(unidad_id: String, casilla: Vector2i) -> Dictionary:
+	return _contexto.incidente.consulta(unidad_id, casilla, _plantel)
+
+
+# T19 (Sistema.md 10.5: "el jugador ve la probabilidad antes de acercarla"):
+# {tipo, rivales, porcentaje, seguro} del chequeo de rival enemiga que tendria la
+# unidad al empezar su proximo turno parada en `casilla`, con el tablero de ahora
+# (ChequeoRival.consulta, la misma cuenta que la tirada). Calcula sin aplicar.
+func rival_en(unidad_id: String, casilla: Vector2i) -> Dictionary:
+	return _contexto.chequeo_rival.consulta(unidad_id, casilla, _plantel)
+
+
+# Sistema.md 4.1 (T24, "el porcentaje se muestra antes de gastar el mana"): el %
+# de sellado de una salvaje con su vida de ahora (Sellado), sin mirar distancia,
+# mana ni pergaminos. null si no es una salvaje de pie (oculta incluida), si no
+# es sellable o si su rango no alcanza con la balanza del Maestro.
+func porcentaje_sellado(unidad_id: String) -> Variant:
+	var criatura: Criatura = _sellable(unidad_id)
+	return null if criatura == null else _contexto.sellado.porcentaje_de(criatura)
+
+
+# Sistema.md 2.3 (T24): el costo de sellarla, con las mismas condiciones que
+# porcentaje_sellado.
+func costo_sellado(unidad_id: String) -> Variant:
+	var criatura: Criatura = _sellable(unidad_id)
+	return null if criatura == null else _contexto.sellado.costo(criatura.especie, _plantel.maestro)
+
+
+# Sistema.md 2.3 y 3.1 (T26): el costo de invocar a la criatura, o null si no es
+# una guardada de la tribu. No mira el turno, el mana ni las casillas.
+func costo_invocar(unidad_id: String) -> Variant:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.bando != Criatura.Bando.TRIBU or criatura.estado != Criatura.Estado.GUARDADA:
+		return null
+	return _contexto.costos_mana.invocar(criatura.especie, _plantel.maestro)
+
+
+# Sistema.md 2.3 y 11.5 (T27): el costo de guardar a la unidad si es una caida de
+# la tribu (la consulta unica, Objetivos CAIDA_PROPIA); si no, null. No mira el
+# turno, el mana ni la distancia.
+func costo_guardar_caida(unidad_id: String) -> Variant:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.bando != Criatura.Bando.TRIBU \
+			or not Objetivos.puede_ser_objetivo(unidad_id, Objetivos.Clase.CAIDA_PROPIA, _plantel):
+		return null
+	return _contexto.guardado_caida.costo(criatura.especie, _plantel.maestro)
+
+
+# Sistema.md 11.7 (T25, "la probabilidad se muestra sobre la unidad"): el % de
+# huida que tiraria la unidad si su turno empezara ahora (Huida, la misma cuenta
+# que la tirada); 0 si no tira.
+func porcentaje_huida(unidad_id: String) -> int:
+	return _contexto.huida.porcentaje(unidad_id, _plantel)
+
+
+# Sistema.md 6 (T29, D-005): quien rescataria al Maestro si cayera ahora, con la
+# misma eleccion que el Cierre (Rescate.elegir) y el Plantel de ahora; null si
+# nadie. No modifica nada.
+func rescatista_ahora() -> Variant:
+	var elegida: String = _contexto.rescate.elegir(_plantel)
+	return null if elegida.is_empty() else elegida
+
+
+# Sistema.md 11.7, "previsualizacion al declarar" (T28, D-005, S-61): lo que
+# arriesga el Maestro si declara la huida ahora. Calcula sin aplicar: no cambia
+# el Plantel, la cola ni el generador. Devuelve:
+#   enemigas: [{unidad, alcanza, danio}], las que actuan antes de que se vaya
+#     (11.7 v1.8, T46): las de entrada pendiente en la ronda que pueden actuar,
+#     en el orden de la cola, y despues las que irian antes que el en la ronda
+#     siguiente (ColaIniciativa.ronda_siguiente, con el Plantel de ahora). Cada
+#     una cuenta una vez. alcanza: si lo golpea
+#     en su turno moviendose y atacando, como la IA (pasos_para_mover y
+#     previsualizar_ataque); danio: el de la casilla que mas le pega, por los
+#     ataques de su modo actual (0 si no alcanza).
+#   danio_maximo: la suma; vida: la del Maestro; puede_caer: danio_maximo >= vida;
+#   caidas: las de la tribu que moririan (Cierre.caidas_que_mueren), por id.
+# Lectura S-61: con el tablero de ahora, sin lo que depende de tiradas (huida,
+# Encono, cobardia, incidente) ni de como se muevan las demas.
+func previsualizar_huida() -> Dictionary:
+	var actuan: Array[EntradaCola] = []
+	var vistas: Dictionary = {}
+	var entradas: Array[EntradaCola] = _cola.entradas()
+	for indice in range(_cola.lugar(), entradas.size()):
+		var entrada: EntradaCola = entradas[indice]
+		if _es_del_jugador(entrada.unidad_id) or not _cola.pendiente(entrada.unidad_id, _plantel):
+			continue
+		actuan.append(entrada)
+		vistas[entrada.unidad_id] = true
+	for entrada in _cola.ronda_siguiente(_plantel):
+		if entrada.unidad_id == Maestro.ID:
+			break
+		if _es_del_jugador(entrada.unidad_id) or vistas.has(entrada.unidad_id):
+			continue
+		actuan.append(entrada)
+		vistas[entrada.unidad_id] = true
+	var enemigas: Array[Dictionary] = []
+	var total: int = 0
+	for entrada in actuan:
+		var danio: int = _danio_maximo_al_maestro(entrada)
+		var alcanza: bool = danio >= 0
+		danio = maxi(danio, 0)
+		enemigas.append({"unidad": entrada.unidad_id, "alcanza": alcanza, "danio": danio})
+		total += danio
+	var caidas: Array[String] = []
+	for criatura in Cierre.caidas_que_mueren(_plantel):
+		caidas.append(criatura.id)
+	var vida: int = _plantel.maestro.vida
+	return {"enemigas": enemigas, "danio_maximo": total, "vida": vida, "puede_caer": total >= vida,
+			"caidas": caidas}
+
+
+# T28 (S-61): el mayor danio que la unidad de la entrada le haria al Maestro en
+# su turno, desde alguna casilla a la que llega, con un turno de consulta
+# (Turno.para_consulta: sin inicio del turno, sin azar). Por los ataques de su
+# modo: el primero y, si tiene mas, los siguientes como el segundo de Caza
+# (previsualizar_ataque con tras_primer_ataque). -1 si no lo alcanza. El danio sale
+# del mismo camino que el ataque real (Danio y los aportes del Turno).
+func _danio_maximo_al_maestro(entrada: EntradaCola) -> int:
+	var consulta: Turno = Turno.para_consulta(entrada, _plantel, _contexto.tablero, _surcos, _cadena, _cola,
+			_contexto.reglas)
+	var mejor: int = -1
+	for casilla: Vector2i in consulta.pasos_para_mover().keys():
+		var primero: ResultadoAccion = consulta.previsualizar_ataque(casilla, Maestro.ID)
+		if not primero.valida:
+			continue
+		var danio: int = primero.danio
+		if consulta.ataques_restantes > 1:
+			var siguiente: ResultadoAccion = consulta.previsualizar_ataque(casilla, Maestro.ID, true)
+			if siguiente.valida:
+				danio += siguiente.danio * (consulta.ataques_restantes - 1)
+		mejor = maxi(mejor, danio)
+	return mejor
+
+
 func acciones_jugador() -> Array[Dictionary]:
 	return _acciones_jugador.duplicate(true)
 
@@ -178,6 +361,8 @@ func instantanea() -> Dictionary:
 		}
 	# Arquitectura.md A.7 (B.2.1): los surcos del combate.
 	foto["surcos"] = _surcos.instantanea()
+	# A.7 (T16): la cadena actual, o null.
+	foto["cadena"] = _cadena.instantanea()
 	return foto
 
 
@@ -203,10 +388,21 @@ func _arrancar() -> void:
 		_avanzar()
 
 
-# Punto vacio: Sistema.md 9.2, el golpe inicial como primer evento, antes de la
-# ronda 1 (T30). En T12 el campo se lee (ContextoCombate) y no se resuelve.
+# Sistema.md 9.2 punto 1 (T30, A.7): la atacante golpea al Maestro antes de la
+# ronda 1, como primer evento detras de `inicio`. Es el Danio de un ataque (11.4,
+# con sus rasgos de caracteristica) sin aportes de turno: ni afinidad, ni combo,
+# ni Encono, ni cobardia (S-64). No toca la cadena ni el contador de Encono. La
+# vida en 0 la resuelve despues _arrancar, como siempre. Una atacante que no esta
+# de pie o que arranca en 0 no golpea (la resuelve VidaCero en _arrancar).
 func _golpe_inicial() -> void:
-	pass
+	var atacante_id: String = _contexto.golpe_inicial
+	if atacante_id.is_empty() or not Objetivos.de_pie(atacante_id, _plantel) or _vida(atacante_id) == 0:
+		return
+	var desglose: DesgloseDanio = _contexto.danio.calcular(atacante_id, Maestro.ID, _plantel, [])
+	var vida_antes: int = _plantel.maestro.vida
+	_plantel.maestro.vida = maxi(0, vida_antes - desglose.total)
+	_registrar({"tipo": "golpe_inicial", "atacante": atacante_id, "objetivo": Maestro.ID,
+			"desglose": desglose.a_diccionario(), "vida_antes": vida_antes, "vida_despues": _plantel.maestro.vida})
 
 
 # Juega entradas hasta un turno del jugador, el fin o un error.
@@ -220,20 +416,145 @@ func _avanzar() -> void:
 		var entrada: EntradaCola = _cola.siguiente(_plantel)
 		if entrada == null:
 			if _cola.ronda > 0:
-				_cola.terminar_ronda()
-				_registrar({"tipo": "fin_ronda"})
+				_cerrar_ronda()
 			_cola.empezar_ronda(_plantel)
 			_registrar({"tipo": "ronda"})
+			continue
+		# Sistema.md 11.7 v1.8 (T46, D-017, S-63): la huida declarada se cumple en
+		# la proxima entrada del Maestro, en lugar de su `turno` y de su inicio del
+		# turno (sin regenerar mana). Si antes cayo o no quedo ninguna enemiga de
+		# pie, el combate ya habia terminado (caida -> victoria -> se_fue).
+		if entrada.unidad_id == Maestro.ID and _plantel.maestro.huida_declarada:
+			_plantel.maestro.se_fue = true
+			_fin = FinCombate.evaluar(_plantel)
+			_terminar()
+			continue
+		# Sistema.md 10.1 (T17): la entrada de la unidad que Secundo vuelve. El
+		# turno sigue sin un inicio nuevo (S-31), asi que no lleva otro `turno`
+		# (A.7: uno por ronda) y la tribu no corta la cadena.
+		if entrada.vuelve:
+			_registrar({"tipo": "turno_vuelve", "unidad": entrada.unidad_id})
+			_turno = _empezar_turno(entrada)
+			_junco_volcados = 0
 			continue
 		# Antes de empezar el turno: las tiradas de su inicio (T18 a T25) van despues.
 		_registrar({"tipo": "turno", "unidad": entrada.unidad_id,
 				"marca": null if entrada.marca.is_empty() else entrada.marca})
-		_turno = Turno.empezar(entrada, _plantel, _contexto.tablero, _contexto.danio, _surcos)
+		# Sistema.md 10.2 y 10.7: el turno de una enemiga corta la cadena, haga lo
+		# que haga (tambien el Tasajero en sus dos modos).
+		if not _es_del_jugador(entrada.unidad_id):
+			_cadena.cortar(Cadena.MOTIVO_ENEMIGA)
+			_registrar_cadena()
+		var estados_antes: Dictionary = _estados()
+		_turno = _empezar_turno(entrada)
 		_junco_volcados = 0
-		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7).
+		# Sistema.md 2.1 y 11.3 paso 1 (T21, D-007): la regeneracion del Maestro,
+		# justo detras de su `turno` y solo si el mana cambio. Paso antes que toda
+		# tirada del inicio del turno: no las vuelca.
+		if not _turno.mana.is_empty():
+			_registrar({"tipo": "mana", "unidad": entrada.unidad_id, "de": _turno.mana["de"],
+					"a": _turno.mana["a"], "motivo": RegeneracionMana.MOTIVO_REGENERACION}, 0)
+		# Sistema.md 11.7 y 11.3 paso 2 (T25): la huida, detras de su propia tirada.
+		if _registrar_huida(estados_antes):
+			continue
+		# Sistema.md 11.2.3: el cambio de modo del inicio del turno (A.7). Paso
+		# antes que las tiradas de los pasos 3 y 4 de 11.3: se registra sin
+		# volcarlas, asi el orden del registro es el de lo que paso.
 		if not _turno.cambio_modo.is_empty():
 			_registrar({"tipo": "cambio_modo", "unidad": entrada.unidad_id,
-					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]})
+					"de": _turno.cambio_modo["de"], "a": _turno.cambio_modo["a"]}, 0)
+		_registrar_chequeo_rival()
+		_registrar_incidente(estados_antes)
+
+
+# Sistema.md 11.7 (T25, A.7): el evento huida, detras del turno y de su tirada
+# (solo la suya: las de los pasos 3 y 4 van despues), solo si tiro. Si huyo,
+# siguen el estado y los surcos cerrados, y el turno termina: con el combate en
+# curso, su fin_turno (sin posicion, ya no esta en el tablero, asi que no hay
+# encierro que medir); si era la ultima enemiga, el fin, sin fin_turno, como
+# cualquier accion que gana. Devuelve si el turno termino ahi.
+func _registrar_huida(estados_antes: Dictionary) -> bool:
+	var huida: Dictionary = _turno.huida
+	if huida.is_empty():
+		return false
+	var unidad_id: String = _turno.unidad_id
+	_registrar({"tipo": "huida", "unidad": unidad_id, "porcentaje": huida["porcentaje"], "tiro": huida["tiro"],
+			"resultado": huida["resultado"]}, 1)
+	if huida["resultado"] != Huida.RESULTADO_HUYE:
+		return false
+	_registrar_estados(estados_antes)
+	_registrar_surcos()
+	_fin = FinCombate.evaluar(_plantel)
+	if _fin != FinCombate.Fin.EN_CURSO:
+		_terminar()
+	else:
+		_registrar({"tipo": "fin_turno", "unidad": unidad_id, "posicion": Plantel.casilla_a_lista(_posicion(unidad_id))})
+	return true
+
+
+func _empezar_turno(entrada: EntradaCola) -> Turno:
+	return Turno.empezar(entrada, _plantel, _contexto.tablero, _surcos, _cadena, _cola, _contexto.reglas,
+			_contexto.azar_combate)
+
+
+# Sistema.md 10.5 y 10.6 (T19, A.7): el chequeo de rival enemiga, detras del
+# `turno` (y del `cambio_modo`) y de su propia `tirada`, si tiro; antes de todo
+# lo del incidente, cuya tirada queda sin volcar hasta su evento. T44: la
+# resistida suma sostenida_por (y afin, P-041), solo si ChequeoRival los trae.
+func _registrar_chequeo_rival() -> void:
+	var chequeo: Dictionary = _turno.chequeo_rival
+	if chequeo.is_empty():
+		return
+	var evento: Dictionary = {"tipo": "chequeo_rival", "unidad": _turno.unidad_id, "tipo_chequeo": chequeo["tipo"],
+			"rivales": (chequeo["rivales"] as Array).duplicate(), "porcentaje": chequeo["porcentaje"],
+			"tiro": chequeo["tiro"], "resultado": chequeo["resultado"]}
+	for clave in ["sostenida_por", "afin"]:
+		if chequeo.has(clave):
+			evento[clave] = chequeo[clave]
+	_registrar(evento, 1 if chequeo["tiro"] else 0)
+
+
+# Sistema.md 10.4 (T18, A.7): el incidente del inicio del turno, detras del
+# `turno` y de su `tirada` (se vuelca sola). Si golpea, el golpe va como un
+# `ataque` normal (sin eslabon, S-33) con lo que dispara: Junco, estados, surcos
+# y el corte de la cadena. Si la tirada no sale, solo queda la `tirada`.
+func _registrar_incidente(estados_antes: Dictionary) -> void:
+	if _turno.incidente.is_empty():
+		return
+	var unidad_id: String = _turno.unidad_id
+	_registrar({"tipo": "incidente", "unidad": unidad_id, "rivales": _turno.incidente["rivales"].duplicate(),
+			"porcentaje": _turno.incidente["porcentaje"], "resultado": _turno.incidente["resultado"],
+			"objetivo": _turno.incidente["objetivo"]})
+	if _turno.golpe_incidente.is_empty():
+		return
+	_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": _turno.incidente["objetivo"],
+			"desglose": (_turno.golpe_incidente["desglose"] as DesgloseDanio).a_diccionario(), "eslabon": null,
+			"vida_antes": _turno.golpe_incidente["vida_antes"], "vida_despues": _turno.golpe_incidente["vida_despues"]})
+	_registrar_eventos_turno()
+	_registrar_estados(estados_antes)
+	_registrar_surcos()
+	_registrar_cadena()
+	# Una rival de la tribu que cae no termina el combate (11.5), pero se mira igual.
+	_fin = FinCombate.evaluar(_plantel)
+	if _fin != FinCombate.Fin.EN_CURSO:
+		_terminar()
+
+
+# Fin de ronda (T07): el punto de la cola y, despues del fin_ronda, el hambre de
+# combate (Sistema.md 7.2, T14), con el numero de la ronda que se cierra (A.7).
+# En una ronda que la dispara, el evento va aunque nadie cambie (todas en el
+# tope): lectura tecnica de T14. Un combate que termina a mitad de ronda no
+# llega aca, asi que no suma. Despues, la cadena se corta: nunca pasa a la ronda
+# siguiente (10.2). Con la huida del Maestro declarada, todo esto rige igual: se
+# va en su proxima entrada (_avanzar, 11.7 v1.8, T46).
+func _cerrar_ronda() -> void:
+	_cola.terminar_ronda()
+	_registrar({"tipo": "fin_ronda"})
+	var cambios: Variant = _contexto.hambre_combate.cerrar_ronda(_cola.ronda, _plantel)
+	if cambios != null:
+		_registrar({"tipo": "hambre_combate", "cambios": cambios})
+	_cadena.cortar(Cadena.MOTIVO_FIN_RONDA)
+	_registrar_cadena()
 
 
 # Sistema.md 11.8: las acciones de la IA, una por una. Corta si el combate
@@ -265,24 +586,57 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	var estados_antes: Dictionary = _estados()
 	var desde: Vector2i = _posicion(unidad_id)
 	var vida_antes: int = 0
-	if accion.tipo == Accion.Tipo.ATACAR:
+	if accion.tipo == Accion.Tipo.ATACAR or accion.tipo == Accion.Tipo.HECHIZO:
 		vida_antes = _vida(accion.objetivo_id)
 
 	var resultado: ResultadoAccion = _turno.aplicar(accion)
 	if not resultado.valida:
 		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
 		return resultado
+	# Sistema.md 1.6, 4.1, 3.1 y 11.5, D-007 (T22, T24, T26 y T27): el mana que paga un
+	# hechizo, un sellado, una invocacion o guardar a una caida, justo detras de su `accion`. Se
+	# registra sin volcar tiradas: la del sellado va despues, detras de la que se
+	# pago (A.7). Despues, el Martillazo es un `ataque` normal (es un ataque) y la
+	# Lanzadera, el Remiendo y el sellado, su propio evento.
+	if not resultado.mana.is_empty():
+		_registrar({"tipo": "mana", "unidad": unidad_id, "de": resultado.mana["de"], "a": resultado.mana["a"],
+				"motivo": _motivo_mana(accion)}, 0)
+	if accion.tipo == Accion.Tipo.HECHIZO:
+		if resultado.desglose != null:
+			_registrar_ataque(unidad_id, accion.objetivo_id, resultado, vida_antes)
+		else:
+			_registrar(resultado.evento.duplicate(true))
 	match accion.tipo:
 		Accion.Tipo.MOVER:
 			_registrar({"tipo": "movimiento", "unidad": unidad_id,
 					"desde": Plantel.casilla_a_lista(desde), "hasta": Plantel.casilla_a_lista(accion.casilla)})
 		Accion.Tipo.ATACAR:
-			_registrar({"tipo": "ataque", "atacante": unidad_id, "objetivo": accion.objetivo_id,
-					"desglose": resultado.desglose.a_diccionario(),
-					"vida_antes": vida_antes, "vida_despues": _vida(accion.objetivo_id)})
-	_registrar_junco()
+			_registrar_ataque(unidad_id, accion.objetivo_id, resultado, vida_antes)
+		# Sistema.md 10.1 (T17, A.7): detras de quien y en que lugar de la cola
+		# quedo (desde 0). El turno no termino: no hay fin_turno.
+		Accion.Tipo.SECUNDAR:
+			_registrar({"tipo": "secundar", "unidad": unidad_id, "detras_de": accion.aliado_id,
+					"lugar": _cola.lugar_de(unidad_id)})
+		# Sistema.md 4.1 (T24, A.7): el `sellado`, detras de su `tirada` (se vuelca sola).
+		Accion.Tipo.SELLAR:
+			_registrar(resultado.evento.duplicate(true))
+		# Sistema.md 3.1 (T26, A.7): la invocada pasa a suelta y despues va la
+		# `invocacion`; los destapes por contacto, detras.
+		Accion.Tipo.INVOCAR:
+			_registrar_estados(estados_antes)
+			estados_antes = _estados()
+			_registrar(resultado.evento.duplicate(true))
+		# Sistema.md 11.5 (T27, A.7): la caida pasa a guardada y despues va el
+		# `guardado_caida`; sus surcos cerrados, detras (_registrar_surcos).
+		Accion.Tipo.GUARDAR_CAIDA:
+			_registrar_estados(estados_antes)
+			estados_antes = _estados()
+			_registrar(resultado.evento.duplicate(true))
+	_registrar_eventos_turno()
 	_registrar_estados(estados_antes)
 	_registrar_surcos()
+	# Los cortes de la accion (otra objetivo, objetivo que ya no es hostil).
+	_registrar_cadena()
 
 	_fin = resultado.fin
 	if _fin != FinCombate.Fin.EN_CURSO:
@@ -290,38 +644,156 @@ func _ejecutar(accion: Accion, origen: String, paso: Variant) -> ResultadoAccion
 	elif accion.tipo == Accion.Tipo.TERMINAR:
 		_registrar({"tipo": "fin_turno", "unidad": unidad_id,
 				"posicion": Plantel.casilla_a_lista(_posicion(unidad_id))})
+		_registrar_tras_fin_turno(unidad_id)
+	# Sistema.md 3.1 y S-54 (T26, A.7): guardarse termina el turno. Su fin_turno va
+	# sin posicion (ya no esta en el tablero), asi que no hay encierro que medir.
+	elif accion.tipo == Accion.Tipo.GUARDAR:
+		_registrar({"tipo": "fin_turno", "unidad": unidad_id, "posicion": null})
 	return resultado
 
 
+# D-007: el motivo del evento `mana` que paga la accion.
+func _motivo_mana(accion: Accion) -> String:
+	match accion.tipo:
+		Accion.Tipo.SELLAR:
+			return Sellado.MOTIVO_SELLAR
+		Accion.Tipo.INVOCAR:
+			return CostosMana.MOTIVO_INVOCAR
+		Accion.Tipo.GUARDAR_CAIDA:
+			return GuardadoCaida.MOTIVO_GUARDAR_CAIDA
+	return Hechizos.MOTIVO_HECHIZO
+
+
+# Sistema.md 11.9, metricas 13 y 14 (T23, D-011, A.7): los dos datos que el
+# registro no tenia, calculados por el Tablero en el momento y escritos justo
+# detras del `fin_turno`: la distancia del Maestro a la enemiga de pie mas
+# cercana (en todos sus turnos) y el encierro (solo cuando pasa). Con los dos,
+# primero la distancia.
+func _registrar_tras_fin_turno(unidad_id: String) -> void:
+	var tablero: Tablero = _contexto.tablero
+	var casilla: Vector2i = _posicion(unidad_id)
+	if unidad_id == Maestro.ID:
+		_registrar({"tipo": "distancia_maestro",
+				"distancia": tablero.distancia_a_enemiga_de_pie(casilla, Criatura.Bando.TRIBU, _plantel)})
+	if tablero.encerrada(casilla, _plantel, _surcos):
+		_registrar({"tipo": "encierro", "unidad": unidad_id, "casilla": Plantel.casilla_a_lista(casilla)})
+
+
+# Arquitectura.md A.7: el evento `ataque` de un ataque o del Martillazo.
+func _registrar_ataque(atacante_id: String, objetivo_id: String, resultado: ResultadoAccion, vida_antes: int) -> void:
+	_registrar({"tipo": "ataque", "atacante": atacante_id, "objetivo": objetivo_id,
+			"desglose": resultado.desglose.a_diccionario(), "eslabon": resultado.eslabon,
+			"vida_antes": vida_antes, "vida_despues": _vida(objetivo_id)})
+
+
 # Sistema.md 11.5: el combate termino. Se registra el desenlace y el Cierre
-# corre una sola vez; no se juega ninguna entrada mas.
+# corre una sola vez; no se juega ninguna entrada mas. Antes, la cadena que
+# quede se corta: toda cadena termina con su cadena_cortada (A.7).
 func _terminar() -> void:
+	_cadena.cortar(Cadena.MOTIVO_FIN_COMBATE)
+	_registrar_cadena()
 	_registrar({"tipo": "fin", "desenlace": (FinCombate.Fin.keys()[_fin] as String).to_lower()})
-	var ardidos_antes: Array[String] = _pergaminos_ardidos()
-	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin)
+	_ardidos_antes = _pergaminos_ardidos()
+	var cierre: ResultadoCierre = _contexto.cierre.cerrar(_plantel, _fin, _surcos)
 	if not cierre.valido:
 		_error = "cierre rechazado: " + ResultadoCierre.Motivo.keys()[cierre.motivo]
 		return
-	var ardidos: Array[String] = []
-	for id_pergamino in _pergaminos_ardidos():
-		if not ardidos_antes.has(id_pergamino):
-			ardidos.append(id_pergamino)
+	_cierre = cierre
+	# Sistema.md 9.3 (T30): con la victoria y la atacante caida, su destino espera.
+	_destino_pendiente = cierre.destino_pendiente
+	var ardidos: Array[String] = _ardidos_del_combate()
 	_resultado = ResultadoCombate.armar(_contexto, cierre, _cola.ronda, ardidos)
+	# Sistema.md 6 y A.7 (T29): el rescate, entre `fin` y `cierre`, solo si cayo el Maestro.
+	if _fin == FinCombate.Fin.DERROTA_POR_CAIDA:
+		_registrar({"tipo": "rescate", "rescatista": null if cierre.rescatista.is_empty() else cierre.rescatista,
+				"permadeath": cierre.permadeath})
+	# Sistema.md 9.2 paso 6 (T30, P-024): los surcos de la atacante que se fue.
+	_registrar_surcos()
 	_registrar({"tipo": "cierre", "levantadas": cierre.levantadas.duplicate(),
 			"muertas": cierre.muertas.duplicate(), "pergaminos_ardidos": ardidos.duplicate(),
 			"lealtad": ResultadoCombate.cambios_a_lista(cierre.lealtad)})
+	# Sistema.md 11.9 y D-011 (T23): las metricas, sobre el registro completo.
+	_resultado.metricas = MetricasCombate.calcular(_contexto.escenario, _registro.lineas())
+
+
+# Sistema.md 9.3 (T30, A.7: "una decision posterior al combate, registrada como
+# una accion mas"): valida sin aplicar (DestinoAtacante.resolver); si vale,
+# registra la accion, la aplica y registra lo que paso: el mana del resellado
+# (sin volcar la tirada), el `destino_atacante` (detras de su tirada, con la
+# lealtad de la noche), el estado de la atacante y sus surcos. Se graba como una
+# accion del Maestro. Un sellado que falla deja el destino pendiente, sin
+# sellar. Despues, el resultado se vuelve a armar con el estado final.
+func _aplicar_destino(accion: Accion) -> ResultadoAccion:
+	var validacion: ResultadoAccion = _resolver_destino(accion.opcion, false)
+	if not validacion.valida:
+		validacion.fin = _fin
+		return validacion
+	_registrar({"tipo": "accion", "unidad": Maestro.ID, "origen": _ORIGEN_JUGADOR,
+			"accion": accion.a_diccionario(), "paso": null})
+	var estados_antes: Dictionary = _estados()
+	var resultado: ResultadoAccion = _resolver_destino(accion.opcion, true)
+	if not resultado.valida:
+		_error = "validar y aplicar no coinciden: " + str(accion.a_diccionario())
+		return resultado
+	_acciones_jugador.append({"unidad": Maestro.ID, "accion": accion.a_diccionario()})
+	if _primera_opcion_destino.is_empty():
+		_primera_opcion_destino = accion.opcion
+	if not resultado.mana.is_empty():
+		_registrar({"tipo": "mana", "unidad": Maestro.ID, "de": resultado.mana["de"], "a": resultado.mana["a"],
+				"motivo": DestinoAtacante.MOTIVO_RESELLAR}, 0)
+	_registrar(resultado.evento.duplicate(true))
+	_registrar_estados(estados_antes)
+	_registrar_surcos()
+	var nombre_resultado: String = resultado.evento["resultado"]
+	if nombre_resultado == DestinoAtacante.RESULTADO_SELLADO_FALLIDO:
+		_sellar_fallido = true
+	else:
+		_destino_pendiente = ""
+		_cierre.lealtad = resultado.lealtad
+	_resultado = ResultadoCombate.armar(_contexto, _cierre, _cola.ronda, _ardidos_del_combate())
+	if _destino_pendiente.is_empty():
+		_resultado.destino_atacante = {"opcion": accion.opcion, "resultado": nombre_resultado,
+				"primera_opcion": _primera_opcion_destino}
+	_resultado.metricas = MetricasCombate.calcular(_contexto.escenario, _registro.lineas())
+	resultado.fin = _fin
+	return resultado
+
+
+func _resolver_destino(opcion: String, aplica: bool) -> ResultadoAccion:
+	var acumulador: AcumuladorLealtad = null if _cierre == null else _cierre.acumulador
+	return _contexto.destino_atacante.resolver(opcion, _atacante_que_espera(), _plantel, acumulador, _sellar_fallido,
+			_contexto.azar_combate, _surcos, aplica)
+
+
+# La atacante que espera su destino, o "" (tambien si el combate se detuvo por un error).
+func _atacante_que_espera() -> String:
+	return _destino_pendiente if esperando_destino() else ""
+
+
+# Los pergaminos que ardieron en este combate: al cerrar y en el destino (T30).
+func _ardidos_del_combate() -> Array[String]:
+	var ardidos: Array[String] = []
+	for id_pergamino in _pergaminos_ardidos():
+		if not _ardidos_antes.has(id_pergamino):
+			ardidos.append(id_pergamino)
+	return ardidos
 
 
 # Arquitectura.md A.7: antes de cada evento se vuelcan las tiradas nuevas del
 # generador de combate (lo que registra T02), asi quedan en orden.
-func _registrar(evento: Dictionary) -> void:
+# tiradas: cuantas de las pendientes se vuelcan antes (-1, todas). Menos solo
+# para un evento que paso antes que alguna tirada pendiente: el cambio de modo
+# (0, antes de las tiradas de los pasos 3 y 4, T18) y el chequeo de rival (solo
+# la suya, antes de la del incidente, T19).
+func _registrar(evento: Dictionary, tiradas: int = -1) -> void:
 	var historial: Array[Dictionary] = _contexto.azar_combate.historial()
-	for indice in range(_tiradas_volcadas, historial.size()):
+	var hasta: int = historial.size() if tiradas < 0 else mini(historial.size(), _tiradas_volcadas + tiradas)
+	for indice in range(_tiradas_volcadas, hasta):
 		var tirada: Dictionary = historial[indice]
 		_agregar({"tipo": "tirada", "ronda": _cola.ronda, "indice": tirada["indice"],
 				"metodo": tirada["metodo"], "parametros": tirada["parametros"],
 				"resultado": tirada["resultado"]})
-	_tiradas_volcadas = historial.size()
+	_tiradas_volcadas = maxi(_tiradas_volcadas, hasta)
 	evento["ronda"] = _cola.ronda
 	_agregar(evento)
 
@@ -356,13 +828,22 @@ func _registrar_surcos() -> void:
 	_surcos_volcados = historial.size()
 
 
-# Arquitectura.md A.7 (B.2.1): los eventos `oculto`, `destape` y `bono_perdido`
-# nuevos del turno, en el orden en que pasaron, despues del evento de la accion.
-func _registrar_junco() -> void:
+# Arquitectura.md A.7 (B.2.1 y T19): los eventos `encono`, `oculto`, `destape` y
+# `bono_perdido` nuevos del turno, en el orden en que pasaron, despues del evento
+# de la accion (el `encono`, justo detras del `ataque` que sube el contador).
+func _registrar_eventos_turno() -> void:
 	var eventos: Array[Dictionary] = _turno.eventos()
 	for indice in range(_junco_volcados, eventos.size()):
 		_registrar(eventos[indice])
 	_junco_volcados = eventos.size()
+
+
+# Arquitectura.md A.7 (T16): los eventos cadena_cortada nuevos, en orden.
+func _registrar_cadena() -> void:
+	var historial: Array[Dictionary] = _cadena.historial()
+	for indice in range(_cadena_volcados, historial.size()):
+		_registrar(historial[indice])
+	_cadena_volcados = historial.size()
 
 
 func _pergaminos_ardidos() -> Array[String]:
@@ -387,3 +868,14 @@ func _vida(unidad_id: String) -> int:
 	if unidad_id == Maestro.ID:
 		return _plantel.maestro.vida
 	return _plantel.criatura(unidad_id).vida
+
+
+# T24: la criatura si es una salvaje de pie, sellable y de un rango que la
+# balanza alcanza; si no, null.
+func _sellable(unidad_id: String) -> Criatura:
+	var criatura: Criatura = _plantel.criatura(unidad_id)
+	if criatura == null or criatura.comportamiento != Criatura.Comportamiento.SALVAJE \
+			or not Objetivos.de_pie(unidad_id, _plantel) or not criatura.especie.sellable() \
+			or not _contexto.sellado.rango_permitido(criatura.especie, _plantel.maestro):
+		return null
+	return criatura

@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../datos/_esquemas/sellado.schema.json",
+  "_nota": "Copia de datos/tablas/sellado.json para los tests de reglas (Arquitectura.md A.6). Sistema.md 4.1: tramos de vida con su limite superior incluido x rango 1, 2 y 3",
+  "tramos": [
+    { "hasta_vida_pct": 25, "pct_por_rango": [80, 65, 50] },
+    { "hasta_vida_pct": 50, "pct_por_rango": [50, 35, 20] },
+    { "hasta_vida_pct": 75, "pct_por_rango": [20, 10, 5] },
+    { "hasta_vida_pct": 100, "pct_por_rango": [5, 0, 0] }
+  ],
+  "confianza_pct": 100
+}

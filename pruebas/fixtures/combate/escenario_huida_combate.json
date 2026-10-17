@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "huida_combate",
+  "_nota": "Arquitectura.md B.4 (T25): la huida dentro del Combate (registro, metrica 8, resultado y grabacion). Sistema.md 11.7 y 11.3 paso 2. huye_s1 (especie_huida_100, Velocidad 9) juega primero con 7 de 30 (<= 25 %: 100 %) y huye; la Ocarra salvaje (7, entera: 0 %) sigue en pie, asi el combate no termina. Despues la Rodauva de la tribu (6) y el Maestro (5). Todas lejos entre si: nadie tira Encono, cobardia ni incidente en la ronda 1",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [7, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 7] }
+  ],
+  "enemigas": [
+    { "id": "huye_s1", "especie": "especie_huida_100", "comportamiento": "salvaje", "vida": 7, "posicion": [0, 0] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [7, 0] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

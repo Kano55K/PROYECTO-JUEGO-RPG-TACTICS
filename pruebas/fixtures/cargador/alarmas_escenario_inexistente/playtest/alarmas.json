@@ -1,0 +1,10 @@
+{
+  "_nota": "T33 (2): z_no_existe no está en escenarios/",
+  "partidas_por_grupo": 10,
+  "jugadores_minimos": 3,
+  "semillas": [1, 2, 3],
+  "alarmas": [
+    { "id": "otro_escenario", "escenarios": ["c_tasajero", "z_no_existe"], "calculo": "rondas_pelea_mayor_que",
+      "parametros": { "rondas": 5, "umbral_pct": 20 } }
+  ]
+}

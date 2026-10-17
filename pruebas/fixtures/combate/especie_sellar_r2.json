@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Arquitectura.md B.4 (T24): una especie inventada, sellable y de rango 2, con otros ids (especie y rasgo), para que ningun test de sellar dependa de un id real. Numeros del Surcon de la fixture (Sistema.md 11.2), sin su rasgo",
+  "id": "especie_sellar_r2",
+  "rol": "trabajo",
+  "rango": 2,
+  "sellable": true,
+  "vida": 24,
+  "danio": 3,
+  "movimiento": 2,
+  "alcance": 1,
+  "velocidad": 2,
+  "rasgo": {
+    "id": "rasgo_sellar_r2",
+    "efecto": "alabarda"
+  },
+  "huida_pct": 0
+}

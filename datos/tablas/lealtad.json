@@ -1,10 +1,9 @@
 {
   "$schema": "../_esquemas/lealtad.schema.json",
-  "_nota": "Sistema.md 5.1: escala 0-10; Desleal 0-1, Dudosa 2-3, Neutral desde neutral_desde hasta umbral - 1, Leal desde el umbral de rescate (tablas/balanza.json). 4.2: lealtad base por camino; el ajuste por balanza esta en tablas/balanza.json. 4.4: lealtad al resellar",
+  "_nota": "Sistema.md 5.1: escala 0-10; Desleal 0-1 (hasta desleal_hasta), Dudosa 2-3 (desde desleal_hasta + 1 hasta neutral_desde - 1, no se guarda: P-028), Neutral desde neutral_desde hasta umbral - 1, Leal desde el umbral de rescate (tablas/balanza.json). 4.2: lealtad base por camino; el ajuste por balanza esta en tablas/balanza.json. 4.4: lealtad al resellar",
   "minimo": 0,
   "maximo": 10,
   "desleal_hasta": 1,
-  "dudosa_hasta": 3,
   "neutral_desde": 4,
   "inicial_por_camino": {
     "_nota": "Sistema.md 4.2, columna 'Lealtad base'",

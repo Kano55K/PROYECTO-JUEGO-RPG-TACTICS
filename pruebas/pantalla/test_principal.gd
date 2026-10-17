@@ -24,7 +24,7 @@ func test_datos_rotos_muestran_error() -> void:
 	assert_object((runner.scene() as Principal).vista()).is_null()
 
 
-# (2) Con datos/ real arranca sin errores y lista los 11 escenarios.
+# (2) Con datos/ real arranca sin errores y lista los 10 escenarios.
 func test_datos_reales_listan_los_escenarios() -> void:
 	var runner: GdUnitSceneRunner = _principal("res://datos")
 	await runner.simulate_frames(1)
@@ -33,7 +33,8 @@ func test_datos_reales_listan_los_escenarios() -> void:
 	assert_bool(runner.find_child("PantallaError").visible).is_false()
 	assert_bool(runner.find_child("SelectorEscenario").visible).is_true()
 	var ids: Array[String] = principal.ids_escenarios()
-	assert_int(ids.size()).is_equal(11)
+	# A.9, T31: 10 desde que se borro d_rivales_balanza4.json.
+	assert_int(ids.size()).is_equal(10)
 	var textos_botones: Array[String] = []
 	for boton in runner.find_child("SelectorEscenario").get_children():
 		textos_botones.append((boton as Button).text)
@@ -103,15 +104,16 @@ func test_clic_del_mouse_llega_al_tablero() -> void:
 	var runner: GdUnitSceneRunner = _principal("res://datos")
 	await runner.simulate_frames(1)
 	var vista: VistaCombate = (runner.scene() as Principal).abrir_escenario("a_dia_1")
+	MousePrueba.preparar(vista)
 	await runner.simulate_frames(2)
 	var turno: Turno = vista.combate().turno_actual()
 	assert_bool(turno.movimiento_usado).is_false()
 	var casillas: Array[Vector2i] = turno.casillas_para_mover()
 	assert_array(casillas).is_not_empty()
-	runner.simulate_mouse_move(_en_pantalla(vista, casillas[0]))
-	await runner.simulate_frames(1)
-	runner.simulate_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	await runner.simulate_frames(2)
+	# D-006: eventos con su position, sin el cursor del sistema (D-012: por
+	# MousePrueba).
+	MousePrueba.mover_a(_en_pantalla(vista, casillas[0]))
+	MousePrueba.clic_en(_en_pantalla(vista, casillas[0]))
 	assert_bool(vista.combate().turno_actual().movimiento_usado).is_true()
 	assert_object(vista.combate().turno_actual()).is_same(turno)
 
@@ -164,3 +166,36 @@ func _escribir(ruta: String, contenido: String) -> void:
 	var archivo: FileAccess = FileAccess.open(ruta, FileAccess.WRITE)
 	archivo.store_string(contenido)
 	archivo.close()
+
+
+# T32 (7, D-013): con la vista cenital, el tablero usa el TileSet de T13.
+func test_vista_cenital_abre_la_de_t13() -> void:
+	var principal: Principal = auto_free(load(_ESCENA).instantiate())
+	principal.carpeta_datos = "res://datos"
+	principal.vista_tablero = VistasTablero.CENITAL
+	var runner: GdUnitSceneRunner = scene_runner(principal)
+	await runner.simulate_frames(1)
+	var vista: VistaCombate = principal.abrir_escenario("a_dia_1")
+	assert_str(vista.vista_tablero).is_equal(VistasTablero.CENITAL)
+	assert_object(vista.tablero().tile_set).is_same(VistasTablero.tile_set(VistasTablero.CENITAL))
+	assert_bool(vista.combate().esperando_jugador()).is_true()
+
+
+# T32 (7, D-013): una vista desconocida da su error y no arranca: ni datos, ni
+# selector, ni vista.
+func test_vista_desconocida_no_arranca() -> void:
+	var principal: Principal = auto_free(load(_ESCENA).instantiate())
+	principal.carpeta_datos = "res://datos"
+	principal.vista_tablero = "rara"
+	var runner: GdUnitSceneRunner = scene_runner(principal)
+	await runner.simulate_frames(1)
+	assert_bool(runner.find_child("PantallaError").visible).is_true()
+	assert_str((runner.find_child("TextoErrores") as Label).text).contains("rara")
+	assert_bool(runner.find_child("SelectorEscenario").visible).is_false()
+	assert_array(principal.ids_escenarios()).is_empty()
+	assert_object(principal.vista()).is_null()
+	principal.recargar()
+	await runner.simulate_frames(1)
+	assert_bool(runner.find_child("PantallaError").visible).is_true()
+	assert_bool(runner.find_child("SelectorEscenario").visible).is_false()
+	assert_object(principal.vista()).is_null()

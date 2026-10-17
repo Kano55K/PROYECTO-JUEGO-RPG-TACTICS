@@ -9,7 +9,7 @@ const _FIXTURE_EJEMPLO_A2: String = "res://pruebas/fixtures/esquemas/escenario_e
 
 const _ESCENARIOS: Array[String] = [
 	"a_dia_1", "b_muro", "c_tasajero", "d_rivales_normal", "d_rivales_hambriento",
-	"d_rivales_balanza4", "e_cobardia", "e_cobardia_afines", "f_rescate",
+	"e_cobardia", "e_cobardia_afines", "f_rescate",
 	"g_ataque_nocturno", "h_soplo",
 ]
 
@@ -38,7 +38,8 @@ func test_datos_cargan_sin_errores() -> void:
 		assert_str(aviso["esperado"] as String).override_failure_message(str(aviso)).is_equal(_AVISO_CLAVE_SOBRANTE)
 
 
-func test_estan_los_once_escenarios() -> void:
+# Reescrito por A.9, T31: son 10 (se borro d_rivales_balanza4.json).
+func test_estan_los_diez_escenarios() -> void:
 	var datos: Dictionary = _cargar()["datos"]
 	var encontrados: Array[String] = []
 	for ruta in datos.keys():
@@ -51,12 +52,22 @@ func test_estan_los_once_escenarios() -> void:
 
 
 # Arquitectura.md A.2: a_dia_1 es el ejemplo de escenario, copiado tal cual.
-# Salvo la _nota, que T05 actualiza por P-009 (A.9, fila A).
+# Salvo la _nota, que T05 actualiza por P-009 (A.9, fila A). Reescrito en T43
+# por Sistema.md 11.9 v1.6: el ejemplo es del tablero de 8 x 8 y A pasa a
+# 12 x 12 con posiciones nuevas (A.2 y B.3.1), asi que tampoco se comparan el
+# tablero ni las posiciones (ni sus _nota); lo verifica pruebas/datos/test_contacto.gd.
 func test_a_dia_1_es_el_ejemplo_de_a2() -> void:
 	var ejemplo: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_FIXTURE_EJEMPLO_A2))
 	var archivo: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_CARPETA_DATOS.path_join("escenarios/a_dia_1.json")))
-	ejemplo.erase("_nota")
-	archivo.erase("_nota")
+	for escenario: Dictionary in [ejemplo, archivo]:
+		escenario.erase("_nota")
+		escenario.erase("tablero")
+		var unidades: Array = [escenario["maestro"]]
+		unidades.append_array(escenario["tribu"])
+		unidades.append_array(escenario["enemigas"])
+		for unidad: Dictionary in unidades:
+			unidad.erase("posicion")
+			unidad.erase("_nota")
 	assert_dict(archivo).is_equal(ejemplo)
 
 
@@ -65,14 +76,18 @@ func test_semillas_compartidas() -> void:
 	assert_int(_escenario("h_soplo")["semilla"] as int).is_equal(_escenario("c_tasajero")["semilla"] as int)
 	var semilla_d: int = _escenario("d_rivales_normal")["semilla"] as int
 	assert_int(_escenario("d_rivales_hambriento")["semilla"] as int).is_equal(semilla_d)
-	assert_int(_escenario("d_rivales_balanza4")["semilla"] as int).is_equal(semilla_d)
+	# Reescrito por A.9, T31: D con balanza 4 es la variante del panel.
+	var balanza4: Dictionary = VariantesEscenario.escenario(_cargar()["datos"], VariantesEscenario.D_BALANZA_4)
+	assert_int(balanza4["semilla"] as int).is_equal(semilla_d)
 	assert_int(_escenario("e_cobardia_afines")["semilla"] as int).is_equal(_escenario("e_cobardia")["semilla"] as int)
 
 
-# Arquitectura.md B.2 (T04): variante temporal de D hasta T31.
+# Arquitectura.md B.2 (T04): D con balanza 4. Reescrito por A.9, T31: el archivo
+# temporal d_rivales_balanza4.json se borro y la variante se arma con
+# EdicionEscenario (VariantesEscenario), como en el panel.
 func test_d_balanza4_es_d_normal_con_balanza_4() -> void:
 	var normal: Dictionary = _escenario("d_rivales_normal").duplicate(true)
-	var balanza4: Dictionary = _escenario("d_rivales_balanza4").duplicate(true)
+	var balanza4: Dictionary = VariantesEscenario.escenario(_cargar()["datos"], VariantesEscenario.D_BALANZA_4)
 	assert_int((balanza4["maestro"] as Dictionary)["balanza"] as int).is_equal(4)
 	for escenario in [normal, balanza4]:
 		(escenario as Dictionary).erase("id")

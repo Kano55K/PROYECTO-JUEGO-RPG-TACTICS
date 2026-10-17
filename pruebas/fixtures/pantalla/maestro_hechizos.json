@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/maestro.schema.json",
+  "_nota": "Arquitectura.md B.3 (T22, sesion 2, criterio 1): copia de pruebas/fixtures/unidades/maestro.json con los hechizos de pruebas/fixtures/pantalla/hechizos.json (pedrada en lugar del Martillazo). Sistema.md 11.2 y 1.6",
+  "movimiento": 3,
+  "alcance": 1,
+  "velocidad": 5,
+  "hechizos": [
+    "pedrada",
+    "lanzadera",
+    "remiendo"
+  ],
+  "iniciales": {
+    "_nota": "Sistema.md 1.1 (balanza 2, poder 1, regeneracion 1). Hambre 3: Sistema.md 11.9, reglas de los escenarios",
+    "balanza": 2,
+    "poder": 1,
+    "regeneracion": 1,
+    "hambre": 3
+  }
+}

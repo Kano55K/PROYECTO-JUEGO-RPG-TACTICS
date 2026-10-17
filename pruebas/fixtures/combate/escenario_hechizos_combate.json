@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "hechizos_combate",
+  "_nota": "Arquitectura.md B.3 (T22): los hechizos dentro del Combate (registro, mana y grabacion). Sistema.md 1.6, 2.1 y 2.3. La Rodauva de la tribu (Velocidad 6) juega antes que el Maestro (5) y el test solo la hace terminar; el Surcon salvaje (Velocidad 2) juega despues. Rodauva y Surcon se llevan bien (10.8): nadie tira Encono, cobardia ni incidente. El Maestro, quieto en [3,6]: el Surcon esta a 3 (Martillazo en la ronda 1), el Remiendo es sobre si mismo y la Rodauva queda adyacente en [2,6] para la Lanzadera. Mana 8 (balanza 2), regenera 1 por turno",
+  "tipo": "test",
+  "semilla": 22,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 6] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [3, 3] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

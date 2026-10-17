@@ -11,13 +11,11 @@ const _SURCON: String = "surcon_1"
 const _SURCON_SALVAJE: String = "surcon_s1"
 
 var _tablero: Tablero
-var _danio: Danio
 
 
 func before_test() -> void:
 	var tabla_combate: Dictionary = _leer(_CARPETA + "combate.json", "combate")
 	_tablero = Tablero.desde_datos({"ancho": 8, "alto": 8}, tabla_combate)
-	_danio = Danio.desde_datos(tabla_combate, _leer(_CARPETA + "hambre.json", "hambre"))
 
 
 func _leer(ruta: String, nombre_esquema: String) -> Dictionary:
@@ -40,7 +38,8 @@ func _plantel() -> Plantel:
 
 # Turno suelto, sin cola, con los surcos del combate.
 func _turno(plantel: Plantel, unidad_id: String, surcos: Surcos) -> Turno:
-	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, _danio, surcos)
+	return Turno.empezar(EntradaCola.new(unidad_id, "", 0), plantel, _tablero, surcos,
+			DatosFixture.cadena(), ColaIniciativa.new(), DatosFixture.reglas(), GeneradorAzar.new(1))
 
 
 # Todo lo que una accion puede cambiar: Plantel, surcos y turno.

@@ -1,5 +1,7 @@
 # Arquitectura.md A.6 y B.2 (T12): reproduce un archivo de grabacion por consola
-# y escribe el registro en registros/ como .jsonl (una linea por evento).
+# y escribe el registro en registros/ como .jsonl (una linea por evento). T23:
+# si el combate reproducido termino, tambien su resultado con las metricas
+# (<nombre>_resultado.json, D-011). La escritura vive en SalidaReproduccion.
 #
 #   "%GODOT_BIN%" --headless --path . --script res://herramientas/reproducir.gd -- <grabacion.json> [N]
 #
@@ -52,28 +54,14 @@ func _correr(argumentos: PackedStringArray) -> int:
 	if reproduccion.aviso_huella:
 		print("AVISO: la huella de los datos no es la de la grabacion (cambiaron los datos)")
 	if reproduccion.combate != null:
-		var salida: String = _escribir(ruta, hasta_n, reproduccion.combate.registro().lineas_json())
-		if salida.is_empty():
+		var salidas: Array[String] = SalidaReproduccion.escribir(reproduccion.combate, ruta, hasta_n,
+				_CARPETA_REGISTROS)
+		if salidas.is_empty():
 			return 1
-		print("Registro: " + salida)
+		print("Registro: " + salidas[0])
+		if salidas.size() > 1:
+			print("Resultado: " + salidas[1])
 	if not reproduccion.error.is_empty():
 		printerr("ERROR: " + reproduccion.error)
 		return 1
 	return 0
-
-
-# Devuelve la ruta escrita, o "" si no se pudo.
-func _escribir(ruta_grabacion: String, hasta_n: int, lineas: Array[String]) -> String:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_CARPETA_REGISTROS))
-	var nombre: String = ruta_grabacion.get_file().get_basename()
-	if hasta_n >= 0:
-		nombre += "_hasta_%d" % hasta_n
-	var salida: String = _CARPETA_REGISTROS.path_join(nombre + ".jsonl")
-	var archivo: FileAccess = FileAccess.open(salida, FileAccess.WRITE)
-	if archivo == null:
-		printerr("No se pudo escribir " + salida)
-		return ""
-	for linea in lineas:
-		archivo.store_line(linea)
-	archivo.close()
-	return ProjectSettings.globalize_path(salida)

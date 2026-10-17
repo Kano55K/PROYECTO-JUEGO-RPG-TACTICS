@@ -102,6 +102,19 @@ func test_escenario_posiciones_dentro_del_tablero() -> void:
 	assert_array(errores[0]["recibido"] as Array).is_equal([9, 9])
 
 
+# T21 (10), Sistema.md 2.1 y M-04: el mana de entrada de un escenario no supera
+# la reserva de la balanza de su Maestro. Igual a la reserva, o null, no es error.
+func test_t21_mana_entrada_no_supera_la_reserva() -> void:
+	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + "escenario_mana_entrada")
+	var errores: Array[Dictionary] = resultado["errores"]
+
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("escenarios/mayor.json")
+	assert_str(errores[0]["campo"] as String).is_equal("maestro.mana_entrada")
+	assert_str(errores[0]["esperado"] as String).contains("8")
+	assert_int(errores[0]["recibido"] as int).is_equal(9)
+
+
 func test_textos_formato_de_clave() -> void:
 	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + "textos_formato_clave")
 	var errores: Array[Dictionary] = resultado["errores"]
@@ -241,3 +254,82 @@ func test_rasgos_v13() -> void:
 	for nombre in ["con_modos_valida", "erizarse_valida"]:
 		var errores: Array[Dictionary] = _cargar_ficha_rasgo(nombre)["errores"]
 		assert_array(errores).override_failure_message(str(errores)).is_empty()
+
+
+# --- Alarmas de 11.9 (T33, D-015) --------------------------------------------
+
+func _errores_alarmas(carpeta: String) -> Array[Dictionary]:
+	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + carpeta)
+	var errores: Array[Dictionary] = resultado["errores"]
+	if not errores.is_empty():
+		assert_bool(resultado["datos"] == null).is_true()
+	return errores
+
+
+func test_t33_alarmas_validas_cargan() -> void:
+	var resultado: Dictionary = Cargador.new().cargar_carpeta(_CARPETA_FIXTURES + "alarmas_valida")
+	var errores: Array[Dictionary] = resultado["errores"]
+	assert_array(errores).override_failure_message(str(errores)).is_empty()
+	assert_bool((resultado["datos"] as Dictionary).has("playtest/alarmas.json")).is_true()
+
+
+# (2) Un calculo sin uno de sus parametros.
+func test_t33_alarma_sin_su_parametro() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_parametro_faltante")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.comparacion")
+
+
+# (2) Un parametro de otro calculo.
+func test_t33_alarma_con_parametro_ajeno() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_parametro_ajeno")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.rondas")
+
+
+# (2) Un escenario que no esta en escenarios/.
+func test_t33_alarma_con_escenario_inexistente() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_escenario_inexistente")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].escenarios[1]")
+	assert_str(errores[0]["recibido"] as String).is_equal("z_no_existe")
+
+
+func test_t33_alarmas_repetidas_y_especie_inexistente() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_repetidas")
+	var campos: Array[String] = []
+	for error in errores:
+		assert_str(error["archivo"] as String).is_equal("playtest/alarmas.json")
+		campos.append(error["campo"] as String)
+	campos.sort()
+	assert_array(campos).is_equal(["alarmas[0].parametros.especie", "alarmas[1].id", "semillas[2]"])
+
+
+# T33, sesion 2: una comparacion contra un escenario que no esta en escenarios/.
+func test_t33_alarma_comparada_con_escenario_inexistente() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_comparado_inexistente")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.comparado_con")
+	assert_str(errores[0]["recibido"] as String).is_equal("z_no_existe")
+
+
+# T33, sesion 2: activa_poco_usada con un efecto sin activa (la alabarda es pasiva).
+func test_t33_alarma_activa_con_efecto_sin_activa() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_efecto_sin_activa")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.efecto")
+	assert_str(errores[0]["recibido"] as String).is_equal("alabarda")
+
+
+# T33, sesion 2: un efecto que ninguna especie de especies/ tiene.
+func test_t33_alarma_con_efecto_de_ninguna_especie() -> void:
+	var errores: Array[Dictionary] = _errores_alarmas("alarmas_efecto_inexistente")
+	assert_int(errores.size()).override_failure_message(str(errores)).is_equal(1)
+	assert_str(errores[0]["archivo"] as String).is_equal("playtest/alarmas.json")
+	assert_str(errores[0]["campo"] as String).is_equal("alarmas[0].parametros.efecto")
+	assert_str(errores[0]["recibido"] as String).is_equal("caza_y_cuenta")

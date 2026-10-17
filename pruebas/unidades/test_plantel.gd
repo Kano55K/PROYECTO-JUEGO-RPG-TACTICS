@@ -14,11 +14,23 @@ func _leer(archivo: String, nombre_esquema: String) -> Dictionary:
 
 
 func _crear(archivo_escenario: String) -> Plantel:
+	return _crear_desde(_leer(archivo_escenario, "escenario"))
+
+
+func _crear_desde(escenario: Dictionary) -> Plantel:
 	var especies: Dictionary = {}
 	for id_especie in _ESPECIES:
 		especies[id_especie] = Especie.new(_leer(id_especie + ".json", "especie"))
 	var tabla: TablaBalanza = TablaBalanza.new(_leer("balanza_1_2.json", "balanza"))
-	return Plantel.desde_escenario(_leer(archivo_escenario, "escenario"), especies, tabla, _leer("maestro.json", "maestro"))
+	return Plantel.desde_escenario(escenario, especies, tabla, _leer("maestro.json", "maestro"))
+
+
+# La fila de la balanza del fixture, leida del archivo (no del codigo).
+func _fila_balanza(posicion: int) -> Dictionary:
+	for fila in (_leer("balanza_1_2.json", "balanza")["posiciones"] as Array):
+		if fila["posicion"] == posicion:
+			return fila
+	return {}
 
 
 # Criterio 2. Las dos son salvajes: sin pergamino (Sistema.md 3.2, P-010).
@@ -66,7 +78,9 @@ func test_null_toma_el_valor_por_defecto() -> void:
 	assert_int(plantel.maestro.vida).is_equal(20)
 	assert_int(plantel.maestro.hambre).is_equal((ficha_maestro["iniciales"] as Dictionary)["hambre"] as int)
 	assert_int(plantel.maestro.enfermedades).is_equal(0)
-	assert_object(plantel.maestro.mana_entrada).is_null()
+	# Reescrito por Sistema.md 2.1 y 1.2 (T21, M-04): null ya no queda null; es la
+	# reserva de la fila de la balanza.
+	assert_int(plantel.maestro.mana_entrada).is_equal(_fila_balanza(2)["reserva_mana"] as int)
 
 	var rodauva: Criatura = plantel.criatura("rodauva_1")
 	assert_int(rodauva.vida).is_equal(rodauva.especie.vida())
@@ -141,3 +155,22 @@ func _pares(plantel: Plantel) -> Array[String]:
 	for criatura in plantel.criaturas():
 		pares.append("%s:%s" % [criatura.id, criatura.pergamino_id])
 	return pares
+
+
+# T21 (1), Sistema.md 1.2 y 2.1 (M-04): mana_entrada null es la reserva de la
+# fila de su balanza (dos balanzas del fixture); un valor explicito se respeta.
+# El mana actual arranca en mana_entrada.
+func test_t21_mana_entrada_se_resuelve() -> void:
+	for balanza in [2, 4]:
+		var escenario: Dictionary = _leer("escenario_nulos.json", "escenario")
+		(escenario["maestro"] as Dictionary)["balanza"] = balanza
+		var maestro: Maestro = _crear_desde(escenario).maestro
+		assert_int(maestro.mana_entrada).is_equal(_fila_balanza(balanza)["reserva_mana"] as int)
+		assert_int(maestro.mana).is_equal(maestro.mana_entrada)
+	assert_int(_fila_balanza(2)["reserva_mana"] as int).is_not_equal(_fila_balanza(4)["reserva_mana"] as int)
+
+	var explicito: Dictionary = _leer("escenario_nulos.json", "escenario")
+	(explicito["maestro"] as Dictionary)["mana_entrada"] = 4
+	var con_entrada: Maestro = _crear_desde(explicito).maestro
+	assert_int(con_entrada.mana_entrada).is_equal(4)
+	assert_int(con_entrada.mana).is_equal(4)

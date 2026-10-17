@@ -44,6 +44,149 @@ const SUCESO_OCULTO: String = "suceso.oculto"
 const SUCESO_PIERDE_BONO: String = "suceso.pierde_bono"
 const AVISO_CUENTA_UMBRAL: String = "aviso.cuenta.umbral"
 const AVISO_DESTAPAR: String = "aviso.destapar"
+# T14: obediencia en el panel (clave propuesta, falta en es.json) y el suceso
+# del hambre de combate (Mundo.md, "Hechizos, hambre y cierre del combate").
+const PANEL_OBEDIENCIA: String = "panel.obediencia"
+const COMBATE_HAMBRE: String = "combate.hambre"
+# T16: la cadena en curso en el panel (clave propuesta, falta en es.json).
+const PANEL_CADENA: String = "panel.cadena"
+# T41: el aviso de afinidad al pasar el mouse por una casilla (Mundo.md 9.2 v1.2).
+const AFINIDAD_TOOLTIP: String = "afinidad.tooltip"
+# T17: el boton de Secundar y su suceso (Sistema.md 10.1).
+const ACCION_SECUNDAR: String = "accion.secundar"
+# T18: el aviso del incidente y su suceso (Mundo.md 9.2 v1.2). Los sucesos tienen
+# variantes por par de especies (incidente.<resultado>.<especie>.<rival>).
+const INCIDENTE_TOOLTIP: String = "incidente.tooltip"
+const INCIDENTE_DISTRAIDA: String = "incidente.distraida"
+const INCIDENTE_ATAQUE: String = "incidente.ataque"
+# T19: el aviso del Encono y de la cobardia y sus sucesos (Mundo.md 9.2 v1.2 y
+# 5). Las reacciones por par (encono.<especie>.<rival>) y por especie
+# (cobardia.<especie>) reemplazan a la linea general si existen.
+const ENCONO_TOOLTIP: String = "encono.tooltip"
+const COBARDIA_TOOLTIP: String = "cobardia.tooltip"
+const ENCONO_INICIO: String = "encono.inicio"
+const ENCONO_SUBE: String = "encono.sube"
+const COBARDIA_INICIO: String = "cobardia.inicio"
+const COBARDIA_RESISTE: String = "cobardia.resiste"
+# T44 (Mundo.md 9.2 v1.3, A.7): la resistida que sostuvo el Maestro o una afin.
+const COBARDIA_RESISTE_MAESTRO: String = "cobardia.resiste.maestro"
+const COBARDIA_RESISTE_AFIN: String = "cobardia.resiste.afin"
+# T19: claves propuestas, faltan en es.json. Las marcas concuerdan con la especie.
+const MARCA_ENCONADA: String = "marca.enconada"
+const MARCA_ACOBARDADA: String = "marca.acobardada"
+const PANEL_ENCONO: String = "panel.encono"
+const AVISO_TERMINAR_DEBE_ATACAR: String = "aviso.terminar.debe_atacar_rival"
+const AVISO_TERMINAR_DEBE_ACERCARSE: String = "aviso.terminar.debe_acercarse"
+# T21: el mana del Maestro en el panel y el tooltip (clave propuesta, falta en es.json).
+const PANEL_MANA: String = "panel.mana"
+# T22: los choques de la Lanzadera (Mundo.md, "Hechizos, hambre y cierre del
+# combate"), segun contra quien fue (P-042).
+const LANZADERA_CHOQUE: String = "lanzadera.choque"
+const LANZADERA_CHOQUE_MAESTRO: String = "lanzadera.choque.contra_maestro"
+# T22: claves propuestas, faltan en es.json. El choque contra el borde o un
+# surco, y por que un boton de hechizo esta deshabilitado.
+const LANZADERA_CHOQUE_OBSTACULO: String = "lanzadera.choque.obstaculo"
+const AVISO_HECHIZO_MANA: String = "aviso.hechizo.mana_insuficiente"
+const AVISO_HECHIZO_ACCION_USADA: String = "aviso.hechizo.accion_usada"
+const AVISO_HECHIZO_SIN_OBJETIVOS: String = "aviso.hechizo.sin_objetivos"
+# T24 (Sistema.md 4.1, Mundo.md 5): el boton, el % previo, los sucesos del
+# sellado (sellar.fallo tiene variante por especie; la erizada es otra clave,
+# A.2) y por que el boton esta deshabilitado. pergamino.sin_blanco la comparte
+# Mundo.md con el sellado en combate; sellar.rango_alto, la del rango.
+const ACCION_SELLAR: String = "accion.sellar"
+const SELLAR_TOOLTIP: String = "sellar.tooltip"
+const SELLAR_EXITO: String = "sellar.exito"
+const SELLAR_FALLO: String = "sellar.fallo"
+const SELLAR_FALLO_ERIZADA: String = "sellar.fallo.erizada"
+const SELLAR_RANGO_ALTO: String = "sellar.rango_alto"
+const PERGAMINO_SIN_BLANCO: String = "pergamino.sin_blanco"
+# T24: claves propuestas, faltan en es.json.
+const AVISO_SELLAR_ACCION_USADA: String = "aviso.sellar.accion_usada"
+const AVISO_SELLAR_MANA: String = "aviso.sellar.mana_insuficiente"
+const AVISO_SELLAR_FUERA_DE_ALCANCE: String = "aviso.sellar.fuera_de_alcance"
+const AVISO_SELLAR_NO_SELLABLE: String = "aviso.sellar.no_sellable"
+const AVISO_SELLAR_OCULTA: String = "aviso.sellar.oculta"
+const AVISO_SELLAR_NO_SALVAJE: String = "aviso.sellar.no_salvaje"
+const AVISO_SELLAR_SIN_OBJETIVOS: String = "aviso.sellar.sin_objetivos"
+# T45 (Sistema.md 4.1 v1.8, S-50): clave confirmada por el Arquitecto; falta en es.json v1.5.
+const AVISO_SELLAR_SIN_PROBABILIDAD: String = "aviso.sellar.sin_probabilidad"
+# T25 (Sistema.md 11.7): la huida de las salvajes. La marca y el tooltip del %
+# no existen en es.json (nombres propuestos). El suceso de la huida es
+# huida.salvaje con la variante de la especie (estan las cinco); el de quedarse,
+# opcional: se muestra solo si existe.
+const MARCA_HUIDA: String = "marca.huida"
+const HUIDA_PORCENTAJE: String = "huida.salvaje.porcentaje"
+const HUIDA_SALVAJE: String = "huida.salvaje"
+const HUIDA_SE_QUEDA: String = "huida.salvaje.se_queda"
+# T26 (Sistema.md 3.1, Mundo.md): guardar e invocar en combate. Los botones, sus
+# tooltips y los sucesos estan en es.json; por que el boton de invocar esta
+# deshabilitado, no (claves propuestas).
+const ACCION_GUARDAR: String = "accion.guardar"
+const GUARDAR: String = "guardar"
+const GUARDAR_TOOLTIP: String = "guardar.tooltip"
+const ACCION_INVOCAR: String = "accion.invocar"
+const INVOCAR: String = "invocar"
+const INVOCAR_TOOLTIP: String = "invocar.tooltip"
+const AVISO_INVOCAR_YA_SE_MOVIO: String = "aviso.invocar.ya_se_movio"
+const AVISO_INVOCAR_ACCION_USADA: String = "aviso.invocar.accion_usada"
+const AVISO_INVOCAR_MANA: String = "aviso.invocar.mana_insuficiente"
+const AVISO_INVOCAR_SIN_CASILLA_LIBRE: String = "aviso.invocar.sin_casilla_libre"
+# T27 (Sistema.md 11.5, Mundo.md 5): guardar a una caida. El boton, su tooltip y
+# el suceso (hueco {caida}) estan en es.json; por que el boton esta
+# deshabilitado, no (claves propuestas, pedido de Mundo.md 9).
+const ACCION_GUARDAR_CAIDA: String = "accion.guardar_caida"
+const GUARDAR_CAIDA: String = "guardar_caida"
+const GUARDAR_CAIDA_TOOLTIP: String = "guardar_caida.tooltip"
+const AVISO_GUARDAR_CAIDA_ACCION_USADA: String = "aviso.guardar_caida.accion_usada"
+const AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE: String = "aviso.guardar_caida.fuera_de_alcance"
+const AVISO_GUARDAR_CAIDA_MANA: String = "aviso.guardar_caida.mana_insuficiente"
+const AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS: String = "aviso.guardar_caida.sin_objetivos"
+# T28 (Sistema.md 11.7, Mundo.md 9): la huida del Maestro. El boton y los
+# sucesos de declarar y de irse (con o sin caidas, hueco {caida}) estan en
+# es.json; la marca y la linea del panel, no (claves propuestas, pedido de
+# Mundo.md 9).
+const ACCION_HUIR: String = "accion.huir"
+const HUIDA_MAESTRO_DECLARAR: String = "huida.maestro.declarar"
+const HUIDA_MAESTRO_SIN_CAIDAS: String = "huida.maestro.sin_caidas"
+const HUIDA_MAESTRO_CON_CAIDAS: String = "huida.maestro.con_caidas"
+const MARCA_HUIDA_DECLARADA: String = "marca.huida_declarada"
+const PANEL_HUIDA_DECLARADA: String = "panel.huida_declarada"
+# T30 (Mundo.md 1.5 v1.4): las de la previsualizacion, las del Worldbuilder. La
+# de las caidas que moririan no tiene texto todavia (pedido al Worldbuilder).
+const HUIDA_PREVIA_TITULO: String = "huida.previa.titulo"
+const HUIDA_PREVIA_ACTUAN: String = "huida.previa.actuan"
+const HUIDA_PREVIA_NINGUNA: String = "huida.previa.ninguna"
+const HUIDA_PREVIA_ALCANZAN: String = "huida.previa.alcanzan"
+const HUIDA_PREVIA_NO_ALCANZAN: String = "huida.previa.no_alcanzan"
+const HUIDA_PREVIA_CAES: String = "huida.previa.caes"
+const HUIDA_PREVIA_CAIDAS: String = "huida.previa.caidas"
+const AVISO_HUIR_ACCION_USADA: String = "aviso.huir.accion_usada"
+const AVISO_HUIR_YA_SE_MOVIO: String = "aviso.huir.ya_se_movio"
+# T29 (Sistema.md 6, Mundo.md 9): el rescate. rescate.<especie>, permadeath y
+# lealtad.motivo.rescate estan en es.json; la linea y la marca de quien rescataria
+# y los bloques nuevos del resultado, no (claves propuestas). RESCATE se arma
+# solo con la especie como sujeto (no tiene base): no va en FIJAS.
+const PANEL_RESCATISTA: String = "panel.rescatista"
+const PANEL_SIN_RESCATISTA: String = "panel.sin_rescatista"
+const MARCA_RESCATISTA: String = "marca.rescatista"
+const RESULTADO_RESCATISTA: String = "resultado.rescatista"
+const RESCATE: String = "rescate"
+const PERMADEATH: String = "permadeath"
+const RESULTADO_MUERTAS: String = "resultado.muertas"
+const RESULTADO_LEVANTADAS: String = "resultado.levantadas"
+const RESULTADO_CAIDAS_GUARDADAS: String = "resultado.caidas_guardadas"
+const RESULTADO_CAPTURAS: String = "resultado.capturas"
+const RESULTADO_ATACANTE_PENDIENTE: String = "resultado.atacante_pendiente"
+# T30 (Mundo.md 4.6): el ataque nocturno. nocturno.base es complemento (A.2.1):
+# la base y la linea de la especie. Los botones y tooltips del destino van por
+# opcion (boton_destino, tooltip_destino) y la linea de comer con una especie
+# suelta es una clave propia (comer_suelta, A.2: el codigo elige la clave).
+const NOCTURNO_BASE: String = "nocturno.base"
+const NOCTURNO_ATACANTE_CAIDA: String = "nocturno.atacante.caida"
+const NOCTURNO_PERDONAR: String = "nocturno.perdonar"
+const NOCTURNO_PERDONAR_TRIBU: String = "nocturno.perdonar.tribu"
+const NOCTURNO_SELLAR: String = "nocturno.sellar"
+const NOCTURNO_COMER: String = "nocturno.comer"
 
 const FIJAS: Array[String] = [
 	MAESTRO_NOMBRE, RONDA, COLA_TITULO, MARCA_CAZA, MARCA_CUENTA,
@@ -54,14 +197,42 @@ const FIJAS: Array[String] = [
 	RESULTADO_TITULO, RESULTADO_RONDAS, RESULTADO_LEALTAD, RESULTADO_VOLVER,
 	ACCION_CAVAR, MARCA_OCULTO, MARCA_BONO, SUCESO_SURCO_CAVAR, SUCESO_SURCO_CERRAR,
 	SUCESO_OCULTO, SUCESO_PIERDE_BONO, AVISO_CUENTA_UMBRAL, AVISO_DESTAPAR,
+	PANEL_OBEDIENCIA, COMBATE_HAMBRE, PANEL_CADENA, AFINIDAD_TOOLTIP, ACCION_SECUNDAR,
+	INCIDENTE_TOOLTIP, INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE,
+	ENCONO_TOOLTIP, COBARDIA_TOOLTIP, ENCONO_INICIO, ENCONO_SUBE, COBARDIA_INICIO, COBARDIA_RESISTE,
+	COBARDIA_RESISTE_MAESTRO, COBARDIA_RESISTE_AFIN,
+	MARCA_ENCONADA, MARCA_ACOBARDADA, PANEL_ENCONO, AVISO_TERMINAR_DEBE_ATACAR, AVISO_TERMINAR_DEBE_ACERCARSE,
+	PANEL_MANA,
+	LANZADERA_CHOQUE, LANZADERA_CHOQUE_MAESTRO, LANZADERA_CHOQUE_OBSTACULO,
+	AVISO_HECHIZO_MANA, AVISO_HECHIZO_ACCION_USADA, AVISO_HECHIZO_SIN_OBJETIVOS,
+	ACCION_SELLAR, SELLAR_TOOLTIP, SELLAR_EXITO, SELLAR_FALLO, SELLAR_FALLO_ERIZADA, SELLAR_RANGO_ALTO,
+	PERGAMINO_SIN_BLANCO, AVISO_SELLAR_ACCION_USADA, AVISO_SELLAR_MANA, AVISO_SELLAR_FUERA_DE_ALCANCE,
+	AVISO_SELLAR_NO_SELLABLE, AVISO_SELLAR_OCULTA, AVISO_SELLAR_NO_SALVAJE, AVISO_SELLAR_SIN_OBJETIVOS,
+	AVISO_SELLAR_SIN_PROBABILIDAD,
+	MARCA_HUIDA, HUIDA_PORCENTAJE,
+	ACCION_GUARDAR, GUARDAR, GUARDAR_TOOLTIP, ACCION_INVOCAR, INVOCAR, INVOCAR_TOOLTIP,
+	AVISO_INVOCAR_YA_SE_MOVIO, AVISO_INVOCAR_ACCION_USADA, AVISO_INVOCAR_MANA, AVISO_INVOCAR_SIN_CASILLA_LIBRE,
+	ACCION_GUARDAR_CAIDA, GUARDAR_CAIDA, GUARDAR_CAIDA_TOOLTIP, AVISO_GUARDAR_CAIDA_ACCION_USADA,
+	AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE, AVISO_GUARDAR_CAIDA_MANA, AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS,
+	ACCION_HUIR, HUIDA_MAESTRO_DECLARAR, HUIDA_MAESTRO_SIN_CAIDAS, HUIDA_MAESTRO_CON_CAIDAS,
+	MARCA_HUIDA_DECLARADA, PANEL_HUIDA_DECLARADA, HUIDA_PREVIA_TITULO, HUIDA_PREVIA_ACTUAN,
+	HUIDA_PREVIA_NINGUNA, HUIDA_PREVIA_ALCANZAN, HUIDA_PREVIA_NO_ALCANZAN, HUIDA_PREVIA_CAES, HUIDA_PREVIA_CAIDAS,
+	AVISO_HUIR_ACCION_USADA, AVISO_HUIR_YA_SE_MOVIO,
+	PANEL_RESCATISTA, PANEL_SIN_RESCATISTA, MARCA_RESCATISTA, RESULTADO_RESCATISTA, PERMADEATH,
+	RESULTADO_MUERTAS, RESULTADO_LEVANTADAS, RESULTADO_CAIDAS_GUARDADAS, RESULTADO_CAPTURAS,
+	RESULTADO_ATACANTE_PENDIENTE,
+	NOCTURNO_BASE, NOCTURNO_ATACANTE_CAIDA, NOCTURNO_PERDONAR, NOCTURNO_PERDONAR_TRIBU, NOCTURNO_SELLAR,
+	NOCTURNO_COMER,
 ]
 # Sistema.md 5.1: los estados de lealtad son fijos en el codigo (EstadosUnidad).
 const _ESTADOS_LEALTAD: Array[String] = [
 	EstadosUnidad.LEALTAD_DESLEAL, EstadosUnidad.LEALTAD_DUDOSA,
 	EstadosUnidad.LEALTAD_NEUTRAL, EstadosUnidad.LEALTAD_LEAL,
 ]
-# FinCombate: los desenlaces que hoy pueden pasar (huida es de T26).
-const _DESENLACES: Array[String] = ["victoria", "derrota_por_caida"]
+# FinCombate: los desenlaces que pueden pasar (huida desde T28).
+const _DESENLACES: Array[String] = ["victoria", "derrota_por_caida", "huida"]
+# T29 (metrica 11): las causas de muerte son los desenlaces que matan.
+const _CAUSAS_MUERTE: Array[String] = ["derrota_por_caida", "huida"]
 # ModificadorDanio.Fuente sin texto propio en es.json (hambre, rasgos y modo lo tienen).
 const _FUENTES_DESGLOSE: Array[String] = ["combo", "afinidad", "encono", "cobardia"]
 # Arquitectura.md A.7: motivos del evento destape.
@@ -71,6 +242,8 @@ const _PREFIJO_ESPECIES: String = "especies/"
 const _PREFIJO_TEXTOS: String = "textos/"
 const _TABLA_HAMBRE: String = "tablas/hambre.json"
 const _TABLA_LEALTAD: String = "tablas/lealtad.json"
+const _MAESTRO: String = "maestro.json"
+const _HECHIZOS: String = "hechizos.json"
 
 
 static func nombre_especie(especie_id: String) -> String:
@@ -83,6 +256,12 @@ static func estado_hambre(estado_id: String) -> String:
 
 static func estado_lealtad(estado_id: String) -> String:
 	return "lealtad.estado.%s" % estado_id
+
+
+# T14: tramo de Obediencia (Obediencia.TRAMOS). Sin concordancia: califica a la
+# obediencia, no a la unidad.
+static func tramo_obediencia(tramo: String) -> String:
+	return "obediencia.tramo.%s" % tramo
 
 
 static func nombre_rasgo(rasgo_id: String) -> String:
@@ -100,6 +279,11 @@ static func estado_unidad(estado: String) -> String:
 
 static func desenlace(nombre: String) -> String:
 	return "resultado.desenlace.%s" % nombre
+
+
+# T29: la causa de una muerta del resultado (metrica 11: el desenlace del fin).
+static func causa_muerte(causa: String) -> String:
+	return "resultado.causa.%s" % causa
 
 
 # motivo: una clave de tablas/lealtad.json eventos (P-019).
@@ -132,6 +316,156 @@ static func suceso_cambio(a: String) -> String:
 	return "suceso.%s.cambio" % a
 
 
+# T19 (Mundo.md 5): la reaccion de una especie al enconarse con su rival.
+static func encono_par(especie_id: String, rival_id: String) -> String:
+	return "encono.%s.%s" % [especie_id, rival_id]
+
+
+# T19 (Mundo.md 5): la linea de una especie al acobardarse.
+static func cobardia_especie(especie_id: String) -> String:
+	return "cobardia.%s" % especie_id
+
+
+# T19 (S-35): por que no puede terminar el turno, o "" si el motivo no es una
+# obligacion del Encono.
+static func motivo_terminar(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.DEBE_ATACAR_RIVAL:
+			return AVISO_TERMINAR_DEBE_ATACAR
+		ResultadoAccion.Motivo.DEBE_ACERCARSE:
+			return AVISO_TERMINAR_DEBE_ACERCARSE
+	return ""
+
+
+# T22: el nombre y el tooltip de un hechizo (por su id de hechizos.json).
+static func nombre_hechizo(hechizo_id: String) -> String:
+	return "hechizo.%s.nombre" % hechizo_id
+
+
+static func tooltip_hechizo(hechizo_id: String) -> String:
+	return "hechizo.%s.tooltip" % hechizo_id
+
+
+# T22: el rotulo de un sentido de la Lanzadera (los `modos` de hechizos.json).
+# Clave propuesta, falta en es.json.
+static func sentido_hechizo(modo: String) -> String:
+	return "hechizo.sentido.%s" % modo
+
+
+# T22: por que un boton de hechizo esta deshabilitado (Turno.motivo_hechizo), o
+# "" si el motivo no se muestra (los demas no se dan en el turno del Maestro).
+static func motivo_hechizo(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_HECHIZO_MANA
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_HECHIZO_ACCION_USADA
+		ResultadoAccion.Motivo.SIN_OBJETIVOS:
+			return AVISO_HECHIZO_SIN_OBJETIVOS
+	return ""
+
+
+# T24: por que el boton Sellar esta deshabilitado (Turno.motivo_sellar), o "" si
+# el motivo no se muestra (los demas no se dan en el turno del Maestro con el
+# combate en curso).
+static func motivo_sellar(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_SELLAR_ACCION_USADA
+		ResultadoAccion.Motivo.SIN_PERGAMINO:
+			return PERGAMINO_SIN_BLANCO
+		ResultadoAccion.Motivo.OBJETIVO_OCULTO:
+			return AVISO_SELLAR_OCULTA
+		ResultadoAccion.Motivo.OBJETIVO_NO_SALVAJE:
+			return AVISO_SELLAR_NO_SALVAJE
+		ResultadoAccion.Motivo.FUERA_DE_ALCANCE:
+			return AVISO_SELLAR_FUERA_DE_ALCANCE
+		ResultadoAccion.Motivo.NO_SELLABLE:
+			return AVISO_SELLAR_NO_SELLABLE
+		ResultadoAccion.Motivo.RANGO_ALTO:
+			return SELLAR_RANGO_ALTO
+		ResultadoAccion.Motivo.SIN_PROBABILIDAD:
+			return AVISO_SELLAR_SIN_PROBABILIDAD
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_SELLAR_MANA
+		ResultadoAccion.Motivo.SIN_OBJETIVOS:
+			return AVISO_SELLAR_SIN_OBJETIVOS
+	return ""
+
+
+# T26: por que un boton de invocar esta deshabilitado (Turno.motivo_invocar), o
+# "" si el motivo no se muestra (los demas no se dan con una guardada de la tribu
+# en el turno del Maestro).
+static func motivo_invocar(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.YA_SE_MOVIO:
+			return AVISO_INVOCAR_YA_SE_MOVIO
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_INVOCAR_ACCION_USADA
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_INVOCAR_MANA
+		ResultadoAccion.Motivo.SIN_CASILLA_LIBRE:
+			return AVISO_INVOCAR_SIN_CASILLA_LIBRE
+	return ""
+
+
+# T27: por que el boton de guardar a una caida esta deshabilitado
+# (Turno.motivo_guardar_caida), o "" si el motivo no se muestra (los demas no se
+# dan en el turno del Maestro con el combate en curso: la consulta solo mira a
+# las caidas de la tribu).
+static func motivo_guardar_caida(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_GUARDAR_CAIDA_ACCION_USADA
+		ResultadoAccion.Motivo.FUERA_DE_ALCANCE:
+			return AVISO_GUARDAR_CAIDA_FUERA_DE_ALCANCE
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_GUARDAR_CAIDA_MANA
+		ResultadoAccion.Motivo.SIN_OBJETIVOS:
+			return AVISO_GUARDAR_CAIDA_SIN_OBJETIVOS
+	return ""
+
+
+# T28: la clave del aviso de por que el Maestro no puede declarar la huida
+# (Turno.motivo_huir), o "" si el motivo no se muestra (fuera del turno del
+# Maestro el boton no aparece).
+static func motivo_huir(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.ACCION_USADA:
+			return AVISO_HUIR_ACCION_USADA
+		ResultadoAccion.Motivo.YA_SE_MOVIO:
+			return AVISO_HUIR_YA_SE_MOVIO
+	return ""
+
+
+# T30 (Mundo.md 4.6): el boton y el tooltip de una opcion del destino de la
+# atacante (DestinoAtacante.OPCIONES).
+static func boton_destino(opcion: String) -> String:
+	return "nocturno.boton.%s" % opcion
+
+
+static func tooltip_destino(opcion: String) -> String:
+	return "nocturno.%s.tooltip" % opcion
+
+
+# T30 (Mundo.md 4.6): la linea de comer cuando hay una suelta de esa especie
+# (nocturno.comer.zancajunco_suelto). Se muestra solo si existe.
+static func comer_suelta(especie_id: String) -> String:
+	return "%s.%s_suelto" % [NOCTURNO_COMER, especie_id]
+
+
+# T30: por que el boton de sellar de nuevo esta deshabilitado
+# (Combate.motivo_destino), o "" si el motivo no se muestra. Las dos claves son
+# las del sellado en combate (Mundo.md 4.6 comparte pergamino.sin_blanco).
+static func motivo_destino(motivo: ResultadoAccion.Motivo) -> String:
+	match motivo:
+		ResultadoAccion.Motivo.SIN_PERGAMINO:
+			return PERGAMINO_SIN_BLANCO
+		ResultadoAccion.Motivo.MANA_INSUFICIENTE:
+			return AVISO_SELLAR_MANA
+	return ""
+
+
 # datos: Cargador.cargar_carpeta()["datos"]. Sin repetidos, en orden estable.
 static func usadas(datos: Dictionary) -> Array[String]:
 	var claves: Array[String] = []
@@ -139,14 +473,21 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		_sumar(claves, fija)
 	for estado in _ESTADOS_LEALTAD:
 		_sumar(claves, estado_lealtad(estado))
+	for tramo in Obediencia.TRAMOS:
+		_sumar(claves, tramo_obediencia(tramo))
 	for estado in Criatura.Estado.keys():
 		_sumar(claves, estado_unidad((estado as String).to_lower()))
 	for nombre in _DESENLACES:
 		_sumar(claves, desenlace(nombre))
+	for causa in _CAUSAS_MUERTE:
+		_sumar(claves, causa_muerte(causa))
 	for fuente in _FUENTES_DESGLOSE:
 		_sumar(claves, fuente_desglose(fuente))
 	for motivo in _MOTIVOS_DESTAPE:
 		_sumar(claves, suceso_destape(motivo))
+	for opcion in DestinoAtacante.OPCIONES:
+		_sumar(claves, boton_destino(opcion))
+		_sumar(claves, tooltip_destino(opcion))
 	var rutas: Array = datos.keys()
 	rutas.sort()
 	var especies: Array[String] = []
@@ -172,8 +513,24 @@ static func usadas(datos: Dictionary) -> Array[String]:
 		for evento in ((datos[_TABLA_LEALTAD] as Dictionary)["eventos"] as Dictionary).keys():
 			if not (evento as String).begins_with("_"):
 				_sumar(claves, motivo_lealtad(evento))
+	_sumar_hechizos(claves, datos)
 	_sumar_variantes(claves, datos, especies)
 	return claves
+
+
+# T22: por cada hechizo del Maestro (maestro.json, en su orden), su nombre y su
+# tooltip; por cada uno de sus `modos` (hechizos.json), el rotulo del sentido.
+static func _sumar_hechizos(claves: Array[String], datos: Dictionary) -> void:
+	if not datos.has(_MAESTRO) or not datos.has(_HECHIZOS):
+		return
+	var ids: Array = (datos[_MAESTRO] as Dictionary).get("hechizos", [])
+	for hechizo_id in ids:
+		_sumar(claves, nombre_hechizo(hechizo_id))
+		_sumar(claves, tooltip_hechizo(hechizo_id))
+	for hechizo in (datos[_HECHIZOS] as Dictionary).get("hechizos", []):
+		if ids.has(hechizo["id"]):
+			for modo in (hechizo as Dictionary).get("modos", []):
+				_sumar(claves, sentido_hechizo(modo))
 
 
 # Arquitectura.md A.2.1, concordancia de las etiquetas: hambre.estado.*,
@@ -195,10 +552,48 @@ static func _sumar_variantes(claves: Array[String], datos: Dictionary, especies:
 			var variante: String = "%s.%s" % [base, sujeto]
 			if existentes.has(variante):
 				_sumar(claves, variante)
+	# T25: quedarse (sin huir) es opcional: solo si existe.
+	if existentes.has(HUIDA_SE_QUEDA):
+		_sumar(claves, HUIDA_SE_QUEDA)
+	# T18: los sucesos del incidente se piden con el par de especies como sujeto.
+	for base in [INCIDENTE_DISTRAIDA, INCIDENTE_ATAQUE]:
+		for especie in especies:
+			for rival in especies:
+				var variante: String = "%s.%s.%s" % [base, especie, rival]
+				if existentes.has(variante):
+					_sumar(claves, variante)
+	# T19: las reacciones del Encono por par, y las de la cobardia por especie
+	# (solo especies: cobardia.resiste.maestro es otra linea, no una variante).
+	# T44: las de quien la sostuvo tambien tienen variante por especie.
+	for especie in especies:
+		for variante in [cobardia_especie(especie), "%s.%s" % [COBARDIA_RESISTE, especie],
+				"%s.%s" % [COBARDIA_RESISTE_MAESTRO, especie], "%s.%s" % [COBARDIA_RESISTE_AFIN, especie]]:
+			if existentes.has(variante):
+				_sumar(claves, variante)
+		for rival in especies:
+			if existentes.has(encono_par(especie, rival)):
+				_sumar(claves, encono_par(especie, rival))
+		# T24: el fallo del sellado se pide con la especie de la objetivo.
+		var variante_fallo: String = "%s.%s" % [SELLAR_FALLO, especie]
+		if existentes.has(variante_fallo):
+			_sumar(claves, variante_fallo)
+		# T25: la huida se pide con la especie de la salvaje. La base huida.salvaje
+		# no tiene texto (la cubren las variantes) y no se suma.
+		for variante_huida in ["%s.%s" % [HUIDA_SALVAJE, especie], "%s.%s" % [HUIDA_SE_QUEDA, especie]]:
+			if existentes.has(variante_huida):
+				_sumar(claves, variante_huida)
+		# T30: el complemento del golpe inicial y la linea de comer con una suelta.
+		for variante_nocturno in ["%s.%s" % [NOCTURNO_BASE, especie], comer_suelta(especie)]:
+			if existentes.has(variante_nocturno):
+				_sumar(claves, variante_nocturno)
+		# T22: el choque de la Lanzadera se pide con la especie de la movida.
+		var variante_choque: String = "%s.%s" % [LANZADERA_CHOQUE, especie]
+		if existentes.has(variante_choque):
+			_sumar(claves, variante_choque)
 
 
 static func _es_etiqueta(clave: String) -> bool:
-	return clave == MARCA_CAIDA or clave.begins_with("hambre.estado.") \
+	return clave in [MARCA_CAIDA, MARCA_ENCONADA, MARCA_ACOBARDADA] or clave.begins_with("hambre.estado.") \
 			or clave.begins_with("lealtad.estado.") or clave.begins_with("estado.")
 
 

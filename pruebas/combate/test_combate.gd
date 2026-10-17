@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 # Arquitectura.md B.2 (T12, sesion 1): contexto, bucle y registro del combate
-# (A.7), con fixtures (A.6) salvo el test 9, que usa los 11 escenarios de datos/.
+# (A.7), con fixtures (A.6) salvo el test 9, que usa los 10 escenarios de datos/.
 # Sistema.md 5.2, 9.2 y 11.5. Los numeros de vida y danio son la comprobacion:
 # el codigo los lee de las fichas, la balanza y las tablas de prueba.
 const _CARPETA: String = "res://pruebas/fixtures/combate/"
@@ -219,7 +219,8 @@ func test_derrota_a_mitad_de_ronda() -> void:
 	assert_array(_de_tipo(combate, "fin_turno")).is_empty()
 	assert_array(_de_tipo(combate, "fin_ronda")).is_empty()
 	var tipos: Array[String] = _tipos(combate)
-	assert_array(tipos.slice(tipos.find("ataque"))).is_equal(["ataque", "estado", "fin", "cierre"])
+	# Reescrito en T29 (A.7): el rescate va entre fin y cierre.
+	assert_array(tipos.slice(tipos.find("ataque"))).is_equal(["ataque", "estado", "fin", "rescate", "cierre"])
 	var estado: Dictionary = _de_tipo(combate, "estado")[0]
 	assert_dict(estado).contains_key_value("unidad", Maestro.ID)
 	assert_dict(estado).contains_key_value("a", "caido")
@@ -247,7 +248,8 @@ func test_unidades_en_0_al_armar() -> void:
 	(maestro_en_0["maestro"] as Dictionary)["vida"] = 0
 	var derrota: Combate = _combate(maestro_en_0)
 	_assert_fin(derrota, FinCombate.Fin.DERROTA_POR_CAIDA)
-	assert_array(_tipos(derrota)).is_equal(["inicio", "estado", "fin", "cierre"])
+	# Reescrito en T29 (A.7): el rescate va entre fin y cierre.
+	assert_array(_tipos(derrota)).is_equal(["inicio", "estado", "fin", "rescate", "cierre"])
 	assert_int(derrota.instantanea()["ronda"] as int).is_equal(0)
 	assert_object(derrota.turno_actual()).is_null()
 
@@ -261,7 +263,7 @@ func test_unidades_en_0_al_armar() -> void:
 
 
 # Ronda 1 de C con la tribu esperando, mas una tirada hecha a mano antes de la
-# accion de la Ocarra de la tribu (en 0a.1 ninguna regla tira dados).
+# accion de la Ocarra de la tribu (despues de la tirada de su incidente, T18).
 func _jugar_ronda_c() -> Combate:
 	var combate: Combate = _combate(_escenario(_CARPETA + "escenario_c.json"))
 	while combate.instantanea()["ronda"] == 1:
@@ -271,22 +273,42 @@ func _jugar_ronda_c() -> Combate:
 	return combate
 
 
+# T44 (Arquitectura.md A.7, Mundo.md 9.2 v1.3): en la ronda de C, la Rodauva leal
+# resiste la cobardia (15 %) con el Maestro vecino: el evento lo dice.
+func test_resistida_registra_quien_la_sostuvo() -> void:
+	var chequeo: Dictionary = _de_tipo(_jugar_ronda_c(), "chequeo_rival")[0]
+	assert_dict(chequeo).contains_key_value("unidad", "rodauva_1").contains_key_value("resultado", "resistida") \
+			.contains_key_value("sostenida_por", "maestro")
+	assert_bool(chequeo.has("afin")).is_false()
+
+
+# Reescrito en T23 (A.7, D-011): tras el fin_turno del Maestro va distancia_maestro,
+# y despues encierro: en [3,6] tiene a la tribu en [2,6], [4,6] y [3,7] y al
+# Tasajero en [3,5] (Sistema.md 11.9, metrica 14).
 # (7) Registro de una ronda de C: orden de los eventos, Tasajero con caza, fin_turno
 # con la posicion, sin float. La tirada queda justo antes de la accion que siguio.
 # Reescrito por Sistema.md 11.2.3 v1.3: un solo turno del Tasajero por ronda (en
 # Caza), y 11.9: desde [3,1] alcanza al Maestro en la ronda 1 (antes pegaba en la Cuenta).
 # Reescrito en T39 por Sistema.md 11.8 paso 6b: desde [3,5], con una sola presa
 # (el Maestro), le da los dos ataques de Caza: dos pares accion/ataque.
+# Reescrito en T18 por Sistema.md 10.4 v1.6 y 11.3 paso 4: la Ocarra y el
+# Zancajunco de la tribu son rivales vecinas en C, asi que cada una tira su
+# incidente al empezar el turno (5 % con la balanza 2). Con la semilla de C
+# ninguna sale: queda la `tirada` sin evento `incidente`. La hecha a mano es la 2.
+# Reescrito en T19 por Sistema.md 10.6 y 11.3 paso 3 v1.6: la Rodauva de la tribu
+# (trabajo) tiene al Tasajero (rival) a su alcance y tira su cobardia (15 %: leal con
+# la balanza 2 y el Maestro vecino, tabla de 10.6): `tirada` y `chequeo_rival` detras de su `turno`. La Ocarra,
+# leal con la balanza 2, tiene 0 % de Encono y no tira (10.5).
 func test_registro_de_una_ronda_de_c() -> void:
 	var combate: Combate = _jugar_ronda_c()
 	assert_str(combate.turno_actual().unidad_id).is_equal("zancajunco_1")
 	assert_array(_tipos(combate)).is_equal([
 		"inicio", "ronda",
-		"turno", "accion", "fin_turno",
-		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
 		"turno", "tirada", "accion", "fin_turno",
-		"turno", "accion", "fin_turno",
-		"turno", "accion", "fin_turno",
+		"turno", "accion", "movimiento", "accion", "ataque", "accion", "ataque", "accion", "fin_turno",
+		"turno", "tirada", "tirada", "accion", "fin_turno",
+		"turno", "tirada", "chequeo_rival", "accion", "fin_turno",
+		"turno", "accion", "fin_turno", "distancia_maestro", "encierro",
 		"fin_ronda", "ronda", "turno",
 	])
 	var turnos: Array[Dictionary] = _de_tipo(combate, "turno")
@@ -310,8 +332,19 @@ func test_registro_de_una_ronda_de_c() -> void:
 	var movimiento: Dictionary = _de_tipo(combate, "movimiento")[0]
 	assert_array(movimiento["desde"]).is_equal([3, 1])
 
-	var tirada: Dictionary = _de_tipo(combate, "tirada")[0]
-	assert_int(tirada["indice"] as int).is_equal(0)
+	var tiradas: Array[Dictionary] = _de_tipo(combate, "tirada")
+	assert_int(tiradas.size()).is_equal(4)
+	assert_array(_de_tipo(combate, "incidente")).is_empty()
+	var chequeo: Dictionary = _de_tipo(combate, "chequeo_rival")[0]
+	assert_dict(chequeo).contains_key_value("unidad", "rodauva_1").contains_key_value("tipo_chequeo", "cobardia") \
+			.contains_key_value("porcentaje", 15).contains_key_value("tiro", true)
+	assert_array(chequeo["rivales"]).is_equal(["tasajero_s1"])
+	assert_int(lineas[(tiradas[3]["n"] as int) + 1]["n"] as int).is_equal(chequeo["n"] as int)
+	for incidente in tiradas.slice(0, 2):
+		assert_dict(incidente["parametros"]).is_equal({"minimo": 1, "maximo": 100})
+		assert_int(incidente["resultado"] as int).is_greater(5)
+	var tirada: Dictionary = tiradas[2]
+	assert_int(tirada["indice"] as int).is_equal(2)
 	assert_str(tirada["metodo"]).is_equal("entero")
 	assert_dict(tirada["parametros"]).is_equal({"minimo": 1, "maximo": 100})
 	var siguiente: Dictionary = lineas[(tirada["n"] as int) + 1]
@@ -339,7 +372,7 @@ func test_registro_determinista() -> void:
 		assert_str(segundo[i]).is_equal(primero[i])
 
 
-# (9) Con datos/ real: los 11 escenarios arman su combate y llegan al primer
+# (9) Con datos/ real: los 10 escenarios arman su combate y llegan al primer
 # turno del jugador sin errores. Una unidad del tablero con posicion null se
 # rechaza; una guardada con null, no (P-023).
 func test_once_escenarios_reales_llegan_al_jugador() -> void:
@@ -357,7 +390,8 @@ func test_once_escenarios_reales_llegan_al_jugador() -> void:
 		var combate: Combate = Combate.empezar(contexto)
 		assert_str(combate.error()).override_failure_message(ruta).is_empty()
 		assert_bool(combate.esperando_jugador()).override_failure_message(ruta).is_true()
-	assert_int(cantidad).is_equal(11)
+	# A.9, T31: 10 desde que se borro d_rivales_balanza4.json.
+	assert_int(cantidad).is_equal(10)
 
 	var sin_posicion: Dictionary = (datos["escenarios/a_dia_1.json"] as Dictionary).duplicate(true)
 	(sin_posicion["maestro"] as Dictionary)["posicion"] = null

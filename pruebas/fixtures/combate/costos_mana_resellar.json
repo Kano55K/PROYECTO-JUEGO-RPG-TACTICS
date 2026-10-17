@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../datos/_esquemas/costos_mana.schema.json",
+  "_nota": "Arquitectura.md B.4 (T30, criterio 11): la fila resellar inventada y distinta de la de invocar, para comprobar que el costo sale de su fila propia (Sistema.md 2.3 y 4.4) y que la balanza 5 (descuento 2) baja del minimo en el rango 1. El resto, como la copia de 2.3",
+  "sellar": [3, 5, 7],
+  "invocar": [2, 3, 4],
+  "resellar": [2, 4, 5],
+  "guardar_caida": [2, 3, 4],
+  "costo_minimo": 1
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "cadena",
+  "_nota": "Sistema.md 10.2, 10.7, 1.3 y 11.4 (tests de T16 con turnos sueltos). Como escenario_afinidad: todas estacionadas en las filas 0 y 7 y en las columnas 0 y 7, sin vecinas entre si; cada test lleva a la que pega a una casilla vecina de la objetivo. Balanza 2 (umbral 7, 3 pasos de Arrimo): rodauva_1 y ocarra_1 con lealtad 8 y hambre 3 son leales; las demas de la tribu, con lealtad 5, neutrales. Hambre 3 (Normal): sin Saciado. tasajero_s1 (30 de vida) aguanta las cadenas largas",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [0, 7] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 7] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 7] },
+    { "id": "rodauva_3", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 7] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 0] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [2, 0] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 0] }
+  ],
+  "enemigas": [
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [6, 0] },
+    { "id": "rodauva_s2", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [7, 2] },
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [7, 4] },
+    { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje", "vida": null, "posicion": [0, 4] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

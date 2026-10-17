@@ -1,31 +1,32 @@
 {
   "$schema": "../_esquemas/escenario.schema.json",
   "id": "c_tasajero",
-  "_nota": "Prueba C (Sistema.md 11.6 y 11.9). Meta: 2 o 3 rondas. ¿Llevo a la Rodauva? Para comparar, cambiar rodauva_1 a 'guardada' en el panel (sacarla cuesta el turno del Maestro y 2 de maná). Ocarra y Zancajunco son rivales aliadas: incidente 5% con Arrimo 3. Misma semilla y posiciones que H.",
+  "_nota": "Prueba C (Sistema.md 11.6 y 11.9). Meta: 2 o 3 rondas de pelea. ¿Llevo a la Rodauva? Para comparar, cambiar rodauva_1 a 'guardada' en el panel (sacarla cuesta el turno del Maestro y 2 de maná). Ocarra y Zancajunco son rivales aliadas: incidente 5% con Arrimo 3. Tablero de 12 × 12 (Sistema.md 11.9 v1.6, T43): con la tribu quieta, el Tasajero se acerca en la ronda 1 y caza en la 2; la ronda 1 es del jugador para sacar a la Rodauva de la zona de Caza, erizarla o esconder al Zancajunco. Misma semilla y posiciones que H.",
   "tipo": "test",
   "semilla": 33001,
-  "tablero": { "ancho": 8, "alto": 8 },
+  "tablero": { "ancho": 12, "alto": 12 },
   "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1,
                "vida": null, "mana_entrada": null, "hambre": 3,
-               "enfermedades": 0, "posicion": [3, 6] },
+               "enfermedades": 0, "posicion": [5, 10],
+               "_nota": "El más cercano al Tasajero (8): en la ronda 1 se acerca hacia él, hasta [5,6]" },
   "tribu": [
     { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [2, 6],
-      "_nota": "Rival del Tasajero: chequea cobardía (25%, 15% con el Maestro al lado). Actúa después del Tasajero en Caza: sola en su zona de Caza recibe 5 + 5 y cae; erizada, 2 + 2 (Sistema.md 11.2.3)" },
+      "vida": null, "posicion": [4, 10],
+      "_nota": "Rival del Tasajero: chequea cobardía (25%, 15% con el Maestro al lado). Si se queda, en la ronda 2 está en la zona de Caza: sola recibe 50 + 50 y cae; erizada, 25 + 25 (Sistema.md 11.2.3; escala ×10 de 11.1 v1.7)" },
     { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [3, 7],
-      "_nota": "Detrás del Maestro, alcance 2 por encima de él. Rival del Tasajero: Encono" },
+      "vida": null, "posicion": [4, 11],
+      "_nota": "Segunda fila, alcance 2 por encima de la Rodauva. Rival del Tasajero: Encono. A 2 casillas del Zancajunco: no empiezan vecinas (Sistema.md 11.3 v1.6, la diagonal cuenta)" },
     { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta",
       "lealtad": 8, "hambre": 3, "enfermedades": 0,
-      "vida": null, "posicion": [4, 6],
-      "_nota": "Diagonal a la Ocarra: no son adyacentes al empezar" }
+      "vida": null, "posicion": [6, 10],
+      "_nota": "Al lado del Maestro. No es vecina de la Ocarra al empezar" }
   ],
   "enemigas": [
     { "id": "tasajero_s1", "especie": "tasajero", "comportamiento": "salvaje",
-      "vida": null, "posicion": [3, 1],
-      "_nota": "Un solo turno por ronda, en Caza (Vel 8) hasta que su vida baja a 50% o menos; después en Cuenta (Vel 3), sin vuelta (Sistema.md 11.2.3). En [3,1] desde el 05/10/2026: desde [3,0] no alcanzaba a nadie en la ronda 1 (11.9)" }
+      "vida": null, "posicion": [5, 2],
+      "_nota": "Un solo turno por ronda, en Caza (Vel 8) hasta que su vida baja a 50% o menos; después en Cuenta (Vel 3), sin vuelta (Sistema.md 11.2.3). En la fila del frente de su zona, a 8 de la tribu (Sistema.md 11.9 v1.6): no pega en la ronda 1 y caza en la 2" }
   ],
   "pergaminos_en_blanco": 1,
   "golpe_inicial": null,

@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "destino_combate",
+  "_nota": "Arquitectura.md B.4 (T30, sesión 2): destino de la atacante. Sistema.md 9.3, 4.4, 5.2, P-002 y S-65. Los tests ponen a ocarra_1 en 0 en memoria: queda caída, victoria con 0 rondas y su destino pendiente. Balanza 2 (umbral de rescate 7, sin descuento, ajuste 0). rodauva_1 (8) leal; rodauva_2 (6) neutral, que con el +1 de la victoria llegaría a 7 (el perdón se mide antes, S-65); zancajunco_1 (10) para el recorte único; surcon_1 (5) afín de la Ocarra (10.8: Surcón-Ocarra bien); rodauva_g guardada (no cambia). Ocarra rango 1: resellar cuesta 2 y tira con 80 (primer tramo). Semilla 1: la primera tirada es 54 (sale); con 26, 90 (falla)",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 7] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 6, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [1, 7] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 10, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [7, 7] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 7] },
+    { "id": "rodauva_g", "especie": "rodauva", "estado": "guardada", "lealtad": 6, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "ocarra_1", "especie": "ocarra", "comportamiento": "atacante_nocturna", "hambre": 9, "vida": null, "posicion": [3, 4] }
+  ],
+  "pergaminos_en_blanco": 1,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

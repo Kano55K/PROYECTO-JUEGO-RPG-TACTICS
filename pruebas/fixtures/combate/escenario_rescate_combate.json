@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "rescate_combate",
+  "_nota": "Sistema.md 6 y 11.5 (T29): el rescate dentro del Combate. Cola: zancajunco_1 (8, del jugador: hay un turno para consultar), ocarra_s1 (7), rodauva_1 (6), Maestro (5). La Ocarra [3,4] remata al Maestro [3,6] (vida 4) a distancia 2 en linea, como contrato_derrota. zancajunco_1 leal (7, umbral 7 de la balanza 2) rescata; rodauva_1 Neutral (5) no. Las dos de la tribu estan a 7 de la Ocarra (Movimiento + Alcance 5): sin chequeo de rival",
+  "tipo": "test",
+  "semilla": 42,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": 4, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [3, 6] },
+  "tribu": [
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 7, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [7, 7] },
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [6, 7] }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [3, 4] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

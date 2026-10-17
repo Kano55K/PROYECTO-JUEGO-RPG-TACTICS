@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../datos/_esquemas/especie.schema.json",
+  "_nota": "Arquitectura.md B.3 (T19, test 5): una especie inventada de rol combate, con otros ids (especie y rasgo), para mostrar que la rama del chequeo sale del rol y no del id; el test arma una copia con rol trabajo. Numeros de la Ocarra de la fixture (Sistema.md 11.2). Su rival enemiga es el Tasajero (relaciones_rival_prueba.json)",
+  "id": "especie_prueba",
+  "rol": "combate",
+  "rango": 1,
+  "sellable": true,
+  "vida": 12,
+  "danio": 4,
+  "movimiento": 3,
+  "alcance": 2,
+  "velocidad": 7,
+  "rasgo": {
+    "id": "rasgo_prueba",
+    "efecto": "alabarda"
+  },
+  "huida_pct": 0
+}

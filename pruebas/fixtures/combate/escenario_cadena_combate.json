@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "cadena_combate",
+  "_nota": "Sistema.md 10.2 y 10.7 (tests de T16 con el Combate). Cola de la ronda 1: zancajunco_1 (8), ocarra_1 (7), rodauva_s1 (6), Maestro (5), surcon_1 (2, la tribu antes en el empate) y surcon_s1 (2). Las cuatro de la tribu le llegan a surcon_s1 [4,4]: ocarra_1 [4,6] por encima de zancajunco_1 [4,5]. rodauva_s1 [0,0] queda encerrada por dos caidas de la tribu (vida 0 al empezar) que no deja atravesar ni puede atacar: con la vida llena, solo termina. Balanza 2 (3 pasos de Arrimo); zancajunco_1 y ocarra_1 son rivales (sin relacion), igual que el Maestro y surcon_1 (lealtad 5, neutral). Cada test puede cambiar el escenario antes de armarlo",
+  "tipo": "test",
+  "semilla": 16,
+  "tablero": { "ancho": 8, "alto": 8 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 4] },
+  "tribu": [
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 5] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 8, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [4, 6] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [3, 4] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 0, "posicion": [1, 0] },
+    { "id": "rodauva_3", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": 0, "posicion": [0, 1] }
+  ],
+  "enemigas": [
+    { "id": "surcon_s1", "especie": "surcon", "comportamiento": "salvaje", "vida": null, "posicion": [4, 4] },
+    { "id": "rodauva_s1", "especie": "rodauva", "comportamiento": "salvaje", "vida": null, "posicion": [0, 0] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

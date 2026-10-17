@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../datos/_esquemas/escenario.schema.json",
+  "id": "rescate",
+  "_nota": "Sistema.md 6, 5.2 y 11.5 (T29): eleccion de la rescatista y cierre con rescate. Balanza 2 (umbral 7, Sistema.md 1.2). Todas en los bordes, lejos del Maestro [5,5]: cada test acomoda lealtad, hambre, posicion, estado y balanza en memoria. Relaciones (10.8): Rodauva-Rodauva y Rodauva-Surcon bien; Ocarra sin relacion con Rodauva. zancajunco_1 guardada con lealtad 9",
+  "tipo": "test",
+  "semilla": 1,
+  "tablero": { "ancho": 12, "alto": 12 },
+  "maestro": { "balanza": 2, "poder": 1, "regeneracion": 1, "vida": null, "mana_entrada": null, "hambre": 3, "enfermedades": 0, "posicion": [5, 5] },
+  "tribu": [
+    { "id": "rodauva_1", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 0] },
+    { "id": "rodauva_2", "especie": "rodauva", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [11, 0] },
+    { "id": "surcon_1", "especie": "surcon", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [0, 11] },
+    { "id": "ocarra_1", "especie": "ocarra", "estado": "suelta", "lealtad": 5, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": [11, 11] },
+    { "id": "zancajunco_1", "especie": "zancajunco", "estado": "guardada", "lealtad": 9, "hambre": 3, "enfermedades": 0, "vida": null, "posicion": null }
+  ],
+  "enemigas": [
+    { "id": "ocarra_s1", "especie": "ocarra", "comportamiento": "salvaje", "vida": null, "posicion": [0, 5] }
+  ],
+  "pergaminos_en_blanco": 0,
+  "golpe_inicial": null,
+  "toggles": { "afines_contra_cobardia": false }
+}

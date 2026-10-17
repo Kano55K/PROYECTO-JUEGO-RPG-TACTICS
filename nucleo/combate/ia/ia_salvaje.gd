@@ -4,11 +4,20 @@
 # por funcion; el primero que decide, gana. El Tasajero la recorre en su unico
 # turno de la ronda (Sistema.md 11.2.3), con el modo y el tablero de ese momento.
 # Los rasgos se reconocen por su efecto o por los numeros del modo, nunca por id.
+# D-005 (T20): la IA nunca recalcula una restriccion del turno (la obligacion de
+# la enconada, la acobardada, la accion perdida). Lee el estado del Turno
+# (enconada) y toma sus casillas y objetivos de sus consultas: pasos_para_mover,
+# casillas_para_mover, previsualizar_ataque, puede_terminar, casillas_para_cavar
+# y casillas_para_retirarse.
 class_name IASalvaje
 extends RefCounted
 
-# Criterios de desempate para elegir objetivo (11.8 y S-19, P-020).
-enum Criterio { MENOS_VIDA, MAS_CERCANA, ANTES_EN_COLA }
+# Criterios de desempate para elegir objetivo (11.8 y S-19, P-020; PUEDE_TUMBAR, 10.5).
+enum Criterio { PUEDE_TUMBAR, MENOS_VIDA, MAS_CERCANA, ANTES_EN_COLA }
+# Sistema.md 10.5, salvaje enconada con varias rivales: puede tumbar -> menos
+# vida -> mas cercana -> antes en la cola.
+const _DESEMPATE_ENCONO: Array[Criterio] = [Criterio.PUEDE_TUMBAR, Criterio.MENOS_VIDA, Criterio.MAS_CERCANA,
+		Criterio.ANTES_EN_COLA]
 # Remate: menos vida -> mas cercana -> antes en la cola (tabla de 11.8).
 const _DESEMPATE_REMATE: Array[Criterio] = [Criterio.MENOS_VIDA, Criterio.MAS_CERCANA, Criterio.ANTES_EN_COLA]
 # Cercana y acercarse: mas cercana -> menos vida -> antes en la cola (paso 6, S-19, P-020).
@@ -27,9 +36,9 @@ const _EFECTO_ERIZARSE: String = "erizarse"
 # cola: la de la ronda en curso, para "la que actua antes en la cola" (P-021).
 static func decidir(turno: Turno, plantel: Plantel, cola: ColaIniciativa) -> DecisionIA:
 	var orden: Dictionary = _orden(cola, plantel)
-	var decision: DecisionIA = _paso_huida(turno, plantel)
-	if decision == null:
-		decision = _paso_encono(turno, plantel)
+	# Paso 1: la huida ya la tiro el inicio del turno (T25, Huida). Una salvaje que
+	# huyo no llega aca: su turno termino.
+	var decision: DecisionIA = _paso_encono(turno, plantel, orden)
 	if decision == null:
 		decision = _paso_erizarse(turno, plantel)
 	if decision == null:
@@ -52,16 +61,90 @@ static func decidir(turno: Turno, plantel: Plantel, cola: ColaIniciativa) -> Dec
 	return decision
 
 
-# Paso 1, lugar vacio: la huida con vida <= 25% es de T25 (11.7).
-static func _paso_huida(_turno: Turno, _plantel: Plantel) -> DecisionIA:
-	return null
+# Paso 3 (Sistema.md 10.5 y 11.8, T20): la enconada va por su rival y no corren
+# los pasos 4 a 8. Las opciones ya vienen del Turno: en el primer ataque solo
+# acepta a las rivales del chequeo, y solo casillas desde donde golpea a alguna
+# (S-35). Elige la rival con los desempates de 10.5 y la ataca desde la casilla
+# de la tabla de 11.8 (si puede tumbarla, entre las que la tumban, como el
+# remate); en Cuenta, la de menos pasos y la retirada. Si no tiene opciones (no
+# la alcanza), se acerca (S-43). En Caza, S-42.
+# La acobardada y la distraida no pasan por aca: los pasos 4 a 8 ya toman sus
+# casillas y objetivos del Turno.
+static func _paso_encono(turno: Turno, plantel: Plantel, orden: Dictionary) -> DecisionIA:
+	if not turno.enconada:
+		return null
+	var opciones: Array[OpcionAtaque] = _opciones(turno, plantel)
+	if opciones.is_empty():
+		return _encono_acercarse(turno, plantel)
+	var rival_id: String = _elegir_objetivo(_candidatas(opciones), _DESEMPATE_ENCONO, orden)
+	var de_la_rival: Array[OpcionAtaque] = []
+	var la_tumban: Array[OpcionAtaque] = []
+	for opcion in opciones:
+		if opcion.objetivo_id == rival_id:
+			de_la_rival.append(opcion)
+			if opcion.puede_tumbar():
+				la_tumban.append(opcion)
+	if _en_caza(turno, plantel):
+		return _encono_caza(turno, plantel, de_la_rival, orden)
+	return _atacar(DecisionIA.Paso.ENCONO, turno, plantel, la_tumban if not la_tumban.is_empty() else de_la_rival,
+			rival_id, orden)
 
 
-# Paso 3, lugar vacio: la enconada va por su rival (10.5), T19/T20. En Caza,
-# solo el primero de sus dos ataques va a la rival; el segundo sigue el 6b. La
-# regla de la acobardada (no terminar mas cerca de su rival) tambien es de T19/T20.
-static func _paso_encono(_turno: Turno, _plantel: Plantel) -> DecisionIA:
-	return null
+# Lectura declarada S-43: la enconada que no alcanza a su rival va a una casilla
+# que el Turno le permite (las de menor distancia a la rival mas cercana, S-35)
+# -> orden de lectura, como Acercarse. Si el Turno la deja terminar sin moverse
+# (ninguna casilla la acerca), no se mueve.
+static func _encono_acercarse(turno: Turno, plantel: Plantel) -> DecisionIA:
+	var decision: DecisionIA = DecisionIA.new(DecisionIA.Paso.ENCONO)
+	decision.casilla = plantel.criatura(turno.unidad_id).posicion
+	if not turno.puede_terminar():
+		var casillas: Array[Vector2i] = turno.casillas_para_mover()
+		if not casillas.is_empty():
+			var mejor: Vector2i = casillas[0]
+			for casilla in casillas:
+				if _menor([casilla.y, casilla.x], [mejor.y, mejor.x]):
+					mejor = casilla
+			decision.casilla = mejor
+			decision.acciones.append(Accion.mover(mejor))
+	decision.acciones.append(Accion.terminar())
+	return decision
+
+
+# Sistema.md 10.5 (Tasajero enconado en Caza) y lectura declarada S-42: la rival
+# ya esta elegida; la casilla, entre las que la golpean, con la clave del 6b. El
+# primer ataque va a la rival; el segundo, a la otra presa de esa casilla de menos
+# vida -> antes en la cola (P-026), que el Turno acepta despues del primero
+# (previsualizar_ataque con tras_primer_ataque); sin otra presa, a la rival, y si
+# el primero la tumba, se pierde. El segundo golpe a la rival tambien sale de
+# previsualizar_ataque con tras_primer_ataque: lleva el punto de Encono del
+# primero (T20, sesion 2), y "tumba" de la clave suma los dos.
+static func _encono_caza(turno: Turno, plantel: Plantel, de_la_rival: Array[OpcionAtaque],
+		orden: Dictionary) -> DecisionIA:
+	var mejor_golpes: Array[OpcionAtaque] = []
+	var mejor_clave: Array = []
+	for primero in de_la_rival:
+		var otras: Array[OpcionAtaque] = []
+		for id_objetivo in _ids(plantel):
+			if id_objetivo == primero.objetivo_id:
+				continue
+			var otra: OpcionAtaque = _opcion(turno, plantel, primero.casilla, primero.pasos, id_objetivo, true)
+			if otra != null:
+				otras.append(otra)
+		var presas: Array[OpcionAtaque] = [primero]
+		var golpes: Array[OpcionAtaque] = [primero]
+		if not otras.is_empty():
+			var segunda: OpcionAtaque = _presas_elegidas(otras, orden)[0]
+			presas.append(segunda)
+			golpes.append(segunda)
+		elif not primero.puede_tumbar():
+			var otra_vez: OpcionAtaque = _opcion(turno, plantel, primero.casilla, primero.pasos, primero.objetivo_id, true)
+			if otra_vez != null:
+				golpes.append(otra_vez)
+		var clave: Array = _clave_caza(presas, golpes, primero.casilla)
+		if mejor_clave.is_empty() or _menor(clave, mejor_clave):
+			mejor_clave = clave
+			mejor_golpes = golpes
+	return _decision_caza(DecisionIA.Paso.ENCONO, plantel.criatura(turno.unidad_id).posicion, mejor_golpes)
 
 
 # Paso 4: con el rasgo (por efecto, no por id), vida <= umbral de la ficha y una
@@ -136,28 +219,44 @@ static func _paso_caza(turno: Turno, plantel: Plantel, opciones: Array[OpcionAta
 	for casilla: Vector2i in por_casilla.keys():
 		var presas: Array[OpcionAtaque] = _presas_elegidas(por_casilla[casilla], orden)
 		var golpes: Array[OpcionAtaque] = presas.duplicate()
-		var tumba: bool = false
-		var vida_sumada: int = 0
-		for presa in presas:
-			tumba = tumba or presa.puede_tumbar()
-			vida_sumada += presa.vida_objetivo
-		if presas.size() == 1:
-			# Los dos golpes a la misma presa dan lo mismo: entre uno y otro no
-			# cambia nada de lo que entra en el danio, solo la vida.
-			tumba = presas[0].danio * 2 >= presas[0].vida_objetivo
-			if not presas[0].puede_tumbar():
-				golpes.append(presas[0])
-		var clave: Array = [-presas.size(), -int(tumba), vida_sumada, presas[0].pasos, casilla.y, casilla.x]
+		# Los dos golpes a la misma presa dan lo mismo: entre uno y otro no
+		# cambia nada de lo que entra en el danio, solo la vida.
+		if presas.size() == 1 and not presas[0].puede_tumbar():
+			golpes.append(presas[0])
+		var clave: Array = _clave_caza(presas, golpes, casilla)
 		if mejor_clave.is_empty() or _menor(clave, mejor_clave):
 			mejor_clave = clave
 			mejor_golpes = golpes
 	if mejor_golpes.is_empty():
 		return null
-	var decision: DecisionIA = DecisionIA.new(DecisionIA.Paso.CAZA)
-	decision.casilla = mejor_golpes[0].casilla
-	if decision.casilla != plantel.criatura(turno.unidad_id).posicion:
+	return _decision_caza(DecisionIA.Paso.CAZA, plantel.criatura(turno.unidad_id).posicion, mejor_golpes)
+
+
+# Tabla de 11.8, Casilla del Tasajero en Caza (paso 6b): junto a 2 presas > 1 ->
+# la que tumba a alguien -> menos vida sumada -> menos pasos -> orden de lectura.
+# Con una sola presa, "tumba" suma el danio de sus golpes (golpes: los planeados,
+# en orden). La comparten el 6b y la Caza enconada (S-42).
+static func _clave_caza(presas: Array[OpcionAtaque], golpes: Array[OpcionAtaque], casilla: Vector2i) -> Array:
+	var tumba: bool = false
+	var vida_sumada: int = 0
+	for presa in presas:
+		tumba = tumba or presa.puede_tumbar()
+		vida_sumada += presa.vida_objetivo
+	if presas.size() == 1:
+		var suma: int = 0
+		for golpe in golpes:
+			suma += golpe.danio
+		tumba = suma >= presas[0].vida_objetivo
+	return [-presas.size(), -int(tumba), vida_sumada, presas[0].pasos, casilla.y, casilla.x]
+
+
+# Moverse a la casilla de los golpes (si no es la suya), los golpes en orden y terminar.
+static func _decision_caza(paso: DecisionIA.Paso, origen: Vector2i, golpes: Array[OpcionAtaque]) -> DecisionIA:
+	var decision: DecisionIA = DecisionIA.new(paso)
+	decision.casilla = golpes[0].casilla
+	if decision.casilla != origen:
 		decision.acciones.append(Accion.mover(decision.casilla))
-	for golpe in mejor_golpes:
+	for golpe in golpes:
 		decision.sumar_ataque(golpe.objetivo_id, golpe.danio)
 	decision.acciones.append(Accion.terminar())
 	return decision
@@ -241,20 +340,34 @@ static func _paso_acercarse(turno: Turno, plantel: Plantel, orden: Dictionary) -
 # consulta unica rechaza (Objetivos): nadie apunta a una caida (11.8) ni a una
 # oculta (11.2.2).
 static func _opciones(turno: Turno, plantel: Plantel) -> Array[OpcionAtaque]:
-	var origen: Vector2i = plantel.criatura(turno.unidad_id).posicion
-	var ids: Array[String] = [Maestro.ID]
-	for criatura in plantel.criaturas():
-		ids.append(criatura.id)
 	var opciones: Array[OpcionAtaque] = []
 	var pasos: Dictionary = turno.pasos_para_mover()
 	for casilla: Vector2i in pasos.keys():
-		for id_objetivo in ids:
-			var resultado: ResultadoAccion = turno.previsualizar_ataque(casilla, id_objetivo)
-			if resultado.valida:
-				var posicion: Vector2i = _posicion(id_objetivo, plantel)
-				opciones.append(OpcionAtaque.new(casilla, pasos[casilla], id_objetivo, resultado.danio,
-						_vida(id_objetivo, plantel), Tablero.distancia(origen, posicion), Tablero.distancia(casilla, posicion)))
+		for id_objetivo in _ids(plantel):
+			var opcion: OpcionAtaque = _opcion(turno, plantel, casilla, pasos[casilla], id_objetivo, false)
+			if opcion != null:
+				opciones.append(opcion)
 	return opciones
+
+
+# El ataque desde `casilla` a `id_objetivo` si el Turno lo acepta (previsualizar_ataque;
+# tras_primer_ataque, el segundo de Caza), o null.
+static func _opcion(turno: Turno, plantel: Plantel, casilla: Vector2i, pasos: int, id_objetivo: String,
+		tras_primer_ataque: bool) -> OpcionAtaque:
+	var resultado: ResultadoAccion = turno.previsualizar_ataque(casilla, id_objetivo, tras_primer_ataque)
+	if not resultado.valida:
+		return null
+	var posicion: Vector2i = _posicion(id_objetivo, plantel)
+	return OpcionAtaque.new(casilla, pasos, id_objetivo, resultado.danio, _vida(id_objetivo, plantel),
+			Tablero.distancia(plantel.criatura(turno.unidad_id).posicion, posicion), Tablero.distancia(casilla, posicion))
+
+
+# Todas las unidades, en el orden del Plantel: el Maestro y despues las criaturas.
+static func _ids(plantel: Plantel) -> Array[String]:
+	var ids: Array[String] = [Maestro.ID]
+	for criatura in plantel.criaturas():
+		ids.append(criatura.id)
+	return ids
 
 
 # Las acciones de un ataque a `objetivo_id`, desde la mejor casilla entre las
@@ -295,7 +408,8 @@ static func _casilla_de_menos_pasos(opciones: Array[OpcionAtaque]) -> OpcionAtaq
 # `elegida`, con los pasos que le quedan, a la casilla alcanzable mas lejana
 # (Manhattan) de la enemiga de pie mas cercana -> orden de lectura. La objetivo
 # no cuenta si el golpe la tumba, ni una oculta (11.2.2). Si ninguna casilla lo
-# aleja, no se mueve: SIN_POSICION.
+# aleja, no se mueve: SIN_POSICION. Las casillas son las que el Turno permite
+# despues del golpe (casillas_para_retirarse, D-005: el Encono y la cobardia).
 static func _retirada(turno: Turno, plantel: Plantel, elegida: OpcionAtaque, orden: Dictionary) -> Vector2i:
 	var desde: Vector2i = elegida.casilla
 	var sin: String = elegida.objetivo_id if elegida.puede_tumbar() else ""
@@ -304,7 +418,7 @@ static func _retirada(turno: Turno, plantel: Plantel, elegida: OpcionAtaque, ord
 		return Criatura.SIN_POSICION
 	var hasta: Vector2i = _posicion(cercana_id, plantel)
 	var mejor: Vector2i = desde
-	for casilla: Vector2i in turno.pasos_para_retirarse(desde).keys():
+	for casilla: Vector2i in turno.casillas_para_retirarse(desde, elegida.objetivo_id).keys():
 		if _menor([-Tablero.distancia(casilla, hasta), casilla.y, casilla.x],
 				[-Tablero.distancia(mejor, hasta), mejor.y, mejor.x]):
 			mejor = casilla
@@ -345,19 +459,23 @@ static func _clave_casilla(opcion: OpcionAtaque) -> Array:
 	return [-opcion.distancia_golpe, opcion.pasos, opcion.casilla.y, opcion.casilla.x]
 
 
-# Una candidata por objetivo: los datos de la objetivo son los mismos en todas sus opciones.
+# Una candidata por objetivo: los datos de la objetivo son los mismos en todas sus
+# opciones. tumba: si alguna de sus opciones la tumba (turno completo, S-8).
 static func _candidatas(opciones: Array[OpcionAtaque]) -> Array[Dictionary]:
-	var vistas: Dictionary = {}
+	var por_id: Dictionary = {}
 	var candidatas: Array[Dictionary] = []
 	for opcion in opciones:
-		if not vistas.has(opcion.objetivo_id):
-			vistas[opcion.objetivo_id] = true
-			candidatas.append(_candidata(opcion.objetivo_id, opcion.vida_objetivo, opcion.distancia_objetivo))
+		if not por_id.has(opcion.objetivo_id):
+			var candidata: Dictionary = _candidata(opcion.objetivo_id, opcion.vida_objetivo, opcion.distancia_objetivo)
+			por_id[opcion.objetivo_id] = candidata
+			candidatas.append(candidata)
+		if opcion.puede_tumbar():
+			(por_id[opcion.objetivo_id] as Dictionary)["tumba"] = true
 	return candidatas
 
 
 static func _candidata(id_objetivo: String, vida: int, distancia: int) -> Dictionary:
-	return {"id": id_objetivo, "vida": vida, "distancia": distancia}
+	return {"id": id_objetivo, "vida": vida, "distancia": distancia, "tumba": false}
 
 
 # La primera segun los criterios, en orden. El orden de la cola es total (ver
@@ -374,6 +492,8 @@ static func _clave_objetivo(candidata: Dictionary, criterios: Array[Criterio], o
 	var clave: Array = []
 	for criterio in criterios:
 		match criterio:
+			Criterio.PUEDE_TUMBAR:
+				clave.append(-int(candidata["tumba"]))
 			Criterio.MENOS_VIDA:
 				clave.append(candidata["vida"])
 			Criterio.MAS_CERCANA:

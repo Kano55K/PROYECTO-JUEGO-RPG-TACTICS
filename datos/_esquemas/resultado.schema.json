@@ -18,6 +18,7 @@
     "lealtad_cambios",
     "pergaminos",
     "atacante_pendiente",
+    "destino_atacante",
     "metricas"
   ],
   "additionalProperties": false,
@@ -50,7 +51,7 @@
       "type": "boolean"
     },
     "rescatista": {
-      "description": "id de la rescatista. T12: null. Lo llena T29",
+      "description": "id de la rescatista si cayó el Maestro y alguien lo rescató (Sistema.md 6, T29); si no, null",
       "type": [
         "string",
         "null"
@@ -58,11 +59,8 @@
       "pattern": "^[a-z0-9_]+$"
     },
     "permadeath": {
-      "description": "T12: null. Lo llena T29",
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "description": "Verdadero solo si cayó el Maestro sin rescatista (Sistema.md 6, T29)",
+      "type": "boolean"
     },
     "maestro": {
       "type": "object",
@@ -82,11 +80,9 @@
           "$ref": "comunes.schema.json#/$defs/posicion"
         },
         "mana": {
-          "description": "T12: null. Lo llena T21",
-          "type": [
-            "integer",
-            "null"
-          ]
+          "description": "Sistema.md 2.1 (T21): el mana del Maestro al terminar el combate",
+          "type": "integer",
+          "minimum": 0
         },
         "hambre": {
           "type": "integer"
@@ -108,6 +104,7 @@
           "estado",
           "vida",
           "lealtad",
+          "hambre",
           "posicion"
         ],
         "additionalProperties": false,
@@ -144,6 +141,13 @@
               "null"
             ]
           },
+          "hambre": {
+            "description": "Final, con el hambre de combate (Sistema.md 7.2, T14). null en las enemigas",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "posicion": {
             "description": "null si no está en el tablero",
             "$ref": "comunes.schema.json#/$defs/posicion"
@@ -169,32 +173,30 @@
       }
     },
     "capturas": {
-      "description": "T12: lista vacía. La llenan T24 (sellar) y T30 (resellar)",
+      "description": "Sistema.md 4.1 y 4.2 (T24): las salvajes selladas en este combate, en el orden de sus pergaminos, con la lealtad inicial del camino de combate (con el ajuste de la balanza). Salen guardadas: no reciben el +1 de victoria (5.2). T30 suma el resellado",
       "type": "array",
       "items": {
         "type": "object",
         "required": [
-          "id",
+          "unidad",
           "especie",
-          "camino",
+          "pergamino",
           "lealtad"
         ],
         "additionalProperties": false,
         "properties": {
-          "id": {
+          "unidad": {
             "$ref": "comunes.schema.json#/$defs/id"
           },
           "especie": {
             "$ref": "comunes.schema.json#/$defs/id"
           },
-          "camino": {
-            "enum": [
-              "combate",
-              "resellado"
-            ]
+          "pergamino": {
+            "$ref": "comunes.schema.json#/$defs/id"
           },
           "lealtad": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "_nota": {
             "$ref": "comunes.schema.json#/$defs/nota"
@@ -203,7 +205,7 @@
       }
     },
     "lealtad_cambios": {
-      "description": "Lo que devuelve el acumulador de lealtad: por criatura, antes, cambio recortado una vez y después, con cada anotación y su motivo",
+      "description": "Lo que devuelve el acumulador de lealtad: por criatura, antes, cambio recortado una vez y después, con cada anotación y su motivo. T30 (Sistema.md 5.2, S-65): con el destino de la atacante pendiente, vacío; con el destino resuelto, los de toda la noche (cierre y destino), recortados una sola vez",
       "type": "array",
       "items": {
         "type": "object",
@@ -289,78 +291,301 @@
       }
     },
     "atacante_pendiente": {
-      "description": "id de la atacante nocturna caída al terminar, que espera la decisión del Maestro (perdonar, sellar, comer: T30); null si no hay",
+      "description": "id de la atacante nocturna caída tras una victoria, que espera la decisión del Maestro (perdonar, sellar, comer: Sistema.md 9.3, T30); null si no hay. Con la derrota o la huida se va (P-024, S-66): null",
       "type": [
         "string",
         "null"
       ],
       "pattern": "^[a-z0-9_]+$"
     },
+    "destino_atacante": {
+      "description": "Sistema.md 9.2 y 9.3 (T30): null si no hubo atacante nocturna que resolver; si no, la opción elegida y su resultado. Con la derrota o la huida (P-024, S-66), opcion null y resultado se_fue. Con la victoria y la atacante caída, null mientras el destino está pendiente (atacante_pendiente); después, la opción final y perdonada, sellada o comida (un sellado fallido no es final). primera_opcion (T45, P-051, 11.9 v1.8): la primera opción elegida (sellar si se reselló, falló y después se eligió otra); null si se fue",
+      "type": ["object", "null"],
+      "required": ["opcion", "resultado", "primera_opcion"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "opcion": {
+          "type": ["string", "null"],
+          "enum": ["perdonar", "sellar", "comer", null]
+        },
+        "primera_opcion": {
+          "type": ["string", "null"],
+          "enum": ["perdonar", "sellar", "comer", null]
+        },
+        "resultado": {
+          "type": "string",
+          "enum": ["se_fue", "perdonada", "sellada", "comida"]
+        }
+      }
+    },
     "metricas": {
-      "description": "T12: null. Las llenan T23 y T33, desde el registro (Sistema.md 11.9)",
-      "type": [
-        "object",
-        "null"
-      ],
+      "description": "Sistema.md 11.9, Métricas por combate (T23, D-011): las calcula MetricasCombate desde el registro y el escenario. Solo enteros, null y listas: un promedio va como suma y cantidad. Las alarmas, los umbrales y el agregado de 10 partidas son de T33",
+      "type": "object",
       "required": [
-        "secundar_usos",
-        "eslabones_promedio",
+        "rondas",
+        "secundar",
+        "eslabones",
         "incidentes",
-        "enconos",
-        "cobardias",
-        "sellados_intentados",
-        "sellados_logrados",
-        "huidas_antes_de_sellar",
+        "encono",
+        "cobardia",
+        "sellados",
+        "capturas_perdidas",
         "caidas",
         "caidas_guardadas",
         "muertes",
-        "rescates",
-        "distancia_media_maestro"
+        "rescate",
+        "distancia_maestro",
+        "activas"
       ],
       "additionalProperties": false,
       "properties": {
-        "secundar_usos": {
-          "type": "integer"
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "rondas": {
+          "description": "Métrica 1. totales: la última ronda; primer_ataque: la ronda del primer evento ataque (Martillazo y golpe de incidente incluidos; el choque de la Lanzadera no), o null; de_pelea: desde el primer ataque hasta la última, inclusive (0 sin ataques)",
+          "type": "object",
+          "required": ["totales", "primer_ataque", "de_pelea"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "totales": { "$ref": "#/$defs/conteo" },
+            "primer_ataque": { "type": ["integer", "null"], "minimum": 0 },
+            "de_pelea": { "$ref": "#/$defs/conteo" }
+          }
         },
-        "eslabones_promedio": {
-          "type": "number"
+        "secundar": {
+          "description": "Métrica 2: eventos secundar",
+          "type": "object",
+          "required": ["usos"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "usos": { "$ref": "#/$defs/conteo" }
+          }
+        },
+        "eslabones": {
+          "description": "Métrica 3: solo las cadena_cortada de 2 eslabones o más. Promedio = suma / cadenas",
+          "type": "object",
+          "required": ["cadenas", "suma", "maximo"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "cadenas": { "$ref": "#/$defs/conteo" },
+            "suma": { "$ref": "#/$defs/conteo" },
+            "maximo": { "$ref": "#/$defs/conteo" }
+          }
         },
         "incidentes": {
-          "type": "integer"
+          "description": "Métrica 4, por bando (el Maestro va con la tribu)",
+          "type": "object",
+          "required": ["tribu", "enemigas"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "tribu": { "$ref": "#/$defs/incidentes_bando" },
+            "enemigas": { "$ref": "#/$defs/incidentes_bando" }
+          }
         },
-        "enconos": {
-          "type": "integer"
+        "encono": {
+          "description": "Métrica 5: chequeo_rival con resultado enconada (también las seguras, sin tirada), por bando",
+          "type": "object",
+          "required": ["tribu", "enemigas"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "tribu": { "$ref": "#/$defs/conteo" },
+            "enemigas": { "$ref": "#/$defs/conteo" }
+          }
         },
-        "cobardias": {
-          "type": "integer"
+        "cobardia": {
+          "description": "Métrica 6: tiradas de cobardía por bando",
+          "type": "object",
+          "required": ["tribu", "enemigas"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "tribu": { "$ref": "#/$defs/cobardia_bando" },
+            "enemigas": { "$ref": "#/$defs/cobardia_bando" }
+          }
         },
-        "sellados_intentados": {
-          "type": "integer"
+        "sellados": {
+          "description": "Métrica 7 (T24): cada evento sellado, en orden, con la probabilidad mostrada y si salió. Lista vacía sin intentos",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["objetivo", "porcentaje", "logrado"],
+            "additionalProperties": false,
+            "properties": {
+              "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+              "objetivo": { "$ref": "comunes.schema.json#/$defs/id" },
+              "porcentaje": { "$ref": "comunes.schema.json#/$defs/pct" },
+              "logrado": { "type": "boolean" }
+            }
+          }
         },
-        "sellados_logrados": {
-          "type": "integer"
-        },
-        "huidas_antes_de_sellar": {
-          "type": "integer"
+        "capturas_perdidas": {
+          "description": "Métrica 8 (T25): cada salvaje que sale del tablero sin ser sellada, en orden: por huida en su turno o por llegar a 0. Lista vacía si no hubo ninguna",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["unidad", "motivo", "ronda"],
+            "additionalProperties": false,
+            "properties": {
+              "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+              "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+              "motivo": { "enum": ["huida", "cero"] },
+              "ronda": { "$ref": "#/$defs/conteo" }
+            }
+          }
         },
         "caidas": {
-          "type": "integer"
+          "description": "Métrica 9: cada evento estado que pasa a caida (o a caido, el Maestro: P-043), en orden",
+          "type": "array",
+          "items": { "$ref": "#/$defs/unidad_ronda" }
         },
         "caidas_guardadas": {
-          "type": "integer"
+          "description": "Métrica 10 (T27): cada evento guardado_caida (la caída que el Maestro guardó), en orden. Lista vacía si no hubo ninguno",
+          "type": "array",
+          "items": { "$ref": "#/$defs/unidad_ronda" }
         },
         "muertes": {
-          "type": "integer"
+          "description": "Métrica 11: las muertas del cierre, con la causa = el desenlace del fin",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["unidad", "causa"],
+            "additionalProperties": false,
+            "properties": {
+              "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+              "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+              "causa": { "$ref": "comunes.schema.json#/$defs/id" }
+            }
+          }
         },
-        "rescates": {
-          "type": "integer"
+        "rescate": {
+          "description": "Métrica 12 (T29), desde el evento rescate: null si el Maestro no cayó; si cayó, quién lo rescató (null si fue permadeath)",
+          "type": ["object", "null"],
+          "required": ["rescatista"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "rescatista": {
+              "type": ["string", "null"],
+              "pattern": "^[a-z0-9_]+$"
+            }
+          }
         },
-        "distancia_media_maestro": {
-          "type": "number"
+        "distancia_maestro": {
+          "description": "Métrica 13: los distancia_maestro no nulos desde la ronda del primer ataque. Promedio = suma / turnos",
+          "type": "object",
+          "required": ["turnos", "suma"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "turnos": { "$ref": "#/$defs/conteo" },
+            "suma": { "$ref": "#/$defs/conteo" }
+          }
         },
-        "_nota": {
-          "$ref": "comunes.schema.json#/$defs/nota"
+        "activas": {
+          "description": "Métrica 14: activas (por el tipo de la acción) y terreno. invocaciones desde T45 (D-016)",
+          "type": "object",
+          "required": ["usos", "surcos", "ocultos", "destapes_contacto", "bonos_cobrados", "bonos_perdidos", "cambios_modo", "encierros", "invocaciones"],
+          "additionalProperties": false,
+          "properties": {
+            "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+            "usos": {
+              "description": "Solo las unidades con algún uso, en el orden del escenario",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["unidad", "erizarse", "cavar", "hacerse_junco"],
+                "additionalProperties": false,
+                "properties": {
+                  "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+                  "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "erizarse": { "$ref": "#/$defs/conteo" },
+                  "cavar": { "$ref": "#/$defs/conteo" },
+                  "hacerse_junco": { "$ref": "#/$defs/conteo" }
+                }
+              }
+            },
+            "surcos": { "$ref": "#/$defs/conteo" },
+            "ocultos": { "$ref": "#/$defs/conteo" },
+            "destapes_contacto": { "$ref": "#/$defs/conteo" },
+            "bonos_cobrados": { "$ref": "#/$defs/conteo" },
+            "bonos_perdidos": { "$ref": "#/$defs/conteo" },
+            "cambios_modo": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["unidad", "de", "a", "ronda"],
+                "additionalProperties": false,
+                "properties": {
+                  "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+                  "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "de": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "a": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "ronda": { "$ref": "#/$defs/conteo" }
+                }
+              }
+            },
+            "encierros": {
+              "description": "Turnos terminados sin ninguna casilla libre en las 4 ortogonales (evento encierro). Solo las unidades con alguno, en el orden del escenario",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["unidad", "turnos"],
+                "additionalProperties": false,
+                "properties": {
+                  "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+                  "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+                  "turnos": { "type": "integer", "minimum": 1 }
+                }
+              }
+            },
+            "invocaciones": {
+              "description": "T45 (D-016, P-052): unidad -> cantidad de eventos invocacion. Solo las invocadas, en el orden del escenario",
+              "type": "object",
+              "additionalProperties": { "type": "integer", "minimum": 1 }
+            }
+          }
         }
+      }
+    }
+  },
+  "$defs": {
+    "conteo": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "incidentes_bando": {
+      "type": "object",
+      "required": ["distraida", "golpe"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "distraida": { "$ref": "#/$defs/conteo" },
+        "golpe": { "$ref": "#/$defs/conteo" }
+      }
+    },
+    "cobardia_bando": {
+      "type": "object",
+      "required": ["acobardada", "resistida"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "acobardada": { "$ref": "#/$defs/conteo" },
+        "resistida": { "$ref": "#/$defs/conteo" }
+      }
+    },
+    "unidad_ronda": {
+      "type": "object",
+      "required": ["unidad", "ronda"],
+      "additionalProperties": false,
+      "properties": {
+        "_nota": { "$ref": "comunes.schema.json#/$defs/nota" },
+        "unidad": { "$ref": "comunes.schema.json#/$defs/id" },
+        "ronda": { "$ref": "#/$defs/conteo" }
       }
     }
   }

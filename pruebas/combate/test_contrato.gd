@@ -126,12 +126,22 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_array(victoria["lealtad_cambios"]).is_equal([{"id": "rodauva_1", "antes": 5, "cambio": 1,
 			"despues": 6, "anotaciones": [{"cambio": 1, "motivo": "victoria"}]}])
 	assert_dict(victoria["pergaminos"]).is_equal({"en_blanco": 0, "ardidos": []})
-	# Campos de tareas futuras: null o lista vacia.
+	# Campos de tareas futuras: null o lista vacia. Reescrito en T29 (Sistema.md 6):
+	# en una victoria, sin rescatista y permadeath falso.
 	assert_object(victoria["atacante_pendiente"]).is_null()
+	# T30 (Sistema.md 9.3): sin atacante nocturna, destino_atacante null.
+	assert_object(victoria["destino_atacante"]).is_null()
 	assert_object(victoria["rescatista"]).is_null()
-	assert_object(victoria["permadeath"]).is_null()
-	assert_object(victoria["metricas"]).is_null()
-	assert_object((victoria["maestro"] as Dictionary)["mana"]).is_null()
+	assert_bool(victoria["permadeath"]).is_false()
+	# Reescrito en T23 (A.7, D-011): metricas ya no es null; valida con el resto.
+	assert_int((victoria["metricas"]["rondas"] as Dictionary)["totales"]).is_equal(1)
+	# Reescrito por Sistema.md 2.1 (T21): el mana del Maestro es un entero; sin
+	# gastos, el de entrada (la reserva de su balanza en el fixture).
+	assert_int((victoria["maestro"] as Dictionary)["mana"]).is_equal(
+			combate.contexto().plantel.maestro.fila_balanza()["reserva_mana"])
+	var con_mana_nulo: Dictionary = victoria.duplicate(true)
+	(con_mana_nulo["maestro"] as Dictionary)["mana"] = null
+	assert_array(_errores_esquema(con_mana_nulo, "resultado")).is_not_empty()
 	assert_array(victoria["capturas"]).is_empty()
 
 	# Derrota: la Rodauva arranca en 0 (caida) y la Ocarra tumba al Maestro: muere
@@ -146,9 +156,14 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_dict(_estado(derrota, "rodauva_1")).contains_key_value("estado", "muerta")
 	assert_array((derrota["pergaminos"] as Dictionary)["ardidos"]).is_equal(["pergamino_1"])
 	assert_object(derrota["atacante_pendiente"]).is_null()
+	# T29 (Sistema.md 6): la unica de la tribu esta caida: permadeath.
+	assert_object(derrota["rescatista"]).is_null()
+	assert_bool(derrota["permadeath"]).is_true()
 
 	# Escenario G con la atacante en 0: queda caida, victoria sin rondas y su
-	# destino queda pendiente (T30).
+	# destino queda pendiente (T30). Reescrito en T30 (Sistema.md 9.2 y 9.3, P-024):
+	# una atacante que arranca en 0 no da el golpe inicial, la pendiente solo
+	# existe con la victoria y su destino todavia no esta (null).
 	var nocturno: Dictionary = _escenario(_CARPETA_UNIDADES + "escenario_g.json")
 	((nocturno["enemigas"] as Array)[0] as Dictionary)["vida"] = 0
 	var pendiente: Dictionary = _combate(nocturno).resultado().a_diccionario()
@@ -157,6 +172,8 @@ func test_resultados_validan_contra_el_esquema() -> void:
 	assert_int(pendiente["rondas"]).is_equal(0)
 	assert_str(pendiente["atacante_pendiente"]).is_equal("ocarra_1")
 	assert_dict(_estado(pendiente, "ocarra_1")).contains_key_value("estado", "caida")
+	assert_object(pendiente["destino_atacante"]).is_null()
+	assert_int((pendiente["maestro"] as Dictionary)["vida"]).is_equal(_combate(nocturno).contexto().plantel.maestro.vida_max_real())
 
 
 # (12) P-019: cada motivo es una clave de lealtad.json eventos y el +1 de
@@ -294,3 +311,66 @@ func test_accion_imposible_detiene_con_error() -> void:
 	assert_str(ajena.error).is_not_empty()
 	assert_int(ajena.accion_con_error).is_equal(1)
 	assert_str(str(ajena.combate.instantanea())).is_equal(str(_reproducir(otra, 0).combate.instantanea()))
+
+
+# T23 (D-011): true si en el valor hay algun float, a cualquier profundidad.
+func _tiene_float(valor: Variant) -> bool:
+	if valor is float:
+		return true
+	if valor is Dictionary:
+		for clave in (valor as Dictionary).keys():
+			if _tiene_float(valor[clave]):
+				return true
+	if valor is Array:
+		for elemento in (valor as Array):
+			if _tiene_float(elemento):
+				return true
+	return false
+
+
+# (8) T23: las metricas de una victoria y de una derrota (con muertas) validan
+# contra el esquema y no tienen ningun float (D-011). La derrota cuenta la
+# caida del Maestro (P-043) y la muerte con su causa.
+func test_t23_metricas_de_victoria_y_derrota() -> void:
+	var victoria: Dictionary = _victoria().resultado().a_diccionario()
+	_assert_valida(victoria, "resultado")
+	var metricas: Dictionary = victoria["metricas"]
+	assert_bool(_tiene_float(metricas)).is_false()
+	assert_dict(metricas["rondas"]).is_equal({"totales": 1, "primer_ataque": 1, "de_pelea": 1})
+	# La Ocarra salvaje la tumba en la ronda 1 (se levanta en el cierre); la Ocarra
+	# salvaje en 0 sale del tablero sin caer (Sistema.md 11.5).
+	assert_array(metricas["caidas"]).is_equal([{"unidad": "rodauva_1", "ronda": 1}])
+	assert_array(metricas["muertes"]).is_empty()
+
+	var con_caida: Dictionary = _escenario(_CARPETA_CONTRATO + "contrato_derrota.json")
+	((con_caida["tribu"] as Array)[0] as Dictionary)["vida"] = 0
+	var derrota: Dictionary = _combate(con_caida).resultado().a_diccionario()
+	_assert_valida(derrota, "resultado")
+	assert_bool(_tiene_float(derrota["metricas"])).is_false()
+	assert_array(derrota["metricas"]["muertes"]).is_equal([{"unidad": "rodauva_1", "causa": "derrota_por_caida"}])
+	var caidas: Array = (derrota["metricas"]["caidas"] as Array).map(func(caida: Dictionary) -> String: return caida["unidad"])
+	assert_array(caidas).contains([Maestro.ID])
+	# Un float en una metrica no valida.
+	var con_float: Dictionary = victoria.duplicate(true)
+	(con_float["metricas"]["secundar"] as Dictionary)["usos"] = 0.5
+	assert_array(_errores_esquema(con_float, "resultado")).is_not_empty()
+
+
+# (9) T23: las metricas sobre el registro en vivo y sobre el de su reproduccion
+# son exactamente las mismas (tambien las del resultado).
+func test_t23_metricas_en_vivo_y_reproducidas() -> void:
+	var en_vivo: Combate = _victoria()
+	var reproduccion: Reproductor = _reproducir(Grabacion.desde_combate(en_vivo))
+	var escenario: Dictionary = en_vivo.contexto().escenario
+	assert_str(JSON.stringify(MetricasCombate.calcular(escenario, reproduccion.combate.registro().lineas()), "", true)) \
+			.is_equal(JSON.stringify(MetricasCombate.calcular(escenario, en_vivo.registro().lineas()), "", true))
+	assert_dict(reproduccion.combate.resultado().a_diccionario()["metricas"]) \
+			.is_equal(en_vivo.resultado().a_diccionario()["metricas"])
+
+	# C jugado dos rondas (sin terminar): mismas metricas del registro parcial.
+	var c_en_vivo: Combate = _combate(_escenario(_CARPETA + "escenario_c.json"))
+	_jugar_c(c_en_vivo)
+	var c_reproducido: Reproductor = _reproducir(Grabacion.desde_combate(c_en_vivo))
+	var escenario_c: Dictionary = c_en_vivo.contexto().escenario
+	assert_dict(MetricasCombate.calcular(escenario_c, c_reproducido.combate.registro().lineas())) \
+			.is_equal(MetricasCombate.calcular(escenario_c, c_en_vivo.registro().lineas()))

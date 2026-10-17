@@ -252,3 +252,80 @@ func test_pasos_hasta_con_rodeo() -> void:
 	assert_int(pasos[Vector2i(2, 7)]).is_equal(1)
 	assert_int(pasos[Vector2i(3, 5)]).is_equal(4)
 	assert_bool(pasos.has(Vector2i(3, 6))).is_false()
+
+
+# T41, Sistema.md 11.3 v1.6 (D-001): el vinculo mira las 8 vecinas (Chebyshev 1).
+# Las 4 ortogonales y las 4 diagonales si; la misma casilla y a distancia 2, no.
+# Las vecinas del cuerpo (vecinas, adyacentes) no cambian: test_diagonal_no_es_adyacente.
+func test_vecina_en_8() -> void:
+	var centro: Vector2i = Vector2i(3, 3)
+	for dx in [-1, 0, 1]:
+		for dy in [-1, 0, 1]:
+			var otra: Vector2i = centro + Vector2i(dx, dy)
+			assert_bool(Tablero.es_vecina_en_8(centro, otra)).override_failure_message(str(otra)) \
+					.is_equal(otra != centro)
+	assert_bool(Tablero.es_vecina_en_8(centro, Vector2i(5, 3))).is_false()
+	assert_bool(Tablero.es_vecina_en_8(centro, Vector2i(5, 4))).is_false()
+	assert_bool(Tablero.es_vecina_en_8(centro, Vector2i(5, 5))).is_false()
+
+
+# (13) T23, deuda de T22 (P-042): la consulta publica de quien ocupa una casilla,
+# con el criterio de siempre (Maestro y criaturas en el tablero, de pie o
+# caidas; las guardadas no ocupan). El Turno ya no tiene su copia.
+func test_t23_ocupante_en() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({"ocarra_1": Vector2i(2, 3), "rodauva_1": Vector2i(4, 3),
+			"surcon_1": Vector2i(3, 4)})
+	var tablero: Tablero = mesa.tablero
+	var plantel: Plantel = mesa.plantel
+	assert_str(tablero.ocupante_en(Vector2i(5, 7), plantel)).is_equal(Maestro.ID)
+	assert_str(tablero.ocupante_en(Vector2i(2, 3), plantel)).is_equal("ocarra_1")
+	assert_str(tablero.ocupante_en(Vector2i(0, 0), plantel)).is_equal("ocarra_s1")
+	plantel.criatura("rodauva_1").estado = Criatura.Estado.CAIDA
+	assert_str(tablero.ocupante_en(Vector2i(4, 3), plantel)).is_equal("rodauva_1")
+	plantel.criatura("surcon_1").estado = Criatura.Estado.GUARDADA
+	assert_object(tablero.ocupante_en(Vector2i(3, 4), plantel)).is_null()
+	assert_object(tablero.ocupante_en(Vector2i(3, 3), plantel)).is_null()
+	var turno: String = FileAccess.get_file_as_string("res://nucleo/combate/turno.gd")
+	assert_bool(turno.contains("func _ocupante_en")).is_false()
+
+
+# (1) T23, Sistema.md 11.9 metrica 13: distancia Manhattan a la enemiga de pie
+# mas cercana. Una oculta cuenta (esta de pie); una caida no; sin ninguna, null.
+func test_t23_distancia_a_enemiga_de_pie() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({Maestro.ID: Vector2i(3, 6), "zancajunco_s1": Vector2i(3, 4)})
+	var tablero: Tablero = mesa.tablero
+	var plantel: Plantel = mesa.plantel
+	plantel.criatura("zancajunco_s1").oculta = true
+	assert_int(tablero.distancia_a_enemiga_de_pie(Vector2i(3, 6), Criatura.Bando.TRIBU, plantel)).is_equal(2)
+	# Caida: la siguiente es la Rodauva en [2,0] o el Surcon en [4,0] (7).
+	plantel.criatura("zancajunco_s1").estado = Criatura.Estado.CAIDA
+	assert_int(tablero.distancia_a_enemiga_de_pie(Vector2i(3, 6), Criatura.Bando.TRIBU, plantel)).is_equal(7)
+	# Desde el otro bando, el Maestro cuenta como de la tribu.
+	assert_int(tablero.distancia_a_enemiga_de_pie(Vector2i(3, 5), Criatura.Bando.ENEMIGA, plantel)).is_equal(1)
+	for criatura in plantel.criaturas():
+		if criatura.bando == Criatura.Bando.ENEMIGA:
+			criatura.estado = Criatura.Estado.CAIDA
+	assert_object(tablero.distancia_a_enemiga_de_pie(Vector2i(3, 6), Criatura.Bando.TRIBU, plantel)).is_null()
+
+
+# (2) T23, Sistema.md 11.9 metrica 14 y S-25: encerrada = ninguna de las 4
+# ortogonales es casilla libre. Las tapan unidades de cualquier bando (de pie o
+# caidas) o surcos; una diagonal libre no cuenta; fuera del tablero no es libre.
+func test_t23_encerrada() -> void:
+	var mesa: MesaHechizos = MesaHechizos.new({"ocarra_1": Vector2i(3, 3), "rodauva_1": Vector2i(3, 2),
+			"surcon_1": Vector2i(2, 3), "tasajero_s1": Vector2i(4, 3)})
+	var tablero: Tablero = mesa.tablero
+	var plantel: Plantel = mesa.plantel
+	plantel.criatura("surcon_1").estado = Criatura.Estado.CAIDA
+	assert_bool(tablero.encerrada(Vector2i(3, 3), plantel, mesa.surcos)).is_false()
+	mesa.surcos.cavar(Vector2i(3, 4), "surcon_1", 3)
+	# Las 4 diagonales siguen libres: no cuentan.
+	assert_bool(tablero.es_casilla_libre(Vector2i(2, 2), plantel, mesa.surcos)).is_true()
+	assert_bool(tablero.encerrada(Vector2i(3, 3), plantel, mesa.surcos)).is_true()
+
+	# Esquina [0,7]: solo tiene 2 vecinas, las dos ocupadas.
+	var esquina: MesaHechizos = MesaHechizos.new({"ocarra_1": Vector2i(0, 7), "rodauva_1": Vector2i(0, 6),
+			"surcon_1": Vector2i(1, 7)})
+	assert_bool(esquina.tablero.encerrada(Vector2i(0, 7), esquina.plantel, esquina.surcos)).is_true()
+	esquina.plantel.criatura("rodauva_1").posicion = Vector2i(1, 6)
+	assert_bool(esquina.tablero.encerrada(Vector2i(0, 7), esquina.plantel, esquina.surcos)).is_false()
